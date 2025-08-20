@@ -52,8 +52,8 @@ public class SensorSpecifics {
             try {
                 if(init.exists())
                     inputStr = loadLocal(init);
-                else
-                    inputStr = loadNetwork(device);
+                //else
+                //    inputStr = loadNetwork(device);
                 count = 0;
                 for (String str : inputStr) {
                     Log.d("SensorSpecifics", "read:" + str);
