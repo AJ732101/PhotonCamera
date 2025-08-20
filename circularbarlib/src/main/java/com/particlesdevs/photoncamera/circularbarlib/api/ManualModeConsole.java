@@ -9,7 +9,7 @@ import java.util.Observer;
 
 public interface ManualModeConsole {
 
-    void init(Activity activity, CameraCharacteristics cameraCharacteristics);
+    void init(Activity activity, CameraCharacteristics cameraCharacteristics, boolean isIsoExtended, boolean isExposureExtended);
 
     void onResume();
 
