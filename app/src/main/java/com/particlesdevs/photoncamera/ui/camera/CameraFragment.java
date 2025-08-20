@@ -97,6 +97,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+
 public class CameraFragment extends Fragment implements BaseActivity.BackPressedListener {
     public static final int REQUEST_CAMERA_PERMISSION = 1;
     public static final String FRAGMENT_DIALOG = "dialog";
@@ -363,46 +364,66 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     @SuppressLint("DefaultLocale")
     private void updateScreenLog(CaptureResult result) {
         surfaceView.post(() -> {
+            PhotonCamera.getCaptureController().videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
             if (PreferenceKeys.isAfDataOn()) {
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
-                stringMap.put("AF_MODE", getResultFieldName("CONTROL_AF_MODE_", result.get(CaptureResult.CONTROL_AF_MODE)));
-                stringMap.put("AF_TRIGGER", getResultFieldName("CONTROL_AF_TRIGGER_", result.get(CaptureResult.CONTROL_AF_TRIGGER)));
-                stringMap.put("AF_STATE", getResultFieldName("CONTROL_AF_STATE_", result.get(CaptureResult.CONTROL_AF_STATE)));
-                stringMap.put("AE_MODE", getResultFieldName("CONTROL_AE_MODE_", result.get(CaptureResult.CONTROL_AE_MODE)));
-                stringMap.put("FLASH_MODE", getResultFieldName("FLASH_MODE_", result.get(CaptureResult.FLASH_MODE)));
-                stringMap.put("FOCUS_DISTANCE", String.valueOf(result.get(CaptureResult.LENS_FOCUS_DISTANCE)));
-                stringMap.put("EXPOSURE_TIME", expoPair.ExposureString() + "s");
-//            stringMap.put("EXPOSURE_TIME_CR", String.format(Locale.ROOT,"%.5f",result.get(CaptureResult.SENSOR_EXPOSURE_TIME).doubleValue()/1E9)+ "s");
-                stringMap.put("ISO", String.valueOf(expoPair.iso));
-//            stringMap.put("ISO_CR", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
-                stringMap.put("Shakiness", String.valueOf(PhotonCamera.getGyro().getShakiness()));
-                stringMap.put("TripodShakiness", String.valueOf(PhotonCamera.getGyro().tripodShakiness));
-                stringMap.put("Tripod", String.valueOf(PhotonCamera.getGyro().getTripod()));
-                stringMap.put("FrameNumber", String.valueOf(result.getFrameNumber()));
-                float[] temp = new float[3];
-                temp[0] = captureController.mPreviewTemp[0].floatValue();
-                temp[1] = captureController.mPreviewTemp[1].floatValue();
-                temp[2] = captureController.mPreviewTemp[2].floatValue();
-                stringMap.put("White Point", String.format("%.3f %.3f %.3f", temp[0], temp[1], temp[2]));
-                MeteringRectangle[] afRect = result.get(CaptureResult.CONTROL_AF_REGIONS);
-                stringMap.put("AF_RECT", Arrays.deepToString(afRect));
-                if (afRect != null && afRect.length > 0) {
-                    RectF rect = getScreenRectFromMeteringRect(afRect[0]);
-                    stringMap.put("AF_RECT(px)", rect.toString());
-                    surfaceView.setAFRect(rect);
-                } else {
-                    surfaceView.setAFRect(null);
-                }
-                MeteringRectangle[] aeRect = result.get(CaptureResult.CONTROL_AE_REGIONS);
-                stringMap.put("AE_RECT", Arrays.deepToString(aeRect));
-                if (aeRect != null && aeRect.length > 0) {
-                    RectF rect = getScreenRectFromMeteringRect(aeRect[0]);
-                    stringMap.put("AE_RECT(px)", rect.toString());
-                    surfaceView.setAERect(rect);
-                } else {
-                    surfaceView.setAERect(null);
+                stringMap.put("Camera ID", result.getCameraId());
+                //stringMap.put("ISO", String.valueOf(expoPair.iso));
+                stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
+                stringMap.put("Shutter", expoPair.ExposureString() + "s");
+                stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
+                stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
+                stringMap.put("35mm Focal length", Math.ceil(mCameraLensDataMap.get(result.getCameraId()).getCamera35mmFocalLength()) + "mm");
+                stringMap.put("Stabilization", getResultFieldName("LENS_OPTICAL_STABILIZATION_MODE_", result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE)));
+                stringMap.put("Orientation", String.valueOf(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation()));
+                stringMap.put("8K", String.valueOf(PhotonCamera.getSpecific().specificSetting.is8k));
+                /*if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
+                }*/
+                stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
+                stringMap.put("HEVC", String.valueOf(PhotonCamera.getSpecific().specificSetting.isH265));
+                stringMap.put("High Bitrate", String.valueOf(PhotonCamera.getSpecific().specificSetting.isHighBitrate));
+                stringMap.put("Ext. ISO", String.valueOf(PhotonCamera.getSpecific().specificSetting.isIsoExtended));
+                stringMap.put("Ext. Expo", String.valueOf(PhotonCamera.getSpecific().specificSetting.isExposureExtended));
+                if (!PhotonCamera.getSpecific().specificSetting.isEssentialOsd)
+                {
+                    stringMap.put("AF_MODE", getResultFieldName("CONTROL_AF_MODE_", result.get(CaptureResult.CONTROL_AF_MODE)));
+                    stringMap.put("AF_TRIGGER", getResultFieldName("CONTROL_AF_TRIGGER_", result.get(CaptureResult.CONTROL_AF_TRIGGER)));
+                    stringMap.put("AF_STATE", getResultFieldName("CONTROL_AF_STATE_", result.get(CaptureResult.CONTROL_AF_STATE)));
+                    stringMap.put("AE_MODE", getResultFieldName("CONTROL_AE_MODE_", result.get(CaptureResult.CONTROL_AE_MODE)));
+                    stringMap.put("FLASH_MODE", getResultFieldName("FLASH_MODE_", result.get(CaptureResult.FLASH_MODE)));
+                    stringMap.put("FOCUS_DISTANCE", String.valueOf(result.get(CaptureResult.LENS_FOCUS_DISTANCE)));
+                    //stringMap.put("EXPOSURE_TIME_CR", String.format(Locale.ROOT,"%.5f",result.get(CaptureResult.SENSOR_EXPOSURE_TIME).doubleValue()/1E9)+ "s");
+                    //stringMap.put("ISO_CR", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
+                    stringMap.put("Shakiness", String.valueOf(PhotonCamera.getGyro().getShakiness()));
+                    stringMap.put("TripodShakiness", String.valueOf(PhotonCamera.getGyro().tripodShakiness));
+                    stringMap.put("Tripod", String.valueOf(PhotonCamera.getGyro().getTripod()));
+                    stringMap.put("FrameNumber", String.valueOf(result.getFrameNumber()));
+                    float[] temp = new float[3];
+                    temp[0] = captureController.mPreviewTemp[0].floatValue();
+                    temp[1] = captureController.mPreviewTemp[1].floatValue();
+                    temp[2] = captureController.mPreviewTemp[2].floatValue();
+                    stringMap.put("White Point", String.format("%.3f %.3f %.3f", temp[0], temp[1], temp[2]));
+                    MeteringRectangle[] afRect = result.get(CaptureResult.CONTROL_AF_REGIONS);
+                    stringMap.put("AF_RECT", Arrays.deepToString(afRect));
+                    if (afRect != null && afRect.length > 0) {
+                        RectF rect = getScreenRectFromMeteringRect(afRect[0]);
+                        stringMap.put("AF_RECT(px)", rect.toString());
+                        surfaceView.setAFRect(rect);
+                    } else {
+                        surfaceView.setAFRect(null);
+                    }
+                    MeteringRectangle[] aeRect = result.get(CaptureResult.CONTROL_AE_REGIONS);
+                    stringMap.put("AE_RECT", Arrays.deepToString(aeRect));
+                    if (aeRect != null && aeRect.length > 0) {
+                        RectF rect = getScreenRectFromMeteringRect(aeRect[0]);
+                        stringMap.put("AE_RECT(px)", rect.toString());
+                        surfaceView.setAERect(rect);
+                    } else {
+                        surfaceView.setAERect(null);
+                    }
                 }
                 surfaceView.setDebugText(Logger.createTextFrom(stringMap));
                 surfaceView.refresh();
@@ -756,7 +777,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             auxButtonsViewModel.setActiveId(PreferenceKeys.getCameraID());
             Boolean flashAvailable = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
             mCameraUIView.showFlashButton(flashAvailable != null && flashAvailable);
-            manualModeConsole.init(activity, characteristics);
+            manualModeConsole.init(activity, characteristics, PhotonCamera.getSpecific().specificSetting.isIsoExtended, PhotonCamera.getSpecific().specificSetting.isExposureExtended);
             manualModeConsole.onResume();
         }
 
