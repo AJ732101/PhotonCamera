@@ -88,7 +88,7 @@
     <string name="contributors_title">Contributors ↗</string>
     <string name="eis_toggle_text">Image Stabilization</string>
     <string name="fps_60_toggle_text">Frame rate</string>
-    <string name="quad_bayer_toggle_text">Quad Bayer Res. (48/64 MP)</string>
+    <string name="quad_bayer_toggle_text">Quad Bayer Res. (48/50/64 MP)</string>
     <string name="backup_restore">Backup/Restore Settings</string>
     <string name="reset">Reset All</string>
     <string name="reset_preferences_warning">This will reset all settings to their default values. Continue?</string>
