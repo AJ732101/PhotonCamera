@@ -27,6 +27,10 @@ import static android.hardware.camera2.CameraMetadata.CONTROL_SCENE_MODE_HDR;
 import static android.hardware.camera2.CameraMetadata.HOT_PIXEL_MODE_FAST;
 import static android.hardware.camera2.CameraMetadata.HOT_PIXEL_MODE_HIGH_QUALITY;
 import static android.hardware.camera2.CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON;
+import static android.hardware.camera2.CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_OFF;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION;
 import static android.hardware.camera2.CameraMetadata.SHADING_MODE_FAST;
 import static android.hardware.camera2.CameraMetadata.STATISTICS_LENS_SHADING_MAP_MODE_ON;
 import static android.hardware.camera2.CameraMetadata.TONEMAP_MODE_GAMMA_VALUE;
@@ -35,6 +39,7 @@ import static android.hardware.camera2.CameraMetadata.TONEMAP_MODE_PRESET_CURVE;
 import static android.hardware.camera2.CaptureRequest.CONTROL_SCENE_MODE;
 import static android.hardware.camera2.CaptureRequest.HOT_PIXEL_MODE;
 import static android.hardware.camera2.CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE;
+import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureRequest.STATISTICS_HOT_PIXEL_MAP_MODE;
 import static android.hardware.camera2.CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE;
 import static android.hardware.camera2.CaptureRequest.TONEMAP_MODE;
@@ -266,8 +271,11 @@ public class Camera2ApiAutoFix {
         int[] stabilizationModes = CaptureController.mCameraCharacteristics.get(LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
         if (stabilizationModes != null && stabilizationModes.length > 1) {
             Log.d(TAG, "LENS_OPTICAL_STABILIZATION_MODE");
-//            captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
-            captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
+            if (PhotonCamera.getSpecific().specificSetting.isOisOn == true) {
+                captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
+            } else {
+                captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
+            }
         }
         //captureBuilder.set(CONTROL_AE_EXPOSURE_COMPENSATION,-1);
         Range<Integer> range = CaptureController.mCameraCharacteristics.get(CONTROL_AE_COMPENSATION_RANGE);
