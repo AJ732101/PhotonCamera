@@ -131,7 +131,7 @@ public class IsoExpoSelector {
             if (pair.normalizedIso() <= 500.0/mpy1 && pair.exposure > ExposureIndex.sec / 50.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
                 pair.ReduceExpo();
             }
-            if (pair.exposure < ExposureIndex.sec * 3.00 && pair.exposure > ExposureIndex.sec / 3 && pair.normalizedIso() < 3200.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
+            if (pair.exposure < ExposureIndex.sec * 3.00 && pair.exposure > ExposureIndex.sec / 3 && pair.normalizedIso() < 6400.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
                 pair.FixedExpo(1.0 / 8);
                 if (pair.exposure > ExposureIndex.sec / 3) pair.ReduceExpo();
                 if (pair.normalizeCheck())
@@ -150,7 +150,7 @@ public class IsoExpoSelector {
     }
 
     public static double getMPY() {
-        return 100.0 / getISOLOW();
+        return 50.0 / getISOLOW();
     }
 
     private static int mpyIso(int in) {
@@ -159,7 +159,9 @@ public class IsoExpoSelector {
 
     private static int getISOHIGH() {
         Object key = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
-        if (key == null) return 3200;
+        if (key == null) {
+            return 12800;
+        }
         else {
             return (int) ((Range) (key)).getUpper();
         }
@@ -171,14 +173,14 @@ public class IsoExpoSelector {
 
     private static int getISOLOW() {
         Object key = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
-        if (key == null) return 100;
+        if (key == null) return 50;
         else {
             return (int) ((Range) (key)).getLower();
         }
     }
     public static int getISOAnalog() {
         Object key = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SENSOR_MAX_ANALOG_SENSITIVITY);
-        if (key == null) return 100;
+        if (key == null) return 50;
         else {
             return (int)(key);
         }
@@ -335,7 +337,7 @@ public class IsoExpoSelector {
         }
 
         public void MinIso() {
-            UseIso(101);
+            UseIso(50);
         }
 
         public void UseIso(double isoUsed) {
