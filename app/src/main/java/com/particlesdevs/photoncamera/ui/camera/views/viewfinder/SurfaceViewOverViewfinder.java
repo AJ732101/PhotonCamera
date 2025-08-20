@@ -40,7 +40,7 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
         whitePaint.setStrokeWidth(1.5f);
 
         textPaint.setColor(Color.WHITE);
-        textPaint.setTextSize(25);
+        textPaint.setTextSize(35);
         textPaint.setTextAlign(Paint.Align.LEFT);
 
         rectPaint.setStyle(Paint.Style.STROKE);
