@@ -78,10 +78,10 @@ public class ManualModeConsoleImpl implements ManualModeConsole {
     }
 
     @Override
-    public void init(Activity activity, CameraCharacteristics cameraCharacteristics) {
+    public void init(Activity activity, CameraCharacteristics cameraCharacteristics, boolean isIsoExtended, boolean isExposureExtended) {
         viewObserver = new ViewObserver(activity);
         addObserver();
-        addKnobs(activity, cameraCharacteristics);
+        addKnobs(activity, cameraCharacteristics, isIsoExtended, isExposureExtended);
         setupOnClickListeners();
         setAutoText();
     }
@@ -120,15 +120,15 @@ public class ManualModeConsoleImpl implements ManualModeConsole {
         manualModeModel.deleteObservers();
     }
 
-    private void addKnobs(Context context, CameraCharacteristics cameraCharacteristics) {
+    private void addKnobs(Context context, CameraCharacteristics cameraCharacteristics, boolean isIsoExtended, boolean isExposureExtended) {
         CameraProperties cameraProperties = new CameraProperties(cameraCharacteristics);
         manualParamModel.reset();
         Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        mfModel = new FocusModel(context, cameraCharacteristics, cameraProperties.focusRange, manualParamModel, manualModeModel::setFocusText,v);
-        evModel = new EvModel(context, cameraCharacteristics, cameraProperties.evRange, manualParamModel, manualModeModel::setEvText,v);
+        mfModel = new FocusModel(context, cameraCharacteristics, cameraProperties.focusRange, manualParamModel, manualModeModel::setFocusText,v, isIsoExtended, isExposureExtended);
+        evModel = new EvModel(context, cameraCharacteristics, cameraProperties.evRange, manualParamModel, manualModeModel::setEvText,v, isIsoExtended, isExposureExtended);
         ((EvModel) evModel).setEvStep((cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue()));
-        isoModel = new IsoModel(context, cameraCharacteristics, cameraProperties.isoRange, manualParamModel, manualModeModel::setIsoText,v);
-        expoTimeModel = new ShutterModel(context, cameraCharacteristics, cameraProperties.expRange, manualParamModel, manualModeModel::setExposureText,v);
+        isoModel = new IsoModel(context, cameraCharacteristics, cameraProperties.isoRange, manualParamModel, manualModeModel::setIsoText,v, isIsoExtended, isExposureExtended);
+        expoTimeModel = new ShutterModel(context, cameraCharacteristics, cameraProperties.expRange, manualParamModel, manualModeModel::setExposureText,v, isIsoExtended, isExposureExtended);
         knobModel.setKnobVisible(false);
         manualModeModel.setCheckedTextViewId(-1);
     }
