@@ -13,7 +13,7 @@ public class IsoExpoSelector {
     private static double mpy1 = 1.0;
 
     public static double getMPY(CameraCharacteristics cameraCharacteristics) {
-        return 100.0 / getISOLOW(cameraCharacteristics);
+        return 50.0 / getISOLOW(cameraCharacteristics);
     }
 
     private static int mpyIso(int in, CameraCharacteristics cameraCharacteristics) {
@@ -22,7 +22,9 @@ public class IsoExpoSelector {
 
     private static int getISOHIGH(CameraCharacteristics cameraCharacteristics) {
         Object key = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
-        if (key == null) return 3200;
+        if (key == null) {
+            return 12800;
+        }
         else {
             return (int) ((Range) (key)).getUpper();
         }
@@ -34,7 +36,7 @@ public class IsoExpoSelector {
 
     private static int getISOLOW(CameraCharacteristics cameraCharacteristics) {
         Object key = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
-        if (key == null) return 100;
+        if (key == null) return 50;
         else {
             return (int) ((Range) (key)).getLower();
         }
@@ -42,7 +44,7 @@ public class IsoExpoSelector {
 
     public static int getISOAnalog(CameraCharacteristics cameraCharacteristics) {
         Object key = cameraCharacteristics.get(CameraCharacteristics.SENSOR_MAX_ANALOG_SENSITIVITY);
-        if (key == null) return 100;
+        if (key == null) return 50;
         else {
             return (int) (key);
         }
@@ -67,6 +69,4 @@ public class IsoExpoSelector {
             return (long) ((Range) (key)).getLower();
         }
     }
-
-
 }
