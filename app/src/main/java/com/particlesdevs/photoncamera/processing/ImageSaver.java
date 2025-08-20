@@ -107,6 +107,8 @@ public class ImageSaver {
     public static class Util {
         public static boolean saveBitmapAsJPG(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
             exifData.COMPRESSION = String.valueOf(jpgQuality);
+            exifData.EQUIVALENT_35MM = "23mm";
+            exifData.SOFTWARE = "Photon Camera";
             try {
                 OutputStream outputStream = Files.newOutputStream(fileToSave);
                 img.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);
