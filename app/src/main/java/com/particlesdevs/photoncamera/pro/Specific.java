@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
+//import java.util.Set;
 
 import static com.particlesdevs.photoncamera.settings.PreferenceKeys.Key.ALL_DEVICES_NAMES_KEY;
 import static com.particlesdevs.photoncamera.util.FileManager.sPHOTON_TUNING_DIR;
@@ -49,18 +49,85 @@ public class Specific {
         return inputStr;
     }
     public void loadSpecific(){
-        isLoaded = mSettingsManager.getBoolean(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded",false);
+        // load all that has no GUI element yet and do this without any conditions
+        ArrayList<String> noGuiYetStr = new ArrayList<String>();
+        File noGuiYet = new File(sPHOTON_TUNING_DIR, "NoGuiYet.txt");
+        try {
+            var ret = noGuiYet.canRead();
+            if (noGuiYet.exists())
+                noGuiYetStr = loadLocal(noGuiYet);
+        } catch (Exception e) {
+            Log.e(TAG,e.toString());
+        }
+
+        for (String str : noGuiYetStr) {
+            String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
+            switch (caseS[0]) {
+                case "apertureToUse": {
+                    Log.d("Specific", "user set aperture loaded: " + caseS[1]);
+                    specificSetting.apertureToUse = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "isOisOn": {
+                    specificSetting.isOisOn = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isEssentialOsd": {
+                    specificSetting.isEssentialOsd = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isQuadBayer": {
+                    specificSetting.isQuadBayer = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isH265": {
+                    specificSetting.isH265 = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isHighBitrate": {
+                    specificSetting.isHighBitrate = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "is8k": {
+                    specificSetting.is8k = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "is24fps": {
+                    specificSetting.is24fps = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isExposureExtended": {
+                    specificSetting.isExposureExtended = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "isIsoExtended": {
+                    specificSetting.isIsoExtended = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "setPhysicalCameraId": {
+                    specificSetting.setPhysicalCameraId = caseS[1];
+                    break;
+                }
+                case "physicalCameraIdTarget": {
+                    specificSetting.physicalCameraIdTarget = caseS[1];
+                    break;
+                }
+            }
+        }
+
+        // load the rest bound to conditions
+        isLoaded = false; //mSettingsManager.getBoolean(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded",false);
         boolean exists = mSettingsManager.getBoolean(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists",true);
         Log.d("Specific", "loaded: "+isLoaded+ " exists: " + exists);
         if(exists) {
             if (!isLoaded) {
                 try {
-                    //Set<String> mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
-                    //BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt");
-                    //boolean specificExists = mSupportedDevicesSet.contains(SupportedDevice.THIS_DEVICE);
-                    //Log.d("Specific", "specificExists: "+specificExists);
-                    //mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists", specificExists);
-                    //if (!specificExists) return;
+                    /*Set<String> mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
+                    BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt");
+                    boolean specificExists = mSupportedDevicesSet.contains(SupportedDevice.THIS_DEVICE);
+                    Log.d("Specific", "specificExists: "+specificExists);
+                    mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists", specificExists);
+                    if (!specificExists) return;*/
                     ArrayList<String> inputStr;
 
                     String device = Build.BRAND.toLowerCase() + "/" + Build.DEVICE.toLowerCase();
@@ -94,7 +161,15 @@ public class Specific {
                                 }
                                 break;
                             }
-
+                            case "apertureList": {
+                                Log.d("Specific", "apertures loaded: "+caseS[1]);
+                                String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                                specificSetting.apertureList = new float[ids.length];
+                                for(int i =0; i<specificSetting.apertureList.length;i++){
+                                    specificSetting.apertureList[i] = Integer.parseInt(ids[i]);
+                                }
+                                break;
+                            }
                         }
                     }
                     mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded", true);
