@@ -3,7 +3,21 @@ package com.particlesdevs.photoncamera.api;
 import android.annotation.SuppressLint;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.util.Log;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class VendorTagUtils {
     private static final String TAG = "VendorTagUtils";
@@ -22,13 +36,27 @@ public class VendorTagUtils {
         return supported;
     }
     @SuppressLint({"NewApi", "LocalSuppress"})
-    public static void builderSessionApply(CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
+    public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
         try {
             byte enable = 1;
-             var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
+            var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
             if(isSupported(builder,clientName)) {
                 Log.d(TAG, "com.xiaomi.sessionparams.clientName supported");
                 builder.set(clientName, "com.android.camera");
+            }
+            var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
+            if (isSupported(builder, apertureMode)) {
+                Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
+                builder.set(apertureMode, 1); // 1 = enable, 0 = disable
+            }
+            var lensAperture = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+            if (isSupported(builder, lensAperture)) {
+                CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
+                Float[] apert = cameraCharacteristics.get(vendorKey);
+                Log.d(TAG, "com.xiaomi.lens.aperture is supported");
+                //builder.set(lensAperture, apert[apert.length - 1]); // stopped down
+                //builder.set(lensAperture, apert[0]); // fully open
+                builder.set(lensAperture, PhotonCamera.getSpecific().specificSetting.apertureToUse);
             }
             if(burst) {
                 var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);
