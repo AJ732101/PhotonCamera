@@ -69,7 +69,7 @@ public class ParseExif {
         Log.d(TAG, "orientation:" + orientation);
 
         Integer iso = result.get(SENSOR_SENSITIVITY);
-        int isonum = 100;
+        int isonum = 50;
         if (iso != null) isonum = (int) (iso * IsoExpoSelector.getMPY());
         Log.d(TAG, "sensivity:" + isonum);
         isonum = Math.min(65535,isonum);
@@ -77,6 +77,7 @@ public class ParseExif {
         data.SENSITIVITY_TYPE = String.valueOf(ExifInterface.SENSITIVITY_TYPE_ISO_SPEED);
         data.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(isonum);
         data.F_NUMBER = resultget(result, LENS_APERTURE);
+        data.EQUIVALENT_35MM = "23mm";
         String focal = resultget(result, LENS_FOCAL_LENGTH);
         if (!focal.isEmpty()) {
             focal = requestget(request, CaptureRequest.LENS_FOCAL_LENGTH);
@@ -91,7 +92,7 @@ public class ParseExif {
         data.DATETIME = sFormatter.format(new Date(System.currentTimeMillis()));
         data.COMPRESSION = "97";
         data.COLOR_SPACE = "sRGB";
-        data.EXIF_VERSION = "0231";
+        data.EXIF_VERSION = "0300";
         data.IMAGE_DESCRIPTION = PhotonCamera.getParameters().toString();
         /*
         //saving for later use
@@ -125,6 +126,11 @@ public class ParseExif {
         inter.setAttribute(TAG_COLOR_SPACE, data.COLOR_SPACE);
         inter.setAttribute(TAG_EXIF_VERSION, data.EXIF_VERSION);
         inter.setAttribute(TAG_IMAGE_DESCRIPTION, data.IMAGE_DESCRIPTION);
+        //inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
+        //inter.setAttribute("FocalLengthIn35mmFormat", data.EQUIVALENT_35MM);
+        inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, "23mm");
+        inter.setAttribute("FocalLengthIn35mmFormat", "23mm");
+        inter.setAttribute(TAG_SOFTWARE, "Photon Camera");
         return inter;
     }
 
@@ -161,5 +167,7 @@ public class ParseExif {
         public String EXPOSURE_TIME;
         public String F_NUMBER;
         public String FOCAL_LENGTH;
+        public String EQUIVALENT_35MM = "23mm";
+        public String SOFTWARE = "Photon Camera";
     }
 }
