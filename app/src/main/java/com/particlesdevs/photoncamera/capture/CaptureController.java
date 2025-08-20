@@ -40,6 +40,7 @@ import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.CamcorderProfile;
+import android.media.EncoderProfiles;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -86,6 +87,7 @@ import com.particlesdevs.photoncamera.ui.camera.viewmodel.TimerFrameCountViewMod
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.AutoFitPreviewView;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.GLPreview;
 import com.particlesdevs.photoncamera.util.log.Logger;
+import com.particlesdevs.photoncamera.ui.camera.CameraUIView;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -112,13 +114,18 @@ import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_ON;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
 import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF;
+import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION;
 import static android.hardware.camera2.CameraMetadata.FLASH_MODE_TORCH;
+import static android.hardware.camera2.CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_OFF;
+import static android.hardware.camera2.CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AE_MODE;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AE_REGIONS;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AF_REGIONS;
 import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureRequest.FLASH_MODE;
+import static android.hardware.camera2.CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE;
 
 /**
  * Class responsible for image capture and sending images for subsequent processing
@@ -128,6 +135,7 @@ import static android.hardware.camera2.CaptureRequest.FLASH_MODE;
  * Constructor {@link CaptureController#CaptureController(Activity, ExecutorService, CameraEventsListener)}
  */
 public class CaptureController implements MediaRecorder.OnInfoListener {
+    //public static final int RAW_FORMAT = ImageFormat.RAW_SENSOR;
     public static final int RAW_FORMAT = ImageFormat.RAW_SENSOR;
     public static final int YUV_FORMAT = ImageFormat.YUV_420_888;
     private static final String TAG = CaptureController.class.getSimpleName();
@@ -248,6 +256,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      */
     public int mSensorOrientation;
     public int cameraRotation;
+    public int videoRotation = 0;
     public boolean is30Fps = true;
     public boolean onUnlimited = false;
     public boolean unlimitedStarted = false;
@@ -573,7 +582,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     };
     public CaptureController(Activity activity, ExecutorService processExecutor, CameraEventsListener cameraEventsListener) {
-        if(PhotonCamera.getSettings().previewFormat != 0) {
+        int prevFormat = PhotonCamera.getSettings().previewFormat;
+        if(prevFormat != 0) {
             mPreviewTargetFormat = PhotonCamera.getSettings().previewFormat;
         } else {
             mPreviewTargetFormat = ImageFormat.JPEG;
@@ -615,6 +625,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public static int getTargetFormat() {
         return mTargetFormat;
+    }
+
+    public Range<Integer> getFpsRangeDef() {
+        return FpsRangeDef;
     }
 
     public static void setTargetFormat(int targetFormat) {
@@ -1249,10 +1263,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
         Range<Integer>[] ranges = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
         int def = 30;
+        if (PhotonCamera.getSpecific().specificSetting.is24fps && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            def = 24;
+        }
         int min = 20;
         if (ranges == null) {
             ranges = new Range[1];
-            ranges[0] = new Range<>(15, 30);
+            if (PhotonCamera.getSpecific().specificSetting.is24fps && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                ranges[0] = new Range<>(24, 24);
+            }
+            else {
+                ranges[0] = new Range<>(15, 30);
+            }
         }
         for (Range<Integer> value : ranges) {
             if ((int) value.getUpper() >= def) {
@@ -1260,22 +1282,28 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 break;
             }
         }
-        if (FpsRangeDef == null)
+
+        if (!PhotonCamera.getSpecific().specificSetting.is24fps) {
+            if (FpsRangeDef == null)
+                for (Range<Integer> range : ranges) {
+                    if ((int) range.getUpper() >= min) {
+                        FpsRangeDef = range;
+                        break;
+                    }
+                }
             for (Range<Integer> range : ranges) {
-                if ((int) range.getUpper() >= min) {
+                if (range.getUpper() > def) {
                     FpsRangeDef = range;
                     break;
                 }
             }
-        for (Range<Integer> range : ranges) {
-            if (range.getUpper() > def) {
-                FpsRangeDef = range;
-                break;
-            }
         }
         if(FpsRangeHigh == null) FpsRangeHigh = new Range<>(60, 60);
-        if(FpsRangeDef == null || FpsRangeDef.getLower() > 30)
+        if (PhotonCamera.getSpecific().specificSetting.is24fps && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO))
+            FpsRangeDef = new Range<>(24, 24);
+        else if(FpsRangeDef == null || FpsRangeDef.getLower() > def)
             FpsRangeDef = new Range<>(7, 30);
+
 
         /*boolean swappedDimensions = false;
         switch (displayRotation) {
@@ -1349,8 +1377,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mTextureView.setAspectRatio(
                     mPreviewSize.getHeight(), mPreviewSize.getWidth());
             cameraEventsListener.onCharacteristicsUpdated(characteristics);
-            if (PhotonCamera.getSettings().DebugData)
+            if ((PhotonCamera.getSettings().DebugData && !PhotonCamera.getSpecific().specificSetting.isEssentialOsd))
+            {
                 showToast("preview:" + new Point(mPreviewWidth, mPreviewHeight));
+            }
         });
         //activity.runOnUiThread(() -> cameraEventsListener.onCharacteristicsUpdated(characteristics));
     }
@@ -1399,7 +1429,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         // Flash is automatically enabled when necessary.
                         resetPreviewAEMode();
                         Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
-                        VendorTagUtils.builderSessionApply(mPreviewRequestBuilder, false, useMaximumResolutionKey);
+                        VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
                         // Finally, we start displaying the camera preview.
                         if (is30Fps) {
                             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
@@ -1494,11 +1524,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mPreviewRequestBuilder.addTarget(surface);
         mPreviewMeteringAF = mPreviewRequestBuilder.get(CONTROL_AF_REGIONS);
         mPreviewAFMode = mPreviewRequestBuilder.get(CONTROL_AF_MODE);
-        if (mIsRecordingVideo) {
+        //CameraMode.VIDEO
+        if (mIsRecordingVideo || (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && PhotonCamera.getSettings().eisPhoto) ) {
             mPreviewRequestBuilder.set(CONTROL_AF_MODE, CONTROL_AF_MODE_CONTINUOUS_VIDEO);
             mPreviewAFMode = CONTROL_AF_MODE_CONTINUOUS_VIDEO;
             if (PreferenceKeys.isEisPhotoOn()) {
-                mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_ON);
+                //mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_ON);
+                mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION);
+            }
+            else {
+                mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             }
         }
         mPreviewMeteringAE = mPreviewRequestBuilder.get(CONTROL_AE_REGIONS);
@@ -1719,7 +1754,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (stabilizationModes != null && stabilizationModes.length > 1) {
                 Log.d(TAG, "LENS_OPTICAL_STABILIZATION_MODE");
 //                captureBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
-                captureBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
+                if (PhotonCamera.getSpecific().specificSetting.isOisOn == true) {
+                    captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
+                } else {
+                    captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
+                }
             }
             for (int i = 0; i < 3; i++) {
                 Log.d(TAG, "Temperature:" + mPreviewTemp[i]);
@@ -1728,7 +1767,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             //setAutoFlash(captureBuilder);
             //int rotation = Interface.getGravity().getCameraRotation();//activity.getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, PhotonCamera.getGravity().getCameraRotation(mSensorOrientation));
-            VendorTagUtils.builderSessionApply(captureBuilder, true, useMaximumResolutionKey);
+            VendorTagUtils.builderSessionApply(mCameraManager.getCameraCharacteristics(mCameraDevice.getId()), captureBuilder, true, useMaximumResolutionKey);
 
             captures = new ArrayList<>();
             BurstShakiness = new ArrayList<>();
@@ -1850,7 +1889,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     if (time != null) {
                         // get exposure multiply ISO and exposure time
                         Object isoKey = result.get(CaptureResult.SENSOR_SENSITIVITY);
-                        int iso = 100;
+                        int iso = 50;
                         if (isoKey != null) {
                             iso = (int) isoKey;
                         }
@@ -2070,20 +2109,53 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void setUpMediaRecorder() {
+        CamcorderProfile profile;
         mMediaRecorder.reset();
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_2160P);
-        mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
+        if (PhotonCamera.getSpecific().specificSetting.is8k)
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_8KUHD);
+        else
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_2160P);
+        //EncoderProfiles encProfs = profile.getAll(mCameraDevice.getId(), CamcorderProfile.QUALITY_2160P);
+        //List<EncoderProfiles.VideoProfile> encVidProfList = encProfs.getVideoProfiles();
+        if (PhotonCamera.getSpecific().specificSetting.is24fps && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            mMediaRecorder.setVideoFrameRate(24);
+            mMediaRecorder.setCaptureRate(24.0f);
+        }
+        else {
+            mMediaRecorder.setVideoFrameRate(profile.videoFrameRate);
+            mMediaRecorder.setCaptureRate(profile.videoFrameRate);
+        }
         mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-        mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
-        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        if (PhotonCamera.getSpecific().specificSetting.isHighBitrate)
+            mMediaRecorder.setVideoEncodingBitRate(120000000);
+        else
+            mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
+        if (PhotonCamera.getSpecific().specificSetting.isH265)
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.HEVC);
+        else
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
         mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
         mMediaRecorder.setOnInfoListener(this);
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        switch (videoRotation) {
+            case 0:
+                mMediaRecorder.setOrientationHint(90);
+                break;
+            case 90:
+                mMediaRecorder.setOrientationHint(0);
+                break;
+            case 180:
+                mMediaRecorder.setOrientationHint(270);
+                break;
+            case -90:
+                mMediaRecorder.setOrientationHint(180);
+                break;
+        }
+        /*int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         switch (mSensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
                 mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
@@ -2091,7 +2163,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             case SENSOR_ORIENTATION_INVERSE_DEGREES:
                 mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
                 break;
-        }
+        }*/
         Date currentDate = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
         String dateText = dateFormat.format(currentDate);
