@@ -15,7 +15,7 @@ public class PreviewParameters {
         Integer analogue = characteristics.get(CameraCharacteristics.SENSOR_MAX_ANALOG_SENSITIVITY);
         if(analogue != null){
             analogIso = analogue;
-        } else analogIso = 100;
+        } else analogIso = 50;
         Object ptr = characteristics.get(CameraCharacteristics.SENSOR_INFO_COLOR_FILTER_ARRANGEMENT);
         if (ptr != null) cfaPattern = (byte) (int) ptr;
         if (PhotonCamera.getSettings().cfaPattern >= 0) {
