@@ -26,8 +26,8 @@ public class EvModel extends ManualModel<Float> {
     private float evStep;
 
     public EvModel(Context context, CameraCharacteristics cameraCharacteristics, Range<Float> range,
-                   ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v) {
-        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v);
+                   ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v, boolean isIsoExtended, boolean isExposureExtended) {
+        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v, isIsoExtended, isExposureExtended);
     }
 
     public void setEvStep(float evStep) {
@@ -35,7 +35,7 @@ public class EvModel extends ManualModel<Float> {
     }
 
     @Override
-    protected void fillKnobInfoList() {
+    protected void fillKnobInfoList(boolean isIsoExtended, boolean isExposureExtended) {
         Range<Float> evRange = range;
         if (evRange == null || (evRange.getLower() == 0.0f && evRange.getUpper() == 0.0f)) {
             Log.d(TAG, "fillKnobInfoList() - evRange is not valid.");

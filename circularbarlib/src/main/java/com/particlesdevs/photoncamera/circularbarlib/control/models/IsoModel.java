@@ -22,12 +22,12 @@ import java.util.ArrayList;
 public class IsoModel extends ManualModel<Integer> {
 
     public IsoModel(Context context, CameraCharacteristics cameraCharacteristics, Range<Integer> range,
-                    ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v) {
-        super(context,cameraCharacteristics, range, manualParamModel, valueChangedEvent,v);
+                    ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v, boolean isIsoExtended, boolean isExposureExtended) {
+        super(context,cameraCharacteristics, range, manualParamModel, valueChangedEvent,v, isIsoExtended, isExposureExtended);
     }
 
     @Override
-    protected void fillKnobInfoList() {
+    protected void fillKnobInfoList(boolean isIsoExtended, boolean isExposureExtended) {
         KnobItemInfo auto = getNewAutoItem(ManualParamModel.ISO_AUTO, null);
         getKnobInfoList().add(auto);
         currentInfo = auto;
@@ -38,6 +38,11 @@ public class IsoModel extends ManualModel<Integer> {
         Object isohigh = range.getUpper();
         int miniso = (int) isolow;
         int maxiso = (int) isohigh;
+        if (isIsoExtended)
+        {
+            maxiso = 12500;
+            isohigh = 12500;
+        }
         Log.v("IsoModel", "Max iso:" + maxiso);
         Log.v("IsoModel", "Max iso cnt:" + Math.log10((double) maxiso / miniso) / Math.log10(2));
         for (double isoCnt = Math.log10(1) / Math.log10(2); isoCnt < Math.log10((double) maxiso / miniso) / Math.log10(2); isoCnt += 1.0 / 4.0) {

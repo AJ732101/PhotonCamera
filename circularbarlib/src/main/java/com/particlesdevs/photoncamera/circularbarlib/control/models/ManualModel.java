@@ -43,7 +43,7 @@ public abstract class ManualModel<T extends Comparable<? super T>> implements Kn
     protected KnobItemInfo currentInfo, autoModel;
     protected Context context;
 
-    public ManualModel(Context context, CameraCharacteristics cameraCharacteristics, Range<T> range, ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v) {
+    public ManualModel(Context context, CameraCharacteristics cameraCharacteristics, Range<T> range, ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v, boolean isIsoExtended, boolean isExposureExtended) {
         this.context = context;
         this.cameraCharacteristics = cameraCharacteristics;
         this.range = range;
@@ -54,7 +54,8 @@ public abstract class ManualModel<T extends Comparable<? super T>> implements Kn
             this.tick = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK);
         } else this.tick = VibrationEffect.createOneShot(9,255);
         knobInfoList = new ArrayList<>();
-        fillKnobInfoList();
+        fillKnobInfoList(isIsoExtended, isExposureExtended);
+        //fillKnobInfoList(true, true);
     }
 
     public void setAutoTxt() {
@@ -96,7 +97,7 @@ public abstract class ManualModel<T extends Comparable<? super T>> implements Kn
 //        return new KnobItemInfo(autoStateDrawable, text, tick, val);
 //    }
 
-    protected abstract void fillKnobInfoList();
+    protected abstract void fillKnobInfoList(boolean isIsoExtended, boolean isExposueExtended);
 
     @Override
     public List<KnobItemInfo> getKnobInfoList() {

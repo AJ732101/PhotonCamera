@@ -32,16 +32,18 @@ public class SupportedDevice {
         specific = new Specific(mSettingsManager);
     }
     public void loadCheck() {
+        specific.loadSpecific();
         new Thread(() -> {
-            try {
+            /*try {
                 if (checkedCount < 1) {
                     loadSupportedDevicesList();
                     isSupported();
                     specific.loadSpecific();
                 }
             } catch (IOException e) {
+                specific.loadSpecific();
                 e.printStackTrace();
-            }
+            }*/
             if (!loaded && mSettingsManager.isSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY))
                 mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
         }).start();

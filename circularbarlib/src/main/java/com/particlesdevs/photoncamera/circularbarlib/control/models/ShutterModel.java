@@ -15,7 +15,6 @@ import com.particlesdevs.photoncamera.circularbarlib.ui.views.knobview.KnobInfo;
 import com.particlesdevs.photoncamera.circularbarlib.ui.views.knobview.KnobItemInfo;
 import com.particlesdevs.photoncamera.circularbarlib.ui.views.knobview.KnobView;
 import com.particlesdevs.photoncamera.circularbarlib.ui.views.knobview.ShadowTextDrawable;
-
 import java.util.ArrayList;
 
 /**
@@ -24,12 +23,12 @@ import java.util.ArrayList;
 public class ShutterModel extends ManualModel<Long> {
 
     public ShutterModel(Context context, CameraCharacteristics cameraCharacteristics, Range<Long> range,
-                        ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v) {
-        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v);
+                        ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v, boolean isIsoExtended, boolean isExposureExtended) {
+        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v, isIsoExtended, isExposureExtended);
     }
 
     @Override
-    protected void fillKnobInfoList() {
+    protected void fillKnobInfoList(boolean isIsoExtended, boolean isExposureExtended) {
 
         long exposureTimeValue;
         Range<Long> range = super.range;
@@ -48,6 +47,8 @@ public class ShutterModel extends ManualModel<Long> {
         if (minexp < 1000) minexp = 1000;
         //minexp += 5000 - minexp % 5000;
         long maxexp = range.getUpper();
+        if (isExposureExtended)
+            maxexp = range.getUpper() * 10;
         Log.v("ExpModel", "Max exp:" + maxexp);
         Log.v("ExpModel", "Min exp:" + minexp);
         double maxcnt = Math.log10((double) maxexp) / Math.log10(2);

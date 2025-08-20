@@ -23,12 +23,12 @@ import java.util.Locale;
 public class FocusModel extends ManualModel<Float> {
 
     public FocusModel(Context context, CameraCharacteristics cameraCharacteristics, Range<Float> range,
-                      ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v) {
-        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v);
+                      ManualParamModel manualParamModel, ValueChangedEvent valueChangedEvent, Vibrator v, boolean isIsoExtended, boolean isExposureExtended) {
+        super(context, cameraCharacteristics, range, manualParamModel, valueChangedEvent,v, isIsoExtended, isExposureExtended);
     }
 
     @Override
-    protected void fillKnobInfoList() {
+    protected void fillKnobInfoList(boolean isIsoExtended, boolean isExposureExtended) {
         Drawable drawable;
         KnobItemInfo auto;
         if (range == null) {
