@@ -206,6 +206,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_ROUND_EDGE);
     }
 
+    public static String getMode() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_SHOW_ROUND_EDGE);
+    }
+
     public static int getGridValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SHOW_GRID);
     }
@@ -418,6 +422,7 @@ public class PreferenceKeys {
          */
         KEY_HDRX(R.string.pref_hdrx_key),
         KEY_EIS_PHOTO(R.string.pref_eis_photo_key),
+        KEY_MODE(R.string.pref_eis_photo_key),
         KEY_QUAD_BAYER(R.string.pref_quad_bayer_key),
         KEY_FPS_PREVIEW(R.string.pref_fps_preview_key),
         CAMERA_ID(R.string.camera_id),

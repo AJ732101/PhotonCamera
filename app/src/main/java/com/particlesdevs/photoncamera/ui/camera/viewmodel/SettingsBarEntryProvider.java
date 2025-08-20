@@ -24,12 +24,14 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import com.particlesdevs.photoncamera.R;
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.settings.SettingType;
 import com.particlesdevs.photoncamera.ui.camera.model.SettingsBarButtonModel;
 import com.particlesdevs.photoncamera.ui.camera.model.SettingsBarEntryModel;
 import com.particlesdevs.photoncamera.ui.camera.model.TopBarSettingsData;
 import com.particlesdevs.photoncamera.ui.camera.views.settingsbar.SettingsBarLayout;
+import com.particlesdevs.photoncamera.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +49,12 @@ public class SettingsBarEntryProvider extends ViewModel {
     private final List<SettingsBarEntryModel> allEntries = new ArrayList<>(8);
 
     public SettingsBarEntryProvider() {
-//        allEntries.add(hdrxEntry);
+        allEntries.add(hdrxEntry);
         allEntries.add(flashEntry);
         allEntries.add(timerEntry);
         allEntries.add(saveRawEntry);
-        allEntries.add(quadEntry);
+        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
+            allEntries.add(quadEntry);
         allEntries.add(eisEntry);
         allEntries.add(fpsEntry);
         allEntries.add(gridEntry);
@@ -72,15 +75,20 @@ public class SettingsBarEntryProvider extends ViewModel {
     }
 
     public void updateAllEntries() {
-        updateEntry(gridEntry, PreferenceKeys.getGridValue());
-        updateEntry(flashEntry, PreferenceKeys.getAeMode());
-        updateEntry(timerEntry, PreferenceKeys.getCountdownTimerIndex());
-        updateEntry(hdrxEntry, PreferenceKeys.isHdrXOn());
-        updateEntry(eisEntry, PreferenceKeys.isEisPhotoOn());
-        updateEntry(fpsEntry, PreferenceKeys.isFpsPreviewOn());
-        updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
-        updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
-        updateEntry(batterySaverEntry, PreferenceKeys.isBatterySaverOn());
+        try {
+            updateEntry(gridEntry, PreferenceKeys.getGridValue());
+            updateEntry(flashEntry, PreferenceKeys.getAeMode());
+            updateEntry(timerEntry, PreferenceKeys.getCountdownTimerIndex());
+            updateEntry(hdrxEntry, PreferenceKeys.isHdrXOn());
+            updateEntry(eisEntry, PreferenceKeys.isEisPhotoOn());
+            updateEntry(fpsEntry, PreferenceKeys.isFpsPreviewOn());
+            if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
+                updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
+            updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
+            updateEntry(batterySaverEntry, PreferenceKeys.isBatterySaverOn());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void addObserver(Observer<TopBarSettingsData<?, ?>> observer) {
@@ -104,10 +112,11 @@ public class SettingsBarEntryProvider extends ViewModel {
     }
 
     private void createQuadBayerEntry() {
-        quadEntry.addSettingsBarButtonModels(
+        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
+            quadEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.quad_off_button, R.drawable.ic_quad_off, R.string.off, 0, quadEntry),
                 SettingsBarButtonModel.newButtonModel(R.id.quad_on_button, R.drawable.ic_quad_on, R.string.on, 1, quadEntry)
-        );
+            );
     }
 
     private void createEisEntry() {

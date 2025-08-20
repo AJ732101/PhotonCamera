@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.api;
 
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 
 import static android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE_OFF;
@@ -45,6 +46,7 @@ public class Settings {
     public String mCameraID;
     public float[] toneMap;
     public float[] gamma;
+    public String mode = "Video"; //
 
     //Camera direct related
     public int noiseReduction = NOISE_REDUCTION_MODE_OFF;
@@ -78,7 +80,8 @@ public class Settings {
         rawSaver = PreferenceKeys.isSaveRaw();
         remosaic = PreferenceKeys.isRemosaicOn();
         eisPhoto = PreferenceKeys.isEisPhotoOn();
-        QuadBayer = PreferenceKeys.isQuadBayerOn();
+        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
+            QuadBayer = PreferenceKeys.isQuadBayerOn();
         fpsPreview = PreferenceKeys.isFpsPreviewOn();
         hdrxNR = PreferenceKeys.isHdrxNrOn();
         alignAlgorithm = PreferenceKeys.getAlignMethodValue();

@@ -17,6 +17,7 @@ android {
     buildFeatures {
         dataBinding true
         mlModelBinding true
+        viewBinding false
     }
 
     if (versionPropsFile.canRead()) {
@@ -39,8 +40,8 @@ android {
 
     defaultConfig {
         compileSdk 35
-        applicationId 'com.particlesdevs.photoncamera'
-        minSdkVersion 26
+        applicationId 'com.xiaomi.module.evaluation'
+        minSdk 30
         targetSdkVersion 35
         versionCode versionBuild
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -87,8 +88,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     lint {
         abortOnError false
@@ -102,6 +103,12 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    dependenciesInfo {
+        includeInBundle false
+        includeInApk false
+    }
+    buildToolsVersion '35.0.0'
+    compileSdk 35
 }
 
 
@@ -114,18 +121,18 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'org.jetbrains:annotations:26.0.2'
     implementation 'androidx.exifinterface:exifinterface:1.4.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.github.mohammadatif:Animatoo:master'
     implementation 'com.github.ChickenHook:RestrictionBypass:2.2'
-    implementation 'com.github.bumptech.glide:glide:4.14.2'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
     implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
-    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.google.code.gson:gson:2.13.1'
     // Navigation Component
-    implementation "androidx.navigation:navigation-fragment-ktx:2.9.0"
-    implementation "androidx.navigation:navigation-ui-ktx:2.9.0"
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.9.2'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.9.2'
     //Subsampling image view
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     //Google Material
@@ -136,11 +143,11 @@ dependencies {
     //Use this lib to detect memory leaks when debugging
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
     //For Testing
-    testImplementation 'org.mockito:mockito-core:3.12.4'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
     implementation 'androidx.test.ext:junit:1.2.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'org.testng:testng:7.4.0'
+    androidTestImplementation 'org.testng:testng:7.11.0'
     implementation 'com.elvishew:xlog:1.11.1'
     implementation 'com.elvishew:xlog-libcat:1.0.0'
 
