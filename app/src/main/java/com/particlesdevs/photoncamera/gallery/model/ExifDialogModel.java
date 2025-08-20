@@ -22,6 +22,7 @@ public class ExifDialogModel extends BaseObservable {
     private String focal;
     private String file_size;
     private String miniText;
+    private String equivalent35mm;
     private Histogram.HistogramModel histogramModel;
 
     public String getMiniText() {
@@ -62,6 +63,14 @@ public class ExifDialogModel extends BaseObservable {
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    public String get35mmEquiv() {
+        return equivalent35mm;
+    }
+
+    public void set35mmEquiv(String equivalent35mm) {
+        this.equivalent35mm = equivalent35mm;
     }
 
     public String getFile_size() {
