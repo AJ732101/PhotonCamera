@@ -25,7 +25,6 @@ public class Settings {
     public double saturation;
     public double sharpness;
     public double contrastMpy = 1.0;
-    public int contrastConst = 0;//TODO
     public double noiseRstr;
     public double mergeStrength;
     public double compressor;
@@ -39,7 +38,6 @@ public class Settings {
     public boolean eisPhoto;
     public boolean fpsPreview;
     public int alignAlgorithm;
-
     public int colorMethod;
     public int focusPeak;
     public int previewFormat;
@@ -51,6 +49,22 @@ public class Settings {
     //Camera direct related
     public int noiseReduction = NOISE_REDUCTION_MODE_OFF;
     public CameraMode selectedMode;
+
+    // QualityDoesMatter
+    public boolean useBasicOsd;
+    public boolean useOis;
+    public boolean useDngCompression;
+    public int videoBitrate;
+    public float apertureToUse;
+    public String videoCodec;
+    public int videoFramrate;
+    public int videoHeight;
+    public boolean videoHDR;
+    public boolean video10bit;
+    public boolean useExtendIso;
+    public boolean useExtendExposure;
+    public int noiseProcessing;
+    public int edgeProcessing;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -66,8 +80,6 @@ public class Settings {
         roundEdge = PreferenceKeys.isRoundEdgeOn();
         sharpness = PreferenceKeys.getSharpnessValue();
         contrastMpy = PreferenceKeys.getContrastValue();//TODO recheck
-//        contrastConst = get(contrastConst, "ContrastConst");///////TODO
-//        saturation = get(saturation, "Saturation");
         saturation = PreferenceKeys.getSaturationValue();
         exposureCompensation = PreferenceKeys.getFloat(PreferenceKeys.Key.KEY_EXPOCOMPENSATE_SEEKBAR);
         compressor = PreferenceKeys.getCompressorValue();
@@ -80,8 +92,7 @@ public class Settings {
         rawSaver = PreferenceKeys.isSaveRaw();
         remosaic = PreferenceKeys.isRemosaicOn();
         eisPhoto = PreferenceKeys.isEisPhotoOn();
-        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
-            QuadBayer = PreferenceKeys.isQuadBayerOn();
+        QuadBayer = PreferenceKeys.isQuadBayerOn();
         fpsPreview = PreferenceKeys.isFpsPreviewOn();
         hdrxNR = PreferenceKeys.isHdrxNrOn();
         alignAlgorithm = PreferenceKeys.getAlignMethodValue();
@@ -93,6 +104,22 @@ public class Settings {
         gamma = parseGammaArray();
         mCameraID = PreferenceKeys.getCameraID();
         theme = PreferenceKeys.getThemeValue();
+
+        // QualityDoesMatter
+        useBasicOsd = PreferenceKeys.useBasicOsdOn();
+        useOis = PreferenceKeys.useOisOn();
+        useDngCompression = PreferenceKeys.useDngCompression();
+        videoBitrate = PreferenceKeys.getVideoBitrate();
+        apertureToUse = PreferenceKeys.getAperture();
+        videoCodec = PreferenceKeys.getVideoCodec();
+        videoFramrate = PreferenceKeys.getVideoFramerate();
+        videoHeight = PreferenceKeys.getVideoHeight();
+        videoHDR = PreferenceKeys.isHdrVideoOn();
+        video10bit = PreferenceKeys.is10bitVideoOn();
+        useExtendIso = PreferenceKeys.useExtendIsoOn();
+        useExtendExposure = PreferenceKeys.useExtendExposureOn();
+        noiseProcessing = PreferenceKeys.getNoiseProcessing();
+        edgeProcessing = PreferenceKeys.getEdgeProcessing();
     }
 
     public void saveID() {

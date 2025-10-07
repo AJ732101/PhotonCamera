@@ -317,7 +317,7 @@ public class Camera2ApiAutoFix {
         int[] stabilizationModes = CaptureController.mCameraCharacteristics.get(LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
         if (stabilizationModes != null && stabilizationModes.length > 1) {
             Log.d(TAG, "LENS_OPTICAL_STABILIZATION_MODE");
-            if (PhotonCamera.getSpecific().specificSetting.isOisOn == true) {
+            if (PhotonCamera.getSettings().useOis) {
                 captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
             } else {
                 captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst

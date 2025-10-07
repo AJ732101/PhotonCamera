@@ -44,20 +44,23 @@ public class VendorTagUtils {
                 Log.d(TAG, "com.xiaomi.sessionparams.clientName supported");
                 builder.set(clientName, "com.android.camera");
             }
-            var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
-            if (isSupported(builder, apertureMode)) {
-                Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
-                builder.set(apertureMode, 1); // 1 = enable, 0 = disable
+
+            float apertureToUse = PhotonCamera.getSettings().apertureToUse;
+            if (apertureToUse < 16) {
+                var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
+                if (isSupported(builder, apertureMode)) {
+                    Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
+                    builder.set(apertureMode, 1); // 1 = enable, 0 = disable
+                }
+                var lensAperture = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                if (isSupported(builder, lensAperture)) {
+                    CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
+                    Float[] apert = cameraCharacteristics.get(vendorKey);
+                    Log.d(TAG, "com.xiaomi.lens.aperture is supported");
+                    builder.set(lensAperture, apertureToUse);
+                }
             }
-            var lensAperture = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
-            if (isSupported(builder, lensAperture)) {
-                CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
-                Float[] apert = cameraCharacteristics.get(vendorKey);
-                Log.d(TAG, "com.xiaomi.lens.aperture is supported");
-                //builder.set(lensAperture, apert[apert.length - 1]); // stopped down
-                //builder.set(lensAperture, apert[0]); // fully open
-                builder.set(lensAperture, PhotonCamera.getSpecific().specificSetting.apertureToUse);
-            }
+
             if(burst) {
                 var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);
                 if (isSupported(builder, remosaicEnabled)) {

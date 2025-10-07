@@ -60,42 +60,9 @@ public class Specific {
             Log.e(TAG,e.toString());
         }
 
-        for (String str : noGuiYetStr) {
+        /*for (String str : noGuiYetStr) {
             String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
             switch (caseS[0]) {
-                case "apertureToUse": {
-                    Log.d("Specific", "user set aperture loaded: " + caseS[1]);
-                    specificSetting.apertureToUse = Float.parseFloat(caseS[1]);
-                    break;
-                }
-                case "isOisOn": {
-                    specificSetting.isOisOn = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "isEssentialOsd": {
-                    specificSetting.isEssentialOsd = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "isQuadBayer": {
-                    specificSetting.isQuadBayer = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "isH265": {
-                    specificSetting.isH265 = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "isHighBitrate": {
-                    specificSetting.isHighBitrate = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "is8k": {
-                    specificSetting.is8k = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "is24fps": {
-                    specificSetting.is24fps = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "isExposureExtended": {
                     specificSetting.isExposureExtended = Boolean.parseBoolean(caseS[1]);
                     break;
@@ -104,16 +71,8 @@ public class Specific {
                     specificSetting.isIsoExtended = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "setPhysicalCameraId": {
-                    specificSetting.setPhysicalCameraId = caseS[1];
-                    break;
-                }
-                case "physicalCameraIdTarget": {
-                    specificSetting.physicalCameraIdTarget = caseS[1];
-                    break;
-                }
-            }
-        }
+              }
+        }*/
 
         // load the rest bound to conditions
         isLoaded = false; //mSettingsManager.getBoolean(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded",false);
@@ -122,12 +81,12 @@ public class Specific {
         if(exists) {
             if (!isLoaded) {
                 try {
-                    /*Set<String> mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
-                    BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt");
-                    boolean specificExists = mSupportedDevicesSet.contains(SupportedDevice.THIS_DEVICE);
-                    Log.d("Specific", "specificExists: "+specificExists);
-                    mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists", specificExists);
-                    if (!specificExists) return;*/
+                    //Set<String> mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
+                    //BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt");
+                    //boolean specificExists = mSupportedDevicesSet.contains(SupportedDevice.THIS_DEVICE);
+                    //Log.d("Specific", "specificExists: "+specificExists);
+                    //mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists", specificExists);
+                    //if (!specificExists) return;
                     ArrayList<String> inputStr;
 
                     String device = Build.BRAND.toLowerCase() + "/" + Build.DEVICE.toLowerCase();
@@ -166,7 +125,7 @@ public class Specific {
                                 String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
                                 specificSetting.apertureList = new float[ids.length];
                                 for(int i =0; i<specificSetting.apertureList.length;i++){
-                                    specificSetting.apertureList[i] = Integer.parseInt(ids[i]);
+                                    specificSetting.apertureList[i] = Float.valueOf(ids[i]);
                                 }
                                 break;
                             }

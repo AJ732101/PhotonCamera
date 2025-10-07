@@ -376,18 +376,27 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
                 stringMap.put("35mm Focal length", Math.ceil(mCameraLensDataMap.get(result.getCameraId()).getCamera35mmFocalLength()) + "mm");
-                stringMap.put("Stabilization", getResultFieldName("LENS_OPTICAL_STABILIZATION_MODE_", result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE)));
+                stringMap.put("OIS", getResultFieldName("LENS_OPTICAL_STABILIZATION_MODE_", result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE)));
                 stringMap.put("Orientation", String.valueOf(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation()));
-                stringMap.put("8K", String.valueOf(PhotonCamera.getSpecific().specificSetting.is8k));
-                /*if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
-                }*/
                 stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
-                stringMap.put("HEVC", String.valueOf(PhotonCamera.getSpecific().specificSetting.isH265));
-                stringMap.put("High Bitrate", String.valueOf(PhotonCamera.getSpecific().specificSetting.isHighBitrate));
-                stringMap.put("Ext. ISO", String.valueOf(PhotonCamera.getSpecific().specificSetting.isIsoExtended));
-                stringMap.put("Ext. Expo", String.valueOf(PhotonCamera.getSpecific().specificSetting.isExposureExtended));
-                if (!PhotonCamera.getSpecific().specificSetting.isEssentialOsd)
+                stringMap.put("Ext. ISO", String.valueOf(PhotonCamera.getSettings().useExtendIso));
+                stringMap.put("Ext. Expo", String.valueOf(PhotonCamera.getSettings().useExtendIso));
+                stringMap.put("DNG Compr", String.valueOf(PhotonCamera.getSettings().useDngCompression));
+                // QualityDoesMatter
+                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    stringMap.put("--VIDEO--", "--OPTS--");
+                    stringMap.put("Codec", PhotonCamera.getSettings().videoCodec);
+                    stringMap.put("Height", String.valueOf(PhotonCamera.getSettings().videoHeight));
+                    stringMap.put("FPS", String.valueOf(PhotonCamera.getSettings().videoFramrate));
+                    stringMap.put("Bitrate", String.valueOf(PhotonCamera.getSettings().videoBitrate) + "MBit/s");
+                    stringMap.put("HDR", String.valueOf(PhotonCamera.getSettings().videoHDR));
+                    stringMap.put("10 bit", String.valueOf(PhotonCamera.getSettings().video10bit));
+                    stringMap.put("Noise Processing.", String.valueOf(PhotonCamera.getSettings().noiseProcessing));
+                    stringMap.put("Edge Processing", String.valueOf(PhotonCamera.getSettings().edgeProcessing));
+                    //stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
+                    stringMap.put("----------", "----------");
+                }
+                if (!PhotonCamera.getSettings().useBasicOsd)
                 {
                     stringMap.put("AF_MODE", getResultFieldName("CONTROL_AF_MODE_", result.get(CaptureResult.CONTROL_AF_MODE)));
                     stringMap.put("AF_TRIGGER", getResultFieldName("CONTROL_AF_TRIGGER_", result.get(CaptureResult.CONTROL_AF_TRIGGER)));
@@ -777,7 +786,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             auxButtonsViewModel.setActiveId(PreferenceKeys.getCameraID());
             Boolean flashAvailable = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
             mCameraUIView.showFlashButton(flashAvailable != null && flashAvailable);
-            manualModeConsole.init(activity, characteristics, PhotonCamera.getSpecific().specificSetting.isIsoExtended, PhotonCamera.getSpecific().specificSetting.isExposureExtended);
+            manualModeConsole.init(activity, characteristics, PhotonCamera.getSettings().useExtendIso, PhotonCamera.getSettings().useExtendExposure);
             manualModeConsole.onResume();
         }
 

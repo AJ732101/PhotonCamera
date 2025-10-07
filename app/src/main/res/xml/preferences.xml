@@ -16,32 +16,28 @@
                 android:defaultValue="@string/pref_framecount_default"
                 app:maxValue="200"
                 app:minValue="1"
-                android:icon="@drawable/ic_burst_mode_black_24dp"
-                />
+                android:icon="@drawable/ic_burst_mode_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_wide169_key"
                 android:defaultValue="@bool/pref_wide169_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/wide169"
                 android:summary=""
-                android:icon="@drawable/ic_burst_mode_black_24dp"
-                />
+                android:icon="@drawable/ic_burst_mode_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
-            android:key="@string/pref_energy_safe_key"
-            android:defaultValue="@bool/pref_energy_safe_default"
-            android:layout="@layout/preference_with_margin"
-            android:title="@string/energy_saving"
-            android:summary=""
-            android:icon="@drawable/leaf_icon_15"
-            />
+                android:key="@string/pref_energy_safe_key"
+                android:defaultValue="@bool/pref_energy_safe_default"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/energy_saving"
+                android:summary=""
+                android:icon="@drawable/leaf_icon_15"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_camera_sounds_key"
                 android:defaultValue="@bool/pref_camera_sounds_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/camera_sounds"
                 android:summary=""
-                android:icon="@drawable/ic_camera_sounds"
-                />
+                android:icon="@drawable/ic_camera_sounds"/>
         <ListPreference
                 android:key="@string/pref_show_grid_key"
                 android:defaultValue="@string/pref_show_grid_default"
@@ -51,24 +47,21 @@
                 android:summary=""
                 android:entries="@array/vf_grid_entries"
                 android:entryValues="@array/vf_grid_entryvalues"
-                android:icon="@drawable/ic_settings_grid"
-                />
+                android:icon="@drawable/ic_settings_grid"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_show_roundedge_key"
                 android:defaultValue="@bool/pref_show_roundedge_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/turn_on_round_edges"
                 android:summary=""
-                android:icon="@drawable/ic_rounded_corner"
-                />
+                android:icon="@drawable/ic_rounded_corner"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_show_watermark_key"
                 android:defaultValue="@bool/pref_show_watermark_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/turn_on_watermark"
                 android:summary=""
-                android:icon="@drawable/ic_watermark"
-                />
+                android:icon="@drawable/ic_watermark"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_af_mode_key"
@@ -78,23 +71,63 @@
                 android:entries="@array/af_mode_entries"
                 android:entryValues="@array/af_mode_entryvalues"
                 android:defaultValue="@string/pref_af_mode_default_value"/>
-
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_ois_key"
+                android:defaultValue="@bool/pref_ois_default"
+                android:title="@string/turn_on_ois"
+                android:summary=""
+                android:icon="@drawable/ic_gradient_black_24dp"/>
+        <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_aperture_key"
+                android:title="@string/aperture"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/ic_saturation"
+                android:entries="@array/aperture_entries"
+                android:entryValues="@array/aperture_entryValues"
+                android:defaultValue="@string/pref_aperture_default_value" />
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_dng_compression_key"
+                android:defaultValue="@bool/pref_dng_compression_default"
+                android:title="@string/turn_on_dng_compression"
+                android:summary=""
+                android:icon="@drawable/ic_gradient_black_24dp"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_extend_iso_key"
+                android:defaultValue="@bool/pref_extend_iso_default"
+                android:title="@string/turn_on_extend_iso"
+                android:summary=""
+                android:icon="@drawable/ic_gradient_black_24dp"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_extend_exposure_key"
+                android:defaultValue="@bool/pref_extend_exposure_default"
+                android:title="@string/turn_on_extend_exposure"
+                android:summary=""
+                android:icon="@drawable/ic_gradient_black_24dp"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_show_afdata_key"
                 android:defaultValue="@bool/pref_show_afdata_default"
-                android:layout="@layout/preference_with_margin"
                 android:title="@string/turn_on_afdata"
                 android:summary=""
-                android:icon="@drawable/ic_developer"
-                />
+                android:icon="@drawable/ic_developer"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_show_basic_osd_key"
+                android:defaultValue="@bool/pref_show_basic_osd_default"
+                android:title="@string/turn_on_basic_osd"
+                android:summary=""
+                android:icon="@drawable/ic_developer"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:title="@string/pref_save_per_lens_string"
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_save_per_lens_settings"
                 android:icon="@drawable/ic_multi_lens"
-                app:defaultValue="false"
-
-                />
+                app:defaultValue="false"/>
     </PreferenceCategory>
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"
@@ -106,16 +139,14 @@
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/turn_on_system_nr"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"
-                />
+                android:icon="@drawable/ic_gradient_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_disable_aligning_key"
                 android:defaultValue="@bool/pref_disable_align_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/disable_aligning"
                 android:summary=""
-                android:icon="@drawable/ic_format_align_justify_black_24dp"
-                />
+                android:icon="@drawable/ic_format_align_justify_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_chroma_nr_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -124,8 +155,7 @@
                 android:defaultValue="@string/pref_chroma_seekbar_default"
                 app:maxValue="65"
                 app:minValue="1"
-                android:icon="@drawable/ic_burst_mode_black_24dp"
-                />
+                android:icon="@drawable/ic_burst_mode_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_luma_nr_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -134,16 +164,14 @@
                 android:defaultValue="@string/pref_luma_seekbar_default"
                 app:maxValue="65"
                 app:minValue="1"
-                android:icon="@drawable/ic_grain_black_24dp"
-                />
+                android:icon="@drawable/ic_grain_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_enhanced_processing_key"
                 android:defaultValue="@bool/pref_enhanced_processing_default"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/enhanced_processing"
                 android:summary=""
-                android:icon="@drawable/ic_tune_black_24dp"
-                />
+                android:icon="@drawable/ic_tune_black_24dp"/>
     </PreferenceCategory>
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"
@@ -165,8 +193,7 @@
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/hdrxNR"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"
-                />
+                android:icon="@drawable/ic_gradient_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_sharpness_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -177,8 +204,7 @@
                 app:minValue="-0.2"
                 app:isFloat="true"
                 app:stepPerUnit="20"
-                android:icon="@drawable/ic_grain_black_24dp"
-                />
+                android:icon="@drawable/ic_grain_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_saturation_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -189,8 +215,7 @@
                 app:minValue="0"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_saturation"
-                />
+                android:icon="@drawable/ic_saturation"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_contrast_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -201,8 +226,7 @@
                 app:minValue="0"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_saturation"
-                />
+                android:icon="@drawable/ic_saturation"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_expocompensation_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -213,8 +237,7 @@
                 app:minValue="-4"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_saturation"
-                />
+                android:icon="@drawable/ic_saturation"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_noise_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -225,8 +248,7 @@
                 app:minValue="-6"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_compressor"
-            />
+                android:icon="@drawable/ic_compressor"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_merge_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -237,8 +259,7 @@
                 app:minValue="-4"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_compressor"
-                />
+                android:icon="@drawable/ic_compressor"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_shadows_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -249,8 +270,7 @@
                 app:minValue="-1.0"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_compressor"
-                />
+                android:icon="@drawable/ic_compressor"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_compressor_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -261,8 +281,7 @@
                 app:minValue="-1.0"
                 app:isFloat="true"
                 app:stepPerUnit="10"
-                android:icon="@drawable/ic_compressor"
-                />
+                android:icon="@drawable/ic_compressor"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_cfa_key"
@@ -271,8 +290,7 @@
                 android:icon="@drawable/ic_bayer"
                 android:entries="@array/cfapat_entries"
                 android:entryValues="@array/cfapat_entryValues"
-                android:defaultValue="@string/pref_cfa_default_value"
-                />
+                android:defaultValue="@string/pref_cfa_default_value"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_align_method_key"
@@ -281,9 +299,7 @@
                 android:icon="@drawable/ic_burst_mode_black_24dp"
                 android:entries="@array/alignset_entries"
                 android:entryValues="@array/alignset_entryValues"
-                android:defaultValue="@string/pref_align_method_default"
-
-                />
+                android:defaultValue="@string/pref_align_method_default"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_color_method_key"
@@ -292,9 +308,7 @@
                 android:icon="@drawable/ic_saturation"
                 android:entries="@array/colorset_entries"
                 android:entryValues="@array/colorset_entryValues"
-                android:defaultValue="@string/pref_align_method_default"
-
-                />
+                android:defaultValue="@string/pref_align_method_default"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_peak_method_key"
@@ -303,8 +317,7 @@
                 android:icon="@drawable/ic_saturation"
                 android:entries="@array/focuspeakset_entries"
                 android:entryValues="@array/focuspeakset_entryValues"
-                android:defaultValue="@string/pref_focus_peak_default"
-                />
+                android:defaultValue="@string/pref_focus_peak_default"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_preview_format_key"
@@ -313,15 +326,12 @@
                 android:icon="@drawable/ic_saturation"
                 android:entries="@array/preview_format_entries"
                 android:entryValues="@array/preview_format_entryValues"
-                android:defaultValue="@string/pref_preview_format_default"
-                />
-
+                android:defaultValue="@string/pref_preview_format_default"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
         android:key="@string/pref_theme_category_key"
         android:title="@string/theme">
-
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_theme_key"
@@ -330,8 +340,7 @@
             android:icon="@drawable/ic_theme"
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_entryValues"
-            android:defaultValue="@string/pref_theme_default_value"
-            />
+            android:defaultValue="@string/pref_theme_default_value" />
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_theme_accent_key"
@@ -340,15 +349,86 @@
             android:icon="@drawable/ic_saturation"
             android:entries="@array/theme_accent_entries"
             android:entryValues="@array/theme_accent_entryValues"
-            android:defaultValue="@string/pref_theme_accent_default_value"
-            />
+            android:defaultValue="@string/pref_theme_accent_default_value"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
-                android:layout="@layout/preference_with_margin"
-                android:key="@string/pref_show_gradient_key"
-                android:title="@string/show_gradient"
-                android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"
-                android:defaultValue="@bool/pref_show_gradient_def_value"/>
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_show_gradient_key"
+            android:title="@string/show_gradient"
+            android:summary=""
+            android:icon="@drawable/ic_gradient_black_24dp"
+            android:defaultValue="@bool/pref_show_gradient_def_value"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        android:key="@string/pref_category_video_key"
+        android:title="@string/video">
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_bitrate_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/bitrate"
+            android:defaultValue="@string/pref_bitrate_default"
+            app:maxValue="200"
+            app:minValue="10"
+            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_codec_key"
+            android:title="@string/codec"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_saturation"
+            android:entries="@array/codec_entries"
+            android:entryValues="@array/codec_entryValues"
+            android:defaultValue="@string/pref_codec_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_video_resolution_key"
+            android:title="@string/video_resolution"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_saturation"
+            android:entries="@array/video_resolution_entries"
+            android:entryValues="@array/video_resolution_entryValues"
+            android:defaultValue="@string/pref_video_resolution_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_video_framerate_key"
+            android:title="@string/video_framerate"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_saturation"
+            android:entries="@array/video_framerate_entries"
+            android:entryValues="@array/video_framerate_entryValues"
+            android:defaultValue="@string/pref_video_framerate_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_noise_processing_key"
+            android:title="@string/noise_processing"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_saturation"
+            android:entries="@array/noise_processing_entries"
+            android:entryValues="@array/noise_processing_entryValues"
+            android:defaultValue="@string/pref_noise_processing_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_edge_processing_key"
+            android:title="@string/edge_processing"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_saturation"
+            android:entries="@array/edge_processing_entries"
+            android:entryValues="@array/edge_processing_entryValues"
+            android:defaultValue="@string/pref_edge_processing_default_value" />
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_hdr_video_key"
+            android:title="@string/hdr_video"
+            android:summary=""
+            android:icon="@drawable/ic_gradient_black_24dp"
+            android:defaultValue="@bool/pref_hdr_video_def_value"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_10bit_video_key"
+            android:title="@string/video_10bit"
+            android:summary=""
+            android:icon="@drawable/ic_gradient_black_24dp"
+            android:defaultValue="@bool/pref_10bit_video_def_value"/>
     </PreferenceCategory>
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"
@@ -380,46 +460,42 @@
                 android:key="@string/pref_about_key"
                 android:icon="@drawable/ic_baseline_info_24">
             <Preference
-                    android:layout="@layout/preference_about"
-                    android:title="@string/app_name"
-                    android:summary="@string/photon_camera_summary"
-                    android:key="@string/pref_photoncamera"
-                    android:enabled="false"
-                    android:icon="@drawable/ic_splash">
+                android:layout="@layout/preference_about"
+                android:title="@string/app_name"
+                android:summary="@string/photon_camera_summary"
+                android:key="@string/pref_photoncamera"
+                android:enabled="false"
+                android:icon="@drawable/ic_splash">
             </Preference>
             <Preference
-                    android:key="@string/pref_version_key"
-                    android:title="@string/version_title"
-                    android:layout="@layout/preference_about"
-                    android:summary="@string/version_summary"
-                    android:enabled="false"
-                    />
+                android:key="@string/pref_version_key"
+                android:title="@string/version_title"
+                android:layout="@layout/preference_about"
+                android:summary="@string/version_summary"
+                android:enabled="false"/>
             <Preference
-                    android:layout="@layout/preference_about"
-                    app:singleLineTitle="true"
-                    android:enabled="false"
-                    android:persistent="false"
-                    android:key="@string/pref_this_device_key"
-                    />
+                android:layout="@layout/preference_about"
+                app:singleLineTitle="true"
+                android:enabled="false"
+                android:persistent="false"
+                android:key="@string/pref_this_device_key"/>
             <Preference
-                    android:layout="@layout/preference_about"
-                    android:key="@string/pref_contributors_key"
-                    android:icon="@drawable/ic_github"
-                    android:title="@string/contributors_title"
-                    android:summary="eszdman, assasinfil, killerink, mirai, Urnyx05, vibhorSrv, snajdovski"/>
+                android:layout="@layout/preference_about"
+                android:key="@string/pref_contributors_key"
+                android:icon="@drawable/ic_github"
+                android:title="@string/contributors_title"
+                android:summary="eszdman, assasinfil, killerink, mirai, Urnyx05, vibhorSrv, snajdovski"/>
             <Preference
-                    android:layout="@layout/preference_about"
-                    android:title="@string/telegram"
-                    android:icon="@drawable/ic_telegram"
-                    android:key="@string/pref_telegram_channel_key"
-                    />
+                android:layout="@layout/preference_about"
+                android:title="@string/telegram"
+                android:icon="@drawable/ic_telegram"
+                android:key="@string/pref_telegram_channel_key"/>
             <Preference
-                    android:layout="@layout/preference_about"
-                    android:title="@string/supported_devices"
-                    android:enabled="false"
-                    android:persistent="false"
-                    android:key="@string/all_devices_names"
-                    />
+                android:layout="@layout/preference_about"
+                android:title="@string/supported_devices"
+                android:enabled="false"
+                android:persistent="false"
+                android:key="@string/all_devices_names"/>
         </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

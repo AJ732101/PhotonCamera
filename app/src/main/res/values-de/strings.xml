@@ -5,6 +5,7 @@
     <string name="luma_nr_count">Helligkeit Rauschreduktion Stärke</string>
     <string name="frame_count">Bilder für Synthese/Stacking </string>
     <string name="frame_count_summary">Anzahl der Bilder für die Synthese (Stacking)</string>
+    <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="disable_aligning">Ausrichtung deakivieren</string>
     <string name="processing_processname">Prozessiere %1$s...</string>
     <string name="turn_on_system_nr">System Rauschredultion</string>
@@ -20,6 +21,7 @@
     <string name="noise_merge_str">Stärke der Rauschzusammenführung</string>
     <string name="contrconst">Kontrast</string>
     <string name="saturation">Sättigung</string>
+    <string name="hdrx">HDRX</string>
     <string name="sharpness">Schärfe</string>
     <string name="turn_on_grid">Gitterlinien anzeigen</string>
     <string name="raw">Speicherformat</string>
@@ -78,6 +80,7 @@
     <string name="backup">Sicherung</string>
     <string name="fps_60_toggle_text">Bildwiederholfrequenz</string>
     <string name="quad_bayer_toggle_text">Quad Bayer Aufl. (48/50/64 MP)</string>
+    <string name="mode_video">Video</string>
     <string name="countdown_timer">Auslöseverzögerung</string>
     <string name="flash">Blitz/Leuchte</string>
     <string name="focus_peaking">Fokusbereiche hervorheben</string>
@@ -100,6 +103,7 @@
     <string name="theme_accent_pink">Rosa</string>
     <string name="theme_accent_cyan">Cyan</string>
     <string name="theme_accent_teal">Türkis</string>
+    <string name="version_title">Version</string>
     <string name="contributors_title">Beitragende↗</string>
     <string name="eis_toggle_text">Bild Stabilisierung</string>
     <string name="photon_camera_summary">Open-Source Android Kamera mit fortgeschrittener Bildverarbeitung</string>
@@ -109,4 +113,21 @@
     <string name="gallery_folders">Galerie Verzeichnisse</string>
     <string name="options">Optionen</string>
     <string name="session_on_configure_failed">Session Konfiguration fehlerhaft, versuchen Sie ein anderes Vorschauformat</string>
+    <string name="auto">Auto</string>
+    <string name="t_3s">3s</string>
+    <string name="t_10s">10s</string>
+    <string name="turn_on_basic_osd">Einfaches OSD</string>
+    <string name="turn_on_ois">OIS</string>
+    <string name="turn_on_dng_compression">DNG Kompression</string>
+    <string name="turn_on_extend_iso">ISO erweitern</string>
+    <string name="turn_on_extend_exposure">Belichtungszeit erweitern</string>
+    <string name="codec">Codec</string>
+    <string name="video_resolution">Auflösung</string>
+    <string name="video_framerate">Bildwiederholfrequenz</string>
+    <string name="video">Video</string>
+    <string name="hdr_video">HDR Video</string>
+    <string name="video_10bit">10 Bit Video</string>
+    <string name="jpg">JPEG</string>
+    <string name="noise_processing">Rauschminderung</string>
+    <string name="edge_processing">Kantenverarbeitung</string>
 </resources>

@@ -100,10 +100,8 @@ final class CameraUIController implements CameraUIEventsListener,
                 break;
 
             case R.id.quad_res_toggle_button:
-                if (PhotonCamera.getSpecific().specificSetting.isQuadBayer) {
-                    PreferenceKeys.setQuadBayer(!PreferenceKeys.isQuadBayerOn());
-                    cameraFragment.showSnackBar(cameraFragment.getString(R.string.quad_bayer_toggle_text) + ':' + onOff(PreferenceKeys.isQuadBayerOn()));
-                }
+                PreferenceKeys.setQuadBayer(!PreferenceKeys.isQuadBayerOn());
+                cameraFragment.showSnackBar(cameraFragment.getString(R.string.quad_bayer_toggle_text) + ':' + onOff(PreferenceKeys.isQuadBayerOn()));
                 this.restartCamera();
                 cameraFragment.updateSettingsBar();
                 break;

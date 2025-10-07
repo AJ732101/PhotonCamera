@@ -44,6 +44,22 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AE_MODE.mValue);
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
+        // QualityDoesMatter
+        COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_OIS_ON.mValue);
+        COMMON_KEYS.add(Key.KEY_DNG_COMPRESSION_ON.mValue);
+        COMMON_KEYS.add(Key.KEY_SHOW_BASIC_OSD.mValue);
+        COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_BITRATE_SEEKBAR.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_HEIGHT.mValue);
+        COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
+        COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
+        COMMON_KEYS.add(Key.KEY_EXTEND_EXPOSURE.mValue);
+        COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -67,12 +83,23 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
-
         settingsManager.setDefaults(Key.CAMERA_ID, resources.getString(R.string.camera_id_default), new String[]{"0", "1"});
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
 
-
+        // QualityDoesMatter
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_OIS_ON, resources.getBoolean(R.bool.pref_ois_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON, resources.getBoolean(R.bool.pref_dng_compression_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_BASIC_OSD, resources.getBoolean(R.bool.pref_show_basic_osd_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_ISO, resources.getBoolean(R.bool.pref_extend_iso_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR, resources.getString(R.string.pref_bitrate_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -156,11 +183,7 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA);
     }
 
-    public static int isSystemNrOn() {
-        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_ENABLE_SYSTEM_NR);
-    }
-
-    public static boolean isRemosaicOn() {
+     public static boolean isRemosaicOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_REMOSAIC);
     }
 
@@ -204,6 +227,14 @@ public class PreferenceKeys {
 
     public static boolean isRoundEdgeOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_ROUND_EDGE);
+    }
+
+    public static boolean isHdrVideoOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO);
+    }
+
+    public static boolean is10bitVideoOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO);
     }
 
     public static String getMode() {
@@ -369,10 +400,74 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, key);
     }
 
+    public static int getInteger(Key key) {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, key);
+    }
+
+    // QualityDoesMatter
+    public static boolean useExtendIsoOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_EXTEND_ISO);
+    }
+
+    public static boolean useExtendExposureOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE);
+    }
+    public static boolean useBasicOsdOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_BASIC_OSD);
+    }
+
+    public static boolean useOisOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_OIS_ON);
+    }
+
+    public static boolean useDngCompression() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON);
+    }
+
+    public static int getVideoBitrate() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR);
+    }
+
+    public static float getAperture() {
+        return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_APERTURE);
+    }
+
+    public static String getVideoCodec() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC);
+    }
+
+    public static int getNoiseProcessing() {
+        try {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static int getEdgeProcessing() {
+        try {
+            return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING);
+        }
+        catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static int getVideoFramerate() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE);
+    }
+
+    public static int getVideoHeight() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT);
+    }
+
+    public static int isSystemNrOn() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_ENABLE_SYSTEM_NR);
+    }
+
 
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
-
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
         KEY_SAVE_PER_LENS_SETTINGS(R.string.pref_save_per_lens_settings),
         KEY_DISABLE_ALIGNINIG(R.string.pref_disable_aligning_key),
@@ -408,6 +503,29 @@ public class PreferenceKeys {
         KEY_AF_MODE(R.string.pref_af_mode_key),
         KEY_AE_MODE(R.string.pref_ae_mode_key),
         KEY_COUNTDOWN_TIMER(R.string.pref_countdown_timer_key),
+
+        /**
+         * QualityDoesMatter - Video settings keys
+         */
+        KEY_HDR_VIDEO(R.string.pref_hdr_video_key),
+        KEY_10BIT_VIDEO(R.string.pref_10bit_video_key),
+        KEY_VIDEO_HEIGHT(R.string.pref_video_resolution_key),
+        KEY_VIDEO_BITRATE_SEEKBAR(R.string.pref_bitrate_key),
+        KEY_VIDEO_FRAMERATE(R.string.pref_video_framerate_key),
+        KEY_VIDEO_CODEC(R.string.pref_codec_key),
+        KEY_NOISE_PROCESSING(R.string.pref_noise_processing_key),
+        KEY_EDGE_PROCESSING(R.string.pref_edge_processing_key),
+
+        /**
+         * QualityDoesMatter - other
+         */
+        KEY_APERTURE(R.string.pref_aperture_key),
+        KEY_SHOW_BASIC_OSD(R.string.pref_show_basic_osd_key),
+        KEY_EXTEND_ISO(R.string.pref_extend_iso_key),
+        KEY_EXTEND_EXPOSURE(R.string.pref_extend_exposure_key),
+        KEY_OIS_ON(R.string.pref_ois_key),
+        KEY_DNG_COMPRESSION_ON(R.string.pref_dng_compression_key),
+
         /**
          * Enhanced settings keys
          */

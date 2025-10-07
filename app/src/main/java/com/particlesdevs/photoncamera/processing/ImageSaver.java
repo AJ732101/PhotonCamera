@@ -8,6 +8,9 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -16,14 +19,17 @@ import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.control.GyroBurst;
 import com.particlesdevs.photoncamera.processing.render.Parameters;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.particlesdevs.photoncamera.processing.ImagePath.generateNewFileName;
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.getImageSaver;
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.init;
 
@@ -163,9 +169,12 @@ public class ImageSaver {
 
         public static boolean saveSingleRaw(Path dngFilePath,
                                             ByteBuffer buffer, Parameters parameters) {
+            File dir = FileManager.sPHOTON_RAW_DIR;
+
+            long start = System.currentTimeMillis();
             DngCreator dngCreator = new DngCreator();
             dngCreator.setParameters(parameters);
-            dngCreator.setCompression(false);
+            dngCreator.setCompression(PhotonCamera.getSettings().useDngCompression);
             try {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);
                 dngCreator.writeBuffer(outputStream, buffer, parameters.rawSize.x, parameters.rawSize.y);
@@ -174,6 +183,9 @@ public class ImageSaver {
                 e.printStackTrace();
                 return false;
             }
+            long stop = System.currentTimeMillis();
+            Log.d(TAG, "writing DNG: " + Long.toString(stop - start) + "ms");
+
             return true;
         }
     }

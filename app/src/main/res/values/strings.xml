@@ -10,6 +10,7 @@
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="luma_nr_count">Luminance Noise Reduction Strength</string>
     <string name="frame_count">HDR Frame Count</string>
+    <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="disable_aligning">Disable Aligning</string>
     <string name="chroma_nr_count">Chroma NR Count</string>
     <string name="enhanced_processing">Enhanced Processing</string>
@@ -131,4 +132,18 @@
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing preview format</string>
+
+    <string name="turn_on_basic_osd">Show Basic OSD</string>
+    <string name="turn_on_ois">OIS</string>
+    <string name="turn_on_dng_compression">DNG Compression</string>
+    <string name="turn_on_extend_iso">Extend ISO</string>
+    <string name="turn_on_extend_exposure">Extend Exposure</string>
+    <string name="codec">Codec</string>
+    <string name="video_resolution">Resolution</string>
+    <string name="video_framerate">Framerate</string>
+    <string name="video">Video</string>
+    <string name="hdr_video">HDR Video</string>
+    <string name="video_10bit">10 Bit Video</string>
+    <string name="noise_processing">Noise Processing</string>
+    <string name="edge_processing">Noise Processing</string>
 </resources>

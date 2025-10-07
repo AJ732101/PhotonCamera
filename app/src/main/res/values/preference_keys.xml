@@ -5,11 +5,28 @@
     <string name="pref_category_general_key" translatable="false">pref_category_general_key</string>
     <string name="pref_category_jpg_key" translatable="false">pref_category_jpg_key</string>
     <string name="pref_category_hdrx_key" translatable="false">pref_category_hdrx_key</string>
+    <string name="pref_category_video_key" translatable="false">pref_category_video_key</string>
     <string name="pref_theme_category_key" translatable="false">pref_theme_category_key</string>
     <string name="pref_category_about_key" translatable="false">pref_category_about_key</string>
 
     <string name="pref_preview_resolution_key" translatable="false">pref_show_afdata_key</string>
     <string name="pref_show_afdata_key" translatable="false">pref_show_afdata_key</string>
+
+    <string name="pref_show_basic_osd_key" translatable="false">pref_show_basic_osd_key</string>
+    <string name="pref_ois_key" translatable="false">pref_ois_key</string>
+    <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
+    <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>
+    <string name="pref_extend_exposure_key" translatable="false">pref_extend_exposure_key</string>
+    <string name="pref_bitrate_key" translatable="false">pref_bitrate_key</string>
+    <string name="pref_codec_key" translatable="false">pref_codec_key</string>
+    <string name="pref_video_resolution_key" translatable="false">pref_video_resolution_key</string>
+    <string name="pref_video_framerate_key" translatable="false">pref_video_framerate_key</string>
+    <string name="pref_aperture_key" translatable="false">pref_aperture_key</string>
+    <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
+    <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
+    <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>
+    <string name="pref_edge_processing_key" translatable="false">pref_edge_processing_key</string>
+
     <string name="pref_enable_system_nr_key" translatable="false">pref_enable_system_nr_key</string>
     <string name="pref_save_per_lens_settings" translatable="false">pref_save_per_lens_settings</string>
     <string name="pref_disable_aligning_key" translatable="false">pref_disable_aligning_key</string>

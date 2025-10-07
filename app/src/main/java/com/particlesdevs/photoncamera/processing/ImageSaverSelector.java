@@ -24,6 +24,7 @@ public class ImageSaverSelector {
                 break;
 
             case ImageFormat.YUV_420_888:
+            case ImageFormat.YCBCR_P010:
                 saverImplementation = YUVSaver;
                 //saverImplementation = new YUVSaver(saverImplementation.processingEventsListener);
                 break;

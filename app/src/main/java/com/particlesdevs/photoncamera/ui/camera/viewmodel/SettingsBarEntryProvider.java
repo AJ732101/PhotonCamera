@@ -53,8 +53,7 @@ public class SettingsBarEntryProvider extends ViewModel {
         allEntries.add(flashEntry);
         allEntries.add(timerEntry);
         allEntries.add(saveRawEntry);
-        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
-            allEntries.add(quadEntry);
+        allEntries.add(quadEntry);
         allEntries.add(eisEntry);
         allEntries.add(fpsEntry);
         allEntries.add(gridEntry);
@@ -82,8 +81,7 @@ public class SettingsBarEntryProvider extends ViewModel {
             updateEntry(hdrxEntry, PreferenceKeys.isHdrXOn());
             updateEntry(eisEntry, PreferenceKeys.isEisPhotoOn());
             updateEntry(fpsEntry, PreferenceKeys.isFpsPreviewOn());
-            if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
-                updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
+            updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
             updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
             updateEntry(batterySaverEntry, PreferenceKeys.isBatterySaverOn());
         } catch (Exception e) {
@@ -112,11 +110,10 @@ public class SettingsBarEntryProvider extends ViewModel {
     }
 
     private void createQuadBayerEntry() {
-        if (PhotonCamera.getSpecific().specificSetting.isQuadBayer)
-            quadEntry.addSettingsBarButtonModels(
-                SettingsBarButtonModel.newButtonModel(R.id.quad_off_button, R.drawable.ic_quad_off, R.string.off, 0, quadEntry),
-                SettingsBarButtonModel.newButtonModel(R.id.quad_on_button, R.drawable.ic_quad_on, R.string.on, 1, quadEntry)
-            );
+        quadEntry.addSettingsBarButtonModels(
+            SettingsBarButtonModel.newButtonModel(R.id.quad_off_button, R.drawable.ic_quad_off, R.string.off, 0, quadEntry),
+            SettingsBarButtonModel.newButtonModel(R.id.quad_on_button, R.drawable.ic_quad_on, R.string.on, 1, quadEntry)
+        );
     }
 
     private void createEisEntry() {

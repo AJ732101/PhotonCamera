@@ -32,7 +32,7 @@ public:
         dng_image0->SetPlanarConfig(tinydngwriter::PLANARCONFIG_CONTIG);
         //dng_image0->SetCompression(tinydngwriter::COMPRESSION_NEW_JPEG);
         dng_image0->SetDNGVersion(0x1, 0x4, 0x0, 0x0);
-        dng_image0->SetExifVersion("0300");
+        dng_image0->SetExifVersion("0220");
     }
 
     ~DngCreator() {
