@@ -1,5 +1,5 @@
 redmi:earth
-redmi:markw
+xiaomi:markw
 xiaomi:dipper
 xiaomi:thor
 xiaomi:ishtar

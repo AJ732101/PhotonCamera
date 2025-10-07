@@ -2,6 +2,8 @@ package com.particlesdevs.photoncamera.api;
 
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.os.Build;
+
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.google.gson.Gson;
@@ -59,18 +61,22 @@ public final class CameraManager2 {
             } catch (InterruptedException ignored) {}
         }
         SpecificSetting sp = PhotonCamera.getSpecific().specificSetting;
-        int[] ids = sp.cameraIDS;
+        String[] ids = sp.cameraIDS;
         Log.d("CameraManager2", "Loaded ids:"+ Arrays.toString(ids));
             if (!isLoaded()) {
                 if(ids == null)
                     scanAllCameras(cameraManager);
                 else {
-                    for (int id : ids) {
+                    for (String id : ids) {
                         try {
-                            CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(String.valueOf(id));
-                            CameraLensData cameraLensData = createNewCameraLensData(String.valueOf(id), cameraCharacteristics);
-                            mAllCameraIDsSet.add(String.valueOf(id));
-                            mCameraLensDataMap.put(String.valueOf(id), cameraLensData);
+                            String physicalID = id;
+                            if(id.contains("-")){
+                                physicalID = id.split("-")[1];
+                            }
+                            CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(physicalID);
+                            CameraLensData cameraLensData = createNewCameraLensData(id, cameraCharacteristics);
+                            mAllCameraIDsSet.add(id);
+                            mCameraLensDataMap.put(id, cameraLensData);
                         } catch (Exception ignored) {
                         }
                     }
@@ -82,9 +88,10 @@ public final class CameraManager2 {
                 loadFromSave(cameraManager,ids);
             }
     }
-    private void initExt(CameraManager cameraManager, int[] ids) {
-        for (int num : ids) {
+    private void initExt(CameraManager cameraManager, String[] ids) {
+        for (String id : ids) {
             try {
+                int num = Integer.parseInt(id);
                 CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(String.valueOf(num));
                 log("BitAnalyser:" + num + ":" + intToReverseBinary(num));
                 CameraLensData cameraLensData = createNewCameraLensData(String.valueOf(num), cameraCharacteristics);
@@ -100,7 +107,7 @@ public final class CameraManager2 {
         return mSettingsManager.isSet(_CAMERAS, ALL_CAMERA_IDS_KEY);
     }
 
-    private void loadFromSave(CameraManager cameraManager,int ids[]){
+    private void loadFromSave(CameraManager cameraManager,String ids[]){
         mAllCameraIDsSet = mSettingsManager.getStringSet(_CAMERAS, ALL_CAMERA_IDS_KEY, null);
         //Retrieve the saved Set of CameraLensData JSON strings from SharedPreferences
         mCameraLensDataJSONSet = mSettingsManager.getStringSet(_CAMERAS, ALL_CAMERA_LENS_KEY, null);
@@ -116,15 +123,52 @@ public final class CameraManager2 {
     }
 
     private void scanAllCameras(CameraManager cameraManager) {
+            CameraLensData mainLensData = null;
+            try {
+                mainLensData = createNewCameraLensData("0", cameraManager.getCameraCharacteristics("0"));
+                for (int num = 0; num < 121; num++) {
+                    try {
+                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(String.valueOf(num));
+                        log("BitAnalyser:" + num + ":" + intToReverseBinary(num));
+                        CameraLensData cameraLensData = createNewCameraLensData(String.valueOf(num), cameraCharacteristics);
+                        if (mainLensData.getCameraFocalLength() == cameraLensData.getCameraFocalLength()) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                boolean isLogical = !cameraCharacteristics.getPhysicalCameraIds().isEmpty();
+                                if (!getBit(6, num) && !mCameraLensDataMap.containsValue(cameraLensData) && !isLogical) {
+                                    mAllCameraIDsSet.add(String.valueOf(num));
+                                    mCameraLensDataMap.put(String.valueOf(num), cameraLensData);
+                                    break;
+                                }
+                            } else {
+                                if (!getBit(6, num) && !mCameraLensDataMap.containsValue(cameraLensData)) {
+                                    mAllCameraIDsSet.add(String.valueOf(num));
+                                    mCameraLensDataMap.put(String.valueOf(num), cameraLensData);
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
 
+            }
             for (int num = 0; num < 121; num++) {
                 try {
                     CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(String.valueOf(num));
                     log("BitAnalyser:" + num + ":" + intToReverseBinary(num));
                     CameraLensData cameraLensData = createNewCameraLensData(String.valueOf(num), cameraCharacteristics);
-                    if (!getBit(6, num) && !mCameraLensDataMap.containsValue(cameraLensData)) {
-                        mAllCameraIDsSet.add(String.valueOf(num));
-                        mCameraLensDataMap.put(String.valueOf(num), cameraLensData);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        boolean isLogical = !cameraCharacteristics.getPhysicalCameraIds().isEmpty();
+                        if (!getBit(6, num) && !mCameraLensDataMap.containsValue(cameraLensData) && !isLogical) {
+                            mAllCameraIDsSet.add(String.valueOf(num));
+                            mCameraLensDataMap.put(String.valueOf(num), cameraLensData);
+                        }
+                    } else {
+                        if (!getBit(6, num) && !mCameraLensDataMap.containsValue(cameraLensData)) {
+                            mAllCameraIDsSet.add(String.valueOf(num));
+                            mCameraLensDataMap.put(String.valueOf(num), cameraLensData);
+                        }
                     }
                 } catch (Exception ignored) {
                 }

@@ -16,7 +16,7 @@ public class Demosaic extends Node {
     public void Run() {
         GLTexture glTexture;
         glTexture = previousNode.WorkingTexture;
-        glProg.useAssetProgram("demosaicp1");
+        glProg.useAssetProgram("demosaic/demosaicp1");
         glProg.setTexture("RawBuffer", glTexture);
         glProg.setVar("CfaPattern", basePipeline.mParameters.cfaPattern);
         if(basePipeline.mSettings.cfaPattern == -2) glProg.setDefine("QUAD","1");
@@ -33,11 +33,12 @@ public class Demosaic extends Node {
         outp = basePipeline.main2;
         glProg.drawBlocks(outp);*/
 
-        glProg.useAssetProgram("demosaicp2");
+        glProg.useAssetProgram("demosaic/demosaicp2");
         glProg.setTexture("RawBuffer", outp);
         glProg.setTexture("GreenBuffer", basePipeline.main1);
         glProg.setVar("whitePoint",basePipeline.mParameters.whitePoint);
         glProg.setVar("CfaPattern", basePipeline.mParameters.cfaPattern);
+        glProg.setVar("neutral", basePipeline.mParameters.whitePoint[0], basePipeline.mParameters.whitePoint[1], basePipeline.mParameters.whitePoint[1], basePipeline.mParameters.whitePoint[2]);
         WorkingTexture = basePipeline.main3;
         glProg.drawBlocks(WorkingTexture);
         glProg.close();

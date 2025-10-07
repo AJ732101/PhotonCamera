@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
+import android.graphics.ImageFormat;
 import android.media.Image;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -24,6 +25,17 @@ public class ImageFrame {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public ImageFrame(ByteBuffer in, int format, int width, int row_stride) {
+        ByteBuffer direct;
+        if(format == 0x25){
+            direct = Allocator.allocateAndCopyConvert(in.capacity(), in, width, row_stride);
+        } else {
+            direct = Allocator.allocateAndCopy(in.capacity(), in);
+        }
+        direct.position(0);
+        buffer = direct;
     }
 
     public ImageFrame(ByteBuffer in) {

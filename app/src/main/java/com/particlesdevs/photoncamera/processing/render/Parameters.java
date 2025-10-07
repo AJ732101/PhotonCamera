@@ -342,13 +342,17 @@ public class Parameters {
         Converter.normalizeFM(normalizedColorMatrix1);
         Converter.normalizeFM(normalizedColorMatrix2);
         float[] sensorToXYZ = new float[9];
-
+        Log.d("Parameters", "calibrationTransform1: " + Arrays.toString(calibrationTransform1) + " calibrationTransform2: " + Arrays.toString(calibrationTransform2) + " normalizedColorMatrix1: " + Arrays.toString(normalizedColorMatrix1) + " normalizedColorMatrix2: " + Arrays.toString(normalizedColorMatrix2));
         double interpolationFactor = Converter.findDngInterpolationFactor(ref1,
                 ref2, calibrationTransform1, calibrationTransform2,
                 normalizedColorMatrix1, normalizedColorMatrix2, whitePoint);
+        Log.d("Parameters", "Interpolation factor: " + interpolationFactor);
+        Log.d("Parameters", "normalizedForwardTransform1:" + Arrays.toString(normalizedForwardTransform1) +
+                " normalizedForwardTransform2:" + Arrays.toString(normalizedForwardTransform2));
         Converter.calculateCameraToXYZD50Transform(normalizedForwardTransform1, normalizedForwardTransform2,
                 calibrationTransform1, calibrationTransform2, whitePoint,
                 interpolationFactor, /*out*/sensorToXYZ);
+        Log.d("Parameters", "sensorToXYZ: " + Arrays.toString(sensorToXYZ));
         if (sensorSpecifics.profileHueSatMapDims != null && sensorSpecifics.profileHueSatMapData1 != null && sensorSpecifics.profileHueSatMapData2 != null) {
             HSVMapSize[0] = sensorSpecifics.profileHueSatMapDims[0];
             HSVMapSize[1] = sensorSpecifics.profileHueSatMapDims[1];
@@ -419,7 +423,7 @@ public class Parameters {
             Log.d(TAG, "Using calculated color correction transform");
         }
         Log.d(TAG, Arrays.toString(sensorToProPhoto) + PhotonCamera.getSettings().colorMethod);
-        Converter.multiply(Converter.HDRXCCM, Converter.sProPhotoToXYZ, /*out*/proPhotoToSRGB);
+        Converter.multiply(Converter.sXYZtoSRGB, Converter.sProPhotoToXYZ, /*out*/proPhotoToSRGB);
         if (CST != null && wrongCalibration && !customCCT.exists()) {
             Rational[] temp = new Rational[9];
             CST.copyElements(temp, 0);

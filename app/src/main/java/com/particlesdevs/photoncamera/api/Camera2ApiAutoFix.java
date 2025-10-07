@@ -9,6 +9,7 @@ import android.hardware.camera2.params.RggbChannelVector;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
 import android.util.Rational;
+import android.util.Size;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
@@ -20,6 +21,7 @@ import java.lang.reflect.Field;
 import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE;
 import static android.hardware.camera2.CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
 import static android.hardware.camera2.CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE;
+import static android.hardware.camera2.CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE;
 import static android.hardware.camera2.CameraCharacteristics.TONEMAP_AVAILABLE_TONE_MAP_MODES;
 import static android.hardware.camera2.CameraCharacteristics.TONEMAP_MAX_CURVE_POINTS;
 import static android.hardware.camera2.CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
@@ -68,6 +70,7 @@ public class Camera2ApiAutoFix {
         Camera2ApiAutoFix fix = new Camera2ApiAutoFix(CaptureController.mCameraCharacteristics);
         fix.ExposureTime();
         fix.ExposureCompensation();
+        fix.ISO();
     }
 
     public static void Apply() {
@@ -124,6 +127,49 @@ public class Camera2ApiAutoFix {
             Log.d(TAG, "Applied Fix ExposureTime2 CIT SHIFT");
             Range nrange = new Range(exprange.getLower(), (long) (ExposureIndex.sec * 5.2));
             CameraReflectionApi.set(characteristics, SENSOR_INFO_EXPOSURE_TIME_RANGE, nrange);
+        }
+        var keys = CameraReflectionApi.getCameraCharacteristicsKeys(characteristics, null, true);
+        for (Object keyObj : keys) {
+            try {
+                if (keyObj instanceof CameraCharacteristics.Key<?>) {
+                    CameraCharacteristics.Key<?> key = (CameraCharacteristics.Key<?>) keyObj;
+                    if (key.getName().contains("exposureTimeRange") && !key.getName().contains("android")) {
+                        Object res = characteristics.get(key);
+                        long[] vals = (long[]) res;
+                        if((long)exprange.getUpper() < vals[1]) {
+                            Log.d(TAG, "Applied Fix ExposureTime vendor update");
+                            Range nrange = new Range(vals[0], vals[1]);
+                            CameraReflectionApi.set(characteristics, SENSOR_INFO_EXPOSURE_TIME_RANGE, nrange);
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void ISO() {
+        Range exprange = characteristics.get(SENSOR_INFO_SENSITIVITY_RANGE);
+        if (exprange == null) return;
+        var keys = CameraReflectionApi.getCameraCharacteristicsKeys(characteristics, null, true);
+        for (Object keyObj : keys) {
+            try {
+                if (keyObj instanceof CameraCharacteristics.Key<?>) {
+                    CameraCharacteristics.Key<?> key = (CameraCharacteristics.Key<?>) keyObj;
+                    if (key.getName().contains("sensitivityRange") && !key.getName().contains("android")) {
+                        Object res = characteristics.get(key);
+                        int[] vals = (int[]) res;
+                        if((int)exprange.getUpper() < vals[1]) {
+                            Log.d(TAG, "Applied Fix sensitivityRange vendor update");
+                            Range nrange = new Range(vals[0], vals[1]);
+                            CameraReflectionApi.set(characteristics, SENSOR_INFO_SENSITIVITY_RANGE, nrange);
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
     private void ExposureCompensation(){

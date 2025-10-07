@@ -36,12 +36,12 @@ float interpolateColor(in ivec2 coords){
     green[4] = float(texelFetch(GreenBuffer, (coords),              0).x);
     //for(int i = 0; i<5; i++)if(green[i] < greenmin || green[i] > greenmax) usegreen = false;
     //if(usegreen){
-    float coeff[4];
-    coeff[0] = float(getBayerSample((coords+ivec2(-1,-1))))-(green[0]/neutral.g);
-    coeff[1] = float(getBayerSample((coords+ivec2(1,-1))))-(green[1]/neutral.g);
-    coeff[2] = float(getBayerSample((coords+ivec2(-1,1))))-(green[2]/neutral.g);
-    coeff[3] = float(getBayerSample((coords+ivec2(1,1))))-(green[3]/neutral.g);
-    return ((green[4]/neutral.g)+(coeff[0]+coeff[1]+coeff[2]+coeff[3])/4.);
+        float coeff[4];
+        coeff[0] = float(getBayerSample((coords+ivec2(-1,-1))))-(green[0]/neutral.g);
+        coeff[1] = float(getBayerSample((coords+ivec2(1,-1))))-(green[1]/neutral.g);
+        coeff[2] = float(getBayerSample((coords+ivec2(-1,1))))-(green[2]/neutral.g);
+        coeff[3] = float(getBayerSample((coords+ivec2(1,1))))-(green[3]/neutral.g);
+        return ((green[4]/neutral.g)+(coeff[0]+coeff[1]+coeff[2]+coeff[3])/4.);
     //} else {
     //    return ((float(texelFetch(RawBuffer, (coords+ivec2(-1,-1)), 0).x)+float(texelFetch(RawBuffer, (coords+ivec2(1,-1)), 0).x)
     //    +float(texelFetch(RawBuffer, (coords+ivec2(-1,1)), 0).x)+float(texelFetch(RawBuffer, (coords+ivec2(1,1)), 0).x))/(4.));
@@ -55,10 +55,10 @@ float interpolateColorx(in ivec2 coords){
     green[2] = float(texelFetch(GreenBuffer, (coords+ivec2(1,0)),  0).x);
     //for(int i = 0; i<3; i++)if(green[i] < greenmin || green[i] > greenmax) usegreen = false;
     //if(usegreen){
-    float coeff[2];
-    coeff[0] = float(getBayerSample((coords+ivec2(-1,0))))-(green[0]/neutral.g);
-    coeff[1] = float(getBayerSample((coords+ivec2(1,0))))-(green[2]/neutral.g);
-    return ((green[1]/neutral.g)+(coeff[0]+coeff[1])/2.);
+        float coeff[2];
+        coeff[0] = float(getBayerSample((coords+ivec2(-1,0))))-(green[0]/neutral.g);
+        coeff[1] = float(getBayerSample((coords+ivec2(1,0))))-(green[2]/neutral.g);
+        return ((green[1]/neutral.g)+(coeff[0]+coeff[1])/2.);
     //} else {
     //    return ((float(texelFetch(RawBuffer, (coords+ivec2(-1,0)), 0).x)+float(texelFetch(RawBuffer, (coords+ivec2(1,0)), 0).x))/(2.));
     //}
@@ -71,10 +71,10 @@ float interpolateColory(in ivec2 coords){
     green[2] = float(texelFetch(GreenBuffer, (coords+ivec2(0,1)),  0).x);
     //for(int i = 0; i<3; i++)if(green[i] < greenmin || green[i] > greenmax) usegreen = false;
     //if(usegreen){
-    float coeff[2];
-    coeff[0] = float(getBayerSample((coords+ivec2(0,-1))))-(green[0]/neutral.g);
-    coeff[1] = float(getBayerSample((coords+ivec2(0,1))))-(green[2]/neutral.g);
-    return ((green[1]/neutral.g)+(coeff[0]+coeff[1])/2.);
+        float coeff[2];
+        coeff[0] = float(getBayerSample((coords+ivec2(0,-1))))-(green[0]/neutral.g);
+        coeff[1] = float(getBayerSample((coords+ivec2(0,1))))-(green[2]/neutral.g);
+        return ((green[1]/neutral.g)+(coeff[0]+coeff[1])/2.);
     //} else {
     //    return ((float(texelFetch(RawBuffer, (coords+ivec2(0,-1)), 0).x)+float(texelFetch(RawBuffer, (coords+ivec2(0,1)), 0).x))/(2.));
     //}

@@ -38,6 +38,10 @@ public class PostPipeline extends GLBasePipeline {
     float fusionGain = 1.f;
     float softLight = 1.f;
 
+    public PostPipeline() {
+        super("PostPipeline");
+    }
+
     public int getRotation() {
         int rotation = mParameters.cameraRotation;
         String TAG = "ParseExif";
@@ -150,7 +154,16 @@ public class PostPipeline extends GLBasePipeline {
 
                 if(mSettings.alignAlgorithm != 2) {
                     //add(new HotPixelFilter());
-                    add(new Demosaic3());
+                    int selectedDemosaicing = getTuning("DemosaicingMethod", 1);
+                    //noinspection SwitchStatementWithTooFewBranches
+                    switch (selectedDemosaicing){
+                        case 0:
+                            add(new Demosaic());
+                            break;
+                        default:
+                            add(new Demosaic3());
+                            break;
+                    }
                 }
                 if (PhotonCamera.getSettings().hdrxNR) {
                     add(new ESD3D(true));
@@ -175,6 +188,8 @@ public class PostPipeline extends GLBasePipeline {
         //add(new Equalization());
 
         add(new Initial());
+
+        add(new AutoExposure());
 
 
         //add(new GlobalToneMapping());

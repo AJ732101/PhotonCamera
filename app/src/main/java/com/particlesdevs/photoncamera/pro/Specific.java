@@ -155,9 +155,9 @@ public class Specific {
                             case "cameraIDS": {
                                 Log.d("Specific", "Camera IDs Loaded: "+caseS[1]);
                                 String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                                specificSetting.cameraIDS = new int[ids.length];
+                                specificSetting.cameraIDS = new String[ids.length];
                                 for(int i =0; i<specificSetting.cameraIDS.length;i++){
-                                    specificSetting.cameraIDS[i] = Integer.parseInt(ids[i]);
+                                    specificSetting.cameraIDS[i] = ids[i];
                                 }
                                 break;
                             }

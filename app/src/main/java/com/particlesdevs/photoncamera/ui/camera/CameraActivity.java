@@ -50,6 +50,7 @@ public class CameraActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("CameraActivity", "Called onCreate()");
         setContentView(R.layout.activity_camera);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -63,8 +64,15 @@ public class CameraActivity extends BaseActivity {
         if (hasAllPermissions()) {
 //            if (null == savedInstanceState)
             tryLoad();
-        } else
+        } else {
             requestPermission(); //First Permission request
+            // sleep for 2 seconds to allow the UI to settle
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Log.d("CameraActivity", "Thread sleep interrupted: " + e.getMessage());
+            }
+        }
     }
     private void requestPermission() {
         requestPermissions(PERMISSIONS, CODE_REQUEST_PERMISSIONS);

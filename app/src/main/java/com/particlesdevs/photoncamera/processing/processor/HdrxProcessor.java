@@ -120,9 +120,12 @@ public class HdrxProcessor extends ProcessorBase {
         ArrayList<ImageFrame> images = new ArrayList<>();
         int ISO = 0;
         int normalFrames = 0;
+        if(BurstShakiness.size() < mImageFramesToProcess.size()){
+            Log.d(TAG,"Warning: Gyro data size:"+BurstShakiness.size()+" is less than image size:"+mImageFramesToProcess.size());
+        }
         for (int i = 0; i < mImageFramesToProcess.size(); i++) {
             ImageFrame frame = mImageFramesToProcess.get(i);
-            frame.frameGyro = BurstShakiness.get(i);
+            frame.frameGyro = BurstShakiness.get(i%BurstShakiness.size()); // cyclic for safety
             //frame.image = mImageFramesToProcess.get(i);
             //Log.d(TAG,"Timestamp:"+frame.image.getTimestamp());
             //frame.pair = IsoExpoSelector.pairs.get(i % IsoExpoSelector.patternSize);

@@ -29,6 +29,17 @@ vec4 getPixel(ivec2 coords, highp sampler2D tex) {
     return texelFetch(tex, coords, 0);
 }
 
+vec4 getPixelLaplacian(ivec2 coords, highp sampler2D tex) {
+    ivec2 size = textureSize(tex, 0);
+    coords = clamp(coords, ivec2(1), size - ivec2(2));
+    vec4 center = texelFetch(tex, coords, 0);
+    vec4 left = texelFetch(tex, coords + ivec2(-1, 0), 0);
+    vec4 right = texelFetch(tex, coords + ivec2(1, 0), 0);
+    vec4 up = texelFetch(tex, coords + ivec2(0, -1), 0);
+    vec4 down = texelFetch(tex, coords + ivec2(0, 1), 0);
+    return (left + right + up + down) - center * 3.0;
+}
+
 highp vec4 getAlignment(ivec2 coords) {
     coords = clamp(coords, ivec2(0), ivec2(textureSize(baseTexture, 0)/TILE_AL - 1));
     return texelFetch(prevAlignment, coords, 0);

@@ -18,6 +18,8 @@ package com.particlesdevs.photoncamera.manual;
  */
 
 import android.hardware.camera2.CaptureRequest;
+
+import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.util.Log;
 
 import androidx.annotation.NonNull;
@@ -93,7 +95,7 @@ public class ParamController implements Observer {
             return;
         }
         if (focusDist == ManualParamModel.FOCUS_AUTO) {
-            builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            builder.set(CaptureRequest.CONTROL_AF_MODE, PreferenceKeys.getAfMode());
         } else {
             builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
             builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusDist);

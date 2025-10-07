@@ -12,6 +12,7 @@ public class Log {
         } else {
             logDir = null;
         }
+        cleanupOldLogs();
     }
 
     private static java.io.File getLogFile() {
@@ -47,7 +48,6 @@ public class Log {
                 .format(new java.util.Date());
         String logEntry = String.format("%s %s/%s: %s\n", time, level, tag, message);
         synchronized (fileLock) {
-            cleanupOldLogs();
             try (java.io.FileWriter fw = new java.io.FileWriter(file, true)) {
                 fw.write(logEntry);
             } catch (Exception e) {

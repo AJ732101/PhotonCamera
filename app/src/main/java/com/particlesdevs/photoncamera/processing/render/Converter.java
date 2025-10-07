@@ -9,9 +9,9 @@ import java.util.Arrays;
 
 public class Converter {
     /**
-     * Matrix to convert from HDRX output to sRGB space.
+     * Matrix to convert from XYZ output to sRGB space.
      */
-    public static final float[] HDRXCCM = new float[]{
+    public static final float[] sXYZtoSRGB = new float[]{
             3.1338561f, -1.6168667f, -0.4906146f,
             -0.9787684f, 1.9161415f, 0.0334540f,
             0.0719453f, -0.2289914f, 1.4052427f
@@ -47,7 +47,7 @@ public class Converter {
      */
     private static final float[] D50_XYZ = new float[]{0.9642f, 1, 0.8249f};
     private static final String TAG = "Converter";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     static {
         sStandardIlluminates.append(CameraMetadata.SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT, 6504);
@@ -159,6 +159,8 @@ public class Converter {
         double lower = Math.min(colorTemperature1, colorTemperature2);
         double upper = Math.max(colorTemperature1, colorTemperature2);
         if (DEBUG) {
+            Log.d(TAG, "calibrationTransform1: " + Arrays.toString(calibrationTransform1));
+            Log.d(TAG, "colorMatrix1: " + Arrays.toString(colorMatrix1));
             Log.d(TAG, "XYZtoCamera1: " + Arrays.toString(XYZToCamera1));
             Log.d(TAG, "XYZtoCamera2: " + Arrays.toString(XYZToCamera2));
             Log.d(TAG, "Finding interpolation factor, initial guess 0.5...");

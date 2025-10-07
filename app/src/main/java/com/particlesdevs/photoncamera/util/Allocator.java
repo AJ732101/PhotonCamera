@@ -8,6 +8,7 @@ public class Allocator{
     public native static ByteBuffer allocate(int capacity);
 
     public native static ByteBuffer allocateAndCopy(int capacity, ByteBuffer origin);
+    public native static ByteBuffer allocateAndCopyConvert(int capacity, ByteBuffer origin, int width, int row_stride);
 
     public native static void free(ByteBuffer buffer);
     public native static long getMemoryCount();

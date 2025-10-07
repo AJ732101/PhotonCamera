@@ -32,11 +32,19 @@ public class SaverImplementation {
             // This image is not valid, skip it
             return null;
         }
-        ImageFrame frame = new ImageFrame(image.getPlanes()[0].getBuffer());
+        int width;
+        int height;
+        if(image.getFormat() == 0x25){
+            width = image.getWidth();
+            height = image.getHeight();
+        } else {
+            width = image.getPlanes()[0].getRowStride() /
+                    image.getPlanes()[0].getPixelStride();
+            height = image.getHeight();
+        }
+        ImageFrame frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride());
         frame.timestamp = image.getTimestamp();
-        int width = image.getPlanes()[0].getRowStride() /
-                image.getPlanes()[0].getPixelStride();
-        int height = image.getHeight();
+
         frame.width = width;
         frame.height = height;
 

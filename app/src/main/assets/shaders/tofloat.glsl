@@ -33,7 +33,7 @@ void main() {
     xy+=ivec2(CfaPattern%2,CfaPattern/2);
     #if QUAD == 1
         fact = (xy/2)%2;
-        xy+=ivec2(CfaPattern%2,CfaPattern/2);
+        xy+=ivec2(CfaPattern%2,CfaPattern/2)*2;
     #endif
     float balance;
     #if USEGAIN == 1
