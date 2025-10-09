@@ -77,13 +77,13 @@
                 android:defaultValue="@bool/pref_ois_default"
                 android:title="@string/turn_on_ois"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"/>
+                android:icon="@drawable/video_stable_24px"/>
         <ListPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_aperture_key"
                 android:title="@string/aperture"
                 app:useSimpleSummaryProvider="true"
-                android:icon="@drawable/ic_saturation"
+                android:icon="@drawable/camera_24px"
                 android:entries="@array/aperture_entries"
                 android:entryValues="@array/aperture_entryValues"
                 android:defaultValue="@string/pref_aperture_default_value" />
@@ -93,21 +93,21 @@
                 android:defaultValue="@bool/pref_dng_compression_default"
                 android:title="@string/turn_on_dng_compression"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"/>
+                android:icon="@drawable/compress_24px"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_extend_iso_key"
                 android:defaultValue="@bool/pref_extend_iso_default"
                 android:title="@string/turn_on_extend_iso"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"/>
+                android:icon="@drawable/exposure_24px"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_extend_exposure_key"
                 android:defaultValue="@bool/pref_extend_exposure_default"
                 android:title="@string/turn_on_extend_exposure"
                 android:summary=""
-                android:icon="@drawable/ic_gradient_black_24dp"/>
+                android:icon="@drawable/ic_timer"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_show_afdata_key"
@@ -369,13 +369,13 @@
             android:defaultValue="@string/pref_bitrate_default"
             app:maxValue="200"
             app:minValue="10"
-            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+            android:icon="@drawable/speed_24px"/>
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_codec_key"
             android:title="@string/codec"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_saturation"
+            android:icon="@drawable/compress_24px"
             android:entries="@array/codec_entries"
             android:entryValues="@array/codec_entryValues"
             android:defaultValue="@string/pref_codec_default_value" />
@@ -384,7 +384,7 @@
             android:key="@string/pref_video_resolution_key"
             android:title="@string/video_resolution"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_saturation"
+            android:icon="@drawable/display_settings_24px"
             android:entries="@array/video_resolution_entries"
             android:entryValues="@array/video_resolution_entryValues"
             android:defaultValue="@string/pref_video_resolution_default_value" />
@@ -393,7 +393,7 @@
             android:key="@string/pref_video_framerate_key"
             android:title="@string/video_framerate"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_saturation"
+            android:icon="@drawable/fps30fps_24px"
             android:entries="@array/video_framerate_entries"
             android:entryValues="@array/video_framerate_entryValues"
             android:defaultValue="@string/pref_video_framerate_default_value" />
@@ -402,7 +402,7 @@
             android:key="@string/pref_noise_processing_key"
             android:title="@string/noise_processing"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_saturation"
+            android:icon="@drawable/transition_dissolve_24px"
             android:entries="@array/noise_processing_entries"
             android:entryValues="@array/noise_processing_entryValues"
             android:defaultValue="@string/pref_noise_processing_default_value" />
@@ -411,7 +411,7 @@
             android:key="@string/pref_edge_processing_key"
             android:title="@string/edge_processing"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_saturation"
+            android:icon="@drawable/e_mobiledata_badge_24px"
             android:entries="@array/edge_processing_entries"
             android:entryValues="@array/edge_processing_entryValues"
             android:defaultValue="@string/pref_edge_processing_default_value" />
@@ -420,15 +420,64 @@
             android:key="@string/pref_hdr_video_key"
             android:title="@string/hdr_video"
             android:summary=""
-            android:icon="@drawable/ic_gradient_black_24dp"
+            android:icon="@drawable/hdr_on_24px"
             android:defaultValue="@bool/pref_hdr_video_def_value"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_10bit_video_key"
             android:title="@string/video_10bit"
             android:summary=""
-            android:icon="@drawable/ic_gradient_black_24dp"
+            android:icon="@drawable/high_quality_24px"
             android:defaultValue="@bool/pref_10bit_video_def_value"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        android:key="@string/pref_category_audio_key"
+        android:title="@string/audio">
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_audio_bitrate_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/audio_bitrate"
+            android:defaultValue="@string/pref_audio_bitrate_default"
+            app:maxValue="192"
+            app:minValue="32"
+            android:icon="@drawable/speed_24px"/>
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_audio_processing_key"
+            android:title="@string/audio_processing"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/mic_24px"
+            android:entries="@array/audio_processing_entries"
+            android:entryValues="@array/audio_processing_entryValues"
+            android:defaultValue="@string/pref_edge_processing_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_audio_codec_key"
+            android:title="@string/audio_codec"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/compress_24px"
+            android:entries="@array/audio_codec_entries"
+            android:entryValues="@array/audio_codec_entryValues"
+            android:defaultValue="@string/pref_audio_codec_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_audio_channels_key"
+            android:title="@string/audio_channels"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/compress_24px"
+            android:entries="@array/audio_channels_entries"
+            android:entryValues="@array/audio_channels_entryValues"
+            android:defaultValue="@string/pref_audio_channels_default_value" />
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_sps_key"
+            android:title="@string/sps"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/cadence_24px"
+            android:entries="@array/sps_entries"
+            android:entryValues="@array/sps_entryValues"
+            android:defaultValue="@string/pref_sps_default_value" />
     </PreferenceCategory>
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"

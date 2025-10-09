@@ -125,9 +125,14 @@
     <string name="video_resolution">Auflösung</string>
     <string name="video_framerate">Bildwiederholfrequenz</string>
     <string name="video">Video</string>
+    <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="jpg">JPEG</string>
     <string name="noise_processing">Rauschminderung</string>
     <string name="edge_processing">Kantenverarbeitung</string>
+    <string name="audio_processing">Audioverarbeitung</string>
+    <string name="audio_codec">Codec</string>
+    <string name="audio_channels">Kanäle</string>
+    <string name="sps">SPS</string>
 </resources>

@@ -91,6 +91,8 @@ import com.particlesdevs.photoncamera.ui.camera.viewmodel.TimerFrameCountViewMod
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.AutoFitPreviewView;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.GLPreview;
 import com.particlesdevs.photoncamera.util.log.Logger;
+import android.media.MediaFormat;
+//import android.media.MediaFormat.ColorSpace;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -1371,36 +1373,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         if (PhotonCamera.getSettings().videoHDR) {
                             outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                         }
-                        /*switch (PhotonCamera.getSpecific().specificSetting.videoHdrFormat)
-                        {
-                            case "HDR10":
-                            case "HDR":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.HDR10);
-                                break;
-                            case "HLG10":
-                            case "HLG":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
-                                break;
-                            case "HDR10_PLUS":
-                            case "HDR10+":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.HDR10_PLUS);
-                                break;
-                            case "DOLBY_VISION_10B_HDR_REF":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.DOLBY_VISION_10B_HDR_REF);
-                                break;
-                            case "DOLBY_VISION_10B_HDR_REF_PO":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.DOLBY_VISION_10B_HDR_REF_PO);
-                                break;
-                            case "DOLBY_VISION_10B_HDR_OEM":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.DOLBY_VISION_10B_HDR_OEM);
-                                break;
-                            case "DOLBY_VISION_10B_HDR_OEM_PO":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.DOLBY_VISION_10B_HDR_OEM_PO);
-                                break;
-                            case "STANDARD":
-                                outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.STANDARD);
-                                break;
-                        }*/
                     }
                     outputConfigurations.add(outputConfig);
                 }
@@ -2026,10 +1998,27 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         createCameraPreviewSession(false);
     }
 
+    // QualityDoesMatter - for later to have more control of the encoding parameters like color space and transfer characteristics
+    private MediaFormat createVideoFormat(int width, int height) {
+        MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
+
+        // ... andere Format-Einstellungen (Bitrate, FrameRate, etc.)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            format.setFeatureEnabled("hdr-editing", true);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
+        }
+        // ---------------------------------------------------------------------
+
+        return format;
+    }
+
     private void setUpMediaRecorder() {
         CamcorderProfile profile;
         mMediaRecorder.reset();
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 
@@ -2065,7 +2054,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         break;
                     case "HEVC":
                     case "H265":
-                        mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel51);
+                        mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain, MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel51);
                         break;
                 }
             }
@@ -2093,9 +2082,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
         // audio
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        mMediaRecorder.setAudioEncodingBitRate(profile.audioBitRate);
-        mMediaRecorder.setAudioSamplingRate(profile.audioSampleRate);
+        mMediaRecorder.setAudioEncoder(PhotonCamera.getSettings().audioCodec);
+        mMediaRecorder.setAudioEncodingBitRate(PhotonCamera.getSettings().audioBitrate * 1024);
+        mMediaRecorder.setAudioSamplingRate(PhotonCamera.getSettings().audioSps);
+        mMediaRecorder.setAudioChannels(PhotonCamera.getSettings().audioChannels);
         mMediaRecorder.setOnInfoListener(this);
         switch (videoRotation) {
             case 0:

@@ -11,6 +11,7 @@
     <string name="luma_nr_count">Luminance Noise Reduction Strength</string>
     <string name="frame_count">HDR Frame Count</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
+    <string name="audio_bitrate">Bitrate [kBit/s]</string>
     <string name="disable_aligning">Disable Aligning</string>
     <string name="chroma_nr_count">Chroma NR Count</string>
     <string name="enhanced_processing">Enhanced Processing</string>
@@ -142,8 +143,13 @@
     <string name="video_resolution">Resolution</string>
     <string name="video_framerate">Framerate</string>
     <string name="video">Video</string>
+    <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="noise_processing">Noise Processing</string>
-    <string name="edge_processing">Noise Processing</string>
+    <string name="edge_processing">Edge Processing</string>
+    <string name="audio_processing">Processing</string>
+    <string name="audio_codec">Codec</string>
+    <string name="audio_channels">Channels</string>
+    <string name="sps">SPS</string>
 </resources>

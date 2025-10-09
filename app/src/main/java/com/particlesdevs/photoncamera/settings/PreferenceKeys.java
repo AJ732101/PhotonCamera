@@ -60,6 +60,11 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_EXPOSURE.mValue);
         COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_CHANNELS.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_BITRATE.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_SPS.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -100,6 +105,11 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CHANNELS, resources.getString(R.string.pref_audio_channels_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE, resources.getString(R.string.pref_audio_bitrate_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS, resources.getString(R.string.pref_sps_default_value));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -437,20 +447,39 @@ public class PreferenceKeys {
     }
 
     public static int getNoiseProcessing() {
-        try {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING);
-        } catch (Exception e) {
-            return 0;
-        }
     }
 
     public static int getEdgeProcessing() {
-        try {
-            return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING);
-        }
-        catch (Exception e) {
-            return 0;
-        }
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING);
+    }
+
+    public static int getAudioProcessing() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING);
+    }
+
+    public static String getAudioProcessingStr() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING);
+    }
+
+    public static int getAudioCodec() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC);
+    }
+
+    public static String getAudioCodecStr() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC);
+    }
+
+    public static int getAudioChannels() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_CHANNELS);
+    }
+
+    public static int getAudioBitrate() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE);
+    }
+
+    public static int getAudioSps() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS);
     }
 
     public static int getVideoFramerate() {
@@ -515,6 +544,15 @@ public class PreferenceKeys {
         KEY_VIDEO_CODEC(R.string.pref_codec_key),
         KEY_NOISE_PROCESSING(R.string.pref_noise_processing_key),
         KEY_EDGE_PROCESSING(R.string.pref_edge_processing_key),
+
+        /**
+         * QualityDoesMatter - Video settings keys
+         */
+        KEY_AUDIO_PROCESSING(R.string.pref_audio_processing_key),
+        KEY_AUDIO_CODEC(R.string.pref_audio_codec_key),
+        KEY_AUDIO_CHANNELS(R.string.pref_audio_channels_key),
+        KEY_AUDIO_BITRATE(R.string.pref_audio_bitrate_key),
+        KEY_AUDIO_SPS(R.string.pref_sps_key),
 
         /**
          * QualityDoesMatter - other

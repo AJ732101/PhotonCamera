@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class VendorTagUtils {
     private static final String TAG = "VendorTagUtils";
-    private static boolean isSupported(CaptureRequest.Builder builder,
+    public static boolean isSupported(CaptureRequest.Builder builder,
                                        CaptureRequest.Key<?> key) {
         boolean supported = true;
         try {

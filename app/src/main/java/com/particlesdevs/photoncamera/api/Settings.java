@@ -65,6 +65,13 @@ public class Settings {
     public boolean useExtendExposure;
     public int noiseProcessing;
     public int edgeProcessing;
+    public int audioProcessing;
+    public int audioCodec;
+    public String audioCodecStr;
+    public String audioProcessingStr;
+    public int audioSps;
+    public int audioBitrate;
+    public int audioChannels;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -120,6 +127,13 @@ public class Settings {
         useExtendExposure = PreferenceKeys.useExtendExposureOn();
         noiseProcessing = PreferenceKeys.getNoiseProcessing();
         edgeProcessing = PreferenceKeys.getEdgeProcessing();
+        audioProcessing = PreferenceKeys.getAudioProcessing();
+        audioCodec = PreferenceKeys.getAudioCodec();
+        audioProcessingStr = PreferenceKeys.getAudioProcessingStr();
+        audioCodecStr = PreferenceKeys.getAudioCodecStr();
+        audioSps = PreferenceKeys.getAudioSps();
+        audioBitrate = PreferenceKeys.getAudioBitrate();
+        audioChannels = PreferenceKeys.getAudioChannels();
     }
 
     public void saveID() {

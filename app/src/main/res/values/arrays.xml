@@ -103,6 +103,8 @@
         <item>30</item>
         <item>60</item>
         <item>120 (exp)</item>
+        <item>240 (exp)</item>
+        <item>480 (exp)</item>
     </string-array>
 
     <string-array name="video_framerate_entryValues">
@@ -110,6 +112,8 @@
         <item>30</item>
         <item>60</item>
         <item>120</item>
+        <item>240</item>
+        <item>480</item>
     </string-array>
 
     <string-array name="noise_processing_entries">
@@ -138,6 +142,24 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="audio_processing_entries">
+        <item>No Audio</item>
+        <item>MIC</item>
+        <item>Unprocessed</item>
+        <item>Voice Performance</item>
+        <item>Voice Recognition</item>
+        <item>Camcorder</item>
+    </string-array>
+
+    <string-array name="audio_processing_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>9</item>
+        <item>10</item>
+        <item>6</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="aperture_entries">
         <item>1.63</item>
         <item>1.9</item>
@@ -160,6 +182,54 @@
         <item>3.5</item>
         <item>4.0</item>
         <item>99</item>
+    </string-array>
+
+    <string-array name="audio_codec_entries">
+        <item>DEFAULT</item>
+        <item>AMR_NB</item>
+        <item>AMR_WB</item>
+        <item>AAC</item>
+        <item>HE_AAC</item>
+        <item>AAC_ELD</item>
+    </string-array>
+
+    <string-array name="audio_codec_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="audio_channels_entries">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="audio_channels_entryValues">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="sps_entries">
+        <item>8k</item>
+        <item>16k</item>
+        <item>32k</item>
+        <item>44k</item>
+        <item>48k</item>
+    </string-array>
+
+    <string-array name="sps_entryValues">
+        <item>8000</item>
+        <item>16000</item>
+        <item>32000</item>
+        <item>44000</item>
+        <item>48000</item>
     </string-array>
 
     <string-array name="theme_entries">
