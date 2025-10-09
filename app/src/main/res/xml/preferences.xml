@@ -465,7 +465,7 @@
             android:key="@string/pref_audio_channels_key"
             android:title="@string/audio_channels"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/compress_24px"
+            android:icon="@drawable/surround_sound_24px"
             android:entries="@array/audio_channels_entries"
             android:entryValues="@array/audio_channels_entryValues"
             android:defaultValue="@string/pref_audio_channels_default_value" />
