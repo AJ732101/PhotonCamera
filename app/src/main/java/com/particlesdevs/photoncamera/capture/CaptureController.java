@@ -143,6 +143,7 @@ import static android.hardware.camera2.CaptureRequest.LENS_OPTICAL_STABILIZATION
  */
 public class CaptureController implements MediaRecorder.OnInfoListener {
     public static final int RAW_FORMAT = ImageFormat.RAW_SENSOR;
+    public static final int HEIC_FORMAT = ImageFormat.HEIC;
     public static final int YUV_FORMAT = ImageFormat.YUV_420_888;
     private static final String TAG = CaptureController.class.getSimpleName();
     public List<Future<?>> taskResults = new ArrayList<>();
@@ -221,7 +222,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public static CaptureRequest mPreviewCaptureRequest;
     public static int mPreviewTargetFormat = ImageFormat.JPEG;
     public boolean isDualSession = false;
-    private static int mTargetFormat = RAW_FORMAT;
+    private static int mTargetFormat = ImageFormat.RAW_SENSOR;
     private final ParamController paramController;
     public TouchFocus mTouchFocus;
 
@@ -591,7 +592,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if(PhotonCamera.getSettings().previewFormat != 0) {
             mPreviewTargetFormat = /*ImageFormat.YCBCR_P010; //*/PhotonCamera.getSettings().previewFormat;
         } else {
-            mPreviewTargetFormat = ImageFormat.JPEG;
+            if (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) {
+                mPreviewTargetFormat = ImageFormat.HEIC;
+            }
+            else {
+                mPreviewTargetFormat = ImageFormat.JPEG;
+            }
         }
         this.activity = activity;
         this.cameraEventsListener = cameraEventsListener;
@@ -948,6 +954,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         ArrayList<Size> allTargets = new ArrayList<>();
 
+        if (PhotonCamera.getSettings().frameCount == 1) {
+            if (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG || PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) {
+                mTargetFormat = mPreviewTargetFormat;//PhotonCamera.getSettings().previewFormat;
+            }
+        }
+
         Size[] targetSizes = map.getOutputSizes(mTargetFormat);
         if(targetSizes != null)
             allTargets.addAll(Arrays.asList(targetSizes));
@@ -1059,17 +1071,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
         Size target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
         int max = 3;
-        if (mTargetFormat == mPreviewTargetFormat && isDualSession) max = PhotonCamera.getSettings().frameCount + 3;
+        if (mTargetFormat == mPreviewTargetFormat && isDualSession) {
+            max = PhotonCamera.getSettings().frameCount + 3;
+        }
         //largest = target;
-        mImageReaderPreview = ImageReader.newInstance(target.getWidth(), target.getHeight(),
-                mPreviewTargetFormat, /*maxImages*/max);
-        mImageReaderPreview.setOnImageAvailableListener(
-                mOnYuvImageAvailableListener, mBackgroundHandler);
+        mImageReaderPreview = ImageReader.newInstance(target.getWidth(), target.getHeight(), mPreviewTargetFormat, /*maxImages*/max);
+        mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
 
-        mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(),
-                mTargetFormat, max);
-        mImageReaderRaw.setOnImageAvailableListener(
-                mOnRawImageAvailableListener, mBackgroundHandler);
+        mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
+        mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
         try {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
@@ -1091,7 +1101,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
     private Size getAspect(CameraMode targetMode){
         Size aspectRatio;
-        if (targetMode == CameraMode.VIDEO || PhotonCamera.getSettings().aspect169) {
+        boolean test1 = PhotonCamera.getSettings().aspect169;
+        if ((targetMode == CameraMode.VIDEO
+                && (PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888))
+                || PhotonCamera.getSettings().aspect169) {
             aspectRatio = new Size(9, 16);
         } else {
             aspectRatio = new Size(3, 4);
@@ -1250,12 +1263,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
         Size target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
         int maxjpg = 3;
-        if (mTargetFormat == mPreviewTargetFormat && isDualSession)
+        if (mTargetFormat == mPreviewTargetFormat && isDualSession) {
             maxjpg = PhotonCamera.getSettings().frameCount + 3;
+        }
 
         Size aspect = getAspect(PhotonCamera.getSettings().selectedMode);
-        if(preview.getWidth() > preview.getHeight())
-            preview = new Size(preview.getWidth(),preview.getWidth()*aspect.getWidth()/aspect.getHeight());
+        if(preview.getWidth() > preview.getHeight()) {
+            preview = new Size(preview.getWidth(), preview.getWidth() * aspect.getWidth() / aspect.getHeight());
+        }
         else {
             preview = new Size(preview.getHeight()*aspect.getWidth()/aspect.getHeight(),preview.getHeight());
         }
@@ -1263,8 +1278,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
         mBufferSize = getPreviewOutputSize(mTextureView.getDisplay(),characteristics,PhotonCamera.getSettings().selectedMode);
 
-        if(mImageReaderRaw != null)
+        if(mImageReaderRaw != null) {
             mImageReaderRaw.close();
+        }
         mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxjpg);
         mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
         // Find out if we need to swap dimension to get the preview size relative to sensor
@@ -1420,8 +1436,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     }
                                 } else {
                                     //if(mSelectedMode != CameraMode.VIDEO)
-                                    mCaptureSession.setRepeatingRequest(mPreviewInputRequest,
-                                            mCaptureCallback, mBackgroundHandler);
+                                    mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
                                     unlockFocus();
                                 }
                             } catch (Exception e) {
@@ -2015,6 +2030,45 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return format;
     }
 
+    public Size getMaxSensorResolution(CameraManager manager, String cameraId) {
+        try {
+            // 1. Hole die Kamera-Eigenschaften (CameraCharacteristics)
+            CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+
+            // 2. Rufe die StreamConfigurationMap ab, die alle unterstützten Größen enthält.
+            StreamConfigurationMap map = characteristics.get(
+                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+            if (map == null) {
+                return null;
+            }
+
+            // 3. Hole alle unterstützten Größen für das höchste Qualitätsformat (JPEG).
+            // JPEG (ImageFormat.JPEG) ist das Standard-Format für Fotos und garantiert
+            // in der Regel die maximale Sensorauflösung.
+            Size[] jpegSizes = map.getOutputSizes(ImageFormat.JPEG);
+
+            if (jpegSizes == null || jpegSizes.length == 0) {
+                // Fallback: Versuche es mit dem Raw-Sensor-Format
+                jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
+            }
+
+            if (jpegSizes == null || jpegSizes.length == 0) {
+                return null;
+            }
+
+            // 4. Finde die größte Auflösung (Größe) in der Liste.
+            // Die Liste ist nicht zwingend sortiert, daher suchen wir nach dem größten Wert.
+            return Collections.max(Arrays.asList(jpegSizes),
+                    (size1, size2) -> Long.signum((long) size1.getWidth() * size1.getHeight() -
+                            (long) size2.getWidth() * size2.getHeight()));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void setUpMediaRecorder() {
         CamcorderProfile profile;
         mMediaRecorder.reset();
@@ -2042,7 +2096,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         break;
                     case "HEVC":
                     case "H265":
-                        mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
+                        if (PhotonCamera.getSettings().videoHDR)
+                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                        else
+                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
                         break;
                 }
             }
@@ -2078,7 +2135,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mMediaRecorder.setVideoFrameRate((int)PhotonCamera.getSettings().videoFramrate);
             mMediaRecorder.setCaptureRate((int)PhotonCamera.getSettings().videoFramrate);
         }
-        mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+
+        if (PhotonCamera.getSettings().videoHeight == 9999) {
+            Size maxRes = getMaxSensorResolution(mCameraManager, "0");
+            mMediaRecorder.setVideoSize(maxRes.getWidth(), maxRes.getHeight());
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 8888) {
+            mMediaRecorder.setVideoSize(6016, 4512);
+        }
+        else {
+            mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        }
+
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
         // audio
@@ -2172,9 +2240,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
     public void resumeCamera() {
         if(PhotonCamera.getSettings().previewFormat != 0) {
-            mPreviewTargetFormat = /*ImageFormat.YCBCR_P010; //*/PhotonCamera.getSettings().previewFormat;
+            mPreviewTargetFormat = PhotonCamera.getSettings().previewFormat;
         } else {
-            mPreviewTargetFormat = ImageFormat.JPEG;
+            if (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) {
+                mPreviewTargetFormat = ImageFormat.HEIC;
+            } else {
+                mPreviewTargetFormat = ImageFormat.JPEG;
+            }
         }
         processExecutor.execute(() -> {
             if (mTextureView == null)

@@ -89,6 +89,8 @@
         <item>FHD (1920x1080)</item>
         <item>4K (3840x2160)</item>
         <item>8K (7680x4320)</item>
+        <item>4K+ 4:3</item>
+        <item>6K+ 4:3</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
@@ -96,6 +98,8 @@
         <item>1080</item>
         <item>2160</item>
         <item>4320</item>
+        <item>9999</item>
+        <item>8888</item>
     </string-array>
 
     <string-array name="video_framerate_entries">
