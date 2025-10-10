@@ -34,7 +34,8 @@ public class SaverImplementation {
         }
         int width;
         int height;
-        if(image.getFormat() == 0x25){
+        // 0x100 = JPEG, 0x48454946 = HEIC
+        if(image.getFormat() == 0x25 || image.getFormat() == 0x100 || image.getFormat() == 0x48454946){
             width = image.getWidth();
             height = image.getHeight();
         } else {
