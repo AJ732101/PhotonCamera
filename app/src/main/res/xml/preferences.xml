@@ -14,7 +14,7 @@
                 android:layout="@layout/preference_seekbar"
                 android:title="@string/frame_count"
                 android:defaultValue="@string/pref_framecount_default"
-                app:maxValue="200"
+                app:maxValue="30"
                 app:minValue="1"
                 android:icon="@drawable/ic_burst_mode_black_24dp"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
