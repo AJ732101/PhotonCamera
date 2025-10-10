@@ -18,10 +18,10 @@
                         android:endX="216.01"
                         android:endY="283.66">
                     <item
-                            android:color="#FF63A4DF"
+                            android:color="#FFE08236"
                             android:offset="0"/>
                     <item
-                            android:color="#FF45399B"
+                            android:color="#B7E08236"
                             android:offset="1"/>
                 </gradient>
             </aapt:attr>
@@ -40,10 +40,10 @@
                             android:endX="217.01"
                             android:endY="253.66">
                         <item
-                                android:color="#FF362E96"
+                                android:color="#FF8F3609"
                                 android:offset="0"/>
                         <item
-                                android:color="#FF030150"
+                                android:color="#FF8F3609"
                                 android:offset="1"/>
                     </gradient>
                 </aapt:attr>

@@ -3,9 +3,9 @@
     <string name="iso" translatable="false">"ISO "</string>
     <string name="icon_string" translatable="false">Icon</string>
     <string name="backup_file_name" translatable="false">PCAM_BKP_%1$s</string>
-    <string name="app_name" translatable="false">PhotonCamera</string>
+    <string name="app_name" translatable="false">PhotonVidCam</string>
     <string name="gallery_name" translatable="false">PGallery</string>
-    <string name="device_support" translatable="false">PhotonCamera Pro</string>
+    <string name="device_support" translatable="false">PhotonVidCam Pro</string>
     <string name="request_permission">This app needs camera permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="luma_nr_count">Luminance Noise Reduction Strength</string>
@@ -83,7 +83,7 @@
     <string name="theme_accent_cyan">Cyan</string>
     <string name="theme_accent_teal">Teal</string>
     <string name="show_gradient">Show Gradient Background</string>
-    <string name="unprocessed_raw">Unprocessed RAW</string>
+    <string name="unprocessed_raw">Unprocessed (RAW/JPEG/HEIC)</string>
     <string name="frame_count_summary">Number of image frames to be stacked</string>
     <string name="photon_camera_summary">An Open-Source Android Camera with Enhanced Image Processing</string>
     <string name="version_title">Version</string>
