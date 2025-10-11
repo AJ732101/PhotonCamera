@@ -71,11 +71,11 @@
     <string name="pref_align_method_default" translatable="false">1</string>
     <string name="pref_focus_peak_default" translatable="false">0</string>
     <string name="pref_color_method_default" translatable="false">0</string>
-    <string name="pref_codec_default" translatable="false">AVC</string>
+    <string name="pref_codec_default" translatable="false">HEVC</string>
     <string name="pref_preview_format_default" translatable="false">0</string>
     <string name="pref_cfa_default_value" translatable="false">-1</string>
     <string name="pref_theme_default_value" translatable="false">-1</string>
-    <string name="pref_theme_accent_default_value" translatable="false">default</string>
+    <string name="pref_theme_accent_default_value" translatable="false">orange</string>
     <string name="pref_af_mode_default_value" translatable="false">4</string>
     <string name="pref_raw_mode_default_value" translatable="false">0</string>
     <bool name="pref_show_gradient_def_value">false</bool>
