@@ -81,7 +81,7 @@
     <bool name="pref_show_gradient_def_value">false</bool>
 
     <string name="pref_bitrate_default" translatable="false">60</string>
-    <string name="pref_codec_default_value" translatable="false">AVC</string>
+    <string name="pref_codec_default_value" translatable="false">HEVC</string>
     <string name="pref_video_resolution_default_value" translatable="false">2160</string>
     <string name="pref_video_framerate_default_value" translatable="false">30</string>
     <string name="pref_aperture_default_value" translatable="false">99</string>
@@ -94,10 +94,10 @@
     <bool name="pref_extend_exposure_default">false</bool>
     <string name="pref_noise_processing_default_value" translatable="false">0</string>
     <string name="pref_edge_processing_default_value" translatable="false">0</string>
-    <string name="pref_audio_codec_default_value" translatable="false">0</string>
-    <string name="pref_audio_bitrate_default_value" translatable="false">32</string>
+    <string name="pref_audio_codec_default_value" translatable="false">5</string>
+    <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
-    <string name="pref_sps_default_value" translatable="false">8000</string>
+    <string name="pref_sps_default_value" translatable="false">49152</string>
     <string name="pref_audio_processing_default_value" translatable="false">1</string>
     <string name="pref_audio_bitrate_default" translatable="false">32</string>
 </resources>
