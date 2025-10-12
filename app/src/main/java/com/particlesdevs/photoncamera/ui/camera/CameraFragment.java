@@ -386,7 +386,18 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                     stringMap.put("--VIDEO--", "--OPTS--");
                     stringMap.put("CodecV", PhotonCamera.getSettings().videoCodec);
-                    stringMap.put("Height", String.valueOf(PhotonCamera.getSettings().videoHeight));
+                    if (PhotonCamera.getSettings().videoHeight == 7777) {
+                        stringMap.put("Height", "8K+ 4:3");
+                    }
+                    else if (PhotonCamera.getSettings().videoHeight == 8888) {
+                        stringMap.put("Height", "6K+ 4:3");
+                    }
+                    else if (PhotonCamera.getSettings().videoHeight == 9999) {
+                        stringMap.put("Height", "4K+ 4:3");
+                    }
+                    else {
+                        stringMap.put("Height", String.valueOf(PhotonCamera.getSettings().videoHeight));
+                    }
                     stringMap.put("FPS", String.valueOf(PhotonCamera.getSettings().videoFramrate));
                     stringMap.put("BitrateV", String.valueOf(PhotonCamera.getSettings().videoBitrate) + "MBit/s");
                     stringMap.put("HDR", String.valueOf(PhotonCamera.getSettings().videoHDR));
