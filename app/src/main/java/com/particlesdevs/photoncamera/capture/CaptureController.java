@@ -29,6 +29,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
@@ -996,7 +997,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     int format = vals[i];
                                     int width = vals[i + 1];
                                     int height = vals[i + 2];
-                                    if ((format == mTargetFormat) && (width > 6000)) {
+                                    if (format == mTargetFormat) {
                                         allTargets.add(new Size(width, height));
                                         Log.d(TAG, "Added custom resolution(" + key.getName() + "):" + width + " " + height);
                                     }
@@ -1065,8 +1066,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             physicalID = logicalID;
         }
         CameraCharacteristics characteristics =  this.mCameraCharacteristicsMap.get(physicalID);
-        StreamConfigurationMap map = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         ArrayList<Size> allTargets = getAllTargets();
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
         Size target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
@@ -1080,18 +1080,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
         mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
+
         try {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
-            this.mCameraManager.openCamera(PhotonCamera.getSettings().mCameraID, mStateCallback, mBackgroundHandler);
+            this.mCameraManager.openCamera(logicalID, mStateCallback, mBackgroundHandler);
         } catch (CameraAccessException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to restart camera.", e);
         }
         //stopBackgroundThread();
-        UpdateCameraCharacteristics(PhotonCamera.getSettings().mCameraID);
+        UpdateCameraCharacteristics(physicalID);
         startBackgroundThread();
 
         Size optimal = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristics, CameraFragment.mSelectedMode);
@@ -1103,7 +1104,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Size aspectRatio;
         boolean test1 = PhotonCamera.getSettings().aspect169;
         if ((targetMode == CameraMode.VIDEO
-                && (PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888))
+                && (PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777))
                 || PhotonCamera.getSettings().aspect169) {
             aspectRatio = new Size(9, 16);
         } else {
@@ -1224,7 +1225,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             setUpCameraOutputs(width, height);
             configureTransform(width, height);
             try {
-                if (!mCameraOpenCloseLock.tryAcquire(1000, TimeUnit.MILLISECONDS)) {
+                if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw new RuntimeException("Time out waiting to lock camera opening.");
                 }
                 physicalID = PhotonCamera.getSettings().mCameraID;
@@ -1380,20 +1381,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.d(TAG, "createCameraPreviewSession() surfaces:" + Arrays.toString(surfaces.toArray()));
             ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
             for (Surface surfacei : surfaces) {
-                OutputConfiguration outputConfig = new OutputConfiguration(surfacei);
-                if(!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
-                    outputConfig.setPhysicalCameraId(physicalID);
+                var config = new OutputConfiguration(surfacei);
+                if(!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    config.setPhysicalCameraId(physicalID);
                 }
                 if (mIsRecordingVideo) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (PhotonCamera.getSettings().videoHDR) {
-                            outputConfig.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
-                        }
+                        config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
-                    outputConfigurations.add(outputConfig);
                 }
-                else
-                    outputConfigurations.add(new OutputConfiguration(surfacei));
+                outputConfigurations.add(config);
             }
 
             CameraCaptureSession.StateCallback stateCallback =
@@ -1407,6 +1404,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             }
                             // When the session is ready, we start displaying the preview.
                             mCaptureSession = cameraCaptureSession;
+                            CameraConstrainedHighSpeedCaptureSession highSpeedSession = null;
+                            if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
+                                highSpeedSession = (CameraConstrainedHighSpeedCaptureSession) cameraCaptureSession;
+                            }
                             try {
                                 // Auto focus should be continuous for camera preview.
                                 //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -1416,11 +1417,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
                                 // Finally, we start displaying the camera preview.
                                 if (is30Fps) {
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-                                            FpsRangeDef);
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
                                 } else {
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-                                            FpsRangeHigh);
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
+                                }
+
+                                if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
+                                    List<CaptureRequest> highSpeedRequests = highSpeedSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
                                 }
                                 mPreviewInputRequest = mPreviewRequestBuilder.build();
                                 if (isBurstSession && isDualSession) {
@@ -1455,15 +1458,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             showToast(activity.getString(R.string.session_on_configure_failed));
                         }
                     };
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                int SessionType =  SessionConfiguration.SESSION_REGULAR;
+                if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
+                    SessionType =  SessionConfiguration.SESSION_HIGH_SPEED;
+                }
                 SessionConfiguration configuration = new SessionConfiguration(
-                        SessionConfiguration.SESSION_REGULAR,
+                        SessionType,
                         outputConfigurations,
                         processExecutor,
                         stateCallback
                 );
                 mCameraDevice.createCaptureSession(configuration);
-
             } else {
                 mCameraDevice.createCaptureSession(surfaces, stateCallback, mBackgroundHandler);
             }
@@ -1711,7 +1718,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             final CaptureRequest.Builder captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             float focus = mFocus;
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
-            //this.mCaptureSession.stopRepeating();
+            captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
             if(isDualSession) {
                 if (mTargetFormat != mPreviewTargetFormat)
                     captureBuilder.addTarget(mImageReaderRaw.getSurface());
@@ -1723,6 +1730,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     captureBuilder.addTarget(surface);
                 }
             }
+
+            captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
+
             Camera2ApiAutoFix.applyEnergySaving();
             cameraRotation = PhotonCamera.getGravity().getCameraRotation(mSensorOrientation);
 
@@ -1744,7 +1754,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.d(TAG, "CaptureBuilderStarted!");
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, PhotonCamera.getGravity().getCameraRotation(mSensorOrientation));
             VendorTagUtils.builderSessionApply(mCameraManager.getCameraCharacteristics(mCameraDevice.getId()), captureBuilder, true, useMaximumResolutionKey);
-
+			captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
             captures = new ArrayList<>();
             BurstShakiness = new ArrayList<>();
 
@@ -1764,6 +1774,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (frameCount == -1) {
                 for (int i = 0; i < 1; i++) {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
+                    captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
                     captures.add(captureBuilder.build());
                 }
             } else {
@@ -1772,6 +1783,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
                     times[i] = IsoExpoSelector.lastSelectedExposure;
                     captures.add(captureBuilder.build());
+                    captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
                     mCaptureRequest = captureBuilder.build();
                 }
                 PhotonCamera.getGyro().PrepareGyroBurst(times, BurstShakiness);
@@ -2072,7 +2084,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void setUpMediaRecorder() {
         CamcorderProfile profile;
         mMediaRecorder.reset();
-        mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
+        if (PhotonCamera.getSettings().audioCodec != 0) {
+            mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
+        }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 
@@ -2143,6 +2157,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 8888) {
             mMediaRecorder.setVideoSize(6016, 4512);
         }
+        else if (PhotonCamera.getSettings().videoHeight == 7777) {
+            mMediaRecorder.setVideoSize(7680, 5760);
+        }
         else {
             mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
         }
@@ -2150,10 +2167,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
         // audio
-        mMediaRecorder.setAudioEncoder(PhotonCamera.getSettings().audioCodec);
-        mMediaRecorder.setAudioEncodingBitRate(PhotonCamera.getSettings().audioBitrate * 1024);
-        mMediaRecorder.setAudioSamplingRate(PhotonCamera.getSettings().audioSps);
-        mMediaRecorder.setAudioChannels(PhotonCamera.getSettings().audioChannels);
+        if (PhotonCamera.getSettings().audioCodec != 0) {
+            mMediaRecorder.setAudioEncoder(PhotonCamera.getSettings().audioCodec);
+            mMediaRecorder.setAudioEncodingBitRate(PhotonCamera.getSettings().audioBitrate * 1024);
+            mMediaRecorder.setAudioSamplingRate(PhotonCamera.getSettings().audioSps);
+            mMediaRecorder.setAudioChannels(PhotonCamera.getSettings().audioChannels);
+        }
+
         mMediaRecorder.setOnInfoListener(this);
         switch (videoRotation) {
             case 0:
@@ -2253,9 +2273,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mTextureView = new GLPreview(activity);
             if (mTextureView.isAvailable()) {
                 Log.d(TAG,"ID:"+mCameraCharacteristicsMap.get(physicalID));
-                Size optimal = getPreviewOutputSize(mTextureView.getDisplay(),
-                        mCameraCharacteristicsMap.get(physicalID),
-                        PhotonCamera.getSettings().selectedMode);
+                Size optimal = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristicsMap.get(physicalID), PhotonCamera.getSettings().selectedMode);
                 openCamera(optimal.getWidth(), optimal.getHeight());
             } else {
                 mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
