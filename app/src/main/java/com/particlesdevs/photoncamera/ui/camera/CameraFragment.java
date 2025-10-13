@@ -367,15 +367,19 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             PhotonCamera.getCaptureController().videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
             if (PreferenceKeys.isAfDataOn()) {
+                //stringMap.put("ISO", String.valueOf(expoPair.iso));
+                String camID = result.getCameraId();
+                String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
-                stringMap.put("Camera ID", result.getCameraId());
-                //stringMap.put("ISO", String.valueOf(expoPair.iso));
+                stringMap.put("Camera ID", camID + "-" + physCamId);
                 stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
                 stringMap.put("Shutter", expoPair.ExposureString() + "s");
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
-                stringMap.put("35mm Focal length", Math.ceil(mCameraLensDataMap.get(result.getCameraId()).getCamera35mmFocalLength()) + "mm");
+                var lensData = mCameraLensDataMap.get(camID + "-" + physCamId);
+                float len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                stringMap.put("35mm Focal length", String.valueOf(len35mm) + "mm");
                 stringMap.put("OIS", getResultFieldName("LENS_OPTICAL_STABILIZATION_MODE_", result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE)));
                 stringMap.put("Orientation", String.valueOf(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation()));
                 stringMap.put("FPS Prev", String.valueOf(captureController.getFpsRangeDef().getLower()));
