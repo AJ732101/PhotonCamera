@@ -91,6 +91,7 @@ final class CameraUIController implements CameraUIEventsListener,
                 PreferenceKeys.setEisPhoto(!PreferenceKeys.isEisPhotoOn());
                 cameraFragment.showSnackBar(cameraFragment.getString(R.string.eis_toggle_text) + ':' + onOff(PreferenceKeys.isEisPhotoOn()));
                 cameraFragment.updateSettingsBar();
+                this.restartCamera();
                 break;
 
             case R.id.fps_toggle_button:
@@ -243,6 +244,7 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case EIS:
                         PreferenceKeys.setEisPhoto(value.equals(1));
+                        this.restartCamera();
                         break;
                     case RAW:
                         PreferenceKeys.setSaveRaw((Integer) value);
