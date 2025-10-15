@@ -80,7 +80,7 @@
 
     <string-array name="codec_entryValues">
         <item>AVC</item>
-        <item>H265</item>
+        <item>HEVC</item>
         <item>DOLBY_VISION</item>
     </string-array>
 

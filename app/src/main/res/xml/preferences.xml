@@ -417,6 +417,13 @@
             android:defaultValue="@string/pref_edge_processing_default_value" />
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_eis_video_key"
+            android:title="@string/eis_video"
+            android:summary=""
+            android:icon="@drawable/video_stable_24px"
+            android:defaultValue="@bool/pref_eis_video_def_value"/>
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_hdr_video_key"
             android:title="@string/hdr_video"
             android:summary=""

@@ -46,6 +46,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
         // QualityDoesMatter
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_OIS_ON.mValue);
         COMMON_KEYS.add(Key.KEY_DNG_COMPRESSION_ON.mValue);
@@ -98,6 +99,9 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_BASIC_OSD, resources.getBoolean(R.bool.pref_show_basic_osd_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_ISO, resources.getBoolean(R.bool.pref_extend_iso_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO, resources.getBoolean(R.bool.pref_10bit_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
@@ -241,6 +245,10 @@ public class PreferenceKeys {
 
     public static boolean isHdrVideoOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO);
+    }
+
+    public static boolean isEisInPreviewVideoOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO);
     }
 
     public static boolean is10bitVideoOn() {
@@ -450,8 +458,34 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING);
     }
 
+    public static boolean isNoiseProcessingOn() {
+        if (preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING) == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public static boolean isEdgeProcessingOn() {
+        if (preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING) == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public static void setSetNoiseProcessing(int value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, value);
+    }
+
     public static int getEdgeProcessing() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING);
+    }
+
+    public static void setSetEdgeProcessing(int value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, value);
     }
 
     public static int getAudioProcessing() {
@@ -537,6 +571,7 @@ public class PreferenceKeys {
          * QualityDoesMatter - Video settings keys
          */
         KEY_HDR_VIDEO(R.string.pref_hdr_video_key),
+        KEY_EIS_VIDEO(R.string.pref_eis_video_key),
         KEY_10BIT_VIDEO(R.string.pref_10bit_video_key),
         KEY_VIDEO_HEIGHT(R.string.pref_video_resolution_key),
         KEY_VIDEO_BITRATE_SEEKBAR(R.string.pref_bitrate_key),

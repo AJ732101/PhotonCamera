@@ -31,6 +31,12 @@
     <item name="eis_entry_layout" type="id"/>
     <item name="eis_off_button" type="id"/>
     <item name="eis_on_button" type="id"/>
+    <item name="noise_entry_layout" type="id"/>
+    <item name="edge_entry_layout" type="id"/>
+    <item name="noise_off_button" type="id"/>
+    <item name="noise_on_button" type="id"/>
+    <item name="edge_off_button" type="id"/>
+    <item name="edge_on_button" type="id"/>
     <item name="saveraw_entry_layout" type="id"/>
     <item name="raw_off_button" type="id"/>
     <item name="raw_on_button" type="id"/>

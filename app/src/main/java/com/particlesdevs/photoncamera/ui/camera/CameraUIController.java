@@ -94,6 +94,30 @@ final class CameraUIController implements CameraUIEventsListener,
                 this.restartCamera();
                 break;
 
+            case R.id.noise_toggle_button:
+                if (PreferenceKeys.getNoiseProcessing() == 0) {
+                    PreferenceKeys.setSetNoiseProcessing(1);
+                }
+                else {
+                    PreferenceKeys.setSetNoiseProcessing(0);
+                }
+                cameraFragment.showSnackBar(cameraFragment.getString(R.string.noise_toggle_text) + ':' + onOff(PreferenceKeys.isNoiseProcessingOn()));
+                cameraFragment.updateSettingsBar();
+                this.restartCamera();
+                break;
+
+            case R.id.edge_toggle_button:
+                if (PreferenceKeys.getEdgeProcessing() == 0) {
+                    PreferenceKeys.setSetEdgeProcessing(1);
+                }
+                else {
+                    PreferenceKeys.setSetEdgeProcessing(0);
+                }
+                cameraFragment.showSnackBar(cameraFragment.getString(R.string.edge_toggle_text) + ':' + onOff(PreferenceKeys.isEdgeProcessingOn()));
+                cameraFragment.updateSettingsBar();
+                this.restartCamera();
+                break;
+
             case R.id.fps_toggle_button:
                 PreferenceKeys.setFpsPreview(!PreferenceKeys.isFpsPreviewOn());
                 cameraFragment.showSnackBar(cameraFragment.getString(R.string.fps_60_toggle_text) + ':' + onOff(PreferenceKeys.isFpsPreviewOn()));
@@ -244,6 +268,15 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case EIS:
                         PreferenceKeys.setEisPhoto(value.equals(1));
+                        this.restartCamera();
+                        break;
+                    case NOISE:
+                        if (PreferenceKeys.getNoiseProcessing() != 0) {
+                            PreferenceKeys.setSetNoiseProcessing(0);
+                        }
+                        else {
+                            PreferenceKeys.setSetNoiseProcessing(1);
+                        }
                         this.restartCamera();
                         break;
                     case RAW:

@@ -1385,7 +1385,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 if(!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     config.setPhysicalCameraId(physicalID);
                 }
-                if (mIsRecordingVideo) {
+                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
@@ -1525,7 +1525,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mPreviewAFMode = CONTROL_AF_MODE_CONTINUOUS_VIDEO;
             if (isEisOn) {
                 // QualityDoesMatter
-                mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION);
+                if (PhotonCamera.getSettings().videoEisInPreview) {
+                    mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION);
+                }
+                else {
+                    mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_ON);
+                }
             }
             else {
                 mPreviewRequestBuilder.set(CONTROL_VIDEO_STABILIZATION_MODE, CONTROL_VIDEO_STABILIZATION_MODE_OFF);
@@ -2175,19 +2180,39 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         mMediaRecorder.setOnInfoListener(this);
-        switch (videoRotation) {
-            case 0:
-                mMediaRecorder.setOrientationHint(90);
-                break;
-            case 90:
-                mMediaRecorder.setOrientationHint(0);
-                break;
-            case 180:
-                mMediaRecorder.setOrientationHint(270);
-                break;
-            case -90:
-                mMediaRecorder.setOrientationHint(180);
-                break;
+        CameraCharacteristics camChar = mCameraCharacteristicsMap.get(PhotonCamera.getSettings().mCameraID);
+        boolean facingFront = camChar.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+        if (facingFront) {
+            switch (videoRotation) {
+                case 0:
+                    mMediaRecorder.setOrientationHint(270);
+                    break;
+                case 90:
+                    mMediaRecorder.setOrientationHint(180);
+                    break;
+                case 180:
+                    mMediaRecorder.setOrientationHint(90);
+                    break;
+                case -90:
+                    mMediaRecorder.setOrientationHint(0);
+                    break;
+            }
+        }
+        else {
+            switch (videoRotation) {
+                case 0:
+                    mMediaRecorder.setOrientationHint(90);
+                    break;
+                case 90:
+                    mMediaRecorder.setOrientationHint(0);
+                    break;
+                case 180:
+                    mMediaRecorder.setOrientationHint(270);
+                    break;
+                case -90:
+                    mMediaRecorder.setOrientationHint(180);
+                    break;
+            }
         }
 
         Date currentDate = new Date();

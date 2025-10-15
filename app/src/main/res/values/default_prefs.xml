@@ -8,7 +8,7 @@
     <bool name="pref_wide169_default">false</bool>
     <bool name="pref_show_watermark_default">true</bool>
     <bool name="pref_save_per_lens_settings">true</bool>
-    <bool name="pref_show_afdata_default">true</bool>
+    <bool name="pref_show_afdata_default">false</bool>
     <bool name="pref_show_roundedge_default">false</bool>
     <bool name="pref_system_nr_default">false</bool>
     <bool name="pref_disable_align_default">false</bool>
@@ -86,6 +86,7 @@
     <string name="pref_video_framerate_default_value" translatable="false">30</string>
     <string name="pref_aperture_default_value" translatable="false">99</string>
     <bool name="pref_hdr_video_def_value">false</bool>
+    <bool name="pref_eis_video_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
     <bool name="pref_show_basic_osd_default">true</bool>
     <bool name="pref_ois_default">true</bool>
@@ -94,10 +95,10 @@
     <bool name="pref_extend_exposure_default">false</bool>
     <string name="pref_noise_processing_default_value" translatable="false">0</string>
     <string name="pref_edge_processing_default_value" translatable="false">0</string>
-    <string name="pref_audio_codec_default_value" translatable="false">5</string>
+    <string name="pref_audio_codec_default_value" translatable="false">3</string>
     <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
     <string name="pref_sps_default_value" translatable="false">49152</string>
-    <string name="pref_audio_processing_default_value" translatable="false">1</string>
+    <string name="pref_audio_processing_default_value" translatable="false">9</string>
     <string name="pref_audio_bitrate_default" translatable="false">32</string>
 </resources>

@@ -44,6 +44,8 @@ public class SettingsBarEntryProvider extends ViewModel {
     private final SettingsBarEntryModel flashEntry = SettingsBarEntryModel.newEntry(R.id.flash_entry_layout, R.string.flash, SettingType.FLASH);
     private final SettingsBarEntryModel gridEntry = SettingsBarEntryModel.newEntry(R.id.grid_entry_layout, R.string.turn_on_grid, SettingType.GRID);
     private final SettingsBarEntryModel eisEntry = SettingsBarEntryModel.newEntry(R.id.eis_entry_layout, R.string.eis_toggle_text, SettingType.EIS);
+    private final SettingsBarEntryModel noiseEntry = SettingsBarEntryModel.newEntry(R.id.noise_entry_layout, R.string.noise_toggle_text, SettingType.NOISE);
+    private final SettingsBarEntryModel edgeEntry = SettingsBarEntryModel.newEntry(R.id.edge_entry_layout, R.string.edge_toggle_text, SettingType.EDGE);
     private final SettingsBarEntryModel saveRawEntry = SettingsBarEntryModel.newEntry(R.id.saveraw_entry_layout, R.string.raw_string, SettingType.RAW);
     private final SettingsBarEntryModel batterySaverEntry = SettingsBarEntryModel.newEntry(R.id.batterysaver_entry_layout, R.string.energy_saving, SettingType.BATTERY_SAVER);
     private final List<SettingsBarEntryModel> allEntries = new ArrayList<>(8);
@@ -55,6 +57,8 @@ public class SettingsBarEntryProvider extends ViewModel {
         allEntries.add(saveRawEntry);
         allEntries.add(quadEntry);
         allEntries.add(eisEntry);
+        allEntries.add(noiseEntry);
+        allEntries.add(edgeEntry);
         allEntries.add(fpsEntry);
         allEntries.add(gridEntry);
         allEntries.add(batterySaverEntry);
@@ -64,6 +68,8 @@ public class SettingsBarEntryProvider extends ViewModel {
         createHdrxEntry();
         createQuadBayerEntry();
         createEisEntry();
+        createNoiseEntry();
+        createEdgeEntry();
         createFlashEntry();
         createFpsEntry();
         createTimerEntry();
@@ -80,6 +86,8 @@ public class SettingsBarEntryProvider extends ViewModel {
             updateEntry(timerEntry, PreferenceKeys.getCountdownTimerIndex());
             updateEntry(hdrxEntry, PreferenceKeys.isHdrXOn());
             updateEntry(eisEntry, PreferenceKeys.isEisPhotoOn());
+            updateEntry(noiseEntry, PreferenceKeys.getNoiseProcessing());
+            updateEntry(edgeEntry, PreferenceKeys.getEdgeProcessing());
             updateEntry(fpsEntry, PreferenceKeys.isFpsPreviewOn());
             updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
             updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
@@ -120,6 +128,20 @@ public class SettingsBarEntryProvider extends ViewModel {
         eisEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.eis_off_button, R.drawable.ic_eis_off, R.string.off, 0, eisEntry),
                 SettingsBarButtonModel.newButtonModel(R.id.eis_on_button, R.drawable.ic_eis_on, R.string.on, 1, eisEntry)
+        );
+    }
+
+    private void createNoiseEntry() {
+        noiseEntry.addSettingsBarButtonModels(
+                SettingsBarButtonModel.newButtonModel(R.id.noise_off_button, R.drawable.noise_off, R.string.off, 0, noiseEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 1, noiseEntry)
+        );
+    }
+
+    private void createEdgeEntry() {
+        edgeEntry.addSettingsBarButtonModels(
+                SettingsBarButtonModel.newButtonModel(R.id.edge_off_button, R.drawable.edge_off, R.string.off, 0, edgeEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 1, edgeEntry)
         );
     }
 

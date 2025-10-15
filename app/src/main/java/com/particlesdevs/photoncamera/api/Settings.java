@@ -59,6 +59,7 @@ public class Settings {
     public String videoCodec;
     public int videoFramrate;
     public int videoHeight;
+    public boolean videoEisInPreview;
     public boolean videoHDR;
     public boolean video10bit;
     public boolean useExtendIso;
@@ -121,6 +122,7 @@ public class Settings {
         videoCodec = PreferenceKeys.getVideoCodec();
         videoFramrate = PreferenceKeys.getVideoFramerate();
         videoHeight = PreferenceKeys.getVideoHeight();
+        videoEisInPreview = PreferenceKeys.isEisInPreviewVideoOn();
         videoHDR = PreferenceKeys.isHdrVideoOn();
         video10bit = PreferenceKeys.is10bitVideoOn();
         useExtendIso = PreferenceKeys.useExtendIsoOn();

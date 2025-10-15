@@ -8,6 +8,8 @@ public enum SettingType {
     FPS_60,
     GRID,
     EIS,
+    NOISE,
+    EDGE,
     RAW,
     BATTERY_SAVER
 }
