@@ -89,6 +89,8 @@
     <string name="version_title">Version</string>
     <string name="contributors_title">Contributors ↗</string>
     <string name="eis_toggle_text">Image Stabilization</string>
+    <string name="noise_toggle_text">Noise Processing</string>
+    <string name="edge_toggle_text">Edge Processing</string>
     <string name="fps_60_toggle_text">Frame rate</string>
     <string name="quad_bayer_toggle_text">Quad Bayer Res. (48/50/64 MP)</string>
     <string name="backup_restore">Backup/Restore Settings</string>
@@ -145,6 +147,7 @@
     <string name="video">Video</string>
     <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
+    <string name="eis_video">EIS in Preview</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="noise_processing">Noise Processing</string>
     <string name="edge_processing">Edge Processing</string>

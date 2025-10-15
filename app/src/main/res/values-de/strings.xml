@@ -6,6 +6,7 @@
     <string name="frame_count">Bilder für Synthese/Stacking </string>
     <string name="frame_count_summary">Anzahl der Bilder für die Synthese (Stacking)</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
+    <string name="audio_bitrate">Bitrate [kBit/s]</string>
     <string name="disable_aligning">Ausrichtung deakivieren</string>
     <string name="processing_processname">Prozessiere %1$s...</string>
     <string name="turn_on_system_nr">System Rauschredultion</string>
@@ -78,6 +79,7 @@
     <string name="show_gradient">Farbverlauf Hintergrund</string>
     <string name="reset_preferences_warning">"Das setzt alle Einstellungen auf ihre Standardwerte zurück! Fortsetzen? "</string>
     <string name="backup">Sicherung</string>
+    <string name="edge_toggle_text">Kantenverarbeitung</string>
     <string name="fps_60_toggle_text">Bildwiederholfrequenz</string>
     <string name="quad_bayer_toggle_text">Quad Bayer Aufl. (48/50/64 MP)</string>
     <string name="mode_video">Video</string>
@@ -127,6 +129,7 @@
     <string name="video">Video</string>
     <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
+    <string name="eis_video">EIS in Vorschau</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="jpg">JPEG</string>
     <string name="noise_processing">Rauschminderung</string>
@@ -135,4 +138,5 @@
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Kanäle</string>
     <string name="sps">SPS</string>
+    <string name="noise_toggle_text">Rauschminderung</string>
 </resources>
