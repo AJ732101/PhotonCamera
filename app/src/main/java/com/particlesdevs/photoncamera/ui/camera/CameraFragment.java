@@ -372,13 +372,36 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
-                stringMap.put("Camera ID", camID + "-" + physCamId);
+                if (physCamId != null) {
+                    stringMap.put("Camera ID", camID + "-" + physCamId);
+                }
+                else {
+                    stringMap.put("Camera ID", camID);
+                }
                 stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
                 stringMap.put("Shutter", expoPair.ExposureString() + "s");
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
-                var lensData = mCameraLensDataMap.get(camID + "-" + physCamId);
-                float len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                float len35mm = 0;
+                if (physCamId == null) {
+                    var lensData = mCameraLensDataMap.get(camID);
+                    len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                }
+                else {
+                    var lensData = mCameraLensDataMap.get(camID + "-" + physCamId);
+                    if (lensData != null) {
+                        len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                    }
+                    else {
+                        lensData = mCameraLensDataMap.get(physCamId);
+                        if (lensData != null) {
+                            len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                        }
+                        else {
+                            len35mm = 0;
+                        }
+                    }
+                }
                 stringMap.put("35mm Focal length", String.valueOf(len35mm) + "mm");
                 stringMap.put("OIS", getResultFieldName("LENS_OPTICAL_STABILIZATION_MODE_", result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE)));
                 stringMap.put("Orientation", String.valueOf(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation()));
@@ -408,6 +431,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("10 bit", String.valueOf(PhotonCamera.getSettings().video10bit));
                     stringMap.put("Noise Processing.", String.valueOf(PhotonCamera.getSettings().noiseProcessing));
                     stringMap.put("Edge Processing", String.valueOf(PhotonCamera.getSettings().edgeProcessing));
+                    stringMap.put("Prev EIS", String.valueOf(PhotonCamera.getSettings().videoEisInPreview));
                     //stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
                     stringMap.put("--AUDIO--", "--OPTS--");
                     switch (PhotonCamera.getSettings().audioProcessing) {
@@ -452,7 +476,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     }
                     stringMap.put("Channels", String.valueOf(PhotonCamera.getSettings().audioChannels));
                     stringMap.put("BitrateA", String.valueOf(PhotonCamera.getSettings().audioBitrate) + "KBit/s");
-                    stringMap.put("SPS", String.valueOf(PhotonCamera.getSettings().audioSps));
+                    stringMap.put("SPS", String.valueOf(PhotonCamera.getSettings().audioSps / 1024) + "kHz");
                     stringMap.put("----------", "----------");
                 }
                 if (!PhotonCamera.getSettings().useBasicOsd)
