@@ -232,6 +232,8 @@ public class Parameters {
                 }
             }
             hotPixels = result.get(CaptureResult.STATISTICS_HOT_PIXEL_MAP);
+            if (hotPixels == null)
+                Log.d(TAG, "CaptureResult.STATISTICS_HOT_PIXEL_MAP is null");
             ReCalcColor(false, result);
         }
         if (!usedDynamic)
