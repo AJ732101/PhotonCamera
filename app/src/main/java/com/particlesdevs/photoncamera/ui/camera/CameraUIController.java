@@ -261,6 +261,7 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case FPS_60:
                         PreferenceKeys.setFpsPreview(value.equals(1));
+                        this.restartCamera();
                         break;
                     case TIMER:
                         PreferenceKeys.setCountdownTimerIndex((Integer) value);
