@@ -10,6 +10,7 @@
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="luma_nr_count">Luminance Noise Reduction Strength</string>
     <string name="frame_count">HDR Frame Count</string>
+    <string name="single_frame_quality">Single Frame/Shot Quality</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="audio_bitrate">Bitrate [kBit/s]</string>
     <string name="disable_aligning">Disable Aligning</string>
