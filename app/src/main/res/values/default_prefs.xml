@@ -21,7 +21,7 @@
     <bool name="pref_fps_preview_default">false</bool>
     <bool name="pref_hdrx_mode_default">true</bool>
     <string name="pref_ae_mode_default" translatable="false">1</string>
-    <string name="pref_camera_mode_default" translatable="false">2</string>
+    <string name="pref_camera_mode_default" translatable="false">4</string>
 
     <string name="camera_id_default" translatable="false">2</string>
     <string name="camera_mode" translatable="false">Photo</string>
@@ -58,6 +58,7 @@
     <string name="gamma_default" translatable="false">[0f, 0.99981f]
     </string>
     <string name="pref_framecount_default" translatable="false">8</string>
+    <string name="pref_single_frame_quality_default" translatable="false">75</string>
     <string name="pref_chroma_seekbar_default" translatable="false">12</string>
     <string name="pref_luma_seekbar_default" translatable="false">12</string>
     <string name="pref_sharpness_seekbar_default" translatable="false">0.60</string>
@@ -99,6 +100,6 @@
     <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
     <string name="pref_sps_default_value" translatable="false">49152</string>
-    <string name="pref_audio_processing_default_value" translatable="false">9</string>
+    <string name="pref_audio_processing_default_value" translatable="false">5</string>
     <string name="pref_audio_bitrate_default" translatable="false">32</string>
 </resources>
