@@ -60,19 +60,55 @@ public class Specific {
             Log.e(TAG,e.toString());
         }
 
-        /*for (String str : noGuiYetStr) {
+        for (String str : noGuiYetStr) {
             String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
             switch (caseS[0]) {
-                case "isExposureExtended": {
-                    specificSetting.isExposureExtended = Boolean.parseBoolean(caseS[1]);
+                case "hotPixelMode": {
+                    specificSetting.hotPixelMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-                case "isIsoExtended": {
-                    specificSetting.isIsoExtended = Boolean.parseBoolean(caseS[1]);
+                case "colorCorrectionAberrationMode": {
+                    specificSetting.colorCorrectionAberrationMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-              }
-        }*/
+                case "distortionCorrectionMode": {
+                    specificSetting.distortionCorrectionMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "shadingMode": {
+                    specificSetting.shadingMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "exposureCompensation": {
+                    specificSetting.exposureCompensation = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "statisticsHotPixelMapMode": {
+                    specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "statisticsLensShadingMapMode": {
+                    specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "statisticsOisDataMode": {
+                    specificSetting.statisticsOisDataMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "toneMapGamma": {
+                    specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "colorTemperature": {
+                    specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "contrastCurve": {
+                    specificSetting.contrastCurve = caseS[1];
+                    break;
+                }
+            }
+        }
 
         // load the rest bound to conditions
         isLoaded = false; //mSettingsManager.getBoolean(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded",false);
