@@ -44,6 +44,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AE_MODE.mValue);
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
+        COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
         // QualityDoesMatter
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -66,6 +67,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AUDIO_CHANNELS.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_BITRATE.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_SPS.mValue);
+        COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -89,6 +91,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, resources.getString(R.string.pref_preview_format_default));
         settingsManager.setDefaults(Key.CAMERA_ID, resources.getString(R.string.camera_id_default), new String[]{"0", "1"});
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
@@ -114,6 +117,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CHANNELS, resources.getString(R.string.pref_audio_channels_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE, resources.getString(R.string.pref_audio_bitrate_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS, resources.getString(R.string.pref_sps_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -528,6 +532,9 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_ENABLE_SYSTEM_NR);
     }
 
+    public static int getSingleFrameQualityValue() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY);
+    }
 
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
@@ -592,6 +599,7 @@ public class PreferenceKeys {
         /**
          * QualityDoesMatter - other
          */
+        KEY_SINGLE_FRAME_QUALITY(R.string.pref_single_frame_quality_key),
         KEY_APERTURE(R.string.pref_aperture_key),
         KEY_SHOW_BASIC_OSD(R.string.pref_show_basic_osd_key),
         KEY_EXTEND_ISO(R.string.pref_extend_iso_key),
