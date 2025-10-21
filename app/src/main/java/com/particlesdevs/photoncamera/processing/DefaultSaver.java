@@ -28,15 +28,21 @@ public class DefaultSaver extends SaverImplementation {
         super.runRaw(imageFormat, characteristics, captureResult,captureRequest, burstShakiness, cameraRotation, exposures);
         //Wait for one frame at least.
         Log.d(TAG, "Acquiring:" + IMAGE_BUFFER.size());
-        while (bufferLock || IMAGE_BUFFER.isEmpty()){}
+        while (bufferLock || IMAGE_BUFFER.isEmpty())
+        {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         Log.d(TAG, "Acquired:" + IMAGE_BUFFER.size());
         bufferLock = true;
         Log.d(TAG,"Size:"+IMAGE_BUFFER.size());
         if (PhotonCamera.getSettings().frameCount == 1) {
             Path dngFile = ImagePath.newDNGFilePath();
             Log.d(TAG, "Size:" + IMAGE_BUFFER.size());
-            boolean imageSaved = ImageSaver.Util.saveSingleRaw(dngFile, IMAGE_BUFFER.get(0),
-                    characteristics, captureResult, cameraRotation);
+            boolean imageSaved = ImageSaver.Util.saveSingleRaw(dngFile, IMAGE_BUFFER.get(0), characteristics, captureResult, cameraRotation);
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
             processingEventsListener.onProcessingFinished("Saved Unprocessed RAW");
             IMAGE_BUFFER.clear();
@@ -45,22 +51,8 @@ public class DefaultSaver extends SaverImplementation {
         }
         Path dngFile = ImagePath.newDNGFilePath();
         Path jpgFile = ImagePath.newJPGFilePath();
-        //Remove broken images
-            /*for(int i =0; i<IMAGE_BUFFER.size();i++){
-                try{
-                    IMAGE_BUFFER.get(i).getFormat();
-                } catch (IllegalStateException e){
-                    IMAGE_BUFFER.remove(i);
-                    i--;
-                    Log.d(TAG,"IMGBufferSize:"+IMAGE_BUFFER.size());
-                    e.printStackTrace();
-                }
-            }*/
-        hdrxProcessor.configure(
-                PhotonCamera.getSettings().alignAlgorithm,
-                PhotonCamera.getSettings().rawSaver,
-                PhotonCamera.getSettings().selectedMode
-        );
+
+        hdrxProcessor.configure(PhotonCamera.getSettings().alignAlgorithm, PhotonCamera.getSettings().rawSaver, PhotonCamera.getSettings().selectedMode);
         ArrayList<ImageFrame> slicedBuffer = new ArrayList<>();
         ArrayList<ImageFrame> imagebuffer = new ArrayList<>();
         for(int i =0; i<frameCount;i++){
