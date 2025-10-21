@@ -73,6 +73,7 @@ public class Settings {
     public int audioSps;
     public int audioBitrate;
     public int audioChannels;
+    public int singleFrameQuality;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -136,6 +137,7 @@ public class Settings {
         audioSps = PreferenceKeys.getAudioSps();
         audioBitrate = PreferenceKeys.getAudioBitrate();
         audioChannels = PreferenceKeys.getAudioChannels();
+        singleFrameQuality = PreferenceKeys.getSingleFrameQualityValue();
     }
 
     public void saveID() {
