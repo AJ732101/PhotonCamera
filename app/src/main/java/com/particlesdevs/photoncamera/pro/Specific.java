@@ -87,6 +87,14 @@ public class Specific {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "forceNewSettingsInRegularPhotoMode": {
+                    specificSetting.forceNewSettingsInRegularPhotoMode = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "useNewRecordingPipeline": {
+                    specificSetting.useNewRecordingPipeline = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -103,8 +111,16 @@ public class Specific {
                     specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "newRecKeyFrameIntervall": {
+                    specificSetting.newRecKeyFrameIntervall = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "contrastCurve": {
                     specificSetting.contrastCurve = caseS[1];
+                    break;
+                }
+                case "newRecColorRange": {
+                    specificSetting.newRecColorRange = caseS[1];
                     break;
                 }
             }

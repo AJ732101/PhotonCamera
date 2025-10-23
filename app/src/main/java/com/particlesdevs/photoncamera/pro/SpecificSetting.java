@@ -8,6 +8,8 @@ public class SpecificSetting {
     public String[] cameraIDS;
     public float[] apertureList;
     // QualityDoesMatter
+    public boolean forceNewSettingsInRegularPhotoMode = false;
+    public boolean useNewRecordingPipeline = false;
     public int hotPixelMode = 99;
     public int colorCorrectionAberrationMode = 99;
     public int distortionCorrectionMode = 99;
@@ -18,7 +20,9 @@ public class SpecificSetting {
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
     public int colorTemperature = 99;
+    public int newRecKeyFrameIntervall = 10;
     public String contrastCurve = "off";
+    public String newRecColorRange = "full";
     public SpecificSetting(){
     }
 }
