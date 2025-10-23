@@ -40,7 +40,7 @@ android {
 
     defaultConfig {
         applicationId 'com.xiaomi.module.evaluation'
-        minSdk 31
+        minSdk 29
         targetSdk 36
         versionCode versionBuild
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
