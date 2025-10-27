@@ -2582,9 +2582,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         {
             mAudioFormat = null;
         }
-
-        mEncoderData.mVideoTrackIndex = -1;
-        mEncoderData.mAudioTrackIndex = -1;
+        if (mEncoderData != null) {
+            mEncoderData.mVideoTrackIndex = -1;
+            mEncoderData.mAudioTrackIndex = -1;
+        }
     }
 
     private void setUpMediaRecorder() {
