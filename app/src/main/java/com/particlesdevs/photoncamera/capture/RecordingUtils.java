@@ -64,17 +64,8 @@ public class RecordingUtils {
                 mEncoderData.mVideoTrackIndex = mMediaMuxer.addTrack(format);
                 if (mEncoderData.mVideoTrackIndex >= 0) {
                     try {
-                        mMuxerThread.setVideoTrackIndex(mEncoderData.mVideoTrackIndex);
-                        Log.d("VideoEncoderCallback:onOutputFormatChanged", "MediaMuxer was started, Track-Index: " + mEncoderData.mVideoTrackIndex);
-                    } catch (Exception e) {
-                        Log.e("VideoEncoderCallback:VideoEncoderCallback", "MediaMuxer start failed - " + e.getMessage());
-                    }
-                } else {
-                    Log.e("VideoEncoderCallback:VideoEncoderCallback", "Unable to add video track to MediaMuxer");
-                }
-                if ((mEncoderData.mVideoTrackIndex >= 0) && (mEncoderData.mAudioTrackIndex >= 0)) {
-                    try {
                         mMediaMuxer.start();
+                        mMuxerThread.setVideoTrackIndex(mEncoderData.mVideoTrackIndex);
                         mMuxerThread.start();
                         mMuxerStarted = true;
                         Log.d("VideoEncoderCallback:onOutputFormatChanged", "MediaMuxer was started, Track-Index: " + mEncoderData.mVideoTrackIndex);

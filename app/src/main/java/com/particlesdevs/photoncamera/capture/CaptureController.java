@@ -2528,7 +2528,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void setUpMediaRecorderNew() {
         if (mEncoderData == null) {
-            RecordingUtils.EncoderData mEncoderData = new RecordingUtils.EncoderData();
+            mEncoderData = new RecordingUtils.EncoderData();
         }
 
         mVideoFormat = createVideoFormat();
