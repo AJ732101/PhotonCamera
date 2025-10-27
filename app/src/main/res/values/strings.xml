@@ -92,6 +92,7 @@
     <string name="eis_toggle_text">Image Stabilization</string>
     <string name="noise_toggle_text">Noise Processing</string>
     <string name="edge_toggle_text">Edge Processing</string>
+    <string name="zoom_toggle_text">2x Zoom</string>
     <string name="fps_60_toggle_text">Frame rate</string>
     <string name="quad_bayer_toggle_text">Quad Bayer Res. (48/50/64 MP)</string>
     <string name="backup_restore">Backup/Restore Settings</string>
@@ -152,6 +153,7 @@
     <string name="video_10bit">10 Bit Video</string>
     <string name="noise_processing">Noise Processing</string>
     <string name="edge_processing">Edge Processing</string>
+    <string name="zoom">Zoom</string>
     <string name="audio_processing">Processing</string>
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Channels</string>
