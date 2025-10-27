@@ -10,16 +10,16 @@
         <import type="android.view.View"/>
 
         <variable
-                name="hdrx_visible"
-                type="boolean"/>
+            name="hdrx_visible"
+            type="boolean"/>
 
         <variable
-                name="eis_visible"
-                type="boolean"/>
+            name="eis_visible"
+            type="boolean"/>
 
         <variable
-                name="noise_visible"
-                type="boolean"/>
+            name="noise_visible"
+            type="boolean"/>
 
         <variable
             name="edge_visible"
@@ -30,8 +30,8 @@
             type="boolean"/>
 
         <variable
-                name="fps_visible"
-                type="boolean"/>
+            name="fps_visible"
+            type="boolean"/>
 
         <variable
                 name="flash_visible"
@@ -53,8 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            tools:visibility="visible"
-            >
+            tools:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             bindViewGroupChildrenRotate="@{uimodel}"
@@ -74,7 +73,7 @@
 
             <ToggleButton
                 android:id="@+id/hdrx_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/raw_button"
                 android:checked="@{PreferenceKeys.isHdrXOn()}"
@@ -89,8 +88,8 @@
 
             <ToggleButton
                 android:id="@+id/eis_toggle_button"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="@drawable/eis_button"
                 android:checked="@{PreferenceKeys.isEisPhotoOn()}"
                 android:onClick="@{top_bar_click_listener}"
@@ -105,14 +104,14 @@
 
             <com.particlesdevs.photoncamera.ui.camera.views.TimerButton
                 android:id="@+id/countdown_timer_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/ic_timer"
                 android:backgroundTint="@android:color/white"
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
-                android:visibility="visible"
+                android:visibility="@{timer_visible ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBaseline_toBaselineOf="@+id/eis_toggle_button"
                 app:layout_constraintEnd_toStartOf="@+id/quad_res_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/eis_toggle_button"
@@ -120,7 +119,7 @@
 
             <ToggleButton
                 android:id="@+id/quad_res_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/quad_button"
                 android:checked="@{PreferenceKeys.isQuadBayerOn()}"
@@ -135,7 +134,7 @@
 
             <ToggleButton
                 android:id="@+id/fps_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/fps_button"
                 android:checked="@{PreferenceKeys.isFpsPreviewOn()}"
@@ -150,7 +149,7 @@
 
             <Button
                 android:id="@+id/grid_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/ic_grid_toggle"
                 android:onClick="@{top_bar_click_listener}"
@@ -165,7 +164,7 @@
 
             <com.particlesdevs.photoncamera.ui.camera.views.FlashButton
                 android:id="@+id/flash_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/ic_flash"
                 android:backgroundTint="@android:color/white"
@@ -180,14 +179,14 @@
 
             <ToggleButton
                 android:id="@+id/noise_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/noise_button"
                 android:checked="@{PreferenceKeys.isNoiseProcessingOn()}"
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
-                android:visibility="visible"
+                android:visibility="@{noise_visible ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBaseline_toBaselineOf="@+id/flash_button"
                 app:layout_constraintEnd_toStartOf="@+id/edge_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/flash_button"
@@ -195,14 +194,14 @@
 
             <ToggleButton
                 android:id="@+id/edge_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/edge_button"
                 android:checked="@{PreferenceKeys.isEdgeProcessingOn()}"
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
-                android:visibility="visible"
+                android:visibility="@{edge_visible ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBaseline_toBaselineOf="@+id/noise_toggle_button"
                 app:layout_constraintEnd_toStartOf="@+id/zoom_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/noise_toggle_button"
@@ -211,8 +210,8 @@
             <ImageButton
                 android:id="@+id/settings_button"
                 style="@style/Widget.AppCompat.ImageButton"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginEnd="1dp"
                 android:background="@drawable/ic_settings"
                 android:onClick="@{top_bar_click_listener}"
@@ -226,7 +225,7 @@
 
             <ToggleButton
                 android:id="@+id/zoom_toggle_button"
-                android:layout_width="0dp"
+                android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="14dp"
                 android:background="@drawable/zoom_button"
@@ -234,7 +233,7 @@
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
-                android:visibility="visible"
+                android:visibility="@{zoom_visible ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/settings_button"
                 app:layout_constraintStart_toEndOf="@+id/edge_toggle_button"
