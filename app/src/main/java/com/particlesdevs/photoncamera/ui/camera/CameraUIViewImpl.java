@@ -1,6 +1,9 @@
 package com.particlesdevs.photoncamera.ui.camera;
 
+import android.graphics.ImageFormat;
 import android.os.Bundle;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -47,7 +50,7 @@ class CameraUIViewImpl implements CameraUIView {
         this.mModePicker = cameraFragment.cameraFragmentBinding.layoutBottombar.modeSwitcher.modePickerView;
         this.initListeners();
         this.initModeSwitcher();
-        this.currentState = new PhotoMotionModeState(); //init mode
+        this.currentState = new VideoModeState(); //init mode
     }
 
     private void initListeners() {
@@ -221,8 +224,10 @@ class CameraUIViewImpl implements CameraUIView {
     public class VideoModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
+            topbar.setZoomVisible(true);
+            topbar.setNoiseVisible(true);
+            topbar.setEdgeVisible(true);
             topbar.setEisVisible(true);
-            // cameraUIView.cameraFragmentBinding.textureHolder.setBackgroundResource(R.drawable.gradient_vector_video);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
@@ -239,6 +244,9 @@ class CameraUIViewImpl implements CameraUIView {
     public class UnlimitedModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
+            topbar.setZoomVisible(false);
+            topbar.setNoiseVisible(false);
+            topbar.setEdgeVisible(false);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
@@ -255,6 +263,19 @@ class CameraUIViewImpl implements CameraUIView {
     public class PhotoMotionModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
+            var frameCount = PhotonCamera.getSettings().frameCount;
+            var previewFormat = PhotonCamera.getSettings().previewFormat;
+            if ((PhotonCamera.getSettings().frameCount == 1) &&
+                    ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC))) {
+                topbar.setZoomVisible(true);
+                topbar.setNoiseVisible(true);
+                topbar.setEdgeVisible(true);
+            }
+            else {
+                topbar.setZoomVisible(false);
+                topbar.setNoiseVisible(false);
+                topbar.setEdgeVisible(false);
+            }
             topbar.setEisVisible(true);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(true);
@@ -273,6 +294,17 @@ class CameraUIViewImpl implements CameraUIView {
     public class NightModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
+            if ((PhotonCamera.getSettings().frameCount == 1) &&
+                    ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC))) {
+                topbar.setZoomVisible(true);
+                topbar.setNoiseVisible(true);
+                topbar.setEdgeVisible(true);
+            }
+            else {
+                topbar.setZoomVisible(false);
+                topbar.setNoiseVisible(false);
+                topbar.setEdgeVisible(false);
+            }
             topbar.setEisVisible(false);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(true);
@@ -286,6 +318,5 @@ class CameraUIViewImpl implements CameraUIView {
             toggleConstraints(mode);
         }
     }
-
 }
 
