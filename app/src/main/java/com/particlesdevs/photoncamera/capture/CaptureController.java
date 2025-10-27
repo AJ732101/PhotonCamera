@@ -42,12 +42,12 @@ import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.AudioFormat;
 import android.media.CamcorderProfile;
-import android.media.EncoderProfiles;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaCodecInfo;
-import android.media.EncoderProfiles;
+import android.media.AudioRecord;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -95,7 +95,6 @@ import com.particlesdevs.photoncamera.util.log.Logger;
 import android.media.MediaFormat;
 import android.media.MediaCodec;
 import android.media.MediaMuxer;
-import java.util.concurrent.ArrayBlockingQueue;
 //import android.media.MediaFormat.ColorSpace;
 import android.hardware.camera2.params.TonemapCurve;
 
@@ -104,7 +103,6 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -117,14 +115,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_ON;
-import static android.hardware.camera2.CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
 import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
 import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF;
@@ -139,156 +135,6 @@ import static android.hardware.camera2.CaptureRequest.CONTROL_AF_REGIONS;
 import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureRequest.FLASH_MODE;
 import static android.hardware.camera2.CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE;
-
-class MuxerData {
-    public final ByteBuffer data;
-    public final MediaCodec.BufferInfo info;
-
-    public MuxerData(ByteBuffer data, MediaCodec.BufferInfo info) {
-        this.data = data;
-        this.info = new MediaCodec.BufferInfo();
-        this.info.set(info.offset, info.size, info.presentationTimeUs, info.flags);
-    }
-}
-
-class MuxerThread extends Thread {
-
-    private static final int MAX_QUEUE_SIZE = 100;
-    // Puffer für die Übertragung von MuxerData zwischen Threads
-    private final ArrayBlockingQueue<MuxerData> mMuxerQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
-
-    private final MediaMuxer mMediaMuxer;
-    private volatile boolean mIsRunning = false;
-    private int mTrackIndex = -1; // Video Track Index
-    private volatile boolean mSawVideoEOS = false; // End-of-Stream Flag
-
-    public MuxerThread(MediaMuxer muxer) {
-        this.mMediaMuxer = muxer;
-    }
-
-    public void setTrackIndex(int index) {
-        mTrackIndex = index;
-    }
-
-    public void queueSample(ByteBuffer data, MediaCodec.BufferInfo info) throws InterruptedException {
-        ByteBuffer copy = ByteBuffer.allocateDirect(info.size);
-        data.position(info.offset);
-        data.limit(info.offset + info.size);
-        copy.put(data);
-        copy.flip();
-
-        mMuxerQueue.put(new MuxerData(copy, info));
-    }
-
-    public void signalVideoEOS() {
-        mSawVideoEOS = true;
-        // Optional: Füge ein leeres (null) Sample zur Queue hinzu, um den Thread aufzuwecken
-        // mMuxerQueue.put(null);
-    }
-
-    @Override
-    public void run() {
-        mIsRunning = true;
-        Log.d("MuxerThread", "Muxer thread started");
-
-        while (mIsRunning) {
-            try {
-                MuxerData data = mMuxerQueue.take();
-                if (mTrackIndex != -1) {
-                    mMediaMuxer.writeSampleData(mTrackIndex, data.data, data.info);
-                }
-                if ((data.info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                    Log.d("MuxerThread", "Received EOS-Flag in muxer thread");
-                    mIsRunning = false;
-                }
-            } catch (InterruptedException e) {
-                Log.d("MuxerThread", "Thread interrupted, terminate loop");
-                mIsRunning = false;
-            } catch (Exception e) {
-                Log.e("MuxerThread", "Muxing error: " + e.getMessage());
-            }
-        }
-        Log.d("MuxerThread", "Muxer thread terminated");
-    }
-
-    public void quit() {
-        mIsRunning = false;
-        this.interrupt();
-    }
-}
-
-class VideoEncoderCallback extends MediaCodec.Callback {
-    private MediaMuxer mMediaMuxer;
-    private int mVideoTrackIndex = -1;
-    public boolean mMuxerStarted = false;
-    private final Object mMuxerLock = new Object();
-    private MuxerThread mMuxerThread;
-
-    public VideoEncoderCallback(MediaMuxer muxer) {
-        this.mMediaMuxer = muxer;
-    }
-
-    public void setMuxerThread(MuxerThread muxerThread) {
-        this.mMuxerThread = muxerThread;
-    }
-
-    @Override
-    public void onInputBufferAvailable(MediaCodec codec, int index) {
-        Log.d("VideoEncoderCallback", "onInputBufferAvailable");
-    }
-
-    @Override
-    public void onOutputBufferAvailable(MediaCodec codec, int index, MediaCodec.BufferInfo info) {
-        //Log.d("VideoEncoderCallback", "onOutputBufferAvailable");
-        ByteBuffer outputBuffer = codec.getOutputBuffer(index);
-        try {
-            if (mMuxerStarted && outputBuffer != null) {
-                if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                    Log.d("VideoEncoderCallback", "received EOS-Flag - terminate recording");
-                    mMuxerThread.signalVideoEOS();
-                    // stop muxer here or in main logic
-                }
-                try {
-                    mMuxerThread.queueSample(outputBuffer, info);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        } finally {
-            codec.releaseOutputBuffer(index, false);
-        }
-    }
-
-    @Override
-    public void onOutputFormatChanged(MediaCodec codec, MediaFormat format) {
-        synchronized (mMuxerLock) {
-            Log.d("VideoEncoderCallback", "onOutputFormatChanged");
-            if (mMuxerStarted) {
-                Log.w("VideoEncoderCallback", "tried to start MediaMuxer a second time");
-                return;
-            }
-            mVideoTrackIndex = mMediaMuxer.addTrack(format);
-            if (mVideoTrackIndex >= 0) {
-                try {
-                    mMediaMuxer.start();
-                    mMuxerThread.setTrackIndex(mVideoTrackIndex);
-                    mMuxerThread.start();
-                    mMuxerStarted = true;
-                    Log.d("VideoEncoderCallback:onOutputFormatChanged", "MediaMuxer was started, Track-Index: " + mVideoTrackIndex);
-                } catch (Exception e) {
-                    Log.e("VideoEncoderCallback:VideoEncoderCallback", "MediaMuxer start failed - " + e.getMessage());
-                }
-            } else {
-                Log.e("VideoEncoderCallback:VideoEncoderCallback", "Unable to add video track to MediaMuxer");
-            }
-        }
-    }
-
-    @Override
-    public void onError(MediaCodec codec, MediaCodec.CodecException e) {
-        Log.e("MediaCodec", e.getDiagnosticInfo());
-    }
-}
 
 /**
  * Class responsible for image capture and sending images for subsequent processing
@@ -535,11 +381,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      */
     private MediaRecorder mMediaRecorder = null;
     private MediaFormat mVideoFormat = null;
+    private MediaFormat mAudioFormat = null;
     private MediaCodec mVideoCodec = null;
+    private MediaCodec mAudioCodec = null;
     private MediaMuxer mMediaMuxer = null;
     private Surface mMediaCodecSurface = null;
-    private VideoEncoderCallback mVideoEncoderCallback = null;
-    private MuxerThread mMuxerThread = null;
+    private RecordingUtils.VideoEncoderCallback mVideoEncoderCallback = null;
+    private RecordingUtils.AudioEncoderCallback mAudioEncoderCallback = null;
+    private RecordingUtils.MuxerThread mMuxerThread = null;
+    private RecordingUtils.EncoderData mEncoderData = null;
+    AudioRecord mAudioRecord = null;
     /**
      * Whether the app is recording video now
      */
@@ -1740,6 +1591,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
                         config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
                 }
@@ -1897,8 +1749,20 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         setAdvancedParameters(mPreviewRequestBuilder);
         setContrastCurve(mPreviewRequestBuilder);
 
-        //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
-        //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.5f);
+        //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (PhotonCamera.getSettings().zoom2X) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                }
+                else {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                }
+
+            }
+        //}
 
         // AF mode for video
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
@@ -2110,8 +1974,20 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             setAdvancedParameters(captureBuilder);
             setContrastCurve(captureBuilder);
 
-            //captureBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
-            //captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.5f);
+            //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (PhotonCamera.getSettings().zoom2X) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                    }
+                    else {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    }
+    
+                }
+            //}
 
             var CurrHotPixelMode = captureBuilder.get(CaptureRequest.HOT_PIXEL_MODE);
             Log.d(TAG, "HOT_PIXEL_MODE: " + CurrHotPixelMode.toString());
@@ -2449,6 +2325,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    private MediaFormat createAudioFormat() {
+        String mimeAud = MediaFormat.MIMETYPE_AUDIO_AAC;
+        // create MediaFormat to fill out with audio parameters
+        MediaFormat format = MediaFormat.createAudioFormat(mimeAud, PhotonCamera.getSettings().audioSps, PhotonCamera.getSettings().audioChannels);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().audioBitrate * 1024);
+
+        return format;
+    }
+
     private MediaFormat createVideoFormat() {
         // resolution related
         int vidHeight = PhotonCamera.getSettings().videoHeight;
@@ -2460,7 +2345,21 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 2 * 1920;
         } else if (PhotonCamera.getSettings().videoHeight == 1080) {
             vidWidth = 1920;
-        } else {
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 9999) {
+            Size maxRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
+            vidWidth = maxRes.getWidth();
+            vidHeight = maxRes.getHeight();
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 8888) {
+            vidWidth = 6016;
+            vidHeight = 4512;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 7777) {
+            vidWidth = 7680;
+            vidHeight = 5760;
+        }
+        else {
             vidWidth = 1280;
         }
 
@@ -2476,6 +2375,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         // create MediaFormat to fill out with video parameters
         MediaFormat format = MediaFormat.createVideoFormat(mimeVid, vidWidth, vidHeight);
+
+        format.setString("camera_application_name", "com.particlesdevs.photonvidcam");
+        format.setInteger("camera_module_id", Integer.valueOf(PhotonCamera.getSettings().mCameraID));
+        format.setString("eis_enabled", PhotonCamera.getSettings().eisPhoto ? "true" : "false");
+        format.setInteger("noise_processing", PhotonCamera.getSettings().noiseReduction);
+        format.setInteger("edge_processing", PhotonCamera.getSettings().edgeProcessing);
+        format.setString("eis_enabled", PhotonCamera.getSettings().eisPhoto ? "true" : "false");
 
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265")) {
             if (PhotonCamera.getSettings().video10bit && PhotonCamera.getSettings().videoHDR) {
@@ -2568,6 +2474,26 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return format;
     }
 
+    private MediaCodec createAudioCodec(MediaFormat audioFormat) {
+        MediaCodec audioEncoder = null;
+
+        /*String mimeAud = MediaFormat.MIMETYPE_AUDIO_AAC;
+        try {
+            audioEncoder = MediaCodec.createEncoderByType(mimeAud);
+        }
+        catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+
+        audioEncoder.configure(audioFormat);
+
+        int bufferSize = AudioRecord.getMinBufferSize(PhotonCamera.getSettings().audioSps, PhotonCamera.getSettings().audioChannels, AudioFormat.ENCODING_PCM_16BIT);
+
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, PhotonCamera.getSettings().audioSps, PhotonCamera.getSettings().audioChannels, AudioFormat.ENCODING_PCM_16BIT, bufferSize * 4 );*/
+
+        return audioEncoder;
+    }
+
     private MediaCodec createVideoCodec(MediaFormat videoFormat) {
         String mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265"))
@@ -2590,43 +2516,38 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private MediaMuxer createMediaMuxer() {
         MediaMuxer mediaMuxer = null;
-
-        Date currentDate = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
-        String dateText = dateFormat.format(currentDate);
-        File dir = new File(Environment.getExternalStorageDirectory() + "//DCIM//Camera//");
-        vid = new File(dir.getAbsolutePath(), "PhotonVidCam_" + dateText + ".mp4");
-        try {
-            vid.createNewFile();
-        } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
-
+        createRecordingFile();
         try {
             mediaMuxer = new MediaMuxer(vid.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
         }
         catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
-
         return mediaMuxer;
     }
 
     private void setUpMediaRecorderNew() {
+        if (mEncoderData == null) {
+            RecordingUtils.EncoderData mEncoderData = new RecordingUtils.EncoderData();
+        }
+
         mVideoFormat = createVideoFormat();
+        //mAudioFormat = createAudioFormat();
         mVideoCodec = createVideoCodec(mVideoFormat);
+        //mAudioCodec = createAudioCodec(mAudioFormat);
         mMediaMuxer = createMediaMuxer();
 
-        mVideoEncoderCallback = new VideoEncoderCallback(mMediaMuxer);
-        mMuxerThread = new MuxerThread(mMediaMuxer);
+        mVideoEncoderCallback = new RecordingUtils.VideoEncoderCallback(mMediaMuxer, mEncoderData);
+        //mAudioEncoderCallback = new AudioEncoderCallback(mMediaMuxer, mEncoderData);
+        mMuxerThread = new RecordingUtils.MuxerThread(mMediaMuxer);
         mVideoCodec.setCallback(mVideoEncoderCallback);
+        //mAudioCodec.setCallback(mAudioEncoderCallback);
         mVideoEncoderCallback.setMuxerThread(mMuxerThread);
+        //mAudioEncoderCallback.setMuxerThread(mMuxerThread);
         mVideoCodec.configure(mVideoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        //mAudioCodec.configure(mAudioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mMediaCodecSurface = mVideoCodec.createInputSurface();
         mVideoCodec.start();
-
-        //MediaFormat trackFormat = mVideoCodec.getOutputFormat(); // done in callback
-        //int videoTrackIndex = mMediaMuxer.addTrack(trackFormat); // done in callback
     }
 
     private void releaseMediaRecorderNew() {
@@ -2647,10 +2568,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mVideoCodec.release();
             mVideoCodec = null;
         }
+        if (mAudioCodec != null)
+        {
+            mAudioCodec.stop();
+            mAudioCodec.release();
+            mAudioCodec = null;
+        }
         if (mVideoFormat != null)
         {
             mVideoFormat = null;
         }
+        if (mAudioFormat != null)
+        {
+            mAudioFormat = null;
+        }
+
+        mEncoderData.mVideoTrackIndex = -1;
+        mEncoderData.mAudioTrackIndex = -1;
     }
 
     private void setUpMediaRecorder() {
@@ -2790,16 +2724,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
-        Date currentDate = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
-        String dateText = dateFormat.format(currentDate);
-        File dir = new File(Environment.getExternalStorageDirectory() + "//DCIM//Camera//");
-        vid = new File(dir.getAbsolutePath(), "VID_" + dateText + ".mp4");
-        try {
-            vid.createNewFile();
-        } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
+        createRecordingFile();
         mMediaRecorder.setOutputFile(vid.getAbsolutePath());
         try {
             mMediaRecorder.prepare();
@@ -2821,6 +2746,40 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 cameraEventsListener.onRequestTriggerMediaScanner(Uri.fromFile(vid));
             }
             createCameraPreviewSession(false);
+        }
+    }
+
+    private void createRecordingFile() {
+        Date currentDate = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
+        String dateText = dateFormat.format(currentDate);
+        File dir = new File(Environment.getExternalStorageDirectory() + "//DCIM//Camera//");
+
+        String addOptions = "";
+        if (PhotonCamera.getSettings().zoom2X) {
+            addOptions += "_2x";
+        }
+        if ((PhotonCamera.getSettings().noiseProcessing != 0) || (PhotonCamera.getSettings().edgeProcessing != 0))
+        {
+            if (PhotonCamera.getSettings().noiseProcessing != 0) {
+                addOptions += "_N";
+            }
+            if (PhotonCamera.getSettings().edgeProcessing != 0) {
+                addOptions += "_E";
+            }
+        }
+
+        if (!PhotonCamera.getSpecific().specificSetting.recPrefix.isEmpty()) {
+            vid = new File(dir.getAbsolutePath(), PhotonCamera.getSpecific().specificSetting.recPrefix + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + ".mp4");
+        }
+        else
+        {
+            vid = new File(dir.getAbsolutePath(), "PVC_" + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + ".mp4");
+        }
+        try {
+            vid.createNewFile();
+        } catch (IOException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 
