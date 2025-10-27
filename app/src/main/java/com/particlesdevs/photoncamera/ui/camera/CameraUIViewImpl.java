@@ -50,7 +50,12 @@ class CameraUIViewImpl implements CameraUIView {
         this.mModePicker = cameraFragment.cameraFragmentBinding.layoutBottombar.modeSwitcher.modePickerView;
         this.initListeners();
         this.initModeSwitcher();
-        this.currentState = new VideoModeState(); //init mode
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            this.currentState = new VideoModeState(); //init mode
+        }
+        else {
+            this.currentState = new PhotoMotionModeState();
+        }
     }
 
     private void initListeners() {
