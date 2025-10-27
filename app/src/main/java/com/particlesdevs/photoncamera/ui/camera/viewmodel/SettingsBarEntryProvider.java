@@ -46,6 +46,7 @@ public class SettingsBarEntryProvider extends ViewModel {
     private final SettingsBarEntryModel eisEntry = SettingsBarEntryModel.newEntry(R.id.eis_entry_layout, R.string.eis_toggle_text, SettingType.EIS);
     private final SettingsBarEntryModel noiseEntry = SettingsBarEntryModel.newEntry(R.id.noise_entry_layout, R.string.noise_toggle_text, SettingType.NOISE);
     private final SettingsBarEntryModel edgeEntry = SettingsBarEntryModel.newEntry(R.id.edge_entry_layout, R.string.edge_toggle_text, SettingType.EDGE);
+    private final SettingsBarEntryModel zoomEntry = SettingsBarEntryModel.newEntry(R.id.zoom_entry_layout, R.string.zoom_toggle_text, SettingType.ZOOM);
     private final SettingsBarEntryModel saveRawEntry = SettingsBarEntryModel.newEntry(R.id.saveraw_entry_layout, R.string.raw_string, SettingType.RAW);
     private final SettingsBarEntryModel batterySaverEntry = SettingsBarEntryModel.newEntry(R.id.batterysaver_entry_layout, R.string.energy_saving, SettingType.BATTERY_SAVER);
     private final List<SettingsBarEntryModel> allEntries = new ArrayList<>(8);
@@ -59,6 +60,7 @@ public class SettingsBarEntryProvider extends ViewModel {
         allEntries.add(eisEntry);
         allEntries.add(noiseEntry);
         allEntries.add(edgeEntry);
+        allEntries.add(zoomEntry);
         allEntries.add(fpsEntry);
         allEntries.add(gridEntry);
         allEntries.add(batterySaverEntry);
@@ -70,6 +72,7 @@ public class SettingsBarEntryProvider extends ViewModel {
         createEisEntry();
         createNoiseEntry();
         createEdgeEntry();
+        createZoomEntry();
         createFlashEntry();
         createFpsEntry();
         createTimerEntry();
@@ -88,6 +91,7 @@ public class SettingsBarEntryProvider extends ViewModel {
             updateEntry(eisEntry, PreferenceKeys.isEisPhotoOn());
             updateEntry(noiseEntry, PreferenceKeys.getNoiseProcessing());
             updateEntry(edgeEntry, PreferenceKeys.getEdgeProcessing());
+            updateEntry(zoomEntry, PreferenceKeys.isZoomOn());
             updateEntry(fpsEntry, PreferenceKeys.isFpsPreviewOn());
             updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
             updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
@@ -142,6 +146,13 @@ public class SettingsBarEntryProvider extends ViewModel {
         edgeEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.edge_off_button, R.drawable.edge_off, R.string.off, 0, edgeEntry),
                 SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 1, edgeEntry)
+        );
+    }
+
+    private void createZoomEntry() {
+        zoomEntry.addSettingsBarButtonModels(
+                SettingsBarButtonModel.newButtonModel(R.id.zoom_off_button, R.drawable.zoom_2x_off, R.string.off, 0, zoomEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.zoom_on_button, R.drawable.zoom_2x_on, R.string.on, 1, zoomEntry)
         );
     }
 

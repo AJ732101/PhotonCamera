@@ -89,6 +89,7 @@
     <bool name="pref_hdr_video_def_value">false</bool>
     <bool name="pref_eis_video_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
+    <bool name="pref_2x_zoom_def_value">false</bool>
     <bool name="pref_show_basic_osd_default">true</bool>
     <bool name="pref_ois_default">true</bool>
     <bool name="pref_dng_compression_default">false</bool>

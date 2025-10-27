@@ -64,6 +64,7 @@ public class Settings {
     public boolean video10bit;
     public boolean useExtendIso;
     public boolean useExtendExposure;
+    public boolean zoom2X;
     public int noiseProcessing;
     public int edgeProcessing;
     public int audioProcessing;
@@ -130,6 +131,7 @@ public class Settings {
         useExtendExposure = PreferenceKeys.useExtendExposureOn();
         noiseProcessing = PreferenceKeys.getNoiseProcessing();
         edgeProcessing = PreferenceKeys.getEdgeProcessing();
+        zoom2X = PreferenceKeys.isZoomOn();
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();
         audioProcessingStr = PreferenceKeys.getAudioProcessingStr();

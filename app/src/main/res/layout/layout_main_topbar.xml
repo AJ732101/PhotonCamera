@@ -22,6 +22,14 @@
                 type="boolean"/>
 
         <variable
+            name="edge_visible"
+            type="boolean"/>
+
+        <variable
+            name="zoom_visible"
+            type="boolean"/>
+
+        <variable
                 name="fps_visible"
                 type="boolean"/>
 
@@ -82,7 +90,7 @@
             <ToggleButton
                 android:id="@+id/eis_toggle_button"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="0dp"
                 android:background="@drawable/eis_button"
                 android:checked="@{PreferenceKeys.isEisPhotoOn()}"
                 android:onClick="@{top_bar_click_listener}"
@@ -165,7 +173,7 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility='@{flash_visible ? View.VISIBLE:View.GONE, default=visible}'
-                app:layout_constraintBaseline_toBaselineOf="@+id/noise_toggle_button"
+                app:layout_constraintBaseline_toBaselineOf="@+id/grid_toggle_button"
                 app:layout_constraintEnd_toStartOf="@+id/noise_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/grid_toggle_button"
                 tools:visibility="visible" />
@@ -180,17 +188,15 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBaseline_toBaselineOf="@+id/flash_button"
                 app:layout_constraintEnd_toStartOf="@+id/edge_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/flash_button"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
             <ToggleButton
                 android:id="@+id/edge_toggle_button"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginEnd="50dp"
                 android:background="@drawable/edge_button"
                 android:checked="@{PreferenceKeys.isEdgeProcessingOn()}"
                 android:onClick="@{top_bar_click_listener}"
@@ -198,7 +204,7 @@
                 android:textOn=""
                 android:visibility="visible"
                 app:layout_constraintBaseline_toBaselineOf="@+id/noise_toggle_button"
-                app:layout_constraintEnd_toStartOf="@+id/settings_button"
+                app:layout_constraintEnd_toStartOf="@+id/zoom_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/noise_toggle_button"
                 tools:visibility="visible" />
 
@@ -206,7 +212,7 @@
                 android:id="@+id/settings_button"
                 style="@style/Widget.AppCompat.ImageButton"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="0dp"
                 android:layout_marginEnd="1dp"
                 android:background="@drawable/ic_settings"
                 android:onClick="@{top_bar_click_listener}"
@@ -214,6 +220,23 @@
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/zoom_toggle_button"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <ToggleButton
+                android:id="@+id/zoom_toggle_button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="14dp"
+                android:background="@drawable/zoom_button"
+                android:checked="@{PreferenceKeys.isZoomOn()}"
+                android:onClick="@{top_bar_click_listener}"
+                android:textOff=""
+                android:textOn=""
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/settings_button"
                 app:layout_constraintStart_toEndOf="@+id/edge_toggle_button"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />

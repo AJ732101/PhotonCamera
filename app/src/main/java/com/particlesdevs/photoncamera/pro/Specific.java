@@ -107,6 +107,10 @@ public class Specific {
                     specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
                     break;
                 }
+                case "singleShotZoomFactor": {
+                    specificSetting.singleShotZoomFactor = Float.parseFloat(caseS[1]);
+                    break;
+                }
                 case "colorTemperature": {
                     specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
                     break;
@@ -121,6 +125,10 @@ public class Specific {
                 }
                 case "newRecColorRange": {
                     specificSetting.newRecColorRange = caseS[1];
+                    break;
+                }
+                case "recPrefix": {
+                    specificSetting.recPrefix = caseS[1];
                     break;
                 }
             }

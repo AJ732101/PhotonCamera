@@ -54,6 +54,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SHOW_BASIC_OSD.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_BITRATE_SEEKBAR.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
@@ -105,6 +106,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO, resources.getBoolean(R.bool.pref_10bit_video_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
@@ -480,6 +482,14 @@ public class PreferenceKeys {
         }
     }
 
+    public static boolean isZoomOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_2X_ZOOM);
+    }
+
+    public static void setSetZoomOn(boolean value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, value);
+    }
+
     public static void setSetNoiseProcessing(int value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, value);
     }
@@ -586,6 +596,7 @@ public class PreferenceKeys {
         KEY_VIDEO_CODEC(R.string.pref_codec_key),
         KEY_NOISE_PROCESSING(R.string.pref_noise_processing_key),
         KEY_EDGE_PROCESSING(R.string.pref_edge_processing_key),
+        KEY_2X_ZOOM(R.string.pref_2x_zoom_key),
 
         /**
          * QualityDoesMatter - Video settings keys

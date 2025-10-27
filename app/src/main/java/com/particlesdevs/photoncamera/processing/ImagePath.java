@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.FileManager;
 
 import java.io.File;
@@ -11,7 +12,12 @@ import java.util.Locale;
 
 public class ImagePath {
     public static String generateNewFileName() {
-        return "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        if (!PhotonCamera.getSpecific().specificSetting.recPrefix.isEmpty()) {
+            return PhotonCamera.getSpecific().specificSetting.recPrefix + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        }
+        else {
+            return "PVC_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        }
     }
 
     public static Path newDNGFilePath() {
@@ -31,6 +37,19 @@ public class ImagePath {
         if (extension.equalsIgnoreCase("dng")) {
             dir = FileManager.sPHOTON_RAW_DIR;
         }
-        return Paths.get(dir.getAbsolutePath(), generateNewFileName() + '.' + extension);
+        String addOptions = "";
+        if (PhotonCamera.getSettings().zoom2X) {
+            addOptions += "_2x";
+        }
+        if ((PhotonCamera.getSettings().noiseProcessing != 0) || (PhotonCamera.getSettings().edgeProcessing != 0))
+        {
+            if (PhotonCamera.getSettings().noiseProcessing != 0) {
+                addOptions += "_N";
+            }
+            if (PhotonCamera.getSettings().edgeProcessing != 0) {
+                addOptions += "_E";
+            }
+        }
+        return Paths.get(dir.getAbsolutePath(), generateNewFileName() + addOptions + '.' + extension);
     }
 }

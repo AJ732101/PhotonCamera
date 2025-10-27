@@ -19,10 +19,12 @@ public class SpecificSetting {
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
+    public float singleShotZoomFactor = 99;
     public int colorTemperature = 99;
     public int newRecKeyFrameIntervall = 10;
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
+    public String recPrefix = "";
     public SpecificSetting(){
     }
 }

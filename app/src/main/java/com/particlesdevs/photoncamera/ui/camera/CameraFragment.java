@@ -234,7 +234,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private void initSettingsBar() {
         settingsBarEntryProvider.createEntries();
         settingsBarEntryProvider.addObserver(mCameraUIEventsListener);
-        settingsBarEntryProvider.addEntries(cameraFragmentBinding.settingsBar);
+        try {
+            settingsBarEntryProvider.addEntries(cameraFragmentBinding.settingsBar);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateSettingsBar(){

@@ -94,6 +94,13 @@ final class CameraUIController implements CameraUIEventsListener,
                 this.restartCamera();
                 break;
 
+            case R.id.zoom_toggle_button:
+                PreferenceKeys.setSetZoomOn(!PreferenceKeys.isZoomOn());
+                cameraFragment.showSnackBar(cameraFragment.getString(R.string.zoom_toggle_text) + ':' + onOff(PreferenceKeys.isZoomOn()));
+                cameraFragment.updateSettingsBar();
+                this.restartCamera();
+                break;
+
             case R.id.noise_toggle_button:
                 if (PreferenceKeys.getNoiseProcessing() == 0) {
                     PreferenceKeys.setSetNoiseProcessing(1);
@@ -269,6 +276,10 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case EIS:
                         PreferenceKeys.setEisPhoto(value.equals(1));
+                        this.restartCamera();
+                        break;
+                    case ZOOM:
+                        PreferenceKeys.setSetZoomOn(value.equals(1));
                         this.restartCamera();
                         break;
                     case NOISE:
