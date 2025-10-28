@@ -64,6 +64,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
+import android.graphics.ColorSpace;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -1688,6 +1689,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         processExecutor,
                         stateCallback
                 );
+
+                /*if (checkColorSpaceProfilesSupport(mCameraManager)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        configuration.setColorSpace(ColorSpace.Named.SRGB);
+                    }
+                }*/
+
                 mCameraDevice.createCaptureSession(configuration);
             } else {
                 mCameraDevice.createCaptureSession(surfaces, stateCallback, mBackgroundHandler);
@@ -1980,12 +1988,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (PhotonCamera.getSettings().zoom2X) {
-                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
                     }
                     else {
-                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
                     }
-    
                 }
             //}
 
@@ -2298,6 +2305,42 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void VideoStart() {
         mIsRecordingVideo = true;
         createCameraPreviewSession(false);
+    }
+
+    private boolean checkColorSpaceProfilesSupport(CameraManager manager) {
+        // Diese Capability ist erst ab API 34 (Android 14) verfügbar
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            System.out.println("❌ Gerät unterstützt API 34+ nicht.");
+            return false;
+        }
+
+        try {
+            CameraCharacteristics characteristics = manager.getCameraCharacteristics(PhotonCamera.getSettings().mCameraID);
+
+            // Überprüfen, ob die Kamera die Capability unterstützt
+            int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+
+            boolean supportsColorSpace = false;
+            if (capabilities != null) {
+                for (int capability : capabilities) {
+                    if (capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES) {
+                        supportsColorSpace = true;
+                        break;
+                    }
+                }
+            }
+
+            if (supportsColorSpace) {
+                System.out.println("✅ Kamera " + PhotonCamera.getSettings().mCameraID + " unterstützt COLOR_SPACE_PROFILES.");
+            } else {
+                System.out.println("❌ Kamera " + PhotonCamera.getSettings().mCameraID + " unterstützt COLOR_SPACE_PROFILES NICHT.");
+            }
+            return supportsColorSpace;
+
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // QualityDoesMatter - for later to have more control of the encoding parameters like color space and transfer characteristics
