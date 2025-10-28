@@ -29,6 +29,7 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -377,6 +378,15 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
+                if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    if ((PhotonCamera.getSettings().frameCount == 1) && ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC)))
+                    {
+                        stringMap.put("Mode", "SINGLE SHOT");
+                    }
+                    else {
+                        stringMap.put("Mode", "MULTIFRAME SHOT");
+                    }
+                }
                 if (physCamId != null) {
                     stringMap.put("Camera ID", camID + "-" + physCamId);
                 }
