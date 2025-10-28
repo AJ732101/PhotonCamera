@@ -179,13 +179,11 @@ public class SettingsManager {
             return;
         }
         mListeners.add(listener);
-        OnSharedPreferenceChangeListener sharedPreferenceListener =
-                getSharedPreferenceListener(listener);
+        OnSharedPreferenceChangeListener sharedPreferenceListener = getSharedPreferenceListener(listener);
         mSharedPreferenceListeners.add(sharedPreferenceListener);
         mDefaultPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
         if (mCustomPreferences != null) {
-            mCustomPreferences.registerOnSharedPreferenceChangeListener(
-                    sharedPreferenceListener);
+            mCustomPreferences.registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
         }
         Log.v(TAG, "listeners: " + mListeners);
     }
