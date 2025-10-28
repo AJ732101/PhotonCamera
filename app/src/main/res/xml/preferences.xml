@@ -25,6 +25,15 @@
                 app:maxValue="100"
                 app:minValue="5"
                 android:icon="@drawable/ic_burst_mode_black_24dp"/>
+        <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_preview_format_key"
+                app:useSimpleSummaryProvider="true"
+                android:title="@string/preview_format"
+                android:icon="@drawable/preview_24px"
+                android:entries="@array/preview_format_entries"
+                android:entryValues="@array/preview_format_entryValues"
+                android:defaultValue="@string/pref_preview_format_default"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_wide169_key"
                 android:defaultValue="@bool/pref_wide169_default"
@@ -122,7 +131,7 @@
                 android:defaultValue="@bool/pref_show_afdata_default"
                 android:title="@string/turn_on_afdata"
                 android:summary=""
-                android:icon="@drawable/ic_developer"/>
+                android:icon="@drawable/pest_control_24px"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_show_basic_osd_key"
@@ -206,7 +215,7 @@
             android:key="@string/pref_2x_zoom_key"
             android:title="@string/zoom"
             android:summary=""
-            android:icon="@drawable/zoom_2x_on"
+            android:icon="@drawable/speed_2x_24px"
             android:defaultValue="@bool/pref_2x_zoom_def_value"/>
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
@@ -461,15 +470,6 @@
                 android:entries="@array/focuspeakset_entries"
                 android:entryValues="@array/focuspeakset_entryValues"
                 android:defaultValue="@string/pref_focus_peak_default"/>
-        <ListPreference
-                android:layout="@layout/preference_with_margin"
-                android:key="@string/pref_preview_format_key"
-                app:useSimpleSummaryProvider="true"
-                android:title="@string/preview_format"
-                android:icon="@drawable/ic_saturation"
-                android:entries="@array/preview_format_entries"
-                android:entryValues="@array/preview_format_entryValues"
-                android:defaultValue="@string/pref_preview_format_default"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
