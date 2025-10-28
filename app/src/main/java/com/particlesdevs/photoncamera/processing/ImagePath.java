@@ -41,13 +41,14 @@ public class ImagePath {
         if (PhotonCamera.getSettings().zoom2X) {
             addOptions += "_2x";
         }
-        if ((PhotonCamera.getSettings().noiseProcessing != 0) || (PhotonCamera.getSettings().edgeProcessing != 0))
-        {
-            if (PhotonCamera.getSettings().noiseProcessing != 0) {
-                addOptions += "_N";
-            }
-            if (PhotonCamera.getSettings().edgeProcessing != 0) {
-                addOptions += "_E";
+        if (PhotonCamera.getSettings().frameCount == 1) {
+            if ((PhotonCamera.getSettings().noiseProcessing != 0) || (PhotonCamera.getSettings().edgeProcessing != 0)) {
+                if (PhotonCamera.getSettings().noiseProcessing != 0) {
+                    addOptions += "_N";
+                }
+                if (PhotonCamera.getSettings().edgeProcessing != 0) {
+                    addOptions += "_E";
+                }
             }
         }
         return Paths.get(dir.getAbsolutePath(), generateNewFileName() + addOptions + '.' + extension);
