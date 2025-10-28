@@ -84,7 +84,7 @@
                 app:layout_constraintBaseline_toBaselineOf="@+id/eis_toggle_button"
                 app:layout_constraintEnd_toStartOf="@+id/eis_toggle_button"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:visibility="visible" />
+                tools:visibility="gone" />
 
             <ToggleButton
                 android:id="@+id/eis_toggle_button"
