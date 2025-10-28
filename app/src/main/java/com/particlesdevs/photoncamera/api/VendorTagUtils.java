@@ -61,6 +61,14 @@ public class VendorTagUtils {
                 }
             }
 
+            var inSensorZoom = new CaptureRequest.Key<>("com.xiaomi.insensorzoom", String.class);
+            if (isSupported(builder, inSensorZoom)) {
+                Log.d(TAG, "com.xiaomi.insensorzoom is supported");
+                CameraCharacteristics.Key<String> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.insensorzoom", String.class);
+                String zoom = cameraCharacteristics.get(vendorKey);
+                Log.d(TAG, zoom);
+            }
+
             if(burst) {
                 var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);
                 if (isSupported(builder, remosaicEnabled)) {
