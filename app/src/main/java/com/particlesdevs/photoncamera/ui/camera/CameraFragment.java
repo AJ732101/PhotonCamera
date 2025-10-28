@@ -448,51 +448,54 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("Edge Processing", String.valueOf(PhotonCamera.getSettings().edgeProcessing));
                     stringMap.put("Prev EIS", String.valueOf(PhotonCamera.getSettings().videoEisInPreview));
                     //stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
-                    stringMap.put("--AUDIO--", "--OPTS--");
-                    switch (PhotonCamera.getSettings().audioProcessing) {
-                        case 0:
-                            stringMap.put("Source", "No Audio");
-                            break;
-                        case 1:
-                            stringMap.put("Source", "MIC");
-                            break;
-                        case 9:
-                            stringMap.put("Source", "Unprocessed");
-                            break;
-                        case 10:
-                            stringMap.put("Source", "Voice Performance");
-                            break;
-                        case 6:
-                            stringMap.put("Source", "Voice Recognition");
-                            break;
-                        case 5:
-                            stringMap.put("Source", "Camcorder");
-                            break;
+                    // as long as audio not working with new pipeline
+                    if (!PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
+                        stringMap.put("--AUDIO--", "--OPTS--");
+                        switch (PhotonCamera.getSettings().audioProcessing) {
+                            case 0:
+                                stringMap.put("Source", "No Audio");
+                                break;
+                            case 1:
+                                stringMap.put("Source", "MIC");
+                                break;
+                            case 9:
+                                stringMap.put("Source", "Unprocessed");
+                                break;
+                            case 10:
+                                stringMap.put("Source", "Voice Performance");
+                                break;
+                            case 6:
+                                stringMap.put("Source", "Voice Recognition");
+                                break;
+                            case 5:
+                                stringMap.put("Source", "Camcorder");
+                                break;
+                        }
+                        switch (PhotonCamera.getSettings().audioCodec) {
+                            case 0:
+                                stringMap.put("CodecA", "Default");
+                                break;
+                            case 1:
+                                stringMap.put("CodecA", "AMR_NB");
+                                break;
+                            case 2:
+                                stringMap.put("CodecA", "AMR_WB");
+                                break;
+                            case 3:
+                                stringMap.put("CodecA", "AAC");
+                                break;
+                            case 4:
+                                stringMap.put("CodecA", "HE_AAC");
+                                break;
+                            case 5:
+                                stringMap.put("CodecA", "AAC_ELD");
+                                break;
+                        }
+                        stringMap.put("Channels", String.valueOf(PhotonCamera.getSettings().audioChannels));
+                        stringMap.put("BitrateA", String.valueOf(PhotonCamera.getSettings().audioBitrate) + "KBit/s");
+                        stringMap.put("SPS", String.valueOf(PhotonCamera.getSettings().audioSps / 1024) + "kHz");
+                        stringMap.put("----------", "----------");
                     }
-                    switch (PhotonCamera.getSettings().audioCodec) {
-                        case 0:
-                            stringMap.put("CodecA", "Default");
-                            break;
-                        case 1:
-                            stringMap.put("CodecA", "AMR_NB");
-                            break;
-                        case 2:
-                            stringMap.put("CodecA", "AMR_WB");
-                            break;
-                        case 3:
-                            stringMap.put("CodecA", "AAC");
-                            break;
-                        case 4:
-                            stringMap.put("CodecA", "HE_AAC");
-                            break;
-                        case 5:
-                            stringMap.put("CodecA", "AAC_ELD");
-                            break;
-                    }
-                    stringMap.put("Channels", String.valueOf(PhotonCamera.getSettings().audioChannels));
-                    stringMap.put("BitrateA", String.valueOf(PhotonCamera.getSettings().audioBitrate) + "KBit/s");
-                    stringMap.put("SPS", String.valueOf(PhotonCamera.getSettings().audioSps / 1024) + "kHz");
-                    stringMap.put("----------", "----------");
                 }
                 if (!PhotonCamera.getSettings().useBasicOsd)
                 {
