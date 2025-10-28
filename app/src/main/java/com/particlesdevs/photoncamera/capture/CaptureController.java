@@ -1335,7 +1335,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         });
     }
-    public void setAdvancedParameters(CaptureRequest.Builder captureBuilder) {
+    public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
         if (!PhotonCamera.getSpecific().specificSetting.forceNewSettingsInRegularPhotoMode) {
             if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().frameCount != 1)) {
@@ -1347,7 +1347,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
         // QualityDoesMatter
         captureBuilder.set(CaptureRequest.STATISTICS_HOT_PIXEL_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsHotPixelMapMode);
-        if (PhotonCamera.getSpecific().specificSetting.exposureCompensation != 99)
+        if ((PhotonCamera.getSpecific().specificSetting.exposureCompensation != 99) && !isPreview)
             captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSpecific().specificSetting.exposureCompensation);
         if (PhotonCamera.getSpecific().specificSetting.hotPixelMode != 99)
             captureBuilder.set(CaptureRequest.HOT_PIXEL_MODE, PhotonCamera.getSpecific().specificSetting.hotPixelMode);
@@ -1633,7 +1633,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 }
 
                                 // QualityDoesMatter
-                                setAdvancedParameters(mPreviewRequestBuilder);
+                                setAdvancedParameters(mPreviewRequestBuilder, true);
                                 setContrastCurve(mPreviewRequestBuilder);
 
                                 if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
@@ -1754,7 +1754,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mPreviewAFMode = PreferenceKeys.getAfMode();
 
         // QualityDoesMatter
-        setAdvancedParameters(mPreviewRequestBuilder);
+        setAdvancedParameters(mPreviewRequestBuilder, true);
         setContrastCurve(mPreviewRequestBuilder);
 
         //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
@@ -1979,7 +1979,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
 
             // QualityDoesMatter
-            setAdvancedParameters(captureBuilder);
+            setAdvancedParameters(captureBuilder, false);
             setContrastCurve(captureBuilder);
 
             //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
