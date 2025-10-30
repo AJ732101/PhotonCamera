@@ -16,6 +16,7 @@ public class SpecificSetting {
     public int shadingMode = 99;
     public int exposureCompensation = 99;
     public boolean statisticsHotPixelMapMode = true;
+    public boolean xiaomi14Ultra2xHack = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;

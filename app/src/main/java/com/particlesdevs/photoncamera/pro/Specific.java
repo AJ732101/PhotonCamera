@@ -87,6 +87,10 @@ public class Specific {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "xiaomi14Ultra2xHack": {
+                    specificSetting.xiaomi14Ultra2xHack = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "forceNewSettingsInRegularPhotoMode": {
                     specificSetting.forceNewSettingsInRegularPhotoMode = Boolean.parseBoolean(caseS[1]);
                     break;

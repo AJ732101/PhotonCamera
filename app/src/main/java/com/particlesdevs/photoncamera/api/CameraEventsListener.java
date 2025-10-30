@@ -34,4 +34,7 @@ public abstract class CameraEventsListener implements CaptureEventsListener, Pro
     public abstract void onFatalError(String errorMsg);
 
     public abstract void onRequestTriggerMediaScanner(Uri f);
+
+    public abstract void onVideoRecordingStarted(File vid, boolean isTenBit, boolean isHdr);
+    public abstract void onVideoRecordingStopped();
 }

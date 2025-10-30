@@ -1592,7 +1592,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
                         config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
                 }
@@ -1747,6 +1746,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
         } else {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        }
+
+        if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_HDR);
+            }
         }
 
         mPreviewRequestBuilder.addTarget(surface);
@@ -1988,10 +1993,20 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (PhotonCamera.getSettings().zoom2X) {
-                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                        if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                        }
+                        else {
+                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                        }
                     }
                     else {
-                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                        if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                        }
+                        else {
+                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                        }
                     }
                 }
             //}
@@ -2299,12 +2314,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void VideoEnd() {
         mIsRecordingVideo = false;
+        if (cameraEventsListener != null) {
+            cameraEventsListener.onVideoRecordingStopped();
+        }
         stopRecordingVideo();
     }
 
     public void VideoStart() {
         mIsRecordingVideo = true;
         createCameraPreviewSession(false);
+        if (cameraEventsListener != null) {
+            cameraEventsListener.onVideoRecordingStarted(vid, PhotonCamera.getSettings().video10bit, PhotonCamera.getSettings().videoHDR);
+        }
     }
 
     private boolean checkColorSpaceProfilesSupport(CameraManager manager) {

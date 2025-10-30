@@ -45,6 +45,7 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
@@ -87,6 +88,7 @@ import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.SurfaceViewOver
 import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
 import com.particlesdevs.photoncamera.util.log.Logger;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -97,6 +99,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+//import java.util.logging.Handler;
+import android.os.Handler;
+import android.os.Looper;
+import java.util.Locale;
 
 
 public class CameraFragment extends Fragment implements BaseActivity.BackPressedListener {
@@ -169,6 +175,34 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         return manualModeConsole;
     }
 
+    private final Handler timerHandler = new Handler(Looper.getMainLooper());
+    private long recordingStartTime;
+    File mVidFile = null;
+    boolean mIsTenBit = false;
+    boolean mIsHdr = false;
+    private TextView recordingTimerTextView;
+    private TextView recordingSizeTextView;
+    private TextView tenBitIndicatorTextView;
+    private TextView hdrIndicatorTextView;
+
+    private final Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - recordingStartTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds %= 60;
+
+            recordingTimerTextView.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+            recordingTimerTextView.invalidate();
+            if ((mVidFile != null) && mVidFile.exists()) {
+                recordingSizeTextView.setText(String.format(Locale.getDefault(), "%02dMB", mVidFile.length() / (1024 * 1024)));
+            }
+            recordingSizeTextView.invalidate();
+            timerHandler.postDelayed(this, 1000);
+        }
+    };
+
     public CameraFragmentViewModel getCameraFragmentViewModel() {
         return cameraFragmentViewModel;
     }
@@ -229,6 +263,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         PhotonCamera.setCaptureController(captureController);
         captureController.isDualSession = supportedDevice.specific.specificSetting.isDualSessionSupported;
         this.mSwipe = new Swipe(this);
+        recordingTimerTextView = cameraFragmentBinding.recordingTimerText;
+        recordingSizeTextView = cameraFragmentBinding.recordingSizeText;
+        tenBitIndicatorTextView = cameraFragmentBinding.tenBitIndicatorText;
+        hdrIndicatorTextView = cameraFragmentBinding.hdrIndicatorText;
         initSettingsBar();
     }
 
@@ -910,6 +948,46 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         @Override
         public void onRequestTriggerMediaScanner(Uri fileUri) {
             triggerMediaScanner(fileUri);
+        }
+
+        public void onVideoRecordingStarted(File vid, boolean isTenBit, boolean isHdr) {
+            requireActivity().runOnUiThread(() -> {
+                mVidFile = vid;
+                mIsTenBit = isTenBit;
+                mIsHdr = isHdr;
+                recordingStartTime = System.currentTimeMillis();
+                recordingTimerTextView.setVisibility(View.VISIBLE);
+                recordingSizeTextView.setText("0MB");
+                recordingSizeTextView.setVisibility(View.VISIBLE);
+                if (mIsTenBit) {
+                    tenBitIndicatorTextView.setVisibility(View.VISIBLE);
+                    tenBitIndicatorTextView.invalidate();
+                } else {
+                    tenBitIndicatorTextView.setVisibility(View.GONE);
+                }
+                if (mIsHdr) {
+                    hdrIndicatorTextView.setVisibility(View.VISIBLE);
+                    hdrIndicatorTextView.invalidate();
+                }
+                else {
+                    hdrIndicatorTextView.setVisibility(View.GONE);
+                }
+
+                timerHandler.post(timerRunnable);
+            });
+        }
+
+        @Override
+        public void onVideoRecordingStopped() {
+            requireActivity().runOnUiThread(() -> {
+                timerHandler.removeCallbacks(timerRunnable);
+                recordingTimerTextView.setVisibility(View.GONE);
+                recordingSizeTextView.setVisibility(View.GONE);
+                recordingTimerTextView.setText("00:00");
+                recordingSizeTextView.setText("0MB");
+                tenBitIndicatorTextView.setVisibility(View.GONE);
+                hdrIndicatorTextView.setVisibility(View.GONE);
+            });
         }
     }
 
