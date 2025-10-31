@@ -88,7 +88,9 @@ import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.SurfaceViewOver
 import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
 import com.particlesdevs.photoncamera.util.log.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -99,10 +101,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-//import java.util.logging.Handler;
 import android.os.Handler;
 import android.os.Looper;
 import java.util.Locale;
+
+import android.os.Process;
+import java.io.FileReader;
 
 
 public class CameraFragment extends Fragment implements BaseActivity.BackPressedListener {
@@ -184,8 +188,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private TextView recordingSizeTextView;
     private TextView tenBitIndicatorTextView;
     private TextView hdrIndicatorTextView;
+    private TextView currentIsoTextView;
+    private TextView currentShutterTextView;
+
 
     private final Runnable timerRunnable = new Runnable() {
+        AppCpuReader mCpuReader = new AppCpuReader();
         @Override
         public void run() {
             long millis = System.currentTimeMillis() - recordingStartTime;
@@ -199,6 +207,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 recordingSizeTextView.setText(String.format(Locale.getDefault(), "%02dMB", mVidFile.length() / (1024 * 1024)));
             }
             recordingSizeTextView.invalidate();
+            currentIsoTextView.setText("ISO" + captureController.cameraEventsListener.mCurrentIso);
+            currentIsoTextView.invalidate();
+            currentShutterTextView.setText(captureController.cameraEventsListener.mCurrentShutterSpeed + "s");
+            currentShutterTextView.invalidate();
             timerHandler.postDelayed(this, 1000);
         }
     };
@@ -267,6 +279,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         recordingSizeTextView = cameraFragmentBinding.recordingSizeText;
         tenBitIndicatorTextView = cameraFragmentBinding.tenBitIndicatorText;
         hdrIndicatorTextView = cameraFragmentBinding.hdrIndicatorText;
+        currentIsoTextView = cameraFragmentBinding.currentIsoText;
+        currentShutterTextView = cameraFragmentBinding.currentShutterText;
         initSettingsBar();
     }
 
@@ -410,11 +424,13 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         surfaceView.post(() -> {
             PhotonCamera.getCaptureController().videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
+            captureController.cameraEventsListener.mCurrentIso = String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY));
+            IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
+            captureController.cameraEventsListener.mCurrentShutterSpeed = expoPair.ExposureString();
             if (PreferenceKeys.isAfDataOn()) {
                 //stringMap.put("ISO", String.valueOf(expoPair.iso));
                 String camID = result.getCameraId();
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
-                IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
                 if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                     if ((PhotonCamera.getSettings().frameCount == 1) && ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC)))
@@ -797,6 +813,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         /**
          * Implementation of {@link ProcessingEventsListener}
          */
+
         @Override
         public void onProcessingStarted(String processName) {
             logD("onProcessingStarted: " + processName + " Processing Started");
@@ -972,6 +989,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 else {
                     hdrIndicatorTextView.setVisibility(View.GONE);
                 }
+                currentIsoTextView.setVisibility(View.VISIBLE);
+                currentShutterTextView.setVisibility(View.VISIBLE);
 
                 timerHandler.post(timerRunnable);
             });
@@ -985,11 +1004,65 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 recordingSizeTextView.setVisibility(View.GONE);
                 recordingTimerTextView.setText("00:00");
                 recordingSizeTextView.setText("0MB");
+                currentIsoTextView.setText("ISO100");
+                currentShutterTextView.setText("1/100s");
                 tenBitIndicatorTextView.setVisibility(View.GONE);
                 hdrIndicatorTextView.setVisibility(View.GONE);
+                currentIsoTextView.setVisibility(View.GONE);
+                currentShutterTextView.setVisibility(View.GONE);
             });
         }
     }
+}
 
+class AppCpuReader {
+    private static final String TAG = "AppCpuReader";
+    private long lastAppCpuTime = 0;
+    private long lastSystemTime = 0;
+    private int cpuCores = 0;
 
+    public AppCpuReader() {
+        cpuCores = Runtime.getRuntime().availableProcessors();
+    }
+
+    public float getCpuUsage() {
+        int pid = Process.myPid();
+        String procFile = "/proc/" + pid + "/stat";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(procFile))) {
+            String line = reader.readLine();
+            String[] parts = line.split(" ");
+
+            long utime = Long.parseLong(parts[13]);
+            long stime = Long.parseLong(parts[14]);
+            long cutime = Long.parseLong(parts[15]);
+            long cstime = Long.parseLong(parts[16]);
+
+            long appCpuTime = utime + stime + cutime + cstime;
+            long systemTime = System.nanoTime();
+
+            if (lastAppCpuTime == 0 || lastSystemTime == 0) {
+                lastAppCpuTime = appCpuTime;
+                lastSystemTime = systemTime;
+                return 0f;
+            }
+
+            long appCpuTimeDelta = appCpuTime - lastAppCpuTime;
+            long systemTimeDelta = systemTime - lastSystemTime;
+
+            lastAppCpuTime = appCpuTime;
+            lastSystemTime = systemTime;
+
+            if (systemTimeDelta > 0) {
+                long appCpuTimeNs = appCpuTimeDelta * 10_000_000L;
+                float cpuUsage = (float) appCpuTimeNs / systemTimeDelta;
+                return (cpuUsage / cpuCores) * 100f;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Fehler beim Lesen der CPU-Statistik.", e);
+            return -1f;
+        }
+
+        return 0f;
+    }
 }

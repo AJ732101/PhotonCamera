@@ -230,7 +230,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public TouchFocus mTouchFocus;
 
     public final boolean mFlashEnabled = false;
-    private CameraEventsListener cameraEventsListener;
+    public CameraEventsListener cameraEventsListener;
     /**
      * A {@link Semaphore} to prevent the app from exiting before closing the camera.
      */
@@ -2331,7 +2331,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private boolean checkColorSpaceProfilesSupport(CameraManager manager) {
         // Diese Capability ist erst ab API 34 (Android 14) verfügbar
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            System.out.println("❌ Gerät unterstützt API 34+ nicht.");
+            System.out.println("❌ Device not supporting API 34+");
             return false;
         }
 
@@ -2352,9 +2352,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             if (supportsColorSpace) {
-                System.out.println("✅ Kamera " + PhotonCamera.getSettings().mCameraID + " unterstützt COLOR_SPACE_PROFILES.");
+                System.out.println("✅ Camera " + PhotonCamera.getSettings().mCameraID + " supports COLOR_SPACE_PROFILES");
             } else {
-                System.out.println("❌ Kamera " + PhotonCamera.getSettings().mCameraID + " unterstützt COLOR_SPACE_PROFILES NICHT.");
+                System.out.println("❌ Camera " + PhotonCamera.getSettings().mCameraID + " NOT supporting COLOR_SPACE_PROFILES");
             }
             return supportsColorSpace;
 
