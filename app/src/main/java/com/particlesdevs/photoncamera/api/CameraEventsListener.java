@@ -37,6 +37,7 @@ public abstract class CameraEventsListener implements CaptureEventsListener, Pro
 
     public abstract void onVideoRecordingStarted(File vid, boolean isTenBit, boolean isHdr);
     public abstract void onVideoRecordingStopped();
+    public abstract void onPreviewStarted();
 
     public String mCurrentShutterSpeed;
     public String mCurrentIso;

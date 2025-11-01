@@ -1699,6 +1699,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             } else {
                 mCameraDevice.createCaptureSession(surfaces, stateCallback, mBackgroundHandler);
             }
+            if (cameraEventsListener != null) {
+                cameraEventsListener.onPreviewStarted();
+            }
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
@@ -2085,6 +2088,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 PhotonCamera.getGyro().PrepareGyroBurst(times, BurstShakiness);
             }
+
+            /*if (PhotonCamera.getSettings().frameCount == 1) {
+                captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+            }*/
 
             //img
             Log.d(TAG, "FrameCount:" + frameCount);

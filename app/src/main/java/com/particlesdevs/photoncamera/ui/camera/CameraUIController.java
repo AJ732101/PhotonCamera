@@ -1,9 +1,16 @@
 package com.particlesdevs.photoncamera.ui.camera;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import com.particlesdevs.photoncamera.util.Log;
+
+import android.provider.MediaStore;
 import android.view.View;
 
 import androidx.lifecycle.Observer;
@@ -19,6 +26,8 @@ import com.particlesdevs.photoncamera.ui.camera.model.TopBarSettingsData;
 import com.particlesdevs.photoncamera.ui.camera.views.AuxButtonsLayout;
 import com.particlesdevs.photoncamera.ui.camera.views.FlashButton;
 import com.particlesdevs.photoncamera.ui.camera.views.TimerButton;
+import android.content.ContentUris;
+import android.widget.Toast;
 
 /**
  * Implementation of {@link CameraUIEventsListener}
@@ -84,7 +93,24 @@ final class CameraUIController implements CameraUIEventsListener,
                 break;
 
             case R.id.gallery_image_button:
-                cameraFragment.launchGallery();
+                if (PhotonCamera.getSpecific().specificSetting.useExternalViewer) {
+                    Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
+
+                    if (lastImageUri != null) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, lastImageUri);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        try {
+                            cameraFragment.startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(cameraFragment.getContext(), "No gallery app found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(cameraFragment.getContext(), "No image in gallery app found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    cameraFragment.launchGallery();
+                }
                 break;
 
             case R.id.eis_toggle_button:
@@ -302,6 +328,27 @@ final class CameraUIController implements CameraUIEventsListener,
                 cameraFragment.cameraFragmentBinding.layoutTopbar.invalidateAll();
             }
         }
-
     }
 }
+
+class MediaStoreUtils {
+    public static Uri getLatestImageUri(ContentResolver contentResolver) {
+        Uri imageUri = null;
+        String[] projection = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_TAKEN};
+        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String sortOrder = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+
+        try (Cursor cursor = contentResolver.query(queryUri, projection, null, null, sortOrder)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+                long id = cursor.getLong(idColumn);
+                imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            }
+        } catch (Exception e) {
+            Log.e("MediaStoreUtils", "Fehler beim Abrufen des neuesten Bildes: " + e.getMessage());
+        }
+
+        return imageUri;
+    }
+}
+

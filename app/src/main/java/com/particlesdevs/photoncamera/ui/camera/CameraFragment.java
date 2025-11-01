@@ -179,7 +179,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         return manualModeConsole;
     }
 
-    private final Handler timerHandler = new Handler(Looper.getMainLooper());
+    private final Handler timerHandlerVideoRec = new Handler(Looper.getMainLooper());
+    private final Handler timerHandlerAlways = new Handler(Looper.getMainLooper());
     private long recordingStartTime;
     File mVidFile = null;
     boolean mIsTenBit = false;
@@ -192,7 +193,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private TextView currentShutterTextView;
 
 
-    private final Runnable timerRunnable = new Runnable() {
+    private final Runnable timerRunnableVideoRec = new Runnable() {
         AppCpuReader mCpuReader = new AppCpuReader();
         @Override
         public void run() {
@@ -207,11 +208,18 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 recordingSizeTextView.setText(String.format(Locale.getDefault(), "%02dMB", mVidFile.length() / (1024 * 1024)));
             }
             recordingSizeTextView.invalidate();
+            timerHandlerVideoRec.postDelayed(this, 1000);
+        }
+    };
+
+    private final Runnable timerRunnableAlways = new Runnable() {
+        @Override
+        public void run() {
             currentIsoTextView.setText("ISO" + captureController.cameraEventsListener.mCurrentIso);
             currentIsoTextView.invalidate();
-            currentShutterTextView.setText(captureController.cameraEventsListener.mCurrentShutterSpeed + "s");
+            currentShutterTextView.setText(captureController.cameraEventsListener.mCurrentShutterSpeed);
             currentShutterTextView.invalidate();
-            timerHandler.postDelayed(this, 1000);
+            timerHandlerAlways.postDelayed(this, 1000);
         }
     };
 
@@ -424,9 +432,23 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         surfaceView.post(() -> {
             PhotonCamera.getCaptureController().videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
-            captureController.cameraEventsListener.mCurrentIso = String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY));
-            IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
-            captureController.cameraEventsListener.mCurrentShutterSpeed = expoPair.ExposureString();
+            if (result.getFrameNumber() % 5 == 0) {
+                captureController.cameraEventsListener.mCurrentIso = String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY));
+                Long exposureTimeNs = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+
+                if (exposureTimeNs != null && exposureTimeNs > 0) {
+                    if (exposureTimeNs >= 1_000_000_000L) {
+                        // Belichtungszeit >= 1 Sekunde
+                        double seconds = exposureTimeNs / 1_000_000_000.0;
+                        captureController.cameraEventsListener.mCurrentShutterSpeed = String.format(Locale.getDefault(), "%.1fs", seconds);
+                    } else {
+                        // Belichtungszeit < 1 Sekunde
+                        long divisor = (long) (1_000_000_000.0 / exposureTimeNs);
+                        captureController.cameraEventsListener.mCurrentShutterSpeed = "1/" + divisor + "s";
+                    }
+                }
+                //captureController.cameraEventsListener.mCurrentShutterSpeed = String.valueOf(result.get(CaptureResult.SENSOR_EXPOSURE_TIME) / 1000000000);
+            }
             if (PreferenceKeys.isAfDataOn()) {
                 //stringMap.put("ISO", String.valueOf(expoPair.iso));
                 String camID = result.getCameraId();
@@ -448,7 +470,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("Camera ID", camID);
                 }
                 stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
-                stringMap.put("Shutter", expoPair.ExposureString() + "s");
+                stringMap.put("Shutter", captureController.cameraEventsListener.mCurrentShutterSpeed);
+                IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
+                stringMap.put("Shutter1", String.valueOf(expoPair.exposure));
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
                 float len35mm = 0;
@@ -989,17 +1013,24 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 else {
                     hdrIndicatorTextView.setVisibility(View.GONE);
                 }
+
+                timerHandlerVideoRec.post(timerRunnableVideoRec);
+            });
+        }
+
+        public void onPreviewStarted() {
+            requireActivity().runOnUiThread(() -> {
                 currentIsoTextView.setVisibility(View.VISIBLE);
                 currentShutterTextView.setVisibility(View.VISIBLE);
 
-                timerHandler.post(timerRunnable);
+                timerHandlerAlways.post(timerRunnableAlways);
             });
         }
 
         @Override
         public void onVideoRecordingStopped() {
             requireActivity().runOnUiThread(() -> {
-                timerHandler.removeCallbacks(timerRunnable);
+                timerHandlerVideoRec.removeCallbacks(timerRunnableVideoRec);
                 recordingTimerTextView.setVisibility(View.GONE);
                 recordingSizeTextView.setVisibility(View.GONE);
                 recordingTimerTextView.setText("00:00");
@@ -1008,8 +1039,6 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 currentShutterTextView.setText("1/100s");
                 tenBitIndicatorTextView.setVisibility(View.GONE);
                 hdrIndicatorTextView.setVisibility(View.GONE);
-                currentIsoTextView.setVisibility(View.GONE);
-                currentShutterTextView.setVisibility(View.GONE);
             });
         }
     }

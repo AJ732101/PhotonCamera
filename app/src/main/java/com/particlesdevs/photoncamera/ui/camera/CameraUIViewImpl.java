@@ -235,6 +235,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setEisVisible(true);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
+            topbar.setHdrxVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -254,6 +255,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setEdgeVisible(false);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
+            topbar.setHdrxVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -284,6 +286,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setEisVisible(true);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(true);
+            topbar.setHdrxVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.eis_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.VISIBLE);
@@ -313,6 +316,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setEisVisible(false);
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(true);
+            topbar.setHdrxVisible(false);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.eis_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.VISIBLE);

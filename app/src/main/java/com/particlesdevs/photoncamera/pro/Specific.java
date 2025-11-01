@@ -99,6 +99,10 @@ public class Specific {
                     specificSetting.useNewRecordingPipeline = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useExternalViewer": {
+                    specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
