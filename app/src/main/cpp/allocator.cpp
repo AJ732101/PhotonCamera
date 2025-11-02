@@ -31,7 +31,7 @@ extern "C"
 #pragma ide diagnostic ignored "MemoryLeak"
 JNIEXPORT jobject JNICALL
 Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopy(JNIEnv *env, jclass clazz,
-                                                            jint capacity, jobject originBuffer) {
+                                                            jint capacity, jobject originBuffer, jint offset) {
     // Allocate a direct ByteBuffer of the specified size
     void* allocation = malloc(capacity);
     jobject buffer = env->NewDirectByteBuffer(allocation, capacity);
@@ -49,7 +49,7 @@ Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopy(JNIEnv *env, 
         return buffer;
     } else {
         // Copy the contents of the original buffer to the new buffer
-        memcpy(allocation, ptr, capacity);
+        memcpy(allocation, reinterpret_cast<uint8_t*>(ptr) + offset, capacity);
         LOGD("Buffer allocated and copied successfully");
     }
     memoryCount += capacity;
@@ -61,7 +61,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopyConvert(JNIEnv *env, jclass clazz,
                                                                           jint capacity, jobject originBuffer,
-                                                                          jint width, jint row_stride) {
+                                                                          jint width, jint row_stride, jint offset) {
     // Calculate output buffer size (width * height * 2 bytes per pixel)
     int height = capacity / row_stride;
     int output_size = width * height * sizeof(uint16_t);
@@ -83,7 +83,7 @@ Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopyConvert(JNIEnv
         return nullptr;
     }
 
-    uint8_t* input = static_cast<uint8_t*>(ptr);
+    uint8_t* input = static_cast<uint8_t*>(ptr) + offset;
     uint16_t* output = allocation;
 
     // Calculate bytes per row of actual image data (without padding)

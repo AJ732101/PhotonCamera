@@ -17,28 +17,30 @@ extern "C" {
 
 class DngCreator {
     tinydngwriter::DNGImage *dng_image0 = nullptr;
-    DngMetadata metadata;
-    
 public:
+    DngMetadata metadata;
     DngCreator() {
         LOGD("DngCreator initialized");
         dng_image0 = new tinydngwriter::DNGImage();
         dng_image0->SetSubfileType(false, false, false);
         dng_image0->SetBigEndian(false);
         dng_image0->SetSamplesPerPixel(1);
-        uint16_t bps = 16;
-        dng_image0->SetBitsPerSample(1, &bps);
         dng_image0->SetPhotometric(tinydngwriter::PHOTOMETRIC_CFA);
         dng_image0->SetPlanarConfig(tinydngwriter::PLANARCONFIG_CONTIG);
         //dng_image0->SetCompression(tinydngwriter::COMPRESSION_NEW_JPEG);
-        dng_image0->SetDNGVersion(0x1, 0x4, 0x0, 0x0);
+        dng_image0->SetDNGVersion(1, 0, 2, 5);
         dng_image0->SetExifVersion("0220");
+        metadata.bps = 16;
     }
 
     ~DngCreator() {
         if (dng_image0) {
             delete dng_image0;
         }
+    }
+
+    void setBitsPerSample(int bps) {
+        metadata.bps = bps;
     }
 
     void setCompression(bool compression) {
@@ -300,7 +302,10 @@ public:
     }
 
     void* createDng(void* imageData, int width, int height, size_t &size) {
+        metadata.width = width;
+        metadata.height = height;
         tinydngwriter::DNGWriter dng_writer(false);
+        dng_image0->SetBitsPerSample(1, &metadata.bps);
         dng_image0->SetOrientation(metadata.orientation);
         dng_image0->SetImageWidth(static_cast<unsigned int>(width));
         dng_image0->SetImageLength(static_cast<unsigned int>(height));
@@ -367,15 +372,15 @@ public:
                     reinterpret_cast<const unsigned short *>(imageData),
                     static_cast<unsigned int>(width),
                     static_cast<unsigned int>(height),
-                    16); // Assuming 16 bits per pixel
+                    metadata.bps);
         } else {
-            dng_image0->SetImageData(reinterpret_cast<const unsigned char*>(imageData), width * height * 2);
+            dng_image0->SetImageData(reinterpret_cast<const unsigned char*>(imageData), width * height * metadata.bps / 8);
         }
         dng_writer.AddImage(dng_image0);
 
         size_t writeSize = 0;
         std::string err;
-        auto res = dng_writer.WriteToMemory(&writeSize, &err);
+        auto res = dng_writer.WriteToMemory(&writeSize, &err, &metadata.strip_offset);
         if (!err.empty()) {
             LOGE("WriteToMemory error: %s", err.c_str());
         }
@@ -693,6 +698,13 @@ public:
         }
     }
 
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setBitsPerSample(JNIEnv *env, jobject obj, jlong creatorPtr, jint bps) {
+    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+    if (creator) {
+        creator->setBitsPerSample(bps);
+    }
+}
+
     JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(JNIEnv *env, jobject obj, jlong creatorPtr) {
     DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
     if (creator) {
@@ -700,4 +712,27 @@ public:
         delete creator;
     }
 }
+
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_writeFile(JNIEnv *env, jobject obj, jlong creatorPtr, jobject dngData, jobject rawData, jstring path) {
+        DngCreator *creator = reinterpret_cast<DngCreator *>(creatorPtr);
+        if (creator) {
+            void *data = env->GetDirectBufferAddress(dngData);
+            size_t size = env->GetDirectBufferCapacity(dngData);
+            void *raw = env->GetDirectBufferAddress(rawData);
+            size_t rawSize = env->GetDirectBufferCapacity(rawData);
+            memcpy(reinterpret_cast<uint8_t*>(data) + creator->metadata.strip_offset + 8, raw, creator->metadata.width*creator->metadata.height*creator->metadata.bps/8);
+            const char *pathStr = env->GetStringUTFChars(path, nullptr);
+            if (pathStr) {
+                FILE *file = fopen(pathStr, "wb");
+                if (file) {
+                    fwrite(data, 1, size, file);
+                    fclose(file);
+                    LOGD("DNG file written to %s", pathStr);
+                } else {
+                    LOGE("Failed to open file %s for writing", pathStr);
+                }
+                env->ReleaseStringUTFChars(path, pathStr);
+            }
+        }
+    }
 }

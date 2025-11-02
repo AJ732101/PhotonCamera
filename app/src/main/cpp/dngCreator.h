@@ -9,7 +9,10 @@
 #include <string>
 
 struct DngMetadata {
+    int width = 0;
+    int height = 0;
     int orientation = 0; // Default orientation
+    unsigned short bps = 16; // Bits per sample
     bool compression = false;
     // White/Black levels
     double white_level = 1023.0;
@@ -47,6 +50,8 @@ struct DngMetadata {
     bool has_as_shot_neutral = false;
     bool has_as_shot_white_xy = false;
     bool has_analog_balance = false;
+    size_t strip_offset = 0;
+    unsigned short* delinearizationTable = nullptr;
 };
 
 #ifdef __cplusplus

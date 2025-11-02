@@ -27,19 +27,19 @@ public class ImageFrame {
         return timestamp;
     }
 
-    public ImageFrame(ByteBuffer in, int format, int width, int row_stride) {
+    public ImageFrame(ByteBuffer in, int format, int width, int row_stride, int shift, int capacity) {
         ByteBuffer direct;
         if(format == 0x25){
-            direct = Allocator.allocateAndCopyConvert(in.capacity(), in, width, row_stride);
+            direct = Allocator.allocateAndCopyConvert(capacity, in, width, row_stride, shift);
         } else {
-            direct = Allocator.allocateAndCopy(in.capacity(), in);
+            direct = Allocator.allocateAndCopy(capacity, in, shift);
         }
         direct.position(0);
         buffer = direct;
     }
 
     public ImageFrame(ByteBuffer in) {
-        ByteBuffer direct = Allocator.allocateAndCopy(in.capacity(), in);
+        ByteBuffer direct = Allocator.allocateAndCopy(in.capacity(), in, 0);
         direct.position(0);
         buffer = direct;
     }

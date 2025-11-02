@@ -32,6 +32,10 @@ public class ImagePath {
         return getNewImageFilePath("heic");
     }
 
+    public static Path newImageFilePath() {
+        return getNewImageFilePath("");
+    }
+
     public static Path getNewImageFilePath(String extension) {
         File dir = FileManager.sDCIM_CAMERA;
         if (extension.equalsIgnoreCase("dng")) {

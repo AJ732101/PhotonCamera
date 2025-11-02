@@ -2158,7 +2158,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
 
                     if (onUnlimited && !unlimitedStarted) {
-                        mImageSaver.unlimitedStart(mCameraCharacteristics, result, request, cameraRotation);
+                        mImageSaver.processStart(mCameraCharacteristics, result, request, cameraRotation);
                         unlimitedStarted = true;
                     }
                     if(frameCount == 0)
@@ -2308,7 +2308,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void callUnlimitedEnd() {
         onUnlimited = false;
         //mImageSaver.unlimitedEnd();
-        mBackgroundHandler.post(() -> mImageSaver.unlimitedEnd());
+        mBackgroundHandler.post(() -> mImageSaver.processEnd());
         abortCaptures();
         createCameraPreviewSession(false);
         unlimitedStarted = false;
