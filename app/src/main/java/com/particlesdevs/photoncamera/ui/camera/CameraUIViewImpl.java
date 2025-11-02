@@ -86,6 +86,7 @@ class CameraUIViewImpl implements CameraUIView {
                 currentState = new VideoModeState();
                 break;
             case UNLIMITED:
+            case RAWVIDEO:
                 currentState = new UnlimitedModeState();
                 break;
             case PHOTO:
@@ -241,6 +242,11 @@ class CameraUIViewImpl implements CameraUIView {
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackgroundResource(R.color.panel_transparency);
             cameraFragment.cameraFragmentBinding.getRoot().setBackgroundResource(android.R.color.black);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.VISIBLE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.VISIBLE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.hdrx_entry_layout, View.GONE);
+
 
             toggleConstraints(mode);
         }
@@ -261,6 +267,10 @@ class CameraUIViewImpl implements CameraUIView {
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.GONE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.GONE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.hdrx_entry_layout, View.GONE);
 
             toggleConstraints(mode);
         }
@@ -277,11 +287,17 @@ class CameraUIViewImpl implements CameraUIView {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.VISIBLE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.VISIBLE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
             }
             else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.GONE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.GONE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
             }
             topbar.setEisVisible(true);
             topbar.setFpsVisible(true);
@@ -307,11 +323,17 @@ class CameraUIViewImpl implements CameraUIView {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.VISIBLE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.VISIBLE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
             }
             else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.GONE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.GONE);
+                cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
             }
             topbar.setEisVisible(false);
             topbar.setFpsVisible(true);
@@ -320,6 +342,7 @@ class CameraUIViewImpl implements CameraUIView {
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.eis_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.VISIBLE);
+            cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.hdrx_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.roundbutton);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
@@ -328,4 +351,3 @@ class CameraUIViewImpl implements CameraUIView {
         }
     }
 }
-
