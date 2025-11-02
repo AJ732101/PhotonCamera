@@ -23,7 +23,7 @@ public class SaverImplementation {
     private int imageFormat;
     public final ProcessingEventsListener processingEventsListener;
 
-    public ImageFrame getFrame(Image image){
+    public ImageFrame getFrame(Image image) {
         try {
             image.getFormat();
         } catch (Exception e) {
@@ -34,24 +34,38 @@ public class SaverImplementation {
         int height;
         int offset = 0;
         int capacity = image.getPlanes()[0].getBuffer().capacity();
-        if(image.getFormat() == 0x25){
+        if (image.getFormat() == 0x25) {
             width = image.getWidth();
             height = image.getHeight();
         } else {
-            width = image.getPlanes()[0].getRowStride() /
-                    image.getPlanes()[0].getPixelStride();
+            var a = image.getPlanes()[0].getRowStride();
+            var b = image.getPlanes()[0].getPixelStride();
+            if (a != 0 && b != 0) {
+                width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
+            }
+            else {
+                width = image.getWidth();
+            }
             height = image.getHeight();
         }
-        if(PhotonCamera.getSettings().aspect169){
-            if(width > height){
+        if (PhotonCamera.getSettings().aspect169) {
+            if (width > height) {
                 height = width * 9 / 16;
                 int offsetH = (image.getHeight() - height) / 2;
                 offsetH -= offsetH % 2;
-                offset = image.getPlanes()[0].getRowStride() * offsetH;
-                capacity = image.getPlanes()[0].getRowStride() * height;
+                if (image.getPlanes()[0].getRowStride() != 0) {
+                    offset = image.getWidth() * image.getPlanes()[0].getRowStride() * offsetH;
+                    capacity = image.getPlanes()[0].getRowStride() * height;
+                }
             }
         }
-        ImageFrame frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride(), offset, capacity);
+        ImageFrame frame = null;
+        if (image.getPlanes()[0].getRowStride() != 0) {
+            frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride(), offset, capacity);
+        }
+        else {
+            frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getWidth(), offset, capacity);
+        }
         frame.timestamp = image.getTimestamp();
 
         frame.width = width;

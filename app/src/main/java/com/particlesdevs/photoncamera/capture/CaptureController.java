@@ -668,7 +668,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             mTargetFormat = ImageFormat.RAW_SENSOR;
         }
-        else if (PhotonCamera.getSettings().frameCount == 1) {
+        else if ((PhotonCamera.getSettings().frameCount == 1) && PhotonCamera.getSettings().rawSaver != 2) {
             if (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG || PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) {
                 mTargetFormat = PhotonCamera.getSettings().previewFormat;
             }

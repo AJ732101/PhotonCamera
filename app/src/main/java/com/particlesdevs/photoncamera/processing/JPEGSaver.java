@@ -27,11 +27,6 @@ public class JPEGSaver extends DefaultSaver {
                 Path jpgPath = ImagePath.newJPGFilePath();
                 buffer.duplicate().get(bytes);
                 Files.write(jpgPath, bytes);
-
-//                hdrxProcessor.start(dngFile, jpgFile, IMAGE_BUFFER, mImage.getFormat(),
-//                        CaptureController.mCameraCharacteristics, CaptureController.mCaptureResult,
-//                        () -> clearImageReader(mReader));
-
                 IMAGE_BUFFER.clear();
             }
             if (PhotonCamera.getSettings().frameCount == 1) {
