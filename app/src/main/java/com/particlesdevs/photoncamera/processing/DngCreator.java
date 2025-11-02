@@ -56,7 +56,9 @@ public class DngCreator {
     private native void setDateTime(long nativePtr, String datetime);
     private native void setNoiseProfile(long nativePtr, double[] noiseProfile);
     private native void setCompression(long nativePtr, boolean useCompression);
+    private native void setBitsPerSample(long nativePtr, int bps);
     private native void destroy(long nativePtr);
+    private native void writeFile(long nativePtr, ByteBuffer dngBuffer, ByteBuffer raw, String path);
 
     public DngCreator() {
         nativePtr = create();
@@ -316,7 +318,7 @@ public class DngCreator {
         }
         // Basic format validation
         if (datetime.charAt(4) != ':' || datetime.charAt(7) != ':' || datetime.charAt(10) != ' ' ||
-            datetime.charAt(13) != ':' || datetime.charAt(16) != ':') {
+                datetime.charAt(13) != ':' || datetime.charAt(16) != ':') {
             throw new IllegalArgumentException("DateTime format invalid. Expected \"YYYY:MM:DD HH:MM:SS\"");
         }
         setDateTime(nativePtr, datetime);
@@ -350,6 +352,14 @@ public class DngCreator {
     }
 
     /**
+     * Set the bps value for the DNG image
+     * @param bps 16 to use full range
+     */
+    public void setBitsPerSample(int bps) {
+        setBitsPerSample(nativePtr, bps);
+    }
+
+    /**
      * Set the CFA (Color Filter Array) pattern
      * @param pattern CFA pattern type (use CFA_PATTERN_* constants)
      */
@@ -374,6 +384,11 @@ public class DngCreator {
         writeBuffer(outputStream, rawImageData, width, height);
     }
 
+    public ByteBuffer dngBuffer(ByteBuffer buffer, int width, int height) {
+        ByteBuffer dngData = createDNG(nativePtr, width, height, buffer);
+        return dngData;
+    }
+
     public void writeBuffer(OutputStream outputStream, ByteBuffer buffer, int width, int height) {
         ByteBuffer dngData = createDNG(nativePtr, width, height, buffer);
         if (dngData == null) {
@@ -391,6 +406,10 @@ public class DngCreator {
         }
     }
 
+    public void writeFile(ByteBuffer dngBuffer, ByteBuffer raw, String path) {
+        writeFile(nativePtr, dngBuffer, raw, path);
+    }
+
     double[] toDouble(float[] array) {
         double[] result = new double[array.length];
         for (int i = 0; i < array.length; i++) {
@@ -406,11 +425,11 @@ public class DngCreator {
         }
         setDescription(parameters.toString());
         setSoftware("PhotonCamera v" + BuildConfig.VERSION_NAME+BuildConfig.VERSION_CODE);
-        
+
         // Set current date and time
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US);
         setDateTime(dateFormat.format(new Date()));
-        
+
         // Set noise profile from noise modeler
         if (parameters.noiseModeler != null && parameters.noiseModeler.baseModel != null) {
             double[] noiseProfile = new double[6]; // RGB: scale, offset pairs
@@ -427,7 +446,7 @@ public class DngCreator {
 
             setNoiseProfile(noiseProfile);
         }
-        
+
         setMake(Build.BRAND != null ? Build.BRAND : Build.MANUFACTURER);
         setModel(Build.MODEL);
         setUniqueCameraModel(Build.MODEL + "-" + Build.BRAND + "-" + Build.MANUFACTURER);
@@ -449,12 +468,12 @@ public class DngCreator {
         setCFAPattern(parameters.cfaPattern);
         setOrientation(parameters.cameraRotation/90);
         setGainMap(parameters.gainMap,
-                   parameters.sensorPix.top,
-                   parameters.sensorPix.left,
-                   parameters.sensorPix.bottom,
-                   parameters.sensorPix.right,
-                   parameters.mapSize.x,
-                   parameters.mapSize.y);
+                parameters.sensorPix.top,
+                parameters.sensorPix.left,
+                parameters.sensorPix.bottom,
+                parameters.sensorPix.right,
+                parameters.mapSize.x,
+                parameters.mapSize.y);
     }
 
     /**
@@ -479,6 +498,4 @@ public class DngCreator {
     static {
         System.loadLibrary("dngCreator");
     }
-
-
 }

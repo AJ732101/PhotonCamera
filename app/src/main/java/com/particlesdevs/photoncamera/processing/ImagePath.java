@@ -57,4 +57,9 @@ public class ImagePath {
         }
         return Paths.get(dir.getAbsolutePath(), generateNewFileName() + addOptions + '.' + extension);
     }
+
+    public static Path getNewImageFolderPath() {
+        File dir = FileManager.sPHOTON_RAW_DIR;
+        return Paths.get(dir.getAbsolutePath(), generateNewFileName());
+    }
 }

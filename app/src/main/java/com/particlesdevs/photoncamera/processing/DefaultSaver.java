@@ -4,7 +4,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 
-//import com.particlesdevs.photoncamera.processing.processor.RawVideoProcessor;
+import com.particlesdevs.photoncamera.processing.processor.RawVideoProcessor;
 import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -18,14 +18,14 @@ import java.util.HashMap;
 public class DefaultSaver extends SaverImplementation {
     private static final String TAG = "DefaultSaver";
     final UnlimitedProcessor mUnlimitedProcessor;
-    //final RawVideoProcessor mRawVideoProcessor;
+    final RawVideoProcessor mRawVideoProcessor;
     final HdrxProcessor hdrxProcessor;
 
     public DefaultSaver(ProcessingEventsListener processingEventsListener) {
         super(processingEventsListener);
         this.hdrxProcessor = new HdrxProcessor(processingEventsListener);
         this.mUnlimitedProcessor = new UnlimitedProcessor(processingEventsListener);
-        //this.mRawVideoProcessor = new RawVideoProcessor(processingEventsListener);
+        this.mRawVideoProcessor = new RawVideoProcessor(processingEventsListener);
     }
 
     public void runRaw(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
@@ -121,7 +121,7 @@ public class DefaultSaver extends SaverImplementation {
                         processingCallback
                 );
                 break;
-            /*case RAWVIDEO:
+            case RAWVIDEO:
                 mRawVideoProcessor.videoStart(
                         ImagePath.getNewImageFolderPath(),
                         ParseExif.parse(captureResult, captureRequest),
@@ -131,7 +131,7 @@ public class DefaultSaver extends SaverImplementation {
                         cameraRotation,
                         processingCallback
                 );
-                break;*/
+                break;
         }
     }
 
@@ -140,9 +140,9 @@ public class DefaultSaver extends SaverImplementation {
             case UNLIMITED:
                 mUnlimitedProcessor.unlimitedEnd();
                 break;
-            /*case RAWVIDEO:
+            case RAWVIDEO:
                 mRawVideoProcessor.videoEnd();
-                break;*/
+                break;
         }
     }
 }

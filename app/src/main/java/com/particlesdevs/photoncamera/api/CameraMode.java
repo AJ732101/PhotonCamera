@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 public enum CameraMode {
     UNLIMITED(R.string.mode_unlimited),
+    RAWVIDEO(R.string.mode_rawvideo),
     MOTION(R.string.mode_motion),
     PHOTO(R.string.mode_photo),
     NIGHT(R.string.mode_night),

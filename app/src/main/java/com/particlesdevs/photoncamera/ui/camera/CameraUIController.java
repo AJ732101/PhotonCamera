@@ -59,6 +59,7 @@ final class CameraUIController implements CameraUIEventsListener,
                         else startTimer();
                         break;
                     case UNLIMITED:
+                    case RAWVIDEO:
                         if (!cameraFragment.captureController.onUnlimited) {
                             cameraFragment.captureController.callUnlimitedStart();
                             view.setActivated(false);
@@ -234,6 +235,7 @@ final class CameraUIController implements CameraUIEventsListener,
             case MOTION:
             case NIGHT:
             case UNLIMITED:
+            case RAWVIDEO:
             default:
                 break;
             case VIDEO:

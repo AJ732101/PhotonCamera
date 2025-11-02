@@ -15,7 +15,7 @@ public class FrameNumberSelector {
         target *= frames;
         frameCount = Math.min(Math.max((int) lightcycle, Math.min(8,frames)), frames);
         throwCount = Math.min(Math.max((int) target, Math.min(8,frames)), frames);
-        if (PhotonCamera.getSettings().selectedMode == CameraMode.UNLIMITED) frameCount = -1;
+        if (PhotonCamera.getSettings().selectedMode == CameraMode.UNLIMITED || PhotonCamera.getSettings().selectedMode == CameraMode.RAWVIDEO) frameCount = -1;
         if(PhotonCamera.getSettings().DebugData) frameCount = frames;
         throwCount = (frameCount-throwCount);
         return frameCount;

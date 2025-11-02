@@ -1161,9 +1161,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
         Size target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
         int max = 3;
-        if (mTargetFormat == mPreviewTargetFormat && isDualSession) {
-            max = PhotonCamera.getSettings().frameCount + 3;
-        }
+        if (mTargetFormat == mPreviewTargetFormat && isDualSession || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) max = Math.min(PhotonCamera.getSettings().frameCount + 3, 50);
+
         //largest = target;
         mImageReaderPreview = ImageReader.newInstance(target.getWidth(), target.getHeight(), mPreviewTargetFormat, /*maxImages*/max);
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
@@ -1193,7 +1192,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private Size getAspect(CameraMode targetMode){
         Size aspectRatio;
         boolean test1 = PhotonCamera.getSettings().aspect169;
-        if ((targetMode == CameraMode.VIDEO
+        if ((targetMode == CameraMode.VIDEO || targetMode == CameraMode.RAWVIDEO
                 && (PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777))
                 || PhotonCamera.getSettings().aspect169) {
             aspectRatio = new Size(9, 16);
@@ -1647,6 +1646,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                             mCaptureSession.captureBurst(captures, CaptureCallback, mBackgroundHandler);
                                             break;
                                         case UNLIMITED:
+                                        case RAWVIDEO:
                                             mCaptureSession.setRepeatingBurst(captures, CaptureCallback, mBackgroundHandler);
                                             break;
                                     }
@@ -1982,7 +1982,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 return;
             }
             // This is the CaptureRequest.Builder that we use to take a picture.
-            final CaptureRequest.Builder captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            final CaptureRequest.Builder captureBuilder;
+            if(PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+                if(PhotonCamera.getSettings().fpsPreview){
+                    captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+                            FpsRangeHigh);
+                } else {
+
+                }
+            } else {
+                captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            }
+            captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 30));
             float focus = mFocus;
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
 
@@ -2016,14 +2028,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             var CurrHotPixelMode = captureBuilder.get(CaptureRequest.HOT_PIXEL_MODE);
             Log.d(TAG, "HOT_PIXEL_MODE: " + CurrHotPixelMode.toString());
-            if (isDualSession) {
+            if(isDualSession) {
                 if (mTargetFormat != mPreviewTargetFormat)
                     captureBuilder.addTarget(mImageReaderRaw.getSurface());
                 else
                     captureBuilder.addTarget(mImageReaderPreview.getSurface());
             } else {
                 captureBuilder.addTarget(mImageReaderRaw.getSurface());
-                if(frametime > 0.06 && !isDualSession || PhotonCamera.getSettings().selectedMode == CameraMode.MOTION) {
+                CameraMode selectedMode = PhotonCamera.getSettings().selectedMode;
+                if(frametime > 0.06 && !isDualSession || selectedMode == CameraMode.RAWVIDEO || selectedMode == CameraMode.UNLIMITED || (!IsoExpoSelector.HDR)) {
                     captureBuilder.addTarget(surface);
                 }
             }
@@ -2065,7 +2078,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             IsoExpoSelector.HDR = true;
             Log.d(TAG, "HDR:" + IsoExpoSelector.HDR);
             Object mode = mPreviewRequestBuilder.get(CONTROL_AF_MODE);
-            if(mode != null && (int) mode != CaptureRequest.CONTROL_AF_MODE_AUTO || PreferenceKeys.getAfMode() == CaptureRequest.CONTROL_AF_MODE_AUTO) {
+            if(mode != null && (int) mode != CaptureRequest.CONTROL_AF_MODE_AUTO || PreferenceKeys.getAfMode() == CaptureRequest.CONTROL_AF_MODE_AUTO && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
                 captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
             }
@@ -2073,8 +2086,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             IsoExpoSelector.useTripod = PhotonCamera.getGyro().getTripod();
             if (frameCount == -1) {
                 for (int i = 0; i < 1; i++) {
-                    IsoExpoSelector.setExpo(captureBuilder, i, this);
-                    //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
+                    if(!PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO))
+                        IsoExpoSelector.setExpo(captureBuilder, i, this);
+                    else {
+                        captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, mPreviewAFMode);
+                        captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, mPreviewAEMode);
+                    }
                     captures.add(captureBuilder.build());
                 }
             } else {
@@ -2179,7 +2196,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     mMeasuredFrameCnt = finalFrameCount;
                     cameraEventsListener.onCaptureSequenceCompleted(null);
                     burst = false;
-                    if (PhotonCamera.getSettings().selectedMode != CameraMode.UNLIMITED) {
+                    if (PhotonCamera.getSettings().selectedMode != CameraMode.UNLIMITED && PhotonCamera.getSettings().selectedMode != CameraMode.RAWVIDEO) {
                         processExecutor.execute(() -> {
                             int cnt = 0;
                             //int captureNumber = PhotonCamera.getGyro().capturingNumber;
@@ -2224,6 +2241,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 switch (PhotonCamera.getSettings().selectedMode) {
                     case UNLIMITED:
                         mCaptureSession.setRepeatingBurst(captures, CaptureCallback, mBackgroundHandler);
+                        break;
+                    case RAWVIDEO:
+                        mCaptureSession.setRepeatingRequest(captures.get(0), CaptureCallback, mBackgroundHandler);
                         break;
                     case NIGHT:
                     case PHOTO:

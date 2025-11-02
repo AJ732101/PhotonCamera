@@ -8,6 +8,7 @@ import android.util.Range;
 import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
+import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 
 import java.util.ArrayList;
 
@@ -65,7 +66,7 @@ public class IsoExpoSelector {
             }*/
             mpy1 = 3000.0;
         }
-        if(PhotonCamera.getSettings().selectedMode == CameraMode.MOTION){
+        if(PhotonCamera.getSettings().selectedMode == CameraMode.MOTION || PhotonCamera.getSettings().selectedMode == CameraMode.RAWVIDEO){
             //mpy1 = 0.0;
             pair.denormalizeSystem();
             return pair;
@@ -103,10 +104,24 @@ public class IsoExpoSelector {
             pair.ExpoCompensateLower(1.f/2.f);
         }*/
         if (step%patternSize == 0 && HDR) {
-            pair.layerMpy = 4.f;
-            pair.curlayer = ExpoPair.exposureLayer.High;
-            if (pair.ExpoCompensateLowerExpo2(1.0 / pair.layerMpy)) {
-                pair.layerMpy = 1.f;
+            // Set multiplier based on bracketing mode (0=Off, 1=Normal, 2=High)
+            int bracketingMode = PreferenceKeys.getBracketingMode();
+            pair.layerMpy = 1.f;
+            if (bracketingMode == 1) {
+                // Normal bracketing (1x, 4x)
+                pair.layerMpy = 4.f;
+            } else if (bracketingMode == 2) {
+                // High bracketing (1x, 8x)
+                pair.layerMpy = 8.f;
+            }
+
+            if (pair.layerMpy > 1.f) {
+                pair.curlayer = ExpoPair.exposureLayer.High;
+                if (pair.ExpoCompensateLowerExpo2(1.0 / pair.layerMpy)) {
+                    pair.layerMpy = 1.f;
+                    pair.curlayer = ExpoPair.exposureLayer.Normal;
+                }
+            } else {
                 pair.curlayer = ExpoPair.exposureLayer.Normal;
             }
         }
@@ -131,7 +146,7 @@ public class IsoExpoSelector {
             if (pair.normalizedIso() <= 500.0/mpy1 && pair.exposure > ExposureIndex.sec / 50.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
                 pair.ReduceExpo();
             }
-            if (pair.exposure < ExposureIndex.sec * 3.00 && pair.exposure > ExposureIndex.sec / 3 && pair.normalizedIso() < 6400.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
+            if (pair.exposure < ExposureIndex.sec * 3.00 && pair.exposure > ExposureIndex.sec / 3 && pair.normalizedIso() < 3200.0/mpy1 && PhotonCamera.getSettings().eisPhoto) {
                 pair.FixedExpo(1.0 / 8);
                 if (pair.exposure > ExposureIndex.sec / 3) pair.ReduceExpo();
                 if (pair.normalizeCheck())

@@ -45,6 +45,7 @@ public class TimerFrameCountViewModel extends ViewModel {
             case MOTION:
                 break;
             case UNLIMITED:
+            case RAWVIDEO:
                 frameCntTime.maxframe = 0;
         }
         msg.obj = frameCntTime;
