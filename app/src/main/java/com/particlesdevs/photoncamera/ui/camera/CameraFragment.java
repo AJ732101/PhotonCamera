@@ -472,7 +472,6 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
                 stringMap.put("Shutter", captureController.cameraEventsListener.mCurrentShutterSpeed);
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
-                stringMap.put("Shutter1", String.valueOf(expoPair.exposure));
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
                 float len35mm = 0;
