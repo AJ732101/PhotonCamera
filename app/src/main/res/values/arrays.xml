@@ -103,7 +103,11 @@
     </string-array>
 
     <string-array name="video_framerate_entries">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
         <item>24</item>
+        <item>25</item>
         <item>30</item>
         <item>48</item>
         <item>50</item>
@@ -111,7 +115,11 @@
     </string-array>
 
     <string-array name="video_framerate_entryValues">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
         <item>24</item>
+        <item>25</item>
         <item>30</item>
         <item>48</item>
         <item>50</item>
