@@ -18,12 +18,15 @@ public class SpecificSetting {
     public boolean statisticsHotPixelMapMode = true;
     public boolean xiaomi14Ultra2xHack = false;
     public boolean useExternalViewer = false;
+    public boolean useSceneAndEffectMode = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
     public float singleShotZoomFactor = 99;
     public int colorTemperature = 99;
+    public float colorTint = 99.0f;
     public int newRecKeyFrameIntervall = 10;
+    public int effectMode = 99;
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
     public String recPrefix = "";

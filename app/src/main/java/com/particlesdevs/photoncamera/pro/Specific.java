@@ -103,6 +103,10 @@ public class Specific {
                     specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useSceneAndEffectMode": {
+                    specificSetting.useSceneAndEffectMode = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -121,6 +125,14 @@ public class Specific {
                 }
                 case "colorTemperature": {
                     specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "colorTint": {
+                    specificSetting.colorTint = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "effectMode": {
+                    specificSetting.effectMode = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "newRecKeyFrameIntervall": {
