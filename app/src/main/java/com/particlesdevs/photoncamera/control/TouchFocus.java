@@ -1,9 +1,13 @@
 package com.particlesdevs.photoncamera.control;
 
+import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.MeteringRectangle;
+
+import com.particlesdevs.photoncamera.api.CameraMode;
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
 import android.view.View;
@@ -115,6 +119,16 @@ public class TouchFocus {
         triggerAutoFocus(rectaf);
     }
 
+    public boolean isSingleShotJpegOrHeic() {
+        if ((PhotonCamera.getSettings().frameCount == 1) &&
+                ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) || (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG)) &&
+                (PhotonCamera.getSettings().rawSaver != 2) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            return true;
+        }
+        return false;
+    }
+
     private void triggerAutoFocus(MeteringRectangle[] rectaf) {
         if(CaptureController.burst) return;
         CaptureRequest.Builder builder = captureController.mPreviewRequestBuilder;
@@ -124,10 +138,38 @@ public class TouchFocus {
         }
         builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
         //builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
+        if (isSingleShotJpegOrHeic() && PhotonCamera.getSpecific().specificSetting.useSceneAndEffectMode) {
+            if (!captureController.getParamController().isManualMode()) {
+                builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
+                switch (PhotonCamera.getSettings().selectedMode) {
+                    case NIGHT:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_NIGHT);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        break;
+                    case MOTION:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_SPORTS);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        break;
+                    case PHOTO:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_HDR);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+                        break;
+                }
+            }
+        }
+        else {
+            builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+        }
         captureController.rebuildPreviewBuilderOneShot();
         builder.set(CaptureRequest.CONTROL_AF_REGIONS, rectaf);
         builder.set(CaptureRequest.CONTROL_AE_REGIONS, rectaf);
-        builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
         builder.set(CaptureRequest.CONTROL_AF_MODE, PreferenceKeys.getAfMode());
         builder.set(CaptureRequest.CONTROL_AE_MODE, Math.max(PreferenceKeys.getAeMode(), 1));
         //set focus area repeating,else cam forget after one frame where it should focus
