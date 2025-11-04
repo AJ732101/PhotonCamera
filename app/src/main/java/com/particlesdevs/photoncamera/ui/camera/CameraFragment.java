@@ -47,6 +47,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.hardware.camera2.CaptureRequest;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -469,12 +470,48 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 else {
                     stringMap.put("Camera ID", camID);
                 }
-                stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
-                stringMap.put("Shutter", captureController.cameraEventsListener.mCurrentShutterSpeed);
+                if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    if ((PhotonCamera.getSettings().frameCount == 1) && ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC))) {
+                        switch (PhotonCamera.getSpecific().specificSetting.effectMode) {
+                            case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
+                                stringMap.put("Effectmode:", "Mono");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_NEGATIVE:
+                                stringMap.put("Effectmode:", "Negative");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_SOLARIZE:
+                                stringMap.put("Effectmode:", "Solarize");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_SEPIA:
+                                stringMap.put("Effectmode:", "Sepia");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_POSTERIZE:
+                                stringMap.put("Effectmode:", "Posterize");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_WHITEBOARD:
+                                stringMap.put("Effectmode:", "Whiteboard");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_BLACKBOARD:
+                                stringMap.put("Effectmode:", "Blackboard");
+                                break;
+                            case CaptureRequest.CONTROL_EFFECT_MODE_AQUA:
+                                stringMap.put("Effectmode:", "Aqua");
+                                break;
+                            default:
+                                stringMap.put("Effectmode:", "None");
+                                break;
+                        }
+                    }
+                }
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
+                stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
+                //stringMap.put("ISO2", String.valueOf(expoPair.iso));
+                stringMap.put("Shutter", captureController.cameraEventsListener.mCurrentShutterSpeed);
+                //stringMap.put("Shutter2", String.valueOf(result.get(CaptureResult.SENSOR_EXPOSURE_TIME)));
+                //stringMap.put("Shutter3", String.valueOf(expoPair.exposure));
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
-                float len35mm = 0;
+                                float len35mm = 0;
                 if (physCamId == null) {
                     var lensData = mCameraLensDataMap.get(camID);
                     len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());

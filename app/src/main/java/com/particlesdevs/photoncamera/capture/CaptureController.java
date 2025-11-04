@@ -40,6 +40,7 @@ import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.AudioFormat;
@@ -121,6 +122,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_OFF;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_ON;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
 import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
@@ -656,25 +658,28 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     };
 
+    public boolean isSingleShotJpegOrHeic() {
+        if ((PhotonCamera.getSettings().frameCount == 1) &&
+           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) || (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG)) &&
+            (PhotonCamera.getSettings().rawSaver != 2) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            return true;
+        }
+        return false;
+    }
+
     public void setPreviewFormat() {
         mPreviewTargetFormat = ImageFormat.YUV_420_888;
         /*mPreviewTargetFormat = ImageFormat.JPEG;
-        if ((PhotonCamera.getSettings().frameCount == 1) && (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+        if (isSingleShot()) {
             mPreviewTargetFormat = ImageFormat.HEIC;
         }*/
     }
 
     public void setTargetFormat() {
-        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
-            mTargetFormat = ImageFormat.RAW_SENSOR;
-        }
-        else if ((PhotonCamera.getSettings().frameCount == 1) && PhotonCamera.getSettings().rawSaver != 2) {
-            if (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG || PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) {
-                mTargetFormat = PhotonCamera.getSettings().previewFormat;
-            }
-            else {
-                mTargetFormat = ImageFormat.RAW_SENSOR;
-            }
+        mTargetFormat = ImageFormat.RAW_SENSOR;
+        if (isSingleShotJpegOrHeic()) {
+            mTargetFormat = PhotonCamera.getSettings().previewFormat;
         }
     }
 
@@ -1366,8 +1371,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         if (PhotonCamera.getSpecific().specificSetting.colorTemperature != 99) {
             try {
-                captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_OFF);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TEMPERATURE, PhotonCamera.getSpecific().specificSetting.colorTemperature);
+                captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
+                android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
             }
             catch (Exception e){
                 Log.d(TAG, "setCaptureRequestBuilder:"+e);
@@ -1426,6 +1433,57 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         //captureBuilder.set(CaptureRequest.TONEMAP_CURVE, customCurve);
     }
+
+    public void determineFramerate(CameraCharacteristics characteristics) {
+        Range<Integer>[] ranges = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+        int def = 30;
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            def = PhotonCamera.getSettings().videoFramrate;
+        }
+        int min = 20;
+        if (ranges == null) {
+            ranges = new Range[1];
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                ranges[0] = new Range<>(PhotonCamera.getSettings().videoFramrate, PhotonCamera.getSettings().videoFramrate);
+            }
+            else {
+                ranges[0] = new Range<>(15, 30);
+            }
+        }
+        for (Range<Integer> value : ranges) {
+            if ((int) value.getUpper() >= def) {
+                FpsRangeDef = value;
+                break;
+            }
+        }
+
+        if (PhotonCamera.getSettings().videoFramrate != 24.0f) {
+            if (FpsRangeDef == null)
+                for (Range<Integer> range : ranges) {
+                    if ((int) range.getUpper() >= min) {
+                        FpsRangeDef = range;
+                        break;
+                    }
+                }
+            for (Range<Integer> range : ranges) {
+                if (range.getUpper() > def) {
+                    FpsRangeDef = range;
+                    break;
+                }
+            }
+        }
+        if(FpsRangeHigh == null) {
+            FpsRangeHigh = new Range<>(60, 60);
+        }
+
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            FpsRangeDef = new Range<>(PhotonCamera.getSettings().videoFramrate, PhotonCamera.getSettings().videoFramrate);
+        }
+        else if(FpsRangeDef == null || FpsRangeDef.getLower() > def) {
+            FpsRangeDef = new Range<>(7, 30);
+        }
+    }
+
     public void UpdateCameraCharacteristics(String cameraId) {
         PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(cameraId));
         CameraCharacteristics characteristics = this.mCameraCharacteristicsMap.get(cameraId);
@@ -1468,75 +1526,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // coordinate.
         int displayRotation = PhotonCamera.getGravity().getRotation();
         mSensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        Range<Integer>[] ranges = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-        int def = 30;
-        if ((PhotonCamera.getSettings().videoFramrate == 24.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            def = 24;
-        }
-        else if ((PhotonCamera.getSettings().videoFramrate == 60.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            def = 60;
-        }
-        else if ((PhotonCamera.getSettings().videoFramrate == 48.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            def = 48;
-        }
-        else if ((PhotonCamera.getSettings().videoFramrate == 50.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            def = 50;
-        }
-        int min = 20;
-        if (ranges == null) {
-            ranges = new Range[1];
-            if ((PhotonCamera.getSettings().videoFramrate == 24.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                ranges[0] = new Range<>(24, 24);
-            }
-            if ((PhotonCamera.getSettings().videoFramrate == 48.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                ranges[0] = new Range<>(48, 48);
-            }
-            if ((PhotonCamera.getSettings().videoFramrate == 50.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                ranges[0] = new Range<>(50, 50);
-            }
-            else {
-                ranges[0] = new Range<>(15, 30);
-            }
-        }
-        for (Range<Integer> value : ranges) {
-            if ((int) value.getUpper() >= def) {
-                FpsRangeDef = value;
-                break;
-            }
-        }
-
-        if (PhotonCamera.getSettings().videoFramrate != 24.0f) {
-            if (FpsRangeDef == null)
-                for (Range<Integer> range : ranges) {
-                    if ((int) range.getUpper() >= min) {
-                        FpsRangeDef = range;
-                        break;
-                    }
-                }
-            for (Range<Integer> range : ranges) {
-                if (range.getUpper() > def) {
-                    FpsRangeDef = range;
-                    break;
-                }
-            }
-        }
-        if(FpsRangeHigh == null) {
-            FpsRangeHigh = new Range<>(60, 60);
-        }
-
-        if ((PhotonCamera.getSettings().videoFramrate == 24.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            FpsRangeDef = new Range<>(24, 24);
-        }
-        if ((PhotonCamera.getSettings().videoFramrate == 48) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            FpsRangeDef = new Range<>(48, 48);
-        }
-        if ((PhotonCamera.getSettings().videoFramrate == 50) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            FpsRangeDef = new Range<>(50, 50);
-        }
-        else if(FpsRangeDef == null || FpsRangeDef.getLower() > def) {
-            FpsRangeDef = new Range<>(7, 30);
-        }
-
+        determineFramerate(characteristics);
         mCameraAfModes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
 
         // Check if the flash is supported.
@@ -1559,6 +1549,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         });
         //activity.runOnUiThread(() -> cameraEventsListener.onCharacteristicsUpdated(characteristics));
     }
+
     Surface surface;
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
@@ -1749,6 +1740,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
         } else {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            //mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
         }
 
         if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
@@ -1803,9 +1795,121 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // QualityDoesMatter
         mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, PhotonCamera.getSettings().noiseProcessing);
         mPreviewRequestBuilder.set(CaptureRequest.EDGE_MODE, PhotonCamera.getSettings().edgeProcessing);
+        setSceneAndEffectMode(mPreviewRequestBuilder);
 
         mPreviewMeteringAE = mPreviewRequestBuilder.get(CONTROL_AE_REGIONS);
         mPreviewAEMode = mPreviewRequestBuilder.get(CONTROL_AE_MODE);
+    }
+
+    private void setSceneAndEffectMode(CaptureRequest.Builder builder) {
+        if (isSingleShotJpegOrHeic() && PhotonCamera.getSpecific().specificSetting.useSceneAndEffectMode) {
+            if (!paramController.isManualMode()) {
+                builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
+                switch (PhotonCamera.getSettings().selectedMode) {
+                    case NIGHT:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_NIGHT);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        break;
+                    case MOTION:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_SPORTS);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        break;
+                    case PHOTO:
+                        builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_HDR);
+                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    /*** Converts a color temperature (in Kelvin) and a tint value into an
+     * RggbChannelVector suitable for manual white balance control in Camera2.
+     *
+     * This function includes a calibration constant (TINT_NEUTRAL_OFFSET) to
+     * compensate for the inherent color bias of a specific camera sensor, ensuring
+     * that a tint value of 0.0f results in a visually neutral image.
+     *
+     * @param kelvin The color temperature in Kelvin. Typical values range from 2000K (very warm)
+     *               to 8000K (very cold). A value of 6500K is approximately neutral daylight.
+     * @param tint   The tint value for green-magenta color shift. A useful range is
+     *               -1.0f (adds green) to +1.0f (adds magenta). 0.0f should be neutral.
+     * @return An RggbChannelVector to be used with CaptureRequest.COLOR_CORRECTION_GAINS.
+     */
+    public static RggbChannelVector kelvinAndTintToGains(int kelvin, float tint) {
+
+        // --- Calibration Constant ---
+        // This constant compensates for the strong inherent green bias of the sensor.
+        // It's based on the observation that a tint of 1.0f was needed for a neutral image.
+        // This value might need slight tuning for different devices, but it's a strong baseline.
+        final float TINT_NEUTRAL_OFFSET = 1.0f;
+
+        // Clamp input values to a reasonable range
+        kelvin = Math.max(1000, Math.min(15000, kelvin));
+        tint = Math.max(-1.0f, Math.min(1.0f, tint));
+
+        // --- Step 1: Approximate the RGB color of a black-body radiator ---
+        float temp = kelvin / 100.0f;
+        float red, green, blue;
+
+        // Calculate Red component
+        if (temp <= 66) {
+            red = 255;
+        } else {
+            red = temp - 60;
+            red = (float) (329.698727446 * Math.pow(red, -0.1332047592));
+        }
+
+        // Calculate Green component
+        if (temp <= 66) {
+            green = temp;
+            green = (float) (99.4708025861 * Math.log(green) - 161.1195681661);
+        } else {
+            green = temp - 60;
+            green = (float) (288.1221695283 * Math.pow(green, -0.0755148492));
+        }
+
+        // Calculate Blue component
+        if (temp >= 66) {
+            blue = 255;
+        } else {
+            if (temp <= 19) {
+                blue = 0;
+            } else {
+                blue = temp - 10;
+                blue = (float) (138.5177312231 * Math.log(blue) - 305.0447927307);
+            }
+        }
+
+        red = Math.max(0, Math.min(255, red));
+        green = Math.max(0, Math.min(255, green));
+        blue = Math.max(0, Math.min(255, blue));
+
+        // --- Step 2: Calculate the inverse gains required to neutralize the light color ---
+        float redGain = 255.0f / red;
+        float greenGain = 255.0f / green;
+        float blueGain = 255.0f / blue;
+
+        // --- Step 3: Normalize the gains ---
+        float minGain = Math.min(redGain, Math.min(greenGain, blueGain));
+        redGain /= minGain;
+        greenGain /= minGain;
+        blueGain /= minGain;
+
+        // --- Step 4: Apply the tint adjustment with the calibration offset ---
+        // The user's tint is now combined with the neutral offset before being applied.
+        float totalTint = tint + TINT_NEUTRAL_OFFSET;
+        float tintFactor = totalTint * 0.5f;
+        greenGain = greenGain * (1.0f - tintFactor);
+
+        // The RggbChannelVector expects gains for (Red, Green_even, Green_odd, Blue)
+        return new RggbChannelVector(redGain, greenGain, greenGain, blueGain);
     }
 
     private void showToast(String msg) {
@@ -2082,6 +2186,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
                 captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
             }
+
             MeteringRectangle rectaf = new MeteringRectangle(0, 0, 0, 0, 0);
             IsoExpoSelector.useTripod = PhotonCamera.getGyro().getTripod();
             if (frameCount == -1) {
@@ -2099,16 +2204,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 for (int i = 0; i < frameCount; i++) {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
                     times[i] = IsoExpoSelector.lastSelectedExposure;
+                    /*if (isSingleShotJpegOrHeic()) {
+                        captureBuilder.set(CONTROL_AE_MODE, CONTROL_AE_MODE_OFF);
+                        captureBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 250000L);
+                        captureBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 12800);
+                        captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+                    }*/
+                    setSceneAndEffectMode(captureBuilder);
                     captures.add(captureBuilder.build());
                     //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
                     mCaptureRequest = captureBuilder.build();
                 }
                 PhotonCamera.getGyro().PrepareGyroBurst(times, BurstShakiness);
             }
-
-            /*if (PhotonCamera.getSettings().frameCount == 1) {
-                captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
-            }*/
 
             //img
             Log.d(TAG, "FrameCount:" + frameCount);
@@ -2739,22 +2847,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else
             profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
 
-        if ((PhotonCamera.getSettings().videoFramrate == 24.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            mMediaRecorder.setVideoFrameRate(24);
-            mMediaRecorder.setCaptureRate(24.0d);
-        }
-        else if ((PhotonCamera.getSettings().videoFramrate == 48.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            mMediaRecorder.setVideoFrameRate(48);
-            mMediaRecorder.setCaptureRate(48.0d);
-        }
-        else if ((PhotonCamera.getSettings().videoFramrate == 50.0f) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            mMediaRecorder.setVideoFrameRate(50);
-            mMediaRecorder.setCaptureRate(50.0d);
-        }
-        else {
-            mMediaRecorder.setVideoFrameRate((int)PhotonCamera.getSettings().videoFramrate);
-            mMediaRecorder.setCaptureRate((double)PhotonCamera.getSettings().videoFramrate);
-        }
+        mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);
+        mMediaRecorder.setCaptureRate(PhotonCamera.getSettings().videoFramrate);
 
         if (PhotonCamera.getSettings().videoHeight == 9999) {
             Size maxRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
