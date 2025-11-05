@@ -1,8 +1,7 @@
 package com.particlesdevs.photoncamera.ui;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +16,23 @@ import com.particlesdevs.photoncamera.R;
 
 import java.util.List;
 
-public class AppChooserAdapter extends ArrayAdapter<ResolveInfo> {
+// Helper class to hold app information
+class AppEntry {
+    final String appName;
+    final String packageName;
+    final Drawable icon;
 
-    private final PackageManager pm;
+    AppEntry(String appName, String packageName, Drawable icon) {
+        this.appName = appName;
+        this.packageName = packageName;
+        this.icon = icon;
+    }
+}
 
-    public AppChooserAdapter(@NonNull Context context, List<ResolveInfo> apps) {
+public class AppChooserAdapter extends ArrayAdapter<AppEntry> {
+
+    public AppChooserAdapter(@NonNull Context context, List<AppEntry> apps) {
         super(context, 0, apps);
-        this.pm = context.getPackageManager();
     }
 
     @NonNull
@@ -34,14 +43,14 @@ public class AppChooserAdapter extends ArrayAdapter<ResolveInfo> {
             listItemView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_app_chooser, parent, false);
         }
 
-        ResolveInfo currentApp = getItem(position);
+        AppEntry currentApp = getItem(position);
 
         ImageView iconView = listItemView.findViewById(R.id.app_icon);
         TextView nameView = listItemView.findViewById(R.id.app_name);
 
         if (currentApp != null) {
-            iconView.setImageDrawable(currentApp.loadIcon(pm));
-            nameView.setText(currentApp.loadLabel(pm));
+            iconView.setImageDrawable(currentApp.icon);
+            nameView.setText(currentApp.appName);
         }
 
         return listItemView;

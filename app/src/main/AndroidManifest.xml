@@ -13,6 +13,13 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="image/*" />
+        </intent>
+    </queries>
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -34,7 +41,19 @@
         <activity
             android:name="com.particlesdevs.photoncamera.ui.ShortcutDispatcherActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.particlesdevs.photoncamera.action.OPEN_SETTINGS" />
+                <action android:name="com.particlesdevs.photoncamera.action.OPEN_GALLERY" />
+                <action android:name="com.particlesdevs.photoncamera.action.SET_DEFAULT_GALLERY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.particlesdevs.photoncamera.ui.GalleryChooserActivity"
+            android:label="Select Default Gallery"
+            android:theme="@style/Theme.Photon.BaseApp" />
 
         <activity
             android:name="com.particlesdevs.photoncamera.ui.settings.SettingsActivity"
@@ -67,6 +86,11 @@
             android:theme="@style/Theme.Photon.BaseApp"
             android:icon="@mipmap/ic_gallery_launcher"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
                 <data android:mimeType="image/*" />

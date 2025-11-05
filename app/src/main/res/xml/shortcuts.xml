@@ -5,19 +5,15 @@
         android:icon="@mipmap/ic_gallery_launcher"
         android:shortcutShortLabel="@string/gallery_name"
         android:shortcutLongLabel="@string/gallery_name" >
-        <intent
-            android:action="com.particlesdevs.photoncamera.action.OPEN_GALLERY"
-            android:targetClass="com.particlesdevs.photoncamera.ui.ShortcutDispatcherActivity" />
+        <intent android:action="com.particlesdevs.photoncamera.action.OPEN_GALLERY" />
     </shortcut>
     <shortcut
-        android:shortcutId="select_gallery"
+        android:shortcutId="set_default_gallery"
         android:enabled="true"
         android:icon="@mipmap/ic_gallery_launcher"
-        android:shortcutShortLabel="@string/select_gallery"
-        android:shortcutLongLabel="@string/select_gallery" >
-        <intent
-            android:action="com.particlesdevs.photoncamera.action.SELECT_GALLERY"
-            android:targetClass="com.particlesdevs.photoncamera.ui.ShortcutDispatcherActivity" />
+        android:shortcutShortLabel="@string/reset_gallery"
+        android:shortcutLongLabel="@string/reset_gallery" >
+        <intent android:action="com.particlesdevs.photoncamera.action.SET_DEFAULT_GALLERY" />
     </shortcut>
     <shortcut
         android:shortcutId="open_settings"
@@ -25,8 +21,6 @@
         android:icon="@drawable/ic_settings"
         android:shortcutShortLabel="@string/settings"
         android:shortcutLongLabel="@string/settings" >
-        <intent
-            android:action="com.particlesdevs.photoncamera.action.OPEN_SETTINGS"
-            android:targetClass="com.particlesdevs.photoncamera.ui.ShortcutDispatcherActivity" />
+        <intent android:action="com.particlesdevs.photoncamera.action.OPEN_SETTINGS" />
     </shortcut>
 </shortcuts>
