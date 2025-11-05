@@ -2,7 +2,9 @@ package com.particlesdevs.photoncamera.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 
@@ -24,13 +26,8 @@ public class ShortcutDispatcherActivity extends Activity {
                 targetIntent = new Intent(this, SettingsActivity.class);
             } else if ("com.particlesdevs.photoncamera.action.OPEN_GALLERY".equals(action)) {
                 targetIntent = new Intent(this, GalleryActivity.class);
-            } else if ("com.particlesdevs.photoncamera.action.SELECT_GALLERY".equals(action)) {
-                // Use ACTION_OPEN_DOCUMENT as the robust, modern way to ask the user to select a file.
-                targetIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                targetIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                targetIntent.setType("*/*");
-                String[] mimeTypes = {"image/*", "video/*"};
-                targetIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+            } else if ("com.particlesdevs.photoncamera.action.SET_DEFAULT_GALLERY".equals(action)) {
+                targetIntent = new Intent(this, GalleryChooserActivity.class);
             }
 
             if (targetIntent != null) {
