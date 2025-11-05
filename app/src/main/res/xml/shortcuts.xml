@@ -1,0 +1,24 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="open_gallery"
+        android:enabled="true"
+        android:icon="@mipmap/ic_gallery_launcher"
+        android:shortcutShortLabel="@string/gallery_name"
+        android:shortcutLongLabel="@string/gallery_name" >
+        <intent
+            android:action="com.particlesdevs.photoncamera.action.OPEN_GALLERY"
+            android:targetPackage="com.particlesdevs.photoncamera"
+            android:targetClass="com.particlesdevs.photoncamera.gallery.ui.GalleryActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="open_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_settings"
+        android:shortcutShortLabel="@string/settings"
+        android:shortcutLongLabel="@string/settings" >
+        <intent
+            android:action="com.particlesdevs.photoncamera.action.OPEN_SETTINGS"
+            android:targetPackage="com.particlesdevs.photoncamera"
+            android:targetClass="com.particlesdevs.photoncamera.ui.settings.SettingsActivity" />
+    </shortcut>
+</shortcuts>
