@@ -106,7 +106,7 @@ public class DefaultSaver extends SaverImplementation {
     public void processStart(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
         super.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
         Path dngFile = ImagePath.newDNGFilePath();
-        Path jpgFile = ImagePath.newImageFilePath();
+        Path jpgFile = ImagePath.newJPGFilePath();
         switch (PhotonCamera.getSettings().selectedMode) {
             case UNLIMITED:
                 mUnlimitedProcessor.configure(PhotonCamera.getSettings().rawSaver);
