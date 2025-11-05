@@ -5,9 +5,11 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import com.particlesdevs.photoncamera.util.Log;
 
 import android.provider.MediaStore;
@@ -22,6 +24,7 @@ import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.control.CountdownTimer;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.settings.SettingType;
+import com.particlesdevs.photoncamera.ui.GalleryChooserActivity;
 import com.particlesdevs.photoncamera.ui.camera.model.TopBarSettingsData;
 import com.particlesdevs.photoncamera.ui.camera.views.AuxButtonsLayout;
 import com.particlesdevs.photoncamera.ui.camera.views.FlashButton;
@@ -100,6 +103,13 @@ final class CameraUIController implements CameraUIEventsListener,
                     if (lastImageUri != null) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, lastImageUri);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cameraFragment.requireContext());
+                        String galleryPackage = prefs.getString(GalleryChooserActivity.KEY_DEFAULT_GALLERY_PACKAGE, null);
+
+                        if (galleryPackage != null) {
+                            intent.setPackage(galleryPackage);
+                        }
 
                         try {
                             cameraFragment.startActivity(intent);
@@ -353,4 +363,3 @@ class MediaStoreUtils {
         return imageUri;
     }
 }
-
