@@ -14,14 +14,20 @@ uniform float noiseS;
 uniform float noiseO;
 uniform float integralNorm;
 uniform bool first;
+uniform int cfaPattern;
 #define MAXWEIGHT 1.0
 #define MINWEIGHT 0.0
 #define SIGMA 1.5
-vec4 robustWeight(vec4 w){
+/*vec4 robustWeight(vec4 w){
     return vec4(w.r * 2.0 + w.g + w.a,
                 w.g * 2.0 + w.b + w.r,
                 w.b * 2.0 + w.a + w.g,
                 w.a * 2.0 + w.r + w.b) / 4.0;
+}*/
+vec4 robustWeight(vec4 w){
+    float mv = min(w.r, min(w.g, min(w.b, w.a)));
+    mv = smoothstep(0.1, 0.9, mv);
+    return vec4(mv);
 }
 /*vec4 robustWeight(vec4 w){
     return vec4(w.r + w.g + w.a + w.b,
@@ -29,6 +35,11 @@ vec4 robustWeight(vec4 w){
                 w.b + w.a + w.g + w.r,
                 w.a + w.r + w.b + w.g) / 4.0;
 }*/
+
+float bayerCoord(ivec2 pos){
+    int cnt = (pos.x %2) + 2 * (pos.y %2);
+    return imageLoad(diffTexture, pos/2)[cnt];
+}
 
 #import interpolation
 #import gaussian

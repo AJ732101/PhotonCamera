@@ -82,9 +82,9 @@ mat4 getSharedDifferences(ivec2 xy, ivec2 prevOffset) {
             //alterValue *= sqrt((alterValue*alterValue)/(alterValue*alterValue + maxNoise*maxNoise));
             //float luma = brightness(baseValue) - brightness(alterValue);
             //float luma = texture(baseCurve, vec2(brightness(baseValue), 0.5)).r - texture(alterCurve, vec2(brightness(alterValue),0.5)).r;
-            float luma = baseBrightness - brightness(alterValue);
+            //float luma = baseBrightness - brightness(alterValue);
             //float luma = texture(baseCurve, vec2(brightness(baseValue), 0.5)).r - texture(alterCurve, vec2(brightness(alterValue),0.5)).r;
-            differences[i][j] = abs(luma);
+            differences[i][j] = dot(abs(baseValue - alterValue), vec4(0.25));//abs(luma);
         }
     }
     //if(brightness(baseValue) > brightness(clamp(baseValue, 0.0, exposure)) || brightness(baseValue) < 0.001){
@@ -104,6 +104,9 @@ mat4 getOffsetDifferences(ivec2 xy) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             vec2 prevOffset = vec4ToAlignment(getAlignment(xy/(2*TILE) + ivec2(i-1, j-1)))*2.0;
+            if(i == 3 && j == 3) {
+                prevOffset = vec2(0.0);
+            }
             vec4 alterValue = clamp(getPixel(xy + ivec2(prevOffset), alterTexture), 0.0, exposure);
             //alterValue *= sqrt((alterValue*alterValue)/(alterValue*alterValue + maxNoise*maxNoise));
             //alterValue = (alterValue-alterMin) / (alterMax-alterMin);
@@ -111,7 +114,7 @@ mat4 getOffsetDifferences(ivec2 xy) {
             //float luma = median4(baseValue)-median4(alterValue);
             //float luma = texture(baseCurve, vec2(brightness(baseValue), 0.5)).r - texture(alterCurve, vec2(brightness(alterValue),0.5)).r;
             float luma = baseBrightness - brightness(alterValue);
-            differences[i][j] = abs(luma);
+            differences[i][j] = dot(abs(baseValue - alterValue), vec4(0.25));//abs(luma);
         }
     }
     if (baseBrightness > brightness(clamp(baseValue, 0.0, exposure)) || baseBrightness < 0.001) {
@@ -164,7 +167,11 @@ highp vec2 getPrevOffset(ivec2 tile_xy) {
         for (int i = 0; i < 4; i++) {
             if (sum[i][j] < minDiff) {
                 minDiff = sum[i][j];
-                bestOffset = vec2(i - 1, j - 1);
+                if(i == 3 && j == 3) {
+                    bestOffset = vec2(0.0);
+                } else {
+                    bestOffset = vec2(i - 1, j - 1);
+                }
             }
         }
     }
@@ -242,11 +249,11 @@ void main() {
     if (localIndex == 0) {
         // Store the best offset in the output texture
         imageStore(outTexture, tile_xy, alignmentToVec4(bestOffset.xy));
-        vec4 alter = clamp(getPixel(tile_xy*TILE, alterTexture), vec4(0.0), vec4(exposure));
-        vec4 base = clamp(getPixel(tile_xy*TILE, baseTexture), vec4(0.0), vec4(exposure));
+        //vec4 alter = clamp(getPixel(tile_xy*TILE, alterTexture), vec4(0.0), vec4(exposure));
+        //vec4 base = clamp(getPixel(tile_xy*TILE, baseTexture), vec4(0.0), vec4(exposure));
         //float luma = texture(baseCurve, vec2(brightness(base), 0.5)).r - texture(alterCurve, vec2(brightness(alter),0.5)).r;
         //float luma = brightness(base) - brightness(alter);
-        float luma = brightness(alter);
+        //float luma = brightness(alter);
         //float luma = texture(alterCurve, vec2(brightness(alter),0.5)).r;
         //imageStore(outTexture, tile_xy, abs(vec4(luma)));
     }

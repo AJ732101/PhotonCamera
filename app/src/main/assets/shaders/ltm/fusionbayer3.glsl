@@ -53,6 +53,8 @@ void main() {
     vec4 laplaceVal = laplace(normalExpo, expoVal/NORM, xyCenter)*NORM;
 
     weights *= laplaceVal + LAPLACEMIN;
+
+    weights *= weights;
     // How are we going to blend these two?
     vec4 expoDiff = texelFetch(normalExpoDiff, xyCenter, 0);
     result = base + (expoDiff.r*weights.r + expoDiff.g*weights.g + expoDiff.b*weights.b + expoDiff.a*weights.a)/(weights.r + weights.g + weights.b + weights.a);

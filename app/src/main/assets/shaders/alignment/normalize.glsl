@@ -42,7 +42,7 @@ void main() {
     float br = dot(bayer, vec4(0.25));
     float noise = sqrt(noiseS * 1.0 +  noiseO);
     float thr = 0.0;
-    //bayer = clamp(bayer*gains, vec4(0.0), vec4(1.0));
+    bayer = clamp(bayer*gains, vec4(0.0), vec4(1.0));
     vec4 res = (clamp((bayer * vec4(exposure) - thr)/(1.0 - thr), 0.0, 1.0));
     //res *= res;
     //res = mix(res*res, (res), clamp((br-0.1)/0.9, 0.0, 1.0));

@@ -15,11 +15,16 @@ uniform float integralNorm;
 #define MAXWEIGHT 1.0
 #define MINWEIGHT 0.0
 #define SIGMA 1.5
-vec4 robustWeight(vec4 w){
+/*vec4 robustWeight(vec4 w){
     return vec4(w.r * 2.0 + w.g + w.a,
                 w.g * 2.0 + w.b + w.r,
                 w.b * 2.0 + w.a + w.g,
                 w.a * 2.0 + w.r + w.b) / 4.0;
+}*/
+vec4 robustWeight(vec4 w){
+    float mv = min(w.r, min(w.g, min(w.b, w.a)));
+    //mv = smoothstep(0.1, 0.9, mv);
+    return vec4(mv);
 }
 /*vec4 robustWeight(vec4 w){
     return vec4(w.r + w.g + w.a + w.b,

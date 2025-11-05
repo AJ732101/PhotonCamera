@@ -60,6 +60,7 @@ out vec3 Output;
 #define luminocity(x) dot(x.rgb, vec3(0.299, 0.587, 0.114))
 #define MINP 1.0
 #define NOISEO 0.0
+#define NOISES 0.0
 #define LUT 0
 #define CONTRAST 1.0
 #define SHADOWS 0.0
@@ -414,7 +415,8 @@ vec3 applyColorSpace(vec3 pRGB,float tonemapGain, float gainsVal){
     float br = (pRGB.r+pRGB.g+pRGB.b)/3.0;
     //pRGB /= br;
     //float vignetteFactor = mix(0.0,VIGNETTE,clamp(br*100.0 - 0.01,0.0,1.0));
-    float vignetteFactor = smoothstep(0.0,0.05,br)*VIGNETTE;
+    float noise = sqrt(NOISES + NOISEO + 1e-8);
+    float vignetteFactor = smoothstep(0.0,noise * 8.0,br)*VIGNETTE;
     gainsVal = mix(float(1.0), gainsVal, vignetteFactor);
     //br = clamp(reinhard_extended(br*gainsVal,max(1.0,gainsVal)),0.0,1.0);
     //br = clamp(reinhard_extended(br*tonemapGain,max(1.0,tonemapGain)),0.0,1.0);
