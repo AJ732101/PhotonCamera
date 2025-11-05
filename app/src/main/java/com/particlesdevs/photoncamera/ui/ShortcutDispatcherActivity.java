@@ -3,7 +3,6 @@ package com.particlesdevs.photoncamera.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
 
 import androidx.annotation.Nullable;
 
@@ -26,11 +25,16 @@ public class ShortcutDispatcherActivity extends Activity {
             } else if ("com.particlesdevs.photoncamera.action.OPEN_GALLERY".equals(action)) {
                 targetIntent = new Intent(this, GalleryActivity.class);
             } else if ("com.particlesdevs.photoncamera.action.SELECT_GALLERY".equals(action)) {
-                targetIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                targetIntent.setType("image/* video/*");
+                // Use ACTION_OPEN_DOCUMENT as the robust, modern way to ask the user to select a file.
+                targetIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                targetIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                targetIntent.setType("*/*");
+                String[] mimeTypes = {"image/*", "video/*"};
+                targetIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
             }
 
             if (targetIntent != null) {
+                // FLAG_ACTIVITY_NEW_TASK is crucial to bypass the singleTask launchMode of the main app.
                 targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(targetIntent);
             }

@@ -32,6 +32,7 @@ import com.particlesdevs.photoncamera.pro.SupportedDevice;
 import com.particlesdevs.photoncamera.settings.BackupRestoreUtil;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.settings.SettingsManager;
+import com.particlesdevs.photoncamera.ui.SplashActivity;
 import com.particlesdevs.photoncamera.ui.settings.custompreferences.ResetPreferences;
 import com.particlesdevs.photoncamera.util.log.FragmentLifeCycleMonitor;
 
@@ -49,6 +50,16 @@ public class SettingsActivity extends BaseActivity implements PreferenceFragment
     public static boolean toRestartApp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // --- COLD START FIX ---
+        if (PhotonCamera.getInstance(this) == null) {
+            Intent intent = new Intent(this, SplashActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return; // Stop further execution
+        }
+        // --- END OF FIX ---
+
         getDelegate().setLocalNightMode(PreferenceKeys.getThemeValue());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);

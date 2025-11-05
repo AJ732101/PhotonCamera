@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.particlesdevs.photoncamera.R;
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.app.base.BaseActivity;
 import com.particlesdevs.photoncamera.databinding.ActivityGalleryBinding;
 import com.particlesdevs.photoncamera.gallery.files.GalleryFileOperations;
@@ -18,6 +19,7 @@ import com.particlesdevs.photoncamera.gallery.ui.fragments.ImageLibraryFragment;
 import com.particlesdevs.photoncamera.gallery.ui.fragments.ImageViewerFragment;
 import com.particlesdevs.photoncamera.gallery.viewmodel.GalleryViewModel;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
+import com.particlesdevs.photoncamera.ui.SplashActivity;
 
 public class GalleryActivity extends BaseActivity {
     private ActivityGalleryBinding activityGalleryBinding;
@@ -27,6 +29,16 @@ public class GalleryActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        // --- COLD START FIX ---
+        if (PhotonCamera.getInstance(this) == null) {
+            Intent intent = new Intent(this, SplashActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return; // Stop further execution
+        }
+        // --- END OF FIX ---
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
