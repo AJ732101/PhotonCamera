@@ -1739,8 +1739,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (mIsRecordingVideo) {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
         } else {
-            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            //mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            if (PhotonCamera.getSpecific().specificSetting.useAlternatePreviewTemplate) {
+                mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            }
+            else {
+                mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            }
         }
 
         if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {

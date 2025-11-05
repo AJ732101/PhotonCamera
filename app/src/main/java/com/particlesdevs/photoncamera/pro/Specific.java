@@ -107,6 +107,10 @@ public class Specific {
                     specificSetting.useSceneAndEffectMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useAlternatePreviewTemplate": {
+                    specificSetting.useAlternatePreviewTemplate = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
