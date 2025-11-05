@@ -48,7 +48,7 @@ public class DefaultSaver extends SaverImplementation {
             return;
         }
         Path dngFile = ImagePath.newDNGFilePath();
-        Path imageFile = ImagePath.newImageFilePath();
+        Path imageFile = ImagePath.newJPGFilePath();
         //Remove broken images
             /*for(int i =0; i<IMAGE_BUFFER.size();i++){
                 try{
