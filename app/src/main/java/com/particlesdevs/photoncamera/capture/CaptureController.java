@@ -1195,16 +1195,21 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         configureTransform(optimal.getWidth(), optimal.getHeight());
     }
     private Size getAspect(CameraMode targetMode){
-        Size aspectRatio;
-        boolean test1 = PhotonCamera.getSettings().aspect169;
-        if ((targetMode == CameraMode.VIDEO || targetMode == CameraMode.RAWVIDEO
-                && (PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777))
-                || PhotonCamera.getSettings().aspect169) {
-            aspectRatio = new Size(9, 16);
-        } else {
-            aspectRatio = new Size(3, 4);
+        if (targetMode == CameraMode.VIDEO) {
+            if ((PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777)){
+                return new Size(9, 16);
+            }
+            else {
+                return new Size(3, 4);
+            }
         }
-        return aspectRatio;
+
+        if ((targetMode == CameraMode.RAWVIDEO) || PhotonCamera.getSettings().aspect169) {
+            return new Size(9, 16);
+        }
+        else {
+            return new Size(3, 4);
+        }
     }
 
     //Size for preview drawing
