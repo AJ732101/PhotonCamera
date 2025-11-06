@@ -216,10 +216,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private final Runnable timerRunnableAlways = new Runnable() {
         @Override
         public void run() {
-            currentIsoTextView.setText("ISO" + captureController.cameraEventsListener.mCurrentIso);
-            currentIsoTextView.invalidate();
-            currentShutterTextView.setText(captureController.cameraEventsListener.mCurrentShutterSpeed);
-            currentShutterTextView.invalidate();
+            if (captureController != null) {
+                currentIsoTextView.setText("ISO" + captureController.cameraEventsListener.mCurrentIso);
+                currentIsoTextView.invalidate();
+                currentShutterTextView.setText(captureController.cameraEventsListener.mCurrentShutterSpeed);
+                currentShutterTextView.invalidate();
+            }
             timerHandlerAlways.postDelayed(this, 1000);
         }
     };
@@ -372,6 +374,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
     @Override
     public void onPause() {
+        timerHandlerAlways.removeCallbacks(timerRunnableAlways);
         PhotonCamera.getGravity().unregister();
         PhotonCamera.getGyro().unregister();
         PhotonCamera.getSettings().saveID();
@@ -404,27 +407,44 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        Log.d(TAG, "onDestroy() called");
+
         try {
-            captureController.stopBackgroundThread();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        getParentFragmentManager().beginTransaction().remove(CameraFragment.this).commitAllowingStateLoss();
-        for (Future<?> taskResult : captureController.taskResults) {
-            try {
-                taskResult.get(); //wait for all tasks to complete
-            } catch (ExecutionException | InterruptedException ignored) {
+            // 1. Signal background threads to stop their work.
+            if (captureController != null) {
+                captureController.stopBackgroundThread();
             }
+
+            // 2. Shut down the executor and wait for tasks to complete.
+            if (processExecutorService != null) {
+                processExecutorService.shutdown(); // Disable new tasks from being submitted
+                // Wait a reasonable time (e.g., 2 seconds) for existing tasks to terminate
+                if (!processExecutorService.awaitTermination(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                    Log.e(TAG, "Background tasks did not terminate in 2 seconds, forcing shutdown.");
+                    processExecutorService.shutdownNow(); // Cancel currently executing tasks
+                }
+            }
+        } catch (InterruptedException ie) {
+            Log.e(TAG, "onDestroy was interrupted while waiting for tasks to finish.", ie);
+            if(processExecutorService != null) {
+                processExecutorService.shutdownNow();
+            }
+            // Preserve the interrupt status
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            Log.e(TAG, "Error during resource cleanup in onDestroy.", e);
         }
-        settingsBarEntryProvider.removeObserver(mCameraUIEventsListener);
+
+        getParentFragmentManager().beginTransaction().remove(CameraFragment.this).commitAllowingStateLoss();
+        if(settingsBarEntryProvider != null) settingsBarEntryProvider.removeObserver(mCameraUIEventsListener);
+        if(mCameraUIView != null) mCameraUIView.destroy();
+        if(manualModeConsole != null) manualModeConsole.onDestroy();
+
         cameraFragmentBinding = null;
-        mCameraUIView.destroy();
         mCameraUIView = null;
         mCameraUIEventsListener = null;
-        manualModeConsole.onDestroy();
-        PhotonCamera.setCaptureController(captureController = null);
-        processExecutorService.shutdown();
+        PhotonCamera.setCaptureController(null);
+        captureController = null;
+
         Log.d(TAG, "onDestroy() finished");
     }
 
