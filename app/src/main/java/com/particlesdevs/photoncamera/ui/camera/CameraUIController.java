@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import com.particlesdevs.photoncamera.util.Log;
+import android.webkit.MimeTypeMap;
 
 import android.provider.MediaStore;
 import android.view.View;
@@ -47,6 +48,40 @@ final class CameraUIController implements CameraUIEventsListener,
     public CameraUIController(CameraFragment cameraFragment) {
         this.cameraFragment = cameraFragment;
     }
+
+    private String getMimeType(Context context, Uri uri) {
+        String extension;
+        // Prüfen, ob die URI eine content:// URI ist
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            // Fallback für file:// URIs
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new java.io.File(uri.getPath())).toString());
+        }
+
+        if (extension == null) {
+            // Manuelle Prüfung, wenn die Extension nicht ermittelt werden konnte
+            String path = uri.getPath();
+            if (path != null) {
+                if (path.toLowerCase().endsWith(".dng")) return "image/x-adobe-dng";
+                if (path.toLowerCase().endsWith(".heic")) return "image/heic";
+            }
+            return "*/*"; // Generischer Fallback
+        }
+
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+
+        // MimeTypeMap kennt HEIC/DNG oft nicht, also überschreiben wir es hier sicherheitshalber
+        if ("dng".equalsIgnoreCase(extension)) {
+            return "image/x-adobe-dng";
+        }
+        if ("heic".equalsIgnoreCase(extension) || "heif".equalsIgnoreCase(extension)) {
+            return "image/heic";
+        }
+
+        return (mimeType != null) ? mimeType : "*/*";
+    }
+
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -101,6 +136,42 @@ final class CameraUIController implements CameraUIEventsListener,
                     Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
 
                     if (lastImageUri != null) {
+                        try {
+                            // Den MIME-Typ dynamisch basierend auf der Dateiendung der URI ermitteln
+                            String mimeType = getMimeType(cameraFragment.requireContext(), lastImageUri);
+                            Log.d(TAG, "Opening URI: " + lastImageUri + " with MIME type: " + mimeType);
+
+                            // Intent mit URI UND dem korrekten MIME-Typ erstellen
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(lastImageUri, mimeType);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cameraFragment.requireContext());
+                            String galleryPackage = prefs.getString(GalleryChooserActivity.KEY_DEFAULT_GALLERY_PACKAGE, null);
+
+                            if (galleryPackage != null) {
+                                intent.setPackage(galleryPackage);
+                            }
+
+                            cameraFragment.startActivity(intent);
+
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(cameraFragment.getContext(), "Keine App zum Öffnen dieses Dateityps gefunden.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(cameraFragment.getContext(), "Kein Bild in der Galerie gefunden.", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    cameraFragment.launchGallery();
+                }
+                break;
+
+
+            /*case R.id.gallery_image_button:
+                if (PhotonCamera.getSpecific().specificSetting.useExternalViewer) {
+                    Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
+
+                    if (lastImageUri != null) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, lastImageUri);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -122,7 +193,7 @@ final class CameraUIController implements CameraUIEventsListener,
                 } else {
                     cameraFragment.launchGallery();
                 }
-                break;
+                break;*/
 
             case R.id.eis_toggle_button:
                 PreferenceKeys.setEisPhoto(!PreferenceKeys.isEisPhotoOn());
