@@ -20,6 +20,7 @@ public class SpecificSetting {
     public boolean useExternalViewer = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useAlternatePreviewTemplate = false;
+    public boolean useRaw10 = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;

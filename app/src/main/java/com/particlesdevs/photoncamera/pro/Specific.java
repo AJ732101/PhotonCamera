@@ -111,6 +111,10 @@ public class Specific {
                     specificSetting.useAlternatePreviewTemplate = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useRaw10": {
+                    specificSetting.useRaw10 = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
