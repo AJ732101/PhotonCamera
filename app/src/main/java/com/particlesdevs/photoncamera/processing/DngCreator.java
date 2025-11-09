@@ -424,7 +424,7 @@ public class DngCreator {
             blackLevel[i] = (short) parameters.blackLevel[i];
         }
         setDescription(parameters.toString());
-        setSoftware("PhotonCamera v" + BuildConfig.VERSION_NAME+BuildConfig.VERSION_CODE);
+        setSoftware("PhotonVidCam v0.95");
 
         // Set current date and time
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US);
