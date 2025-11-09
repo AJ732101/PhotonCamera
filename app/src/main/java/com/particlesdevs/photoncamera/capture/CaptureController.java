@@ -667,12 +667,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setPreviewFormat() {
-        if (mPreviewTargetFormat == ImageFormat.YCBCR_P010) {
-            mPreviewTargetFormat = ImageFormat.YCBCR_P010;
-        }
-        else {
-            mPreviewTargetFormat = ImageFormat.YUV_420_888;
-        }
+        mPreviewTargetFormat = ImageFormat.YUV_420_888;
     }
 
     public void setTargetFormat() {
