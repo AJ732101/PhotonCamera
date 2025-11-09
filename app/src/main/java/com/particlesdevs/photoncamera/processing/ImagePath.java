@@ -32,6 +32,14 @@ public class ImagePath {
         return getNewImageFilePath("heic");
     }
 
+    public static Path newHEIFFilePath() {
+        return getNewImageFilePath("heif");
+    }
+
+    public static Path newAVIFFilePath() {
+        return getNewImageFilePath("avif");
+    }
+
     public static Path newImageFilePath() {
         return getNewImageFilePath("");
     }
@@ -40,6 +48,12 @@ public class ImagePath {
         File dir = FileManager.sDCIM_CAMERA;
         if (extension.equalsIgnoreCase("dng")) {
             dir = FileManager.sPHOTON_RAW_DIR;
+        }
+        else if (extension.equalsIgnoreCase("heif")) {
+            dir = FileManager.sPHOTON_TEN_BIT_HEIC_DIR;
+        }
+        else if (extension.equalsIgnoreCase("avif")) {
+            dir = FileManager.sPHOTON_AVIF_DIR;
         }
         String addOptions = "";
         if (PhotonCamera.getSettings().zoom2X) {

@@ -24,6 +24,8 @@ public class FileManager {
     public static File sCACHE_DIR;
     public static File sPHOTON_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//");
     public static File sPHOTON_RAW_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Raw//");
+    public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//HEIC_10_Bit//");
+    public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//AVIF//");
     public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Tuning//");
     public static File sDCIM_CAMERA = new File(sEXTERNAL_DIR + "//DCIM//Camera//");
     public static List<File> tempImageFiles;
@@ -33,6 +35,8 @@ public class FileManager {
         Log.d(TAG, "CreatedFolder : " + sDCIM_CAMERA + '=' + sDCIM_CAMERA.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_RAW_DIR + '=' + sPHOTON_RAW_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_TUNING_DIR + '=' + sPHOTON_TUNING_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_TEN_BIT_HEIC_DIR + '=' + sPHOTON_TEN_BIT_HEIC_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_AVIF_DIR + '=' + sPHOTON_TUNING_DIR.mkdirs());
     }
 
     public static void ScanRemovedFile(File f){
