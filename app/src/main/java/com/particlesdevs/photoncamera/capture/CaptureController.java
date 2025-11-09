@@ -345,18 +345,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 return;
             }
             if(PhotonCamera.getSettings().frameCount != 1) {
-                //taskResults.removeIf(Future::isDone); //remove already completed results
-                //Future<?> result = processExecutor.submit(() -> mImageSaver.initProcess(reader));
-                //taskResults.add(result);
-                //processExecutor.execute(() -> mImageSaver.initProcess(reader));
                 mImageSaver.initProcess(reader);
-                //mBackgroundHandler.post(() -> mImageSaver.initProcess(reader));
-                //AsyncTask.execute(() -> mImageSaver.initProcess(reader));
             }
             else {
                 mBackgroundHandler.post(() -> mImageSaver.initProcess(reader));
-                //mImageSaver.initProcess(reader);
-                //processExecutor.execute(() -> mImageSaver.initProcess(reader));
             }
         }
 
@@ -659,8 +651,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     };
 
     public boolean isSingleShotJpegOrHeic() {
+        var test1 = PhotonCamera.getSettings().frameCount;
+        var test2 = PhotonCamera.getSettings().previewFormat;
+        var test3 = PhotonCamera.getSettings().rawSaver;
+        var test4 = PhotonCamera.getSettings().selectedMode;
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) || (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG)) &&
+           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             return true;
@@ -669,15 +667,21 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setPreviewFormat() {
-        mPreviewTargetFormat = ImageFormat.YUV_420_888;
-        /*mPreviewTargetFormat = ImageFormat.JPEG;
-        if (isSingleShot()) {
-            mPreviewTargetFormat = ImageFormat.HEIC;
-        }*/
+        if (mPreviewTargetFormat == ImageFormat.YCBCR_P010) {
+            mPreviewTargetFormat = ImageFormat.YCBCR_P010;
+        }
+        else {
+            mPreviewTargetFormat = ImageFormat.YUV_420_888;
+        }
     }
 
     public void setTargetFormat() {
-        mTargetFormat = ImageFormat.RAW_SENSOR;
+        if (PhotonCamera.getSpecific().specificSetting.useRaw10) {
+            mTargetFormat = ImageFormat.RAW10;
+        }
+        else {
+            mTargetFormat = ImageFormat.RAW_SENSOR;
+        }
         if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             mTargetFormat = PhotonCamera.getSettings().previewFormat;
         }
@@ -1172,7 +1176,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mImageReaderPreview = ImageReader.newInstance(target.getWidth(), target.getHeight(), mPreviewTargetFormat, /*maxImages*/max);
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
 
-        mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
+        try {
+            mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
+            //mImageReaderRaw = ImageReader.newInstance(8192, 6144, ImageFormat.PRIVATE, max);
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
+        }
         mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
 
         try {
@@ -1525,7 +1535,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if(mImageReaderRaw != null) {
             mImageReaderRaw.close();
         }
-        mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxjpg);
+        try {
+            mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxjpg);
+            //mImageReaderRaw = ImageReader.newInstance(8192, 6144, ImageFormat.PRIVATE, maxjpg);
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
+        }
         mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
         // Find out if we need to swap dimension to get the preview size relative to sensor
         // coordinate.
@@ -2519,7 +2535,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             Size[] jpegSizes = map.getOutputSizes(ImageFormat.JPEG);
             if (jpegSizes == null || jpegSizes.length == 0) {
-                jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
+                if (PhotonCamera.getSpecific().specificSetting.useRaw10) {
+                    jpegSizes = map.getOutputSizes(ImageFormat.RAW10);
+                }
+                else {
+                    jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
+                }
             }
             if (jpegSizes == null || jpegSizes.length == 0) {
                 return null;
@@ -3065,6 +3086,68 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     (long) rhs.getWidth() * rhs.getHeight());
         }
 
+    }
+
+    /**
+     * Compares two {@code Size}s, prioritizing 4:3 aspect ratios, then by area.
+     */
+    static class CompareSizesByAreaFourByThree implements Comparator<Size> {
+
+        private static final float TARGET_ASPECT_RATIO = 4.0f / 3.0f;
+        private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
+
+        private boolean isFourByThree(Size size) {
+            float ratio = (float) size.getWidth() / size.getHeight();
+            return Math.abs(ratio - TARGET_ASPECT_RATIO) < ASPECT_RATIO_TOLERANCE;
+        }
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            boolean lhsIsTarget = isFourByThree(lhs);
+            boolean rhsIsTarget = isFourByThree(rhs);
+
+            if (lhsIsTarget && !rhsIsTarget) {
+                return -1; // Prefer lhs
+            }
+            if (!lhsIsTarget && rhsIsTarget) {
+                return 1; // Prefer rhs
+            }
+
+            // If both are the target ratio or neither are, compare by area (descending to get largest)
+            return Long.signum((long) rhs.getWidth() * rhs.getHeight() -
+                    (long) lhs.getWidth() * lhs.getHeight());
+        }
+    }
+
+    /**
+     * Compares two {@code Size}s, prioritizing 16:9 aspect ratios, then by area.
+     */
+    static class CompareSizesByAreaSixteenByNine implements Comparator<Size> {
+
+        private static final float TARGET_ASPECT_RATIO = 16.0f / 9.0f;
+        private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
+
+        private boolean isSixteenByNine(Size size) {
+            float ratio = (float) size.getWidth() / size.getHeight();
+            return Math.abs(ratio - TARGET_ASPECT_RATIO) < ASPECT_RATIO_TOLERANCE;
+        }
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            boolean lhsIsTarget = isSixteenByNine(lhs);
+            boolean rhsIsTarget = isSixteenByNine(rhs);
+
+            if (lhsIsTarget && !rhsIsTarget) {
+                return -1; // Prefer lhs
+            }
+            if (!lhsIsTarget && rhsIsTarget) {
+                return 1; // Prefer rhs
+            }
+
+            // If both are the target ratio or neither are, compare by area (descending to get largest)
+            return Long.signum((long) rhs.getWidth() * rhs.getHeight() -
+                    (long) lhs.getWidth() * lhs.getHeight());
+        }
     }
 
     public static class CameraProperties {
