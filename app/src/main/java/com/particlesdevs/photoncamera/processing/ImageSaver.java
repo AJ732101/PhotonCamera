@@ -8,6 +8,8 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -161,8 +163,7 @@ public class ImageSaver {
             }
         }
 
-        public static boolean saveStackedRaw(Path dngFilePath,
-                                             ByteBuffer buffer, Parameters parameters) {
+        public static boolean saveStackedRaw(Path dngFilePath, ByteBuffer buffer, Parameters parameters) {
             return saveSingleRaw(dngFilePath, buffer, parameters);
         }
         public static boolean saveSingleRaw(Path dngFilePath,
@@ -186,7 +187,7 @@ public class ImageSaver {
                                             ByteBuffer buffer, Parameters parameters) {
             DngCreator dngCreator = new DngCreator();
             dngCreator.setParameters(parameters);
-            dngCreator.setCompression(true);
+            dngCreator.setCompression(PhotonCamera.getSettings().useDngCompression);
             try {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);
                 dngCreator.writeBuffer(outputStream, buffer, parameters.rawSize.x, parameters.rawSize.y);
