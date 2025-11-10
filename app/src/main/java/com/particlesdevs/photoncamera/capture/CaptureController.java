@@ -1672,7 +1672,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                         //mMediaMuxer.start();
                                     }
                                     else {
-                                        mMediaRecorder.start();
+                                        if (mMediaRecorder != null) {
+                                            mMediaRecorder.start();
+                                        }
                                     }
                                 });
                         }
@@ -2551,6 +2553,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private MediaFormat createAudioFormat() {
         String mimeAud = MediaFormat.MIMETYPE_AUDIO_AAC;
+        if (PhotonCamera.getSettings().videoCodec.equals("VP8") || PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+            mimeAud = MediaFormat.MIMETYPE_AUDIO_OPUS;
+        }
         // create MediaFormat to fill out with audio parameters
         MediaFormat format = MediaFormat.createAudioFormat(mimeAud, PhotonCamera.getSettings().audioSps, PhotonCamera.getSettings().audioChannels);
         format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().audioBitrate * 1024);
@@ -2591,18 +2596,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         String mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265")) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
-        } else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         } else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
         } else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
-            //vidWidth = 1280;
-            //vidHeight = 720;
         } else if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
-            vidWidth = 640;
-            vidHeight = 480;
+        } else if (PhotonCamera.getSettings().videoCodec.equals("VP8")) {
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP8;
+        } else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         }
 
         // create MediaFormat to fill out with video parameters
@@ -2634,6 +2637,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoCodec.equals("AVC") || PhotonCamera.getSettings().videoCodec.equals("H264")) {
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel4);
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("VP8")) {
+            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.VP8ProfileMain);
+            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.VP8Level_Version0);
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.VP9Profile0);
+            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.VP9Level41);
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
             if (PhotonCamera.getSettings().video10bit) {
@@ -2744,6 +2755,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         String mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265"))
             mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
+        else if (PhotonCamera.getSettings().videoCodec.equals("VP8"))
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP8;
         else if (PhotonCamera.getSettings().videoCodec.equals("VP9"))
             mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY")))
@@ -2768,7 +2781,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         MediaMuxer mediaMuxer = null;
         createRecordingFile();
         try {
-            mediaMuxer = new MediaMuxer(vid.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            if (PhotonCamera.getSettings().videoCodec.equals("VP8") || PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+                mediaMuxer = new MediaMuxer(vid.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_WEBM);
+            }
+            else {
+                mediaMuxer = new MediaMuxer(vid.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            }
         }
         catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -2885,18 +2903,32 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
         }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        if (PhotonCamera.getSettings().videoCodec.equals("VP8") || PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.WEBM);
+        }
+        else {
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        }
 
         // codec
-        if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265"))
+        if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.HEVC);
-        else if (PhotonCamera.getSettings().videoCodec.equals("VP9"))
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.AV1);
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("VP8")) {
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.VP8);
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.VP9);
-        else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) ||
-                (PhotonCamera.getSettings().videoCodec.equals("DOLBY")))
+        }
+        else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DOLBY_VISION);
-        else
+        }
+        else {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (PhotonCamera.getSettings().video10bit) {
@@ -3046,12 +3078,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
+        String extension = ".mp4";
+        if (PhotonCamera.getSettings().videoCodec.equals("VP8") || PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+            extension = ".webm";
+        }
         if (!PhotonCamera.getSpecific().specificSetting.recPrefix.isEmpty()) {
-            vid = new File(dir.getAbsolutePath(), PhotonCamera.getSpecific().specificSetting.recPrefix + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + ".mp4");
+            vid = new File(dir.getAbsolutePath(), PhotonCamera.getSpecific().specificSetting.recPrefix + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + extension);
         }
         else
         {
-            vid = new File(dir.getAbsolutePath(), "PVC_" + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + ".mp4");
+            vid = new File(dir.getAbsolutePath(), "PVC_" + dateText + "_ID" + PhotonCamera.getSettings().mCameraID.toString() + addOptions + extension);
         }
         try {
             vid.createNewFile();

@@ -203,6 +203,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             int minutes = seconds / 60;
             seconds %= 60;
 
+            //recordingTimerTextView.setText(String.format(Locale.getDefault(), "%02d:%02d - CPU: %02d%%", minutes, seconds, (int)mCpuReader.getCpuUsage()));
             recordingTimerTextView.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
             recordingTimerTextView.invalidate();
             if ((mVidFile != null) && mVidFile.exists()) {
@@ -605,25 +606,30 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                                 stringMap.put("Source", "Camcorder");
                                 break;
                         }
-                        switch (PhotonCamera.getSettings().audioCodec) {
-                            case 0:
-                                stringMap.put("CodecA", "Default");
-                                break;
-                            case 1:
-                                stringMap.put("CodecA", "AMR_NB");
-                                break;
-                            case 2:
-                                stringMap.put("CodecA", "AMR_WB");
-                                break;
-                            case 3:
-                                stringMap.put("CodecA", "AAC");
-                                break;
-                            case 4:
-                                stringMap.put("CodecA", "HE_AAC");
-                                break;
-                            case 5:
-                                stringMap.put("CodecA", "AAC_ELD");
-                                break;
+                        if ((PhotonCamera.getSettings().videoCodec.equals("VP8")) || PhotonCamera.getSettings().videoCodec.equals("VP9")) {
+                            stringMap.put("CodecA", "Opus");
+                        }
+                        else {
+                            switch (PhotonCamera.getSettings().audioCodec) {
+                                case 0:
+                                    stringMap.put("CodecA", "Default");
+                                    break;
+                                case 1:
+                                    stringMap.put("CodecA", "AMR_NB");
+                                    break;
+                                case 2:
+                                    stringMap.put("CodecA", "AMR_WB");
+                                    break;
+                                case 3:
+                                    stringMap.put("CodecA", "AAC");
+                                    break;
+                                case 4:
+                                    stringMap.put("CodecA", "HE_AAC");
+                                    break;
+                                case 5:
+                                    stringMap.put("CodecA", "AAC_ELD");
+                                    break;
+                            }
                         }
                         stringMap.put("Channels", String.valueOf(PhotonCamera.getSettings().audioChannels));
                         stringMap.put("BitrateA", String.valueOf(PhotonCamera.getSettings().audioBitrate) + "KBit/s");
