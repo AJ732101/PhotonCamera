@@ -76,12 +76,20 @@
         <item>AVC/H.264</item>
         <item>HEVC/H.265</item>
         <item>Dolby Vision</item>
+        <item>AV1</item>
+        <item>APV</item>
+        <item>VP8</item>
+        <item>VP9</item>
     </string-array>
 
     <string-array name="codec_entryValues">
         <item>AVC</item>
         <item>HEVC</item>
         <item>DOLBY_VISION</item>
+        <item>AV1</item>
+        <item>APV</item>
+        <item>VP8</item>
+        <item>VP9</item>
     </string-array>
 
     <string-array name="video_resolution_entries">
