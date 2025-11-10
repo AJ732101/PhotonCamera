@@ -2597,8 +2597,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
         } else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
-            vidWidth = 640;
-            vidHeight = 480;
+            //vidWidth = 1280;
+            //vidHeight = 720;
         } else if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
             vidWidth = 640;
@@ -2636,7 +2636,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel4);
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
-            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
+            if (PhotonCamera.getSettings().video10bit) {
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain8);
+            }
+            else {
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
+            }
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
@@ -2767,6 +2772,41 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
+        }
+        if (mediaMuxer != null) {
+            CameraCharacteristics camChar = mCameraCharacteristicsMap.get(PhotonCamera.getSettings().mCameraID);
+            boolean facingFront = camChar.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+            if (facingFront) {
+                switch (videoRotation) {
+                    case 0:
+                        mediaMuxer.setOrientationHint(270);
+                        break;
+                    case 90:
+                        mediaMuxer.setOrientationHint(180);
+                        break;
+                    case 180:
+                        mediaMuxer.setOrientationHint(90);
+                        break;
+                    case -90:
+                        mediaMuxer.setOrientationHint(0);
+                        break;
+                }
+            } else {
+                switch (videoRotation) {
+                    case 0:
+                        mediaMuxer.setOrientationHint(90);
+                        break;
+                    case 90:
+                        mediaMuxer.setOrientationHint(0);
+                        break;
+                    case 180:
+                        mediaMuxer.setOrientationHint(270);
+                        break;
+                    case -90:
+                        mediaMuxer.setOrientationHint(180);
+                        break;
+                }
+            }
         }
         return mediaMuxer;
     }
