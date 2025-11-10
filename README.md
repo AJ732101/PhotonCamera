@@ -1,21 +1,11 @@
-# PhotonCamera
+# PhotonVidCam
 
-Android Camera that uses Enhanced Image Processing
+Android Camera with focus on video recording
 
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 ## Links
 
 [![Telegram - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonCameraEN)
-[![Telegram - RU](https://img.shields.io/badge/Telegram-RU-blue)](https://t.me/PhotonCamera)
-
-[<img height="80px" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play">](https://play.google.com/store/apps/details?id=com.particlesdevs.photoncamera)
-[<img height="80" src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it at IzzyOnDroid">](https://apt.izzysoft.de/packages/com.particlesdevs.photoncamera)
-
-## Screenshots
-
-<p align="center">
-<img src="https://i.imgur.com/na2Tvx6.png" alt="PhotonCamera">
-</p>
 
 ## Libraries used by Photon Camera
 
@@ -29,7 +19,7 @@ Android Camera that uses Enhanced Image Processing
 ## License
 
     PhotonCamera
-    Copyright (C) 2020-2022  Eszdman
+    Copyright (C) 2020-2025  AJ732101/QualityDoesMatter
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
