@@ -159,6 +159,10 @@ public class Specific {
                     specificSetting.recPrefix = caseS[1];
                     break;
                 }
+                case "YCBCR_P010_TargetFormat": {
+                    specificSetting.YCBCR_P010_TargetFormat = caseS[1];
+                    break;
+                }
             }
         }
 

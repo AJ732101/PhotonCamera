@@ -2595,6 +2595,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         } else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
+        } else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
+            vidWidth = 640;
+            vidHeight = 480;
+        } else if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
+            vidWidth = 640;
+            vidHeight = 480;
         }
 
         // create MediaFormat to fill out with video parameters
@@ -2627,11 +2635,20 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel4);
         }
+        else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
+            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
+            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
+        }
+        else if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.APVProfile422_10HDR10);
+            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
+        }
 
         final int BUFFER_SIZE_HINT = vidWidth * vidHeight * 3 / 2;
         format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, BUFFER_SIZE_HINT * 3);
 
-        format.setFloat(MediaFormat.KEY_FRAME_RATE, PhotonCamera.getSettings().videoFramrate);
+        //format.setFloat(MediaFormat.KEY_FRAME_RATE, PhotonCamera.getSettings().videoFramrate);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
         format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, PhotonCamera.getSpecific().specificSetting.newRecKeyFrameIntervall);
@@ -2726,6 +2743,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY")))
             mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
+        else if (PhotonCamera.getSettings().videoCodec.equals("AV1"))
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
+        else if (PhotonCamera.getSettings().videoCodec.equals("APV"))
+            mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
 
         MediaCodec videoEncoder = null;
         try {
@@ -2768,10 +2789,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //mAudioCodec.setCallback(mAudioEncoderCallback);
         mVideoEncoderCallback.setMuxerThread(mMuxerThread);
         //mAudioEncoderCallback.setMuxerThread(mMuxerThread);
-        mVideoCodec.configure(mVideoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        //mAudioCodec.configure(mAudioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        mMediaCodecSurface = mVideoCodec.createInputSurface();
-        mVideoCodec.start();
+        try {
+            mVideoCodec.configure(mVideoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            //mAudioCodec.configure(mAudioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            mMediaCodecSurface = mVideoCodec.createInputSurface();
+            mVideoCodec.start();
+        }
+        catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
     }
 
     private void releaseMediaRecorderNew() {

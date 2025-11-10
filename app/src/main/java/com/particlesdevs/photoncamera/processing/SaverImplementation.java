@@ -34,7 +34,8 @@ public class SaverImplementation {
         int height;
         int offset = 0;
         int capacity = image.getPlanes()[0].getBuffer().capacity();
-        if (image.getFormat() == 0x25) {
+        var imageFormat = image.getFormat();
+        if (imageFormat== 0x25) {
             width = image.getWidth();
             height = image.getHeight();
         } else {

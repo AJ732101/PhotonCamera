@@ -40,6 +40,10 @@ public class ImagePath {
         return getNewImageFilePath("avif");
     }
 
+    public static Path newAPVFilePath() {
+        return getNewImageFilePath("apv");
+    }
+
     public static Path newImageFilePath() {
         return getNewImageFilePath("");
     }
@@ -54,6 +58,9 @@ public class ImagePath {
         }
         else if (extension.equalsIgnoreCase("avif")) {
             dir = FileManager.sPHOTON_AVIF_DIR;
+        }
+        else if (extension.equalsIgnoreCase("apv")) {
+            dir = FileManager.sPHOTON_APV_DIR;
         }
         String addOptions = "";
         if (PhotonCamera.getSettings().zoom2X) {

@@ -32,6 +32,7 @@ public class SpecificSetting {
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
     public String recPrefix = "";
+    public String YCBCR_P010_TargetFormat = "HEVC";
     public SpecificSetting(){
     }
 }
