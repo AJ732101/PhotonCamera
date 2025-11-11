@@ -17,14 +17,21 @@ public class ESD3D extends Node {
     @Override
     public void Compile() {
     }
-    float moire = 1.0f;
-    float luma = 0.0f;
-    float noiseToKernelSize = 100000.f;
+    float moire = 1.5f;
+    float luma = 0.8f;
+    float noiseToKernelSize = 24.0f;
+    float noiseTarget = 1.0f/256.f;
+    int maxSize = 21;
+    int minSize = 7;
 
     @Override
     public void Run() {
-        moire = getTuning("MoireRemoveMpy",moire);
+        //moire = getTuning("MoireRemoveMpy",moire);
         noiseToKernelSize = getTuning("NoiseToKernelSize",noiseToKernelSize);
+        noiseTarget = getTuning("NoiseTarget",noiseTarget);
+        luma = getTuning("Luma",luma);
+        maxSize = getTuning("MaxKernel",maxSize);
+        minSize = getTuning("MinKernel",minSize);
         //if(basePipeline.main4 == null)
         //    basePipeline.main4 = glUtils.medianDown(previousNode.WorkingTexture,4);
         //GLTexture grad;
@@ -48,10 +55,13 @@ public class ESD3D extends Node {
             glProg.setDefine("LUMA", luma);
 
             glProg.setDefine("INSIZE", basePipeline.mParameters.rawSize);
-            float ks = 1.0f + Math.min((basePipeline.noiseS+basePipeline.noiseO) * 3.0f * noiseToKernelSize, 34.f);
-            int msize = 7 + (int)ks - (int)ks%2;
-            Log.d("ESD3D", "KernelSize: "+ks+" MSIZE: "+msize);
-            glProg.setDefine("KERNELSIZE", ks);
+            //float ks = 1.0f + Math.min((basePipeline.noiseS+basePipeline.noiseO) * 3.0f * noiseToKernelSize, 34.f);
+            //int msize = 7 + (int)ks - (int)ks%2;
+            double noiseMpy = Math.max((basePipeline.noiseS+basePipeline.noiseO)/noiseTarget, 0.0000001);
+            double kernelSize = 1.0f + Math.sqrt(noiseMpy) * noiseToKernelSize;
+            int msize = Math.min(minSize + (int)kernelSize - (int)kernelSize%2, maxSize);
+            Log.d("ESD3D", "KernelSize: "+kernelSize+" MSIZE: "+msize);
+            glProg.setDefine("KERNELSIZE", (float)(kernelSize));
             glProg.setDefine("MSIZE", msize);
             glProg.useAssetProgram("denoise/esd3d2");
             //glProg.setTexture("NoiseMap", basePipeline.main4);

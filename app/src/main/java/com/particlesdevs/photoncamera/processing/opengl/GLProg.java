@@ -394,9 +394,17 @@ public class GLProg implements AutoCloseable {
             case 4:
                 glUniform4i(addr, vars[0], vars[1], vars[2], vars[3]);
                 break;
+            case 8:
+                glUniform1iv(addr, 8, vars, 0);
             default:
                 throw new RuntimeException("Wrong var size " + name);
         }
+        checkEglError("setVar:" + name);
+    }
+
+    public void setVar1(String name, int... vars) {
+        int addr = glGetUniformLocation(mCurrentProgramActive, name);
+        glUniform1iv(addr, vars.length, vars, 0);
         checkEglError("setVar:" + name);
     }
 

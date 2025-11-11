@@ -970,7 +970,7 @@ public class GLUtils {
     public GLImage SaveProgResult(Point size, String namesuffix, int channels,String ext){
         GLImage preview = GenerateGLImage(size,channels);
         if(!namesuffix.equals("")) {
-            File debug = new File(ImagePath.newJPGFilePath().toString().replace(".jpg","") + namesuffix + ext);
+            File debug = new File(ImagePath.newImageFilePath().toString().replace(".jpg","") + namesuffix + ext);
             //FileOutputStream fOut = null;
             try {
                 debug.createNewFile();
@@ -989,7 +989,7 @@ public class GLUtils {
         GLFormat bitmapF = new GLFormat(GLFormat.DataType.UNSIGNED_8, channels);
         GLImage preview = new GLImage(new Point((int)(((double)size.x*channels)/4), size.y),bitmapF,in);
         if(!namesuffix.equals("")) {
-            File debug = new File(ImagePath.newJPGFilePath().toString().replace(".jpg","") + namesuffix + ext);
+            File debug = new File(ImagePath.newImageFilePath().toString().replace(".jpg","") + namesuffix + ext);
             //FileOutputStream fOut = null;
             try {
                 debug.createNewFile();

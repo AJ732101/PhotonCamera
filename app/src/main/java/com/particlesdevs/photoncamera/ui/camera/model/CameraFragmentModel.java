@@ -16,6 +16,7 @@ public class CameraFragmentModel extends BaseObservable {
     private Bitmap bitmap;
     private boolean settingsBarVisibility;
     private float screenAspectRatio = 9f / 16;
+    private String dummyAspectRatio = "16:9";
 
     @Bindable
     public float getScreenAspectRatio() {
@@ -67,5 +68,15 @@ public class CameraFragmentModel extends BaseObservable {
     public void setSettingsBarVisibility(boolean settingsBarVisibility) {
         this.settingsBarVisibility = settingsBarVisibility;
         notifyChange();
+    }
+    
+    @Bindable
+    public String getDummyAspectRatio() {
+        return dummyAspectRatio;
+    }
+    
+    public void setDummyAspectRatio(String dummyAspectRatio) {
+        this.dummyAspectRatio = dummyAspectRatio;
+        notifyPropertyChanged(BR.dummyAspectRatio);
     }
 }

@@ -1,6 +1,8 @@
 package com.particlesdevs.photoncamera.processing.opengl.scripts;
 
 import android.graphics.Point;
+
+import com.particlesdevs.photoncamera.processing.opengl.GLOneScript;
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -26,11 +28,13 @@ public class PyramidAlignment implements AutoCloseable {
     GLProg glProg;
     GLUtils glUtils;
     Point size;
-    public PyramidAlignment(Point size, ArrayList<ImageFrame> images, GLProg glProg, GLUtils glUtils) {
+    GLOneScript origin;
+    public PyramidAlignment(Point size, ArrayList<ImageFrame> images, GLProg glProg, GLUtils glUtils, GLOneScript origin) {
         this.size = size;
         this.glProg = glProg;
         this.images = images;
         this.glUtils = glUtils;
+        this.origin = origin;
     }
     public static Point alignmentShift(Parameters parameters, int f) {
         int shiftX = ((f-1)%parameters.tilesX) * (parameters.alignmentSize.x);
@@ -175,6 +179,7 @@ public class PyramidAlignment implements AutoCloseable {
         alter = new GLTexture(rawHalf,new GLFormat(GLFormat.DataType.FLOAT_16,4),null,GL_LINEAR,GL_CLAMP_TO_EDGE);
         gainMap = new GLTexture(parameters.mapSize, new GLFormat(GLFormat.DataType.FLOAT_32, 4),
                 BufferUtils.getFrom(parameters.gainMap), GL_LINEAR, GL_CLAMP_TO_EDGE);
+        float sharpness = origin.getTuning("AlignmentSharpness",1.0f);
         
         // Use normalize script to fill base texture
         glProg.setLayout(8, 8, 1);
@@ -220,6 +225,7 @@ public class PyramidAlignment implements AutoCloseable {
         glProg.useAssetProgram("alignment/normalizebl", true);
         glProg.setVar("blackLevel", blackLevel);
         glProg.setVar("whiteLevel", 1.0f);
+        glProg.setVar("sharpness", sharpness);
         glProg.setTexture("baseTexture", temp);
         glProg.setTexture("gainMap", gainMap);
         glProg.setTextureCompute("outTexture", base, true);
@@ -317,6 +323,7 @@ public class PyramidAlignment implements AutoCloseable {
             glProg.useAssetProgram("alignment/normalizebl", true);
             glProg.setVar("blackLevel", blackLevel);
             glProg.setVar("whiteLevel", 1.0f);
+            glProg.setVar("sharpness", sharpness);
             glProg.setTexture("baseTexture", temp);
             glProg.setTexture("gainMap", gainMap);
             glProg.setTextureCompute("outTexture", alter, true);

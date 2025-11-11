@@ -40,8 +40,8 @@ public class IsoModel extends ManualModel<Integer> {
         int maxiso = (int) isohigh;
         if (isIsoExtended)
         {
-            maxiso = 12500;
-            isohigh = 12500;
+            maxiso = 12800;
+            isohigh = 12800;
         }
         Log.v("IsoModel", "Max iso:" + maxiso);
         Log.v("IsoModel", "Max iso cnt:" + Math.log10((double) maxiso / miniso) / Math.log10(2));

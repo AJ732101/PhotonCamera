@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
 import com.particlesdevs.photoncamera.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -405,6 +406,11 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case BATTERY_SAVER:
                         PreferenceKeys.setBatterySaver(value.equals(1));
+                        break;
+                    case BRACKETING:
+                        PreferenceKeys.setBracketingMode((Integer) value);
+                        // Update HDR class to use the new bracketing mode
+                        IsoExpoSelector.HDR = (Integer) value > 0;
                         break;
 
                 }

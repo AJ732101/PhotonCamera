@@ -3,6 +3,8 @@ package com.particlesdevs.photoncamera.gallery.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -40,6 +42,9 @@ public class GalleryActivity extends BaseActivity {
         // --- END OF FIX ---
 
         super.onCreate(savedInstanceState);
+        // Hide system UI immediately to prevent flickering
+        hideSystemUI();
+        
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
@@ -64,9 +69,45 @@ public class GalleryActivity extends BaseActivity {
     }*/
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Apply hideSystemUI in onResume to prevent flickering when returning to the gallery
+        hideSystemUI();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         activityGalleryBinding = null;
+    }
+    
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            float displayAspectRatio = (float) Math.max(dm.heightPixels, dm.widthPixels) / Math.min(dm.heightPixels, dm.widthPixels);
+            if (displayAspectRatio <= (16f / 9) || dm.densityDpi > 440) {
+                hideSystemUI();
+            }
+        }
+    }
+
+    private void hideSystemUI() {
+        // Enables regular immersive mode.
+        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
+        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
     @Override

@@ -47,4 +47,8 @@
     <item name="btsvr_on_button" type="id"/>
     <item name="btsvr_off_button" type="id"/>
     <item name="batterysaver_entry_layout" type="id"/>
+    <item name="bracketing_entry_layout" type="id"/>
+    <item name="bracketing_off_button" type="id"/>
+    <item name="bracketing_normal_button" type="id"/>
+    <item name="bracketing_high_button" type="id"/>
 </resources>

@@ -183,6 +183,7 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         glProg.setDefine("SATURATIONGAUSS",saturationGauss);
         glProg.setDefine("SATURATIONRED",  saturationRed);
         glProg.setDefine("NOISEO",  basePipeline.noiseO);
+        glProg.setDefine("NOISES",  basePipeline.noiseS);
         glProg.setDefine("EPS", eps);
 
         File postlut = new File(FileManager.sPHOTON_TUNING_DIR,"lut.png");

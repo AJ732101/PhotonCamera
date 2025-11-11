@@ -48,7 +48,7 @@ public class DefaultSaver extends SaverImplementation {
             return;
         }
         Path dngFile = ImagePath.newDNGFilePath();
-        Path imageFile = ImagePath.newJPGFilePath();
+        Path imageFile = ImagePath.newImageFilePath();
         //Remove broken images
             /*for(int i =0; i<IMAGE_BUFFER.size();i++){
                 try{
@@ -106,7 +106,7 @@ public class DefaultSaver extends SaverImplementation {
     public void processStart(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
         super.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
         Path dngFile = ImagePath.newDNGFilePath();
-        Path jpgFile = ImagePath.newJPGFilePath();
+        Path jpgFile = ImagePath.newImageFilePath();
         switch (PhotonCamera.getSettings().selectedMode) {
             case UNLIMITED:
                 mUnlimitedProcessor.configure(PhotonCamera.getSettings().rawSaver);

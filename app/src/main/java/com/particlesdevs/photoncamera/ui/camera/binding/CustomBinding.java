@@ -134,4 +134,16 @@ public class CustomBinding {
             params.topMargin = (int) dpmargin;
         }
     }
+    
+    @BindingAdapter("setAspectRatio")
+    public static void setAspectRatio(View view, String ratio) {
+        if (view != null && ratio != null && !ratio.isEmpty()) {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+                params.dimensionRatio = ratio;
+                view.setLayoutParams(params);
+            }
+        }
+    }
 }

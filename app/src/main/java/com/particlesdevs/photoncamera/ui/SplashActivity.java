@@ -17,6 +17,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Ensure splash screen starts in portrait mode
+        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         final File path = new File(
                 FileManager.sPHOTON_DIR, "PhotonLog");
         /*Printer filePrinter = new FilePrinter                      // Printer that print(save) the log to file

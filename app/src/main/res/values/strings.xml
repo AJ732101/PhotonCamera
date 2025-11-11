@@ -162,4 +162,11 @@
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Channels</string>
     <string name="sps">SPS</string>
+
+    <!-- Bracketing mode strings -->
+    <string name="exposure_bracketing">Exposure Bracketing</string>
+    <string name="bracketing_off">Off (1x)</string>
+    <string name="bracketing_normal">Normal (1x, 4x)</string>
+    <string name="bracketing_high">High (1x, 8x)</string>
+    <string name="pref_bracketing_key">pref_bracketing_mode_key</string>
 </resources>

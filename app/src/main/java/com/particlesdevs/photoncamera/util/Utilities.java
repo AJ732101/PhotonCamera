@@ -61,7 +61,7 @@ public class Utilities {
             canvas.drawCircle(p.x,p.y,pointSize,wallPaint);
     }
     public static void saveBitmap(Bitmap in, String name){
-        File debug = new File(ImagePath.newJPGFilePath().toString().replace(".jpg","") + name + ".png");
+        File debug = new File(ImagePath.newImageFilePath().toString().replace(".jpg","") + name + ".png");
         FileOutputStream fOut = null;
         try {
             debug.createNewFile();

@@ -5,6 +5,8 @@ import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+
+import com.particlesdevs.photoncamera.processing.opengl.scripts.PyramidMerging;
 import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.api.Camera2ApiAutoFix;
 import com.particlesdevs.photoncamera.api.CameraMode;
@@ -17,7 +19,6 @@ import com.particlesdevs.photoncamera.processing.ImageFrameDeblur;
 import com.particlesdevs.photoncamera.processing.ImageSaver;
 import com.particlesdevs.photoncamera.processing.ProcessingEventsListener;
 import com.particlesdevs.photoncamera.processing.opengl.postpipeline.PostPipeline;
-import com.particlesdevs.photoncamera.processing.opengl.scripts.PyramidMerging;
 import com.particlesdevs.photoncamera.processing.parameters.FrameNumberSelector;
 import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
 import com.particlesdevs.photoncamera.processing.render.Parameters;
@@ -25,6 +26,7 @@ import com.particlesdevs.photoncamera.util.Allocator;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -51,7 +53,7 @@ public class HdrxProcessor extends ProcessorBase {
         this.cameraMode = cameraMode;
     }
 
-    public void start(Path dngFile, Path jpgFile,
+    public void start(Path dngFile, Path imageFile,
                       ParseExif.ExifData exifData,
                       ArrayList<GyroBurst> BurstShakiness,
                       ArrayList<ImageFrame> imageBuffer,
@@ -62,7 +64,7 @@ public class HdrxProcessor extends ProcessorBase {
                       CaptureResult captureResult,
                       CaptureRequest captureRequest,
                       ProcessingCallback callback) {
-        this.jpgFile = jpgFile;
+        this.imageFile = imageFile;
         this.dngFile = dngFile;
         this.exifData = exifData;
         this.BurstShakiness = new ArrayList<>(BurstShakiness);
@@ -108,7 +110,7 @@ public class HdrxProcessor extends ProcessorBase {
         Log.d(TAG, "APPLY HDRX: buffer:" + mImageFramesToProcess.get(0).buffer.asShortBuffer().remaining());
         Log.d(TAG, "Api WhiteLevel:" + characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL));
         Log.d(TAG, "Api BlackLevel:" + characteristics.get(CameraCharacteristics.SENSOR_BLACK_LEVEL_PATTERN));
-        Parameters processingParameters = PhotonCamera.getParameters();
+        Parameters processingParameters = new Parameters();
         processingParameters.FillConstParameters(characteristics, new Point(width, height));
         // sort by timestamp first
         mImageFramesToProcess.sort(Comparator.comparingLong(ImageFrame::getTimestamp));
@@ -152,7 +154,7 @@ public class HdrxProcessor extends ProcessorBase {
         processingParameters.cameraRotation = cameraRotation;
 
         exifData.IMAGE_DESCRIPTION = processingParameters.toString();
-        ImageFrameDeblur imageFrameDeblur = new ImageFrameDeblur();
+        ImageFrameDeblur imageFrameDeblur = new ImageFrameDeblur(processingParameters);
         imageFrameDeblur.firstFrameGyro = images.get(0).frameGyro.clone();
         for (int i = 0; i < images.size(); i++)
             imageFrameDeblur.processDeblurPosition(images.get(i));
@@ -281,7 +283,7 @@ public class HdrxProcessor extends ProcessorBase {
             images.get(i).close();
         }
 
-        IncreaseWLBL();
+        IncreaseWLBL(processingParameters);
         Log.d(TAG, "HDRX Alignment elapsed:" + (System.currentTimeMillis() - startTime) + " ms");
         //Black shot fix
         ByteBuffer result = output;
@@ -302,7 +304,7 @@ public class HdrxProcessor extends ProcessorBase {
         images.get(0).close();
         PostPipeline pipeline = new PostPipeline();
 
-        Bitmap img = pipeline.Run(result, PhotonCamera.getParameters());
+        Bitmap img = pipeline.Run(result, processingParameters);
         Allocator.free(result);
 
         img = overlay(img, pipeline.debugData.toArray(new Bitmap[0]));
@@ -312,13 +314,13 @@ public class HdrxProcessor extends ProcessorBase {
         catch (Exception e){
             Log.d(TAG,"Error in processingEventsListener.onProcessingFinished:"+Log.getStackTraceString(e));
         }
-
+        imageFile = Paths.get(imageFile.toAbsolutePath() + ".jpg");
         //Saves the final bitmap
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(jpgFile, img,
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, img,
                 ImageSaver.JPG_QUALITY, exifData);
 
         try {
-            processingEventsListener.notifyImageSavedStatus(imageSaved, jpgFile);
+            processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);
         }
         catch (Exception e){
             Log.d(TAG,"Error in processingEventsListener.notifyImageSavedStatus:"+Log.getStackTraceString(e));

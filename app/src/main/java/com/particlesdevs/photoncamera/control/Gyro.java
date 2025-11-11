@@ -31,18 +31,26 @@ public class Gyro {
     public int circleCount = 0;
     long temp = 0;
     public static final float NS2S = 1.0f / 1000000000.0f;
-    private long prevStamp;
+    private long prevStamp = 0;
     private int counter = 0;
     boolean lock = false;
+    private double averageStamp = 0;
+    private int stampIterations = 0;
 
     private final SensorEventListener mGravityTracker = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             mAngles = sensorEvent.values;
-            float anglex,angley,anglez;
-            anglex = mAngles[0]*(sensorEvent.timestamp-prevStamp)*NS2S;
-            angley = mAngles[1]*(sensorEvent.timestamp-prevStamp)*NS2S;
-            anglez = mAngles[2]*(sensorEvent.timestamp-prevStamp)*NS2S;
+            float anglex = 0.0f,angley = 0.0f,anglez = 0.0f;
+            if(prevStamp != 0) {
+                anglex = mAngles[0]*(sensorEvent.timestamp-prevStamp)*NS2S;
+                angley = mAngles[1]*(sensorEvent.timestamp-prevStamp)*NS2S;
+                anglez = mAngles[2]*(sensorEvent.timestamp-prevStamp)*NS2S;
+                double stampWeight = Math.min(1.0, 1.0 / (Math.min(stampIterations, 5000) + 1));
+                averageStamp = averageStamp * (1.0 - stampWeight) + (sensorEvent.timestamp - prevStamp) * NS2S * stampWeight;
+                stampIterations++;
+            }
+            //Log.d(TAG, "Gyro stampDiff:"+averageStamp);
             if(integrate){
                 x+=anglex;
                 y+=angley;
@@ -84,6 +92,7 @@ public class Gyro {
     }
 
     public void register() {
+        stampIterations = 0;
         mSensorManager.registerListener(mGravityTracker, mGyroSensor, delayUs);
     }
 

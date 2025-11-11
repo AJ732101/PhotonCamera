@@ -51,6 +51,8 @@ public class CameraActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("CameraActivity", "Called onCreate()");
+        // Force portrait orientation immediately on create
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_camera);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -137,6 +139,7 @@ public class CameraActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Ensure portrait orientation is enforced every time activity resumes
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 

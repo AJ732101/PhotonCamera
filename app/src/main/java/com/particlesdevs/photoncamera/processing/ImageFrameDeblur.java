@@ -12,8 +12,8 @@ public class ImageFrameDeblur {
     private Point size, kernelSize, kernelCount, nsize;
     private Parameters parameters;
 
-    public ImageFrameDeblur() {
-        parameters = PhotonCamera.getParameters();
+    public ImageFrameDeblur(Parameters parameters) {
+        this.parameters = parameters;
         size = parameters.rawSize;
         nsize = new Point(size.x / 4, size.y / 4);
         kernelSize = new Point(64, 64);

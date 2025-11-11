@@ -49,10 +49,11 @@ public class SettingsBarEntryProvider extends ViewModel {
     private final SettingsBarEntryModel zoomEntry = SettingsBarEntryModel.newEntry(R.id.zoom_entry_layout, R.string.zoom_toggle_text, SettingType.ZOOM);
     private final SettingsBarEntryModel saveRawEntry = SettingsBarEntryModel.newEntry(R.id.saveraw_entry_layout, R.string.raw_string, SettingType.RAW);
     private final SettingsBarEntryModel batterySaverEntry = SettingsBarEntryModel.newEntry(R.id.batterysaver_entry_layout, R.string.energy_saving, SettingType.BATTERY_SAVER);
+    private final SettingsBarEntryModel bracketingEntry = SettingsBarEntryModel.newEntry(R.id.bracketing_entry_layout, R.string.exposure_bracketing, SettingType.BRACKETING);
     private final List<SettingsBarEntryModel> allEntries = new ArrayList<>(8);
 
     public SettingsBarEntryProvider() {
-        allEntries.add(hdrxEntry);
+//        allEntries.add(hdrxEntry);
         allEntries.add(flashEntry);
         allEntries.add(timerEntry);
         allEntries.add(saveRawEntry);
@@ -64,6 +65,7 @@ public class SettingsBarEntryProvider extends ViewModel {
         allEntries.add(fpsEntry);
         allEntries.add(gridEntry);
         allEntries.add(batterySaverEntry);
+        allEntries.add(bracketingEntry);
     }
 
     public void createEntries() {
@@ -79,6 +81,7 @@ public class SettingsBarEntryProvider extends ViewModel {
         createSaveRawEntry();
         createGridEntry();
         createBatterySaverEntry();
+        createBracketingEntry();
         updateAllEntries();
     }
 
@@ -96,6 +99,7 @@ public class SettingsBarEntryProvider extends ViewModel {
             updateEntry(quadEntry, PreferenceKeys.isQuadBayerOn());
             updateEntry(saveRawEntry, PreferenceKeys.isSaveRaw());
             updateEntry(batterySaverEntry, PreferenceKeys.isBatterySaverOn());
+            updateEntry(bracketingEntry, PreferenceKeys.getBracketingMode());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,6 +172,13 @@ public class SettingsBarEntryProvider extends ViewModel {
         batterySaverEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.btsvr_off_button, R.drawable.ic_round_battery_alert_24, R.string.off, 0, batterySaverEntry),
                 SettingsBarButtonModel.newButtonModel(R.id.btsvr_on_button, R.drawable.leaf_icon_15, R.string.on, 1, batterySaverEntry)
+        );
+    }
+    private void createBracketingEntry() {
+        bracketingEntry.addSettingsBarButtonModels(
+                SettingsBarButtonModel.newButtonModel(R.id.bracketing_off_button, R.drawable.ic_exposure, R.string.bracketing_off, 0, bracketingEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.bracketing_normal_button, R.drawable.ic_exposure, R.string.bracketing_normal, 1, bracketingEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.bracketing_high_button, R.drawable.ic_exposure, R.string.bracketing_high, 2, bracketingEntry)
         );
     }
 

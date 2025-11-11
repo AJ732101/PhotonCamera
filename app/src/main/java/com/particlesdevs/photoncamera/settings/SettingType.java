@@ -12,5 +12,6 @@ public enum SettingType {
     NOISE,
     EDGE,
     RAW,
-    BATTERY_SAVER
+    BATTERY_SAVER,
+    BRACKETING
 }

@@ -323,8 +323,41 @@ public class Parameters {
             }
 
         }
-        //Log.d(TAG, "Using custom color transform 1:"+ colorMat1.toString());
-
+        // Check if forward matrices have each component non-zero, otherwise replace with identity
+        boolean invertible = true;
+        for (int i = 0; i < 3; i++) {
+            float sum = 0.0f;
+            for (int j = 0; j < 3; j++) {
+                if (forwardt1 != null)
+                    sum += Math.abs(forwardt1.getElement(i, j).floatValue());
+            }
+            if(sum == 0.0f) invertible = false;
+        }
+        if(!invertible) {
+            Log.d(TAG, "Forward matrix 1 is not invertible, using identity");
+            forwardt1 = new ColorSpaceTransform(new Rational[]{
+                    new Rational(1,1), new Rational(0,1), new Rational(0,1),
+                    new Rational(0,1), new Rational(1,1), new Rational(0,1),
+                    new Rational(0,1), new Rational(0,1), new Rational(1,1)
+            });
+        }
+        invertible = true;
+        for (int i = 0; i < 3; i++) {
+            float sum = 0.0f;
+            for (int j = 0; j < 3; j++) {
+                if (forwardt2 != null)
+                    sum += Math.abs(forwardt2.getElement(i, j).floatValue());
+            }
+            if(sum == 0.0f) invertible = false;
+        }
+        if(!invertible) {
+            Log.d(TAG, "Forward matrix 1 is not invertible, using identity");
+            forwardt2 = new ColorSpaceTransform(new Rational[]{
+                    new Rational(1,1), new Rational(0,1), new Rational(0,1),
+                    new Rational(0,1), new Rational(1,1), new Rational(0,1),
+                    new Rational(0,1), new Rational(0,1), new Rational(1,1)
+            });
+        }
 
         Converter.convertColorspaceTransform(calibration1, calibrationTransform1);
         Converter.convertColorspaceTransform(calibration2, calibrationTransform2);

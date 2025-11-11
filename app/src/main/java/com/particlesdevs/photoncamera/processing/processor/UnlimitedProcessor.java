@@ -46,7 +46,7 @@ public class UnlimitedProcessor extends ProcessorBase {
                                int cameraRotation,
                                ProcessingCallback callback) {
         this.dngFile = dngFile;
-        this.jpgFile = jpgFile;
+        this.imageFile = jpgFile;
         this.exifData = exifData;
         this.characteristics = characteristics;
         this.captureResult = captureResult;
@@ -127,10 +127,10 @@ public class UnlimitedProcessor extends ProcessorBase {
 
         processingEventsListener.onProcessingFinished("Unlimited JPG Processing Finished");
 
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(jpgFile, bitmap,
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, bitmap,
                 ImageSaver.JPG_QUALITY, exifData);
 
-        processingEventsListener.notifyImageSavedStatus(imageSaved, jpgFile);
+        processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);
 
         pipeline.close();
 
