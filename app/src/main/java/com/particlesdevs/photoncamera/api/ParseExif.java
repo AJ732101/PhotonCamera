@@ -92,7 +92,7 @@ public class ParseExif {
         data.DATETIME = sFormatter.format(new Date(System.currentTimeMillis()));
         data.COMPRESSION = "97";
         data.COLOR_SPACE = "sRGB";
-        data.EXIF_VERSION = "0300";
+        data.EXIF_VERSION = "0231";
         data.IMAGE_DESCRIPTION = PhotonCamera.getParameters().toString();
         /*
         //saving for later use
@@ -130,7 +130,7 @@ public class ParseExif {
         //inter.setAttribute("FocalLengthIn35mmFormat", data.EQUIVALENT_35MM);
         inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, "23mm");
         inter.setAttribute("FocalLengthIn35mmFormat", "23mm");
-        inter.setAttribute(TAG_SOFTWARE, "Photon Camera");
+        inter.setAttribute(TAG_SOFTWARE, "PhotonVidCam");
         return inter;
     }
 
@@ -168,6 +168,6 @@ public class ParseExif {
         public String F_NUMBER;
         public String FOCAL_LENGTH;
         public String EQUIVALENT_35MM = "23mm";
-        public String SOFTWARE = "Photon Camera";
+        public String SOFTWARE = "PhotonVidCam";
     }
 }
