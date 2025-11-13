@@ -109,8 +109,9 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case VIDEO:
                         if (!cameraFragment.captureController.mIsRecordingVideo) {
-                            cameraFragment.captureController.VideoStart();
-                            view.setActivated(false);
+                            if (cameraFragment.captureController.VideoStart()) {
+                                view.setActivated(false);
+                            }
                         } else {
                             cameraFragment.captureController.VideoEnd();
                             view.setActivated(true);
