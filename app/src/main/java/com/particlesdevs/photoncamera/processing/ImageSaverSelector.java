@@ -23,22 +23,19 @@ public class ImageSaverSelector {
             case ImageFormat.JPEG:
                 saverImplementation = JPEGSaver;
                 break;
-
             case ImageFormat.HEIC:
                 saverImplementation = HEICSaver;
                 break;
-
             case ImageFormat.YUV_420_888:
             case ImageFormat.YCBCR_P010:
                 saverImplementation = YUVSaver;
                 break;
-
             case ImageFormat.RAW10:
+            case ImageFormat.RAW12:
             case ImageFormat.RAW_SENSOR:
                 Log.d(TAG, "Selected RAW16Saver for format: " + format);
                 saverImplementation = RAW16Saver;
                 break;
-
             default:
                 Log.e(TAG, "Cannot save image, unexpected image format:" + format);
                 break;
