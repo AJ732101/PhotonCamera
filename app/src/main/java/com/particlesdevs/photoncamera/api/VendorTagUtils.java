@@ -21,8 +21,7 @@ import java.util.Map;
 
 public class VendorTagUtils {
     private static final String TAG = "VendorTagUtils";
-    public static boolean isSupported(CaptureRequest.Builder builder,
-                                       CaptureRequest.Key<?> key) {
+    public static boolean isSupported(CaptureRequest.Builder builder, CaptureRequest.Key<?> key) {
         boolean supported = true;
         try {
             builder.get(key);
@@ -41,7 +40,7 @@ public class VendorTagUtils {
             byte enable = 1;
             var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
             if(isSupported(builder,clientName)) {
-                Log.d(TAG, "com.xiaomi.sessionparams.clientName supported");
+                //Log.d(TAG, "com.xiaomi.sessionparams.clientName is supported");
                 builder.set(clientName, "com.android.camera");
             }
 
@@ -49,21 +48,21 @@ public class VendorTagUtils {
             if (apertureToUse < 16) {
                 var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
                 if (isSupported(builder, apertureMode)) {
-                    Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
+                    //Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
                     builder.set(apertureMode, 1); // 1 = enable, 0 = disable
                 }
                 var lensAperture = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
                 if (isSupported(builder, lensAperture)) {
                     CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
                     Float[] apert = cameraCharacteristics.get(vendorKey);
-                    Log.d(TAG, "com.xiaomi.lens.aperture is supported");
+                    //Log.d(TAG, "com.xiaomi.lens.aperture is supported");
                     builder.set(lensAperture, apertureToUse);
                 }
             }
 
             var inSensorZoom = new CaptureRequest.Key<>("com.xiaomi.insensorzoom", String.class);
             if (isSupported(builder, inSensorZoom)) {
-                Log.d(TAG, "com.xiaomi.insensorzoom is supported");
+                //Log.d(TAG, "com.xiaomi.insensorzoom is supported");
                 CameraCharacteristics.Key<String> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.insensorzoom", String.class);
                 String zoom = cameraCharacteristics.get(vendorKey);
                 Log.d(TAG, zoom);
@@ -72,12 +71,12 @@ public class VendorTagUtils {
             if(burst) {
                 var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);
                 if (isSupported(builder, remosaicEnabled)) {
-                    Log.d(TAG, "remosaic.enabled is supported");
+                    //Log.d(TAG, "remosaic.enabled is supported");
                     builder.set(remosaicEnabled, enable);
                 }
                 var remosaicEnabled2 = new CaptureRequest.Key<>("com.mediatek.control.capture.remosaicenable", int[].class);
                 if (isSupported(builder, remosaicEnabled2)) {
-                    Log.d(TAG, "capture.remosaicenable is supported");
+                    //Log.d(TAG, "capture.remosaicenable is supported");
                     builder.set(remosaicEnabled2, new int[]{1});
                 }
             }
