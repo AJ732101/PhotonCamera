@@ -77,23 +77,37 @@ public class SettingsBarEntryView extends LinearLayout {
     }
 
     public void setSettingsBarEntryModel(SettingsBarEntryModel entryModel) {
-        titleTextView.setText(entryModel.getTitleStringId());
-        stateTextView.setText(entryModel.getStateTextStringId());
+        try {
+            titleTextView.setText(entryModel.getTitleStringId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            stateTextView.setText(entryModel.getStateTextStringId());
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         imageButtons.clear();
-        if (entryModel.getSettingsBarButtonModels() != null) {
-            for (SettingsBarButtonModel buttonModel : entryModel.getSettingsBarButtonModels()) {
-                ImageButton button = new ImageButton(context);
-                button.setId(buttonModel.getId());
-                button.setImageResource(buttonModel.getButtonDrawableId());
-                button.setImageTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_selected}, new int[]{-android.R.attr.state_selected}}, new int[]{Color.BLACK, Color.WHITE}));
-                button.setBackgroundResource(R.drawable.aux_button_background);
-                button.setCropToPadding(false);
-                button.setOnClickListener(buttonModel.getButtonClickListener());
-                button.setSelected(buttonModel.isSelected());
-                imageButtons.add(button);
+        try {
+            if (entryModel.getSettingsBarButtonModels() != null) {
+                for (SettingsBarButtonModel buttonModel : entryModel.getSettingsBarButtonModels()) {
+                    ImageButton button = new ImageButton(context);
+                    button.setId(buttonModel.getId());
+                    button.setImageResource(buttonModel.getButtonDrawableId());
+                    button.setImageTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_selected}, new int[]{-android.R.attr.state_selected}}, new int[]{Color.BLACK, Color.WHITE}));
+                    button.setBackgroundResource(R.drawable.aux_button_background);
+                    button.setCropToPadding(false);
+                    button.setOnClickListener(buttonModel.getButtonClickListener());
+                    button.setSelected(buttonModel.isSelected());
+                    imageButtons.add(button);
+                }
+                addToLayout(imageButtons);
             }
-            addToLayout(imageButtons);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

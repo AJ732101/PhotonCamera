@@ -53,7 +53,8 @@ public class SettingsBarEntryProvider extends ViewModel {
     private final List<SettingsBarEntryModel> allEntries = new ArrayList<>(8);
 
     public SettingsBarEntryProvider() {
-//        allEntries.add(hdrxEntry);
+        //createEntries();
+        //allEntries.add(hdrxEntry);
         allEntries.add(flashEntry);
         allEntries.add(timerEntry);
         allEntries.add(saveRawEntry);
@@ -115,7 +116,11 @@ public class SettingsBarEntryProvider extends ViewModel {
 
     public void addEntries(SettingsBarLayout settingsBarLayout) {
         settingsBarLayout.removeEntries();
-        allEntries.forEach(settingsBarLayout::addEntry);
+        try {
+            allEntries.forEach(settingsBarLayout::addEntry);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void createHdrxEntry() {
