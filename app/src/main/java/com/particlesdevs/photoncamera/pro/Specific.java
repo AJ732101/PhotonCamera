@@ -111,10 +111,6 @@ public class Specific {
                     specificSetting.useAlternatePreviewTemplate = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "useRaw10": {
-                    specificSetting.useRaw10 = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -161,6 +157,18 @@ public class Specific {
                 }
                 case "YCBCR_P010_TargetFormat": {
                     specificSetting.YCBCR_P010_TargetFormat = caseS[1];
+                    break;
+                }
+                case "rawFormat": {
+                    specificSetting.rawFormat = caseS[1];
+                    break;
+                }
+                case "newRecSurfaceType": {
+                    specificSetting.newRecSurfaceType = caseS[1];
+                    break;
+                }
+                case "customRawRes": {
+                    specificSetting.customRawRes = caseS[1];
                     break;
                 }
             }

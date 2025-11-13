@@ -20,7 +20,6 @@ public class SpecificSetting {
     public boolean useExternalViewer = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useAlternatePreviewTemplate = false;
-    public boolean useRaw10 = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
@@ -33,6 +32,9 @@ public class SpecificSetting {
     public String newRecColorRange = "full";
     public String recPrefix = "";
     public String YCBCR_P010_TargetFormat = "HEVC";
+    public String rawFormat = "RAW_SENSOR";
+    public String newRecSurfaceType = "COLOR_FormatSurface";
+    public String customRawRes = "";
     public SpecificSetting(){
     }
 }
