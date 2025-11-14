@@ -38,54 +38,123 @@ public class YUVSaver extends DefaultSaver{
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && (image.getFormat() == ImageFormat.YCBCR_P010)) {
             String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
-            Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec.");
+            Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec");
 
-            Path heicPath = null;
-            if (usedCodec.equals("AVIF")) {
-                heicPath = ImagePath.newAVIFFilePath();
+            Path storagePath = null;
+            if ((usedCodec.equals("AVIF")) || (usedCodec.equals("AV1"))) {
+                storagePath = ImagePath.newAVIFFilePath();
             }
             else if (usedCodec.equals("APV")) {
-                heicPath = ImagePath.newAPVFilePath();
+                storagePath = ImagePath.newAPVFilePath();
             }
             else {
-                heicPath = ImagePath.newHEIFFilePath();
+                storagePath = ImagePath.newHEIFFilePath();
             }
-            File heicFile = new File(heicPath.toString());
+            File heicFile = new File(storagePath.toString());
 
             MediaCodec encoder = null;
             MediaMuxer muxer = null;
             boolean muxerStarted = false;
             MediaFormat format = null;
+            Size maxEncoderRes = null;
+            String mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
 
             try {
                 // 1. Configure and create Muxer and Encoder
                 muxer = new MediaMuxer(heicFile.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_HEIF);
 
                 switch (usedCodec) {
+                    case "HEVC":
+                    case "H265":
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
+                        break;
+                    case "DOLBY_VISION":
+                    case "DOLBY":
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
+                        break;
+                    case "AV1":
                     case "AVIF":
-                        format = createAv1Format(Math.min(image.getWidth(), 1920), Math.min(image.getHeight(), 1920));
-                        encoder = MediaCodec.createByCodecName("c2.android.av1.encoder");
-                        //encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AV1);
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
                         break;
                     case "APV":
-                        format = createApvFormat(Math.min(image.getWidth(), 1920), Math.min(image.getHeight(), 1920));
-                        encoder = MediaCodec.createByCodecName("c2.android.apv.encoder");
-                        //encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AV1);
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
+                        break;
+                    case "VP8":
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_VP8;
+                        break;
+                    case "VP9":
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
                         break;
                     case "HEIC":
-                        format = createDedicatedHeicFormat(image.getWidth(), image.getHeight());
-                        encoder = MediaCodec.createByCodecName("c2.qti.heic.encoder");
-                        //encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC);
+                        mimeVid = MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC;
                         break;
-                    case "HEVC":
-                        //encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder");
-                        encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder");
-                        //encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC);
-                        format = createHeicFormat(image.getWidth(), image.getHeight());
+                    default:
+                        mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
                         break;
                 }
 
-                encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+                encoder = MediaCodec.createEncoderByType(mimeVid);
+                try {
+                    encoder = MediaCodec.createEncoderByType(mimeVid);
+                    MediaCodecInfo codecInfo = encoder.getCodecInfo();
+                    MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
+                    MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
+                    maxEncoderRes = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
+                    Log.d(TAG, "encodername: " + codecInfo.getName() + " - max encoder resolution: " + maxEncoderRes.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+                }
+                catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+
+                switch (usedCodec) {
+                    case "AVIF":
+                    case "AV1":
+                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        break;
+                    case "APV":
+                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        break;
+                    case "HEIC":
+                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        break;
+                    case "HEVC":
+                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        break;
+                }
+
+                /*switch (usedCodec) {
+                    case "AVIF":
+                    case "AV1":
+                        maxEncoderRes = getMaximumSupportedResolution("c2.android.av1.encoder", MediaFormat.MIMETYPE_VIDEO_AV1);
+                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        encoder = MediaCodec.createByCodecName("c2.android.av1.encoder");
+                        break;
+                    case "APV":
+                        maxEncoderRes = getMaximumSupportedResolution("c2.android.apv.encoder", MediaFormat.MIMETYPE_VIDEO_APV);
+                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        encoder = MediaCodec.createByCodecName("c2.android.apv.encoder");
+                        break;
+                    case "HEIC":
+                        maxEncoderRes = getMaximumSupportedResolution("c2.qti.heic.encoder", MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC);
+                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        encoder = MediaCodec.createByCodecName("c2.qti.heic.encoder");
+                        break;
+                    case "HEVC":
+                        maxEncoderRes = getMaximumSupportedResolution("c2.qti.hevc.encoder", MediaFormat.MIMETYPE_VIDEO_HEVC);
+                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder");
+                        break;
+                }*/
+
+                Log.d(TAG, "Output format: " + format.getString(MediaFormat.KEY_MIME) + "codec max resolution: " + maxEncoderRes.toString());
+
+                try {
+                    encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+                }
+                catch (Exception e) {
+                    Log.e(TAG, "Encoder configuration failed", e);
+                    throw e;
+                }
                 muxer.setOrientationHint(0);
 
                 // 2. Start the encoder
@@ -97,11 +166,12 @@ public class YUVSaver extends DefaultSaver{
                     ByteBuffer inputBuffer = encoder.getInputBuffer(inputBufferId);
                     if (inputBuffer != null) {
                         // This is the correct way to copy planar YUV data, respecting strides.
-                        if (usedCodec.equals("AVIF") || usedCodec.equals("APV")) {
-                            copyPlanesToBufferCrop(image.getPlanes(), image.getWidth(), image.getHeight(), inputBuffer);
+                        Size resResolution = new Size(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        if (resResolution.getWidth() == image.getWidth() && resResolution.getHeight() == image.getHeight()) {
+                            copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), inputBuffer);
                         }
                         else {
-                            copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), inputBuffer);
+                            copyPlanesToBufferCrop(image.getPlanes(), image.getWidth(), image.getHeight(), maxEncoderRes.getWidth(), maxEncoderRes.getHeight(), inputBuffer);
                         }
                         encoder.queueInputBuffer(inputBufferId, 0, inputBuffer.position(), image.getTimestamp(), MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                     }
@@ -176,7 +246,7 @@ public class YUVSaver extends DefaultSaver{
                     // Continue looping
                 }*/
 
-                Log.d(TAG, "Successfully saved HEIC/AVIF file to: " + heicFile.getAbsolutePath());
+                Log.d(TAG, "Successfully saved HEIC/AVIF/APV still image to: " + heicFile.getAbsolutePath());
                 processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
 
             } catch (Exception e) {
@@ -302,7 +372,7 @@ public class YUVSaver extends DefaultSaver{
         int yRowStride = yPlane.getRowStride();
         int yPixelStride = yPlane.getPixelStride();
         int yRowDataWidthInBytes = width * yPixelStride;
-        byte[] rowData = new byte[yRowStride]; // Wiederverwendbarer Puffer für eine Zeile
+        byte[] rowData = new byte[yRowStride];
         for (int j = 0; j < height; j++) {
             yBuffer.position(j * yRowStride);
             yBuffer.get(rowData, 0, yRowDataWidthInBytes);
@@ -322,7 +392,58 @@ public class YUVSaver extends DefaultSaver{
         }
     }
 
-    private void copyPlanesToBufferCrop(Image.Plane[] planes, int width, int height, ByteBuffer dst) {
+    private boolean copyPlanesToBufferCrop(Image.Plane[] planes, int widthIn, int heightIn, int widthOut, int heightOut, ByteBuffer dst) {
+        if (widthIn < widthOut || heightIn < heightOut) {
+            Log.e(TAG, "Source image is smaller than target crop size! Cropping disabled.");
+            copyPlanesToBuffer(planes, widthIn, heightIn, dst); // Fallback to non-cropping version
+            return false;
+        }
+
+        // --- Y Plane (Luma) ---
+        // Calculate the top-left corner of the crop rectangle.
+        final int yCropX = (widthIn - widthOut) / 2;
+        // Ensure the Y offset is even for correct Chroma alignment.
+        final int yCropY = ((heightIn - heightOut) / 2) & ~1;
+
+        Image.Plane yPlane = planes[0];
+        ByteBuffer yBuffer = yPlane.getBuffer();
+        int yRowStride = yPlane.getRowStride();
+        int yPixelStride = yPlane.getPixelStride();
+        byte[] rowDataY = new byte[widthOut * yPixelStride];
+
+        for (int j = 0; j < heightOut; j++) {
+            int sourceRow = yCropY + j;
+            int sourceOffset = sourceRow * yRowStride + yCropX * yPixelStride;
+            yBuffer.position(sourceOffset);
+            yBuffer.get(rowDataY, 0, widthOut * yPixelStride);
+            dst.put(rowDataY, 0, widthOut * yPixelStride);
+        }
+
+        // --- UV Plane (Chroma, Interleaved) ---
+        // The chroma planes are subsampled by 2.
+        final int uvWidthOut = widthOut / 2;
+        final int uvHeightOut = heightOut / 2;
+        final int uvCropX = yCropX / 2;
+        final int uvCropY = yCropY / 2;
+
+        Image.Plane uvPlane = planes[1];
+        ByteBuffer uvBuffer = uvPlane.getBuffer();
+        int uvRowStride = uvPlane.getRowStride();
+        int uvPixelStride = uvPlane.getPixelStride();
+        byte[] rowDataUV = new byte[uvWidthOut * uvPixelStride];
+
+        for (int j = 0; j < uvHeightOut; j++) {
+            int sourceRow = uvCropY + j;
+            int sourceOffset = sourceRow * uvRowStride + uvCropX * uvPixelStride;
+            uvBuffer.position(sourceOffset);
+            uvBuffer.get(rowDataUV, 0, uvWidthOut * uvPixelStride);
+            dst.put(rowDataUV, 0, uvWidthOut * uvPixelStride);
+        }
+
+        return true;
+    }
+
+    /*private void copyPlanesToBufferCrop(Image.Plane[] planes, int width, int height, ByteBuffer dst) {
         final int TARGET_SIZE = 1920;
 
         if (width < TARGET_SIZE || height < TARGET_SIZE) {
@@ -370,37 +491,24 @@ public class YUVSaver extends DefaultSaver{
             uvBuffer.get(rowDataUV, 0, uvTargetSize * uvPixelStride);
             dst.put(rowDataUV, 0, uvTargetSize * uvPixelStride);
         }
-    }
+    }*/
 
-    /**
-     * Queries a specific encoder to find its maximum supported resolution for a given MIME type.
-     * @param codecName The exact name of the encoder, e.g., "c2.android.av1.encoder".     * @param mimeType The MIME type to check, e.g., MediaFormat.MIMETYPE_VIDEO_AV1.
-     * @return A Size object with the maximum width and height, or null if not found.
-     */
-    private Size getMaximumSupportedResolution(String codecName, String mimeType) {
+    private Size getMaximumSupportedResolution(MediaCodec videoEncoder, String mimeVid) {
+        Size maxEncoderRes = null;
+        MediaCodecInfo codecInfo = null;
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-            return null;
+            return maxEncoderRes;
         }
         try {
-            MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-            for (MediaCodecInfo info : codecList.getCodecInfos()) {
-                if (!info.isEncoder() || !info.getName().equalsIgnoreCase(codecName)) {
-                    continue;
-                }
-                MediaCodecInfo.CodecCapabilities caps = info.getCapabilitiesForType(mimeType);
-                if (caps == null) continue;
-
-                MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
-                if (videoCaps == null) continue;
-
-                int maxWidth = videoCaps.getSupportedWidths().getUpper();
-                int maxHeight = videoCaps.getSupportedHeights().getUpper();
-                Log.d(TAG, "Max resolution for " + codecName + ": " + maxWidth + "x" + maxHeight);
-                return new Size(maxWidth, maxHeight);
-            }
+            codecInfo = videoEncoder.getCodecInfo();
+            MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
+            MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
+            maxEncoderRes = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
+            Log.d(TAG, "encodename: " + codecInfo.getName() + " - max encoder resolution: " + maxEncoderRes.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+            return maxEncoderRes;
         } catch (Exception e) {
-            Log.e(TAG, "Could not get max resolution for codec: " + codecName, e);
+            Log.e(TAG, "could not get max resolution for codec: " + codecInfo.getName(), e);
+            return maxEncoderRes;
         }
-        return null;
     }
 }
