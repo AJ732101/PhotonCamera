@@ -477,7 +477,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
                 if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    if ((PhotonCamera.getSettings().frameCount == 1) && ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC)))
+                    if ((PhotonCamera.getSettings().frameCount == 1) &&
+                       ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)))
                     {
                         stringMap.put("Mode", "SINGLE SHOT");
                     }
@@ -492,7 +495,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("Camera ID", camID);
                 }
                 if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    if ((PhotonCamera.getSettings().frameCount == 1) && ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) || (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC))) {
+                    if ((PhotonCamera.getSettings().frameCount == 1) &&
+                       ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010))) {
                         switch (PhotonCamera.getSpecific().specificSetting.effectMode) {
                             case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
                                 stringMap.put("Effectmode:", "Mono");
