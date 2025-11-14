@@ -46,6 +46,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.AudioFormat;
 import android.media.CamcorderProfile;
 import android.media.ImageReader;
+import android.media.MediaCodecList;
 import android.media.MediaRecorder;
 import android.media.MediaCodecInfo;
 import android.media.AudioRecord;
@@ -230,6 +231,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isDualSession = false;
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
     private final ParamController paramController;
+    public static MaxEncoderSizes maxEncoderSizes = new MaxEncoderSizes();
     public TouchFocus mTouchFocus;
 
     public final boolean mFlashEnabled = false;
@@ -1800,9 +1802,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
             }
             else {
-                setUpMediaRecorder();
-                surfaces = Arrays.asList(surface, mMediaRecorder.getSurface());
-                mPreviewRequestBuilder.addTarget(mMediaRecorder.getSurface());
+                if (setUpMediaRecorder()) {
+                    surfaces = Arrays.asList(surface, mMediaRecorder.getSurface());
+                    mPreviewRequestBuilder.addTarget(mMediaRecorder.getSurface());
+                }
+                else {
+                    mIsRecordingVideo = false;
+                }
             }
         }
         else {
@@ -2709,7 +2715,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return format;
     }
 
-    private MediaFormat createVideoFormat() {
+    private MediaFormat createVideoFormat(MediaCodec codec) {
         Log.d(TAG, "createVideoFormat start");
         // resolution related
         int vidHeight = PhotonCamera.getSettings().videoHeight;
@@ -2755,8 +2761,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
         }
 
+        Size maxRes = getMaximumSupportedResolution(codec, mimeVid);
+
         // create MediaFormat to fill out with video parameters
-        MediaFormat format = MediaFormat.createVideoFormat(mimeVid, vidWidth, vidHeight);
+        MediaFormat format = null;
+        if (Math.min(vidWidth, maxRes.getWidth()) == 2048) {
+            format = MediaFormat.createVideoFormat(mimeVid, 1920, 1920);
+            Log.d(TAG, "using recording resolution: 1920x1920 -> fallback from 2024x2024");
+        }
+        else {
+            format = MediaFormat.createVideoFormat(mimeVid, Math.min(vidWidth, maxRes.getWidth()), Math.min(vidHeight, maxRes.getHeight()));
+            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxRes.getHeight())));
+        }
 
         //format.setString("camera_application_name", "com.particlesdevs.photonvidcam");
         //format.setInteger("camera_module_id", Integer.valueOf(PhotonCamera.getSettings().mCameraID));
@@ -2773,9 +2789,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
             }
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
-        }
-        else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
-
         }
         else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt);
@@ -2898,25 +2911,61 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return audioEncoder;
     }
 
-    private MediaCodec createVideoCodec(MediaFormat videoFormat) {
+    private Size getMaximumSupportedResolution(MediaCodec videoEncoder, String mimeVid) {
+        Size maxEncoderRes = null;
+        MediaCodecInfo codecInfo = null;
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            return maxEncoderRes;
+        }
+        try {
+            codecInfo = videoEncoder.getCodecInfo();
+            MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
+            MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
+            maxEncoderRes = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
+            Log.d(TAG, "encodername: " + codecInfo.getName() + " - max encoder resolution: " + maxEncoderRes.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+            return maxEncoderRes;
+        } catch (Exception e) {
+            Log.e(TAG, "could not get max resolution for codec: " + codecInfo.getName(), e);
+            return maxEncoderRes;
+        }
+    }
+
+    private MediaCodec createVideoCodec() {
         Log.d(TAG, "createVideoCodec start");
         String mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
-        if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265"))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
-        else if (PhotonCamera.getSettings().videoCodec.equals("VP8"))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP8;
-        else if (PhotonCamera.getSettings().videoCodec.equals("VP9"))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
-        else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY")))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
-        else if (PhotonCamera.getSettings().videoCodec.equals("AV1"))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
-        else if (PhotonCamera.getSettings().videoCodec.equals("APV"))
-            mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
+        String codecName = "c2.android.avc.encoder";
+        Size maxEncoderRes = null;
+
+        switch (PhotonCamera.getSettings().videoCodec) {
+            case "HEVC":
+            case "H265":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_HEVC;
+                break;
+            case "DOLBY_VISION":
+            case "DOLBY":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
+                break;
+            case "AV1":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_AV1;
+                break;
+            case "APV":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_APV;
+                break;
+            case "VP8":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_VP8;
+                break;
+            case "VP9":
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_VP9;
+                break;
+            default:
+                mimeVid = MediaFormat.MIMETYPE_VIDEO_AVC;
+                break;
+        }
 
         MediaCodec videoEncoder = null;
         try {
             videoEncoder = MediaCodec.createEncoderByType(mimeVid);
+            maxEncoderRes = getMaximumSupportedResolution(videoEncoder, mimeVid);
         }
         catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -2953,10 +3002,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mEncoderData = new RecordingUtils.EncoderData();
         }
 
-        mVideoFormat = createVideoFormat();
         //mAudioFormat = createAudioFormat();
-        mVideoCodec = createVideoCodec(mVideoFormat);
         //mAudioCodec = createAudioCodec(mAudioFormat);
+        mVideoCodec = createVideoCodec();
+        mVideoFormat = createVideoFormat(mVideoCodec);
         mMediaMuxer = createMediaMuxer();
 
         mVideoEncoderCallback = new RecordingUtils.VideoEncoderCallback(mMediaMuxer, mEncoderData);
@@ -3038,9 +3087,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Log.d(TAG, "releaseMediaRecorderNew done");
     }
 
-    private void setUpMediaRecorder() {
+    private boolean setUpMediaRecorder() {
+        if (PhotonCamera.getSettings().videoCodec.equals("APV")) {
+            showToast("APV encoding is not supported by old MediaRecorder based implementation");
+            return false;
+        }
+
         Log.d(TAG, "setUpMediaRecorder start");
-        CamcorderProfile profile;
+        int vidWidth = 1280;
+        int vidHeight = 720;
+        String mimeType = MediaFormat.MIMETYPE_VIDEO_AVC;
         mMediaRecorder.reset();
         if (PhotonCamera.getSettings().audioCodec != 0) {
             mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
@@ -3056,21 +3112,27 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // codec
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.HEVC);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_HEVC;
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("AV1")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.AV1);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_AV1;
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("VP8")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.VP8);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_VP8;
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("VP9")) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.VP9);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_VP9;
         }
         else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DOLBY_VISION);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION;
         }
         else {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mimeType = MediaFormat.MIMETYPE_VIDEO_AVC;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -3104,32 +3166,44 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // resolution
-        if (PhotonCamera.getSettings().videoHeight == 4 * 1080)
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_8KUHD);
-        else if (PhotonCamera.getSettings().videoHeight == 2 * 1080)
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_2160P);
-        else if (PhotonCamera.getSettings().videoHeight == 1080)
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_1080P);
-        else
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+        if (PhotonCamera.getSettings().videoHeight == 4 * 1080) {
+            vidWidth = 4 * 1920;
+            vidHeight = 4 * 1080;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2 * 1080) {
+            vidWidth = 2 * 1920;
+            vidHeight = 2 * 1080;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 1080) {
+            vidWidth = 1920;
+            vidHeight = 1080;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 9999) {
+            Size maxRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
+            vidWidth = maxRes.getWidth();
+            vidHeight = maxRes.getHeight();
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 8888) {
+            vidWidth = 6016;
+            vidHeight = 4512;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 7777) {
+            vidWidth = 7680;
+            vidHeight = 5760;
+        }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);
         mMediaRecorder.setCaptureRate(PhotonCamera.getSettings().videoFramrate);
 
-        if (PhotonCamera.getSettings().videoHeight == 9999) {
-            Size maxRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
-            mMediaRecorder.setVideoSize(maxRes.getWidth(), maxRes.getHeight());
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 8888) {
-            mMediaRecorder.setVideoSize(6016, 4512);
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 7777) {
-            mMediaRecorder.setVideoSize(7680, 5760);
+        Size maxEncRes = maxEncoderSizes.getMaxResForMimeType(mimeType);
+        if (Math.min(vidWidth, maxEncRes.getWidth()) == 2048) {
+            mMediaRecorder.setVideoSize(1920, 1920);
+            Log.d(TAG, "using recording resolution: 1920x1920 -> fallback from 2024x2024");
         }
         else {
-            mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxEncRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxEncRes.getHeight())));
+            mMediaRecorder.setVideoSize(Math.min(vidWidth, maxEncRes.getWidth()), Math.min(vidHeight, maxEncRes.getHeight()));
         }
-
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
         // audio
@@ -3167,6 +3241,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             createCameraPreviewSession(false);
         }
         Log.d(TAG, "setUpMediaRecorder done");
+
+        return true;
     }
 
     private void createRecordingFile() {
@@ -3268,6 +3344,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         super.finalize();
     }
     public void resumeCamera() {
+        maxEncoderSizes.getMaxResForEncoders();
         setPreviewFormat();
 
         processExecutor.execute(() -> {
@@ -3295,6 +3372,49 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     (long) rhs.getWidth() * rhs.getHeight());
         }
 
+    }
+
+    static class MaxEncoderSizes {
+        List<String> mimeTypes = new ArrayList<String>();;
+        final Map<String, Size> maxResolutions = new HashMap<>();
+
+        public MaxEncoderSizes() {
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_AVC);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_VP8);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_VP9);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_AV1);
+            mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_APV);
+        }
+
+        public void getMaxResForEncoders() {
+            MediaCodec encoder = null;
+             for (String mimeVid : mimeTypes) {
+                try {
+                    Size maxSize = null;
+                    encoder = MediaCodec.createEncoderByType(mimeVid);
+                    if (encoder != null) {
+                        MediaCodecInfo codecInfo = encoder.getCodecInfo();
+                        MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
+                        MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
+                        maxSize = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
+                        Log.d(TAG, "encodername: " + codecInfo.getName() + " - max encoder resolution: " + maxSize.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+                        maxResolutions.put(mimeVid, maxSize);
+                        encoder.release();
+                    }
+                    else {
+                        Log.e(TAG, "encoder not found: " + mimeVid);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "encoder not found: " + mimeVid);
+                }
+            }
+        }
+
+        public Size getMaxResForMimeType(String mimeType) {
+            return maxResolutions.get(mimeType);
+        }
     }
 
     /**
