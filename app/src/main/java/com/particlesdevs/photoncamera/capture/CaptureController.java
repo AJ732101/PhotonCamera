@@ -1557,16 +1557,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void UpdateCameraCharacteristics(String cameraId) {
-        String curID = cameraId;
-        if(curID.contains("-")) {
-            logicalID = curID.split("-")[0];
-            physicalID = curID.split("-")[1];
-        } else {
-            logicalID = curID;
-            physicalID = logicalID;
-        }
-        PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(physicalID));
-        CameraCharacteristics characteristics = this.mCameraCharacteristicsMap.get(physicalID);
+        PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(cameraId));
+        CameraCharacteristics characteristics = this.mCameraCharacteristicsMap.get(cameraId);
         mCameraCharacteristics = characteristics;
         StreamConfigurationMap map = null;
         if (mCameraCharacteristics != null) {
@@ -1860,20 +1852,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         setAdvancedParameters(mPreviewRequestBuilder, true);
         setContrastCurve(mPreviewRequestBuilder);
 
-        //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (PhotonCamera.getSettings().zoom2X) {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (PhotonCamera.getSettings().zoom2X) {
+                if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
                 }
                 else {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
                 }
-
             }
-        //}
+            else {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+            }
+
+        }
 
         // AF mode for video
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
@@ -2215,29 +2210,35 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             setAdvancedParameters(captureBuilder, false);
             setContrastCurve(captureBuilder);
 
-            //if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (PhotonCamera.getSettings().zoom2X) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (PhotonCamera.getSettings().zoom2X) {
+                    if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
                         if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
-                        }
-                        else {
-                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
+                        } else {
+                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
                         }
                     }
                     else {
                         if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
-                        }
-                        else {
-                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                        } else {
+                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
                         }
                     }
                 }
-            //}
+                else {
+                    if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    }
+                    else {
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    }
+                }
+            }
 
             var CurrHotPixelMode = captureBuilder.get(CaptureRequest.HOT_PIXEL_MODE);
             Log.d(TAG, "HOT_PIXEL_MODE: " + CurrHotPixelMode.toString());

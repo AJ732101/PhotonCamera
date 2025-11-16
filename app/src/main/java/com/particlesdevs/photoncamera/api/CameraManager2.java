@@ -61,7 +61,7 @@ public final class CameraManager2 {
             } catch (InterruptedException ignored) {}
         }
 
-        scanAllCameras(cameraManager);
+        //scanAllCameras(cameraManager);
 
         SpecificSetting sp = PhotonCamera.getSpecific().specificSetting;
         String[] ids = sp.cameraIDS;
