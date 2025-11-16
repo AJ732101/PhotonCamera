@@ -396,7 +396,7 @@
                 android:title="@string/noise_reduction_str"
                 android:summary=""
                 android:defaultValue="@string/pref_noise_seekbar_default"
-                app:maxValue="4"
+                app:maxValue="8"
                 app:minValue="-6"
                 app:isFloat="true"
                 app:stepPerUnit="10"
