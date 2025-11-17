@@ -232,7 +232,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isDualSession = false;
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
     private final ParamController paramController;
-    public static MaxEncoderSizes maxEncoderSizes = new MaxEncoderSizes();
+    public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
 
     public final boolean mFlashEnabled = false;
@@ -1197,10 +1197,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         try {
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
-                mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                //mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, max);
             }
             else {
-                mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                //mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().QuadBayer) {
+                    mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, max);
+                }
+                else {
+                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
@@ -1531,7 +1538,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public Size customRawResForCamId(String camId) {
         String customResStr = PhotonCamera.getSpecific().specificSetting.customRawRes;
         if (customResStr == null || customResStr.isBlank() || !customResStr.startsWith("{") || !customResStr.endsWith("}")) {
-            return new Size(0, 0);
+            return null;
         }
         // Remove brackets {} and split by comma
         String[] entries = customResStr.substring(1, customResStr.length() - 1).split(",");
@@ -1553,7 +1560,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 // Continue to the next entry in case of a malformed one
             }
         }
-        return new Size(0, 0); // Return zero size if not found
+        return null; // Return zero size if not found
     }
 
     public void UpdateCameraCharacteristics(String cameraId) {
@@ -1593,10 +1600,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         try {
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
-                mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                //mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, max);
             }
             else {
-                mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, 2, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA);
+                if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().QuadBayer) {
+                    mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, max);
+                }
+                else {
+                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, max);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
@@ -1787,6 +1800,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (mIsRecordingVideo) {
             if (PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
                 if (setUpMediaRecorderNew()) {
+                    //surfaces = Arrays.asList(surface, mMediaCodecSurface);
                     surfaces = Arrays.asList(surface, mMediaCodecSurface);
                     mPreviewRequestBuilder.addTarget(mMediaCodecSurface);
                 }
@@ -2745,7 +2759,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // get max encoder resolution
-        Size maxRes = maxEncoderSizes.getMaxResForMimeType(mimeVid);
+        Size maxRes = encoderInfo.getMaxResForMimeType(mimeVid);
         if (maxRes == null) {
             Log.d(TAG, "encoder getMaxResForMimeType failed");
             return null;
@@ -2780,6 +2794,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 7777) {
             vidWidth = 7680;
             vidHeight = 5760;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 6666) {
+            vidWidth = 8192;
+            vidHeight = 6144;
         }
         else {
             vidWidth = 1280;
@@ -2879,6 +2897,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             default:
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
                 break;
+        }
+        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > encoderInfo.getMaxBitrateForMimeType(mimeVid)) {
+            Log.w(TAG, "selected video bitrate (" + Integer.toString(PhotonCamera.getSettings().videoBitrate) + "MBit/s)exceeds the maximum supported by the encoder (" +
+                    encoderInfo.getMaxBitrateForMimeType(mimeVid)/(1024*1024) + "MBit/s)");
         }
         format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, PhotonCamera.getSpecific().specificSetting.newRecKeyFrameIntervall);
@@ -3139,7 +3161,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // check max encoder resolution
-        Size maxEncRes = maxEncoderSizes.getMaxResForMimeType(mimeType);
+        Size maxEncRes = encoderInfo.getMaxResForMimeType(mimeType);
         if (maxEncRes == null) {
             return false;
         }
@@ -3239,6 +3261,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 7680;
             vidHeight = 5760;
         }
+        else if (PhotonCamera.getSettings().videoHeight == 6666) {
+            vidWidth = 8192;
+            vidHeight = 6144;
+        }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);
         mMediaRecorder.setCaptureRate(PhotonCamera.getSettings().videoFramrate);
@@ -3251,6 +3277,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else {
             Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxEncRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxEncRes.getHeight())));
             mMediaRecorder.setVideoSize(Math.min(vidWidth, maxEncRes.getWidth()), Math.min(vidHeight, maxEncRes.getHeight()));
+        }
+        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > encoderInfo.getMaxBitrateForMimeType(mimeType)) {
+            Log.w(TAG, "selected video bitrate (" + Integer.toString(PhotonCamera.getSettings().videoBitrate) + "MBit/s)exceeds the maximum supported by the encoder (" +
+                    encoderInfo.getMaxBitrateForMimeType(mimeType)/(1024*1024) + "MBit/s)");
         }
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
@@ -3392,7 +3422,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         super.finalize();
     }
     public void resumeCamera() {
-        maxEncoderSizes.getMaxResForEncoders();
+        encoderInfo.getEncoderInfos();
         setPreviewFormat();
 
         processExecutor.execute(() -> {
@@ -3422,11 +3452,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     }
 
-    static class MaxEncoderSizes {
+    static class EncoderInfoUtil {
         List<String> mimeTypes = new ArrayList<String>();;
         final Map<String, Size> maxResolutions = new HashMap<>();
+        final Map<String, Integer> maxBitrates = new HashMap<>();
+        final Map<String, Boolean> hwSupports = new HashMap<>();
+        final Map<String, String> encoderNames = new HashMap<>();
 
-        public MaxEncoderSizes() {
+        public EncoderInfoUtil() {
             mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_AVC);
             mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_HEVC);
             mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
@@ -3436,7 +3469,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_APV);
         }
 
-        public void getMaxResForEncoders() {
+        public void getEncoderInfos() {
             MediaCodec encoder = null;
              for (String mimeVid : mimeTypes) {
                 try {
@@ -3447,7 +3480,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
                         MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
                         maxSize = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
-                        Log.d(TAG, "encodername: " + codecInfo.getName() + " - max encoder resolution: " + maxSize.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+                        Log.d(TAG, "encodername: " + codecInfo.getName() + " - max encoder resolution: " + maxSize.toString() + " - max bitrate: " +
+                                videoCaps.getBitrateRange().getUpper()/(1024*1024) + "MBit/s" + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
+
+                        encoderNames.put(mimeVid, codecInfo.getName());
+                        maxBitrates.put(mimeVid, videoCaps.getBitrateRange().getUpper());
+                        hwSupports.put(mimeVid, codecInfo.isHardwareAccelerated());
                         maxResolutions.put(mimeVid, maxSize);
                         encoder.release();
                     }
@@ -3462,6 +3500,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         public Size getMaxResForMimeType(String mimeType) {
             return maxResolutions.get(mimeType);
+        }
+        public Integer getMaxBitrateForMimeType(String mimeType) {
+            return maxBitrates.get(mimeType);
+        }
+
+        public String getEncoderNameForMimeType(String mimeType) {
+            return encoderNames.get(mimeType);
+        }
+
+        public Boolean getHwSupportForMimeType(String mimeType) {
+            return hwSupports.get(mimeType);
         }
     }
 

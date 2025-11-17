@@ -66,6 +66,8 @@ final class CameraUIController implements CameraUIEventsListener,
             if (path != null) {
                 if (path.toLowerCase().endsWith(".dng")) return "image/x-adobe-dng";
                 if (path.toLowerCase().endsWith(".heic")) return "image/heic";
+                if (path.toLowerCase().endsWith(".heif")) return "image/heic";
+                if (path.toLowerCase().endsWith(".avif")) return "image/avif";
             }
             return "*/*"; // Generischer Fallback
         }
@@ -75,6 +77,9 @@ final class CameraUIController implements CameraUIEventsListener,
         // MimeTypeMap kennt HEIC/DNG oft nicht, also überschreiben wir es hier sicherheitshalber
         if ("dng".equalsIgnoreCase(extension)) {
             return "image/x-adobe-dng";
+        }
+        if ("avif".equalsIgnoreCase(extension)) {
+            return "image/avif";
         }
         if ("heic".equalsIgnoreCase(extension) || "heif".equalsIgnoreCase(extension)) {
             return "image/heic";
@@ -250,8 +255,6 @@ final class CameraUIController implements CameraUIEventsListener,
 
             case R.id.flip_camera_button:
                 view.animate().rotationBy(180).setDuration(450).start();
-                //cameraFragment.textureView.animate().rotationBy(360).setDuration(450).start();
-                //PreferenceKeys.setCameraID(cycler(PreferenceKeys.getCameraID()));
                 setID(cameraFragment.cycler(PreferenceKeys.getCameraID()));
                 this.restartCamera();
                 break;
