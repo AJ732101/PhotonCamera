@@ -578,6 +578,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     else if (PhotonCamera.getSettings().videoHeight == 9999) {
                         stringMap.put("Height", "4K+ 4:3");
                     }
+                    else if (PhotonCamera.getSettings().videoHeight == 6666) {
+                        stringMap.put("Height", "Full Unbinned");
+                    }
                     else {
                         stringMap.put("Height", String.valueOf(PhotonCamera.getSettings().videoHeight));
                     }
