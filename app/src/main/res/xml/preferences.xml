@@ -155,7 +155,7 @@
             android:layout="@layout/preference_seekbar"
             android:title="@string/bitrate"
             android:defaultValue="@string/pref_bitrate_default"
-            app:maxValue="200"
+            app:maxValue="240"
             app:minValue="10"
             android:icon="@drawable/speed_24px"/>
         <ListPreference
