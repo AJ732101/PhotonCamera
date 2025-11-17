@@ -99,6 +99,8 @@
         <item>8K (7680x4320)</item>
         <item>4K+ 4:3</item>
         <item>6K+ 4:3</item>
+        <item>8K+ 4:3</item>
+        <item>Unbinned Full</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
@@ -108,9 +110,12 @@
         <item>4320</item>
         <item>9999</item>
         <item>8888</item>
+        <item>7777</item>
+        <item>6666</item>
     </string-array>
 
     <string-array name="video_framerate_entries">
+        <item>1</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
@@ -123,6 +128,7 @@
     </string-array>
 
     <string-array name="video_framerate_entryValues">
+        <item>1</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
