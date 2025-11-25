@@ -451,8 +451,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
     @SuppressLint("DefaultLocale")
     private void updateScreenLog(CaptureResult result) {
+        if (captureController == null) {
+            return;
+        }
         surfaceView.post(() -> {
-            PhotonCamera.getCaptureController().videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
+            captureController.videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
             if (result.getFrameNumber() % 5 == 0) {
                 captureController.cameraEventsListener.mCurrentIso = String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY));
@@ -460,11 +463,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
                 if (exposureTimeNs != null && exposureTimeNs > 0) {
                     if (exposureTimeNs >= 1_000_000_000L) {
-                        // Belichtungszeit >= 1 Sekunde
                         double seconds = exposureTimeNs / 1_000_000_000.0;
                         captureController.cameraEventsListener.mCurrentShutterSpeed = String.format(Locale.getDefault(), "%.1fs", seconds);
                     } else {
-                        // Belichtungszeit < 1 Sekunde
                         long divisor = (long) (1_000_000_000.0 / exposureTimeNs);
                         captureController.cameraEventsListener.mCurrentShutterSpeed = "1/" + divisor + "s";
                     }
