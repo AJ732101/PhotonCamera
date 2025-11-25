@@ -111,6 +111,10 @@ public class Specific {
                     specificSetting.useAlternatePreviewTemplate = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useCodeAuroraMultiFrameNoiseReduction": {
+                    specificSetting.useCodeAuroraMultiFrameNoiseReduction = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -137,6 +141,22 @@ public class Specific {
                 }
                 case "effectMode": {
                     specificSetting.effectMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraSharpnessStrength": {
+                    specificSetting.codeAuroraSharpnessStrength = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraEisMode": {
+                    specificSetting.codeAuroraEisMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraSaturation": {
+                    specificSetting.codeAuroraSaturation = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraAiMode": {
+                    specificSetting.codeAuroraAiMode = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "newRecKeyFrameIntervall": {
@@ -169,6 +189,10 @@ public class Specific {
                 }
                 case "customRawRes": {
                     specificSetting.customRawRes = caseS[1];
+                    break;
+                }
+                case "codeAuroraHdrMode": {
+                    specificSetting.codeAuroraHdrMode = caseS[1];
                     break;
                 }
             }

@@ -20,6 +20,7 @@ public class SpecificSetting {
     public boolean useExternalViewer = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useAlternatePreviewTemplate = false;
+    public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
@@ -28,6 +29,10 @@ public class SpecificSetting {
     public float colorTint = 99.0f;
     public int newRecKeyFrameIntervall = 10;
     public int effectMode = 99;
+    public int codeAuroraSharpnessStrength = 0;
+    public int codeAuroraEisMode = 0;
+    public int codeAuroraSaturation = 99;    //X13U [0 10 5 1], 99 = off
+    public int codeAuroraAiMode = 99;
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
     public String recPrefix = "";
@@ -35,6 +40,7 @@ public class SpecificSetting {
     public String rawFormat = "RAW_SENSOR";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
+    public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
     public SpecificSetting(){
     }
 }
