@@ -492,23 +492,4 @@ public class YUVSaver extends DefaultSaver{
             dst.put(rowDataUV, 0, uvTargetSize * uvPixelStride);
         }
     }*/
-
-    private Size getMaximumSupportedResolution(MediaCodec videoEncoder, String mimeVid) {
-        Size maxEncoderRes = null;
-        MediaCodecInfo codecInfo = null;
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-            return maxEncoderRes;
-        }
-        try {
-            codecInfo = videoEncoder.getCodecInfo();
-            MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(mimeVid);
-            MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
-            maxEncoderRes = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
-            Log.d(TAG, "encodename: " + codecInfo.getName() + " - max encoder resolution: " + maxEncoderRes.toString() + " - HW supported: " + Boolean.toString(codecInfo.isHardwareAccelerated()));
-            return maxEncoderRes;
-        } catch (Exception e) {
-            Log.e(TAG, "could not get max resolution for codec: " + codecInfo.getName(), e);
-            return maxEncoderRes;
-        }
-    }
 }
