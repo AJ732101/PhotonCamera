@@ -21,6 +21,7 @@ public class SpecificSetting {
     public boolean useSceneAndEffectMode = false;
     public boolean useAlternatePreviewTemplate = false;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
+    public boolean useCodeAuroraCinematicMode = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;

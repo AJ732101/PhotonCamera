@@ -39,7 +39,6 @@ public class VendorTagUtils {
             if (isXiaomi) {
                 var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
                 if (isSupported(builder, clientName)) {
-                    //Log.d(TAG, "com.xiaomi.sessionparams.clientName is supported");
                     builder.set(clientName, "com.android.camera");
                 }
 
@@ -47,11 +46,11 @@ public class VendorTagUtils {
                 if (apertureToUse < 16) {
                     var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
                     if (isSupported(builder, apertureMode)) {
-                        //Log.d(TAG, "com.xiaomi.lens.apertureMode is supported");
                         builder.set(apertureMode, 1); // 1 = enable, 0 = disable
                     }
 
-                    var lensAperture = new CaptureRequest.Key<>("com.xiaomi.lens.info.availableApertures", Float.class);
+                    var lensAperture = new CaptureRequest.Key<>("com.xiaomi.sessionparams.initAperture", Float.class);
+                    //var lensApertureAndroid = new CaptureRequest.Key<>("android.lens.aperture", Float.class);
                     if (isSupported(builder, lensAperture)) {
                         CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
                         Float[] apert = cameraCharacteristics.get(vendorKey);
@@ -85,6 +84,11 @@ public class VendorTagUtils {
             var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
             if (isSupported(builder, eisMode)) {
                 builder.set(eisMode, (int) PhotonCamera.getSpecific().specificSetting.codeAuroraEisMode);
+            }
+
+            var enableCinematicMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableCinematicMode", Integer.class);
+            if (isSupported(builder, enableCinematicMode)) {
+                builder.set(enableCinematicMode, PhotonCamera.getSpecific().specificSetting.useCodeAuroraCinematicMode ? 1 : 0);
             }
 
             var useMfnr = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableMFNR", Integer.class);

@@ -115,6 +115,10 @@ public class Specific {
                     specificSetting.useCodeAuroraMultiFrameNoiseReduction = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useCodeAuroraCinematicMode": {
+                    specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
