@@ -101,6 +101,6 @@
     <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
     <string name="pref_sps_default_value" translatable="false">49152</string>
-    <string name="pref_audio_processing_default_value" translatable="false">5</string>
-    <string name="pref_audio_bitrate_default" translatable="false">32</string>
+    <string name="pref_audio_processing_default_value" translatable="false">9</string>
+    <string name="pref_audio_bitrate_default" translatable="false">320</string>
 </resources>
