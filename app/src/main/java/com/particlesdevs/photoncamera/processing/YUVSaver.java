@@ -182,7 +182,13 @@ public class YUVSaver extends DefaultSaver{
                 int trackIndex = -1;
 
                 while (true) {
-                    int outputBufferId = encoder.dequeueOutputBuffer(bufferInfo, 10000);
+                    int outputBufferId = encoder.dequeueOutputBuffer(bufferInfo, 1000000);
+                    if (outputBufferId == MediaCodec.INFO_TRY_AGAIN_LATER) {
+                        Log.d(TAG,"encoder status: INFO_TRY_AGAIN_LATER");
+                    }
+                    if (outputBufferId == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                        Log.d(TAG,"encoder status: INFO_OUTPUT_BUFFERS_CHANGED");
+                    }
                     if (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                         MediaFormat newFormat = encoder.getOutputFormat();
                         trackIndex = muxer.addTrack(newFormat);
@@ -248,7 +254,6 @@ public class YUVSaver extends DefaultSaver{
 
                 Log.d(TAG, "Successfully saved HEIC/AVIF/APV still image to: " + heicFile.getAbsolutePath());
                 processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
-
             } catch (Exception e) {
                 Log.e(TAG, "Failed during HEIC/AVIF/APV encoding process", e);
                 processingEventsListener.onProcessingError("HEIC/AVIF/APV encoding failed: " + e.getMessage());
@@ -284,6 +289,7 @@ public class YUVSaver extends DefaultSaver{
     private MediaFormat createHeicFormat(int width, int height) {
         MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 200_000_000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
@@ -293,9 +299,10 @@ public class YUVSaver extends DefaultSaver{
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
             //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
             //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
+            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
             format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
@@ -355,10 +362,15 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
         format.setInteger(MediaFormat.KEY_QUALITY, 85);
+        format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
+        format.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
+        format.setLong(MediaFormat.KEY_DURATION, 0);
+        format.setInteger(MediaFormat.KEY_ROTATION, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-            //format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             //format.setInteger(MediaFormat.KEY_PROFILE, 0x6003);
             //format.setInteger(MediaFormat.KEY_LEVEL, 0x600C);
         }
