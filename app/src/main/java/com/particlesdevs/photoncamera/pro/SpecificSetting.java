@@ -22,6 +22,7 @@ public class SpecificSetting {
     public boolean useAlternatePreviewTemplate = false;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
+    public boolean useSingleShotZsl = false;
     public boolean createSingleShotThumbnail = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;

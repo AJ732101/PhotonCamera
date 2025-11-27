@@ -119,6 +119,10 @@ public class Specific {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "useSingleShotZsl": {
+                    specificSetting.useSingleShotZsl = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "createSingleShotThumbnail": {
                     specificSetting.createSingleShotThumbnail = Boolean.parseBoolean(caseS[1]);
                     break;
