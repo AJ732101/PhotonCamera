@@ -477,59 +477,53 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String camID = result.getCameraId();
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
-                if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    if ((PhotonCamera.getSettings().frameCount == 1) &&
-                       ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)))
-                    {
-                        stringMap.put("Mode", "SINGLE SHOT");
+                if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                   (PhotonCamera.getSettings().frameCount == 1) &&
+                   ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                    (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                    (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+                    (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+                    (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) &&
+                    (PhotonCamera.getSettings().rawSaver != 2)) {
+                    stringMap.put("Mode", "SINGLE SHOT");
+                    switch (PhotonCamera.getSpecific().specificSetting.effectMode) {
+                        case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
+                            stringMap.put("Effectmode:", "Mono");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_NEGATIVE:
+                            stringMap.put("Effectmode:", "Negative");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_SOLARIZE:
+                            stringMap.put("Effectmode:", "Solarize");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_SEPIA:
+                            stringMap.put("Effectmode:", "Sepia");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_POSTERIZE:
+                            stringMap.put("Effectmode:", "Posterize");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_WHITEBOARD:
+                            stringMap.put("Effectmode:", "Whiteboard");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_BLACKBOARD:
+                            stringMap.put("Effectmode:", "Blackboard");
+                            break;
+                        case CaptureRequest.CONTROL_EFFECT_MODE_AQUA:
+                            stringMap.put("Effectmode:", "Aqua");
+                            break;
+                        default:
+                            stringMap.put("Effectmode:", "None");
+                            break;
                     }
-                    else {
-                        stringMap.put("Mode", "MULTIFRAME SHOT");
-                    }
+                }
+                else {
+                    stringMap.put("Mode", "MULTIFRAME SHOT");
                 }
                 if (physCamId != null) {
                     stringMap.put("Camera ID", camID + "-" + physCamId);
                 }
                 else {
                     stringMap.put("Camera ID", camID);
-                }
-                if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    if ((PhotonCamera.getSettings().frameCount == 1) &&
-                       ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010))) {
-                        switch (PhotonCamera.getSpecific().specificSetting.effectMode) {
-                            case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
-                                stringMap.put("Effectmode:", "Mono");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_NEGATIVE:
-                                stringMap.put("Effectmode:", "Negative");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_SOLARIZE:
-                                stringMap.put("Effectmode:", "Solarize");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_SEPIA:
-                                stringMap.put("Effectmode:", "Sepia");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_POSTERIZE:
-                                stringMap.put("Effectmode:", "Posterize");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_WHITEBOARD:
-                                stringMap.put("Effectmode:", "Whiteboard");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_BLACKBOARD:
-                                stringMap.put("Effectmode:", "Blackboard");
-                                break;
-                            case CaptureRequest.CONTROL_EFFECT_MODE_AQUA:
-                                stringMap.put("Effectmode:", "Aqua");
-                                break;
-                            default:
-                                stringMap.put("Effectmode:", "None");
-                                break;
-                        }
-                    }
                 }
                 IsoExpoSelector.ExpoPair expoPair = IsoExpoSelector.GenerateExpoPair(-1, captureController);
                 stringMap.put("ISO", String.valueOf(result.get(CaptureResult.SENSOR_SENSITIVITY)));
