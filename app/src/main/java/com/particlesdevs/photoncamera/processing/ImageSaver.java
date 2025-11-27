@@ -93,13 +93,32 @@ public class ImageSaver {
         frameCounter++;
     }
 
+    public void directSaveImage(ImageReader mReader) {
+        Log.v(TAG, "directSaveImage()");
+        Image mImage;
+        try {
+            mImage = mReader.acquireNextImage();
+        } catch (Exception ignored) {
+            return;
+        }
+        if (mImage == null)
+            return;
+        int format = mImage.getFormat();
+        imageFormat = mReader.getImageFormat();
+        implementation = getImageSaver(format, implementation);
+        Log.d(TAG,"Implementation:" + implementation);
+        implementation.frameCount = desiredFrameCount;
+        implementation.newBurst = newBurst;
+        implementation.addImage(mImage);
+    }
+
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
-        implementation.runRaw(imageFormat,characteristics,captureResult, captureRequest,burstShakiness,cameraRotation, exposures);
+        implementation.runRaw(imageFormat, characteristics, captureResult, captureRequest, burstShakiness, cameraRotation, exposures);
     }
 
     public void processStart(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
         implementation = ImageSaverSelector.getImageSaver(ImageFormat.RAW_SENSOR, implementation);
-        implementation.processStart(imageFormat,characteristics,captureResult, captureRequest,cameraRotation);
+        implementation.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
     }
 
     public void processEnd() {
