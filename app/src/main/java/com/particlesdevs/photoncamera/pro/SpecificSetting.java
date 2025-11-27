@@ -22,6 +22,7 @@ public class SpecificSetting {
     public boolean useAlternatePreviewTemplate = false;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
+    public boolean createSingleShotThumbnail = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
@@ -42,6 +43,7 @@ public class SpecificSetting {
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
+    public String previewFormat = "YUV_420_888"; // YUV_420_888, YCBCR_P010
     public SpecificSetting(){
     }
 }

@@ -119,6 +119,10 @@ public class Specific {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "createSingleShotThumbnail": {
+                    specificSetting.createSingleShotThumbnail = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -197,6 +201,10 @@ public class Specific {
                 }
                 case "codeAuroraHdrMode": {
                     specificSetting.codeAuroraHdrMode = caseS[1];
+                    break;
+                }
+                case "previewFormat": {
+                    specificSetting.previewFormat = caseS[1];
                     break;
                 }
             }
