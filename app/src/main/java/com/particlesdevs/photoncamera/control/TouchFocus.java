@@ -121,10 +121,14 @@ public class TouchFocus {
 
     public boolean isSingleShotJpegOrHeic() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-                ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) || (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG)) &&
-                (PhotonCamera.getSettings().rawSaver != 2) &&
-                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            return true;
+           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) &&
+            (PhotonCamera.getSettings().rawSaver != 2) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+           return true;
         }
         return false;
     }
