@@ -284,7 +284,9 @@ class CameraUIViewImpl implements CameraUIView {
             var previewFormat = PhotonCamera.getSettings().previewFormat;
             if ((PhotonCamera.getSettings().frameCount == 1) &&
                ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010))) {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
@@ -322,7 +324,9 @@ class CameraUIViewImpl implements CameraUIView {
         public void reConfigureModeViews(CameraMode mode) {
             if ((PhotonCamera.getSettings().frameCount == 1) &&
                ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                  (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010))) {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
