@@ -298,9 +298,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             0.75f, 0.70f,
             1.00f, 0.85f
     };
-    float[] flatCurve = {
+    float[] linearCurve = {
             0.00f, 0.00f,
-            0.25f, 0.255f,
+            0.25f, 0.25f,
             0.50f, 0.50f,
             0.75f, 0.75f,
             1.00f, 1.00f
@@ -350,6 +350,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            if (isSingleShotJpegOrHeic()) {
+                mImageSaver.directSaveImage(reader);
+            }
             if (onUnlimited && !unlimitedStarted) {
                 return;
             }
@@ -507,7 +510,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         public void onCaptureProgressed(@NonNull CameraCaptureSession session,
                                         @NonNull CaptureRequest request,
                                         @NonNull CaptureResult partialResult) {
-
             process(partialResult);
         }
 
@@ -579,6 +581,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
     };
+
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
      */
@@ -608,6 +611,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             showToast("onError() : cameraDevice = [" + cameraDevice + "], error = [" + error + "]");
         }
     };
+
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
      * {@link TextureView}.
@@ -657,6 +661,51 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     };
 
+    /**
+     * Function to request a Gain Map (Ultra HDR) within the CaptureRequest.
+     * @param captureBuilder The CaptureRequest.Builder for the still image capture.
+     * @param characteristics The CameraCharacteristics of the device being used.
+     * @return true if Gain Map (Ultra HDR) was successfully requested, false otherwise.
+     */
+    public boolean requestGainMap(CaptureRequest.Builder captureBuilder, CameraCharacteristics characteristics)
+    {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return false;
+        }
+
+        int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+        boolean ultraHdrSupported = false;
+        final int ULTRA_HDR_CAPABILITY_RAW_VALUE = 20;
+        final int COLOR_SPACE_BT2020_HLG_ID = 14;
+
+        if (capabilities != null) {
+            for (int capability : capabilities) {
+                // The specific capability flag indicating Ultra HDR support.
+                if (capability == ULTRA_HDR_CAPABILITY_RAW_VALUE) {
+                    ultraHdrSupported = true;
+                    break;
+                }
+            }
+        }
+
+        if (!ultraHdrSupported) {
+            return false;
+        }
+
+        CaptureRequest.Key<Integer> requestOutputColorSpaceKey = new CaptureRequest.Key<>("android.request.outputColorSpace", Integer.class);
+        if (VendorTagUtils.isSupported(captureBuilder, requestOutputColorSpaceKey)) {
+            captureBuilder.set(requestOutputColorSpaceKey, COLOR_SPACE_BT2020_HLG_ID);
+        }
+        else {
+            return false;
+        }
+
+        // Optional: Additional control settings, often recommended for quality.
+        //captureBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
+
+        return true;
+    }
+
     public boolean isSingleShotJpegOrHeic() {
         var test1 = PhotonCamera.getSettings().frameCount;
         var test2 = PhotonCamera.getSettings().previewFormat;
@@ -665,6 +714,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
            ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
@@ -674,9 +725,21 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setPreviewFormat() {
-        mPreviewTargetFormat = ImageFormat.YUV_420_888;
-        //mPreviewTargetFormat = ImageFormat.YCBCR_P010;
-        //mPreviewTargetFormat = ImageFormat.JPEG;
+        switch (PhotonCamera.getSpecific().specificSetting.previewFormat) {
+            case "YCBCR_P010":
+                mPreviewTargetFormat = ImageFormat.YCBCR_P010;
+                break;
+            case "JPEG":
+                mPreviewTargetFormat = ImageFormat.JPEG;
+                break;
+            default:
+                mPreviewTargetFormat = ImageFormat.YUV_420_888;
+                break;
+        }
+
+        if (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) {
+            mPreviewTargetFormat = ImageFormat.YCBCR_P010;
+        }
     }
 
     public void setTargetFormat() {
@@ -694,6 +757,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 break;
             case "RAW12":
                 mTargetFormat = ImageFormat.RAW12;
+                break;
+            case "RAW_PRIVATE":
+                mTargetFormat = ImageFormat.RAW_PRIVATE;
                 break;
             default:
                 mTargetFormat = ImageFormat.RAW_SENSOR;
@@ -1211,12 +1277,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void createImageReaderPreview(String cameraId) {
-        if (mTargetFormat == mPreviewTargetFormat && isDualSession || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+        if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
+        if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            maxImagerReaderImages = 1;
+        }
+
         PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(cameraId));
-        CameraCharacteristics characteristics = this.mCameraCharacteristicsMap.get(cameraId);
-        mCameraCharacteristics = characteristics;
+        mCameraCharacteristics = this.mCameraCharacteristicsMap.get(cameraId);
         StreamConfigurationMap map = null;
         if (mCameraCharacteristics != null) {
             map = mCameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -1241,7 +1310,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImagerReaderImages);
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
-        mBufferSize = getPreviewOutputSize(mTextureView.getDisplay(),characteristics,PhotonCamera.getSettings().selectedMode);
+        mBufferSize = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristics, PhotonCamera.getSettings().selectedMode);
     }
 
     private void createImageReaderRaw() {
@@ -1252,12 +1321,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
                 mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
-            }
-            else {
+            } else {
                 if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().QuadBayer) {
                     mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
-                }
-                else {
+                } else {
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 }
             }
@@ -1396,7 +1463,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     String[] ids = PhotonCamera.getSettings().mCameraID.split("-");
                     logicalID = ids[0];
                     physicalID = ids[1];
-                    isDualSession = true;
+                    if (!PhotonCamera.getSettings().QuadBayer) {
+                        isDualSession = true;
+                    }
                 }
                 this.mCameraManager.openCamera(logicalID, mStateCallback, mBackgroundHandler);
             } catch (CameraAccessException e) {
@@ -1463,7 +1532,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // look for keywords
         if (!PhotonCamera.getSpecific().specificSetting.contrastCurve.contains("slog") &&
                 !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("high") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("flat") &&
+                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear") &&
                 !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low")) {
             return;
         }
@@ -1514,8 +1583,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low")) {
             customCurve = new TonemapCurve(lowContrastPoints, lowContrastPoints, lowContrastPoints);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("flat")) {
-            customCurve = new TonemapCurve(flatCurve, flatCurve, flatCurve);
+        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear")) {
+            customCurve = new TonemapCurve(linearCurve, linearCurve, linearCurve);
         }
 
         if (customCurve != null) {
@@ -1683,6 +1752,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
                 }
+                if ((mPreviewTargetFormat == ImageFormat.JPEG_R) || (mPreviewTargetFormat == ImageFormat.YCBCR_P010)) {
+                    if (mImageReaderRaw.getSurface() == surfacei) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
+                        }
+                    }
+                    else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
+                        }
+                    }
+                }
                 outputConfigurations.add(config);
             }
 
@@ -1840,45 +1921,34 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     @NotNull
     private List<Surface> configureSurfaces(boolean isBurstSession) {
-        //List<Surface> surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
+        Surface videoRecordingSurface = null;
         List<Surface> surfaces = Arrays.asList(surface);
         if (mIsRecordingVideo) {
             if (PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
                 if (setUpMediaRecorderNew()) {
-                    surfaces = Arrays.asList(surface, mMediaCodecSurface);
-                    mPreviewRequestBuilder.addTarget(mMediaCodecSurface);
-                }
-                else {
+                    videoRecordingSurface = mMediaCodecSurface;
+                } else {
                     mIsRecordingVideo = false;
-                }
-            }
-            else {
-                if (setUpMediaRecorder()) {
-                    surfaces = Arrays.asList(surface, mMediaRecorder.getSurface());
-                    mPreviewRequestBuilder.addTarget(mMediaRecorder.getSurface());
-                }
-                else {
-                    mIsRecordingVideo = false;
-                }
-            }
-        }
-        else {
-            if (isDualSession) {
-                if (isBurstSession) {
-                    surfaces = Arrays.asList(mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
-                }
-                if (mTargetFormat == mPreviewTargetFormat) {
-                    surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
                 }
             } else {
-                if ((PhotonCamera.getSettings().previewFormat == 0) || (Build.BRAND.equalsIgnoreCase("samsung"))) {
-                    surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
-                }
-                else {
-                    surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
+                if (setUpMediaRecorder()) {
+                    videoRecordingSurface = mMediaRecorder.getSurface();
+                } else {
+                    mIsRecordingVideo = false;
                 }
             }
+            surfaces = Arrays.asList(surface, videoRecordingSurface);
+            mPreviewRequestBuilder.addTarget(videoRecordingSurface);
+            return surfaces;
         }
+
+        if (isDualSession && isBurstSession) {
+            surfaces = Arrays.asList(mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
+        }
+        else {
+            surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
+        }
+
         Log.d(TAG, "number of surfaces:" + surfaces.size());
         return surfaces;
     }
@@ -2242,11 +2312,116 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         activity.runOnUiThread(() -> debugCapture(builder));
     }
 
+    private void applySingleShotSettings(CaptureRequest.Builder captureBuilder) {
+        setAdvancedParameters(captureBuilder, false);
+        VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, false, useMaximumResolutionKey);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (PhotonCamera.getSettings().zoom2X) {
+                if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
+                    if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
+                    } else {
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
+                    }
+                }
+                else {
+                    if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                    } else {
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+                    }
+                }
+            }
+            else {
+                if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                }
+                else {
+                    captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                }
+            }
+        }
+
+        var CurrHotPixelMode = captureBuilder.get(CaptureRequest.HOT_PIXEL_MODE);
+        Log.d(TAG, "HOT_PIXEL_MODE: " + CurrHotPixelMode.toString());
+
+        int[] stabilizationModes = mCameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+        if (stabilizationModes != null && stabilizationModes.length > 1) {
+            Log.d(TAG, "LENS_OPTICAL_STABILIZATION_MODE");
+            if (PhotonCamera.getSettings().useOis == true) {
+                captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_ON);//Fix ois bugs for preview and burst
+            } else {
+                captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
+            }
+        }
+
+        captureBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, PhotonCamera.getSettings().noiseProcessing);
+        captureBuilder.set(CaptureRequest.EDGE_MODE, PhotonCamera.getSettings().edgeProcessing);
+
+        if (PhotonCamera.getSpecific().specificSetting.createSingleShotThumbnail) {
+            captureBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, new Size(320, 240));
+        }
+        boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
+    }
+
+    private void captureSingleStillPicture() {
+        try {
+            if (null == mCameraDevice) {
+                Log.e(TAG, "CameraDevice is null, cannot start single shot capture.");
+                return;
+            }
+
+            CaptureRequest.Builder captureBuilder = null;
+            if (PhotonCamera.getSpecific().specificSetting.useSingleShotZsl) {
+                captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_ZERO_SHUTTER_LAG);
+            }
+            else {
+                captureBuilder =  mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            }
+            captureBuilder.addTarget(mImageReaderRaw.getSurface());
+            int rotation = PhotonCamera.getGravity().getCameraRotation(mSensorOrientation);
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
+            applySingleShotSettings(captureBuilder);
+
+            CameraCaptureSession.CaptureCallback singleShotCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session,
+                                               @NonNull CaptureRequest request,
+                                               @NonNull TotalCaptureResult result) {
+                    super.onCaptureCompleted(session, request, result);
+                    Log.d(TAG, "Single shot capture completed.");
+                }
+
+                @Override
+                public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long lastFrameNumber) {
+                    super.onCaptureSequenceCompleted(session, sequenceId, lastFrameNumber);
+                    Log.d(TAG, "Single shot sequence completed. Unlocking focus.");
+                    unlockFocus();
+                }
+            };
+
+            mCaptureSession.stopRepeating(); // Zuerst die Live-Vorschau anhalten
+            CaptureRequest request = captureBuilder.build();
+            mCaptureSession.capture(request, singleShotCaptureCallback, mBackgroundHandler);
+            Log.d(TAG, "Single shot capture command sent.");
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Failed to capture single shot picture: " + e.getMessage());
+        }
+    }
+
     private void captureStillPicture() {
         try {
             if (null == mCameraDevice) {
                 return;
             }
+
+            // single shot logic
+            if (isSingleShotJpegOrHeic()) {
+                captureSingleStillPicture();
+                return;
+            }
+
             // This is the CaptureRequest.Builder that we use to take a picture.
             final CaptureRequest.Builder captureBuilder;
             if(PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
@@ -2269,36 +2444,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (PhotonCamera.getSettings().zoom2X) {
-                    if (PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor != 99) {
-                        if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
-                        } else {
-                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSpecific().specificSetting.singleShotZoomFactor);
-                        }
-                    }
-                    else {
-                        if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
-                        } else {
-                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
-                        }
-                    }
-                }
-                else {
-                    if (PhotonCamera.getSpecific().specificSetting.xiaomi14Ultra2xHack) {
-                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
-                    }
-                    else {
-                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
-                    }
-                }
-            }
 
             var CurrHotPixelMode = captureBuilder.get(CaptureRequest.HOT_PIXEL_MODE);
             Log.d(TAG, "HOT_PIXEL_MODE: " + CurrHotPixelMode.toString());
-            if(isDualSession) {
+            if (isDualSession) {
                 if (mTargetFormat != mPreviewTargetFormat)
                     captureBuilder.addTarget(mImageReaderRaw.getSurface());
                 else
@@ -2328,16 +2477,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     captureBuilder.set(LENS_OPTICAL_STABILIZATION_MODE, LENS_OPTICAL_STABILIZATION_MODE_OFF);//Fix ois bugs for preview and burst
                 }
             }
-            // QualityDoesMatter
-            captureBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, PhotonCamera.getSettings().noiseProcessing);
-            captureBuilder.set(CaptureRequest.EDGE_MODE, PhotonCamera.getSettings().edgeProcessing);
+
             for (int i = 0; i < 3; i++) {
                 Log.d(TAG, "Temperature:" + mPreviewTemp[i]);
             }
             Log.d(TAG, "CaptureBuilderStarted!");
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, PhotonCamera.getGravity().getCameraRotation(mSensorOrientation));
-            VendorTagUtils.builderSessionApply(mCameraManager.getCameraCharacteristics(mCameraDevice.getId()), captureBuilder, true, useMaximumResolutionKey);
-			//captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
+            VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, true, useMaximumResolutionKey);
+            //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
             captures = new ArrayList<>();
             BurstShakiness = new ArrayList<>();
 
@@ -2370,15 +2517,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 for (int i = 0; i < frameCount; i++) {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
                     times[i] = IsoExpoSelector.lastSelectedExposure;
-                    /*if (isSingleShotJpegOrHeic()) {
-                        captureBuilder.set(CONTROL_AE_MODE, CONTROL_AE_MODE_OFF);
-                        captureBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 250000L);
-                        captureBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 12800);
-                        captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
-                    }*/
-                    captureBuilder.removeTarget(surface);
-                    captureBuilder.removeTarget(mImageReaderPreview.getSurface());
-                    captureBuilder.addTarget(mImageReaderRaw.getSurface());
+                    if (i >= 1) {
+                        captureBuilder.removeTarget(surface);
+                        captureBuilder.removeTarget(mImageReaderPreview.getSurface());
+                        captureBuilder.addTarget(mImageReaderRaw.getSurface());
+                    }
 
                     setSceneAndEffectMode(captureBuilder);
                     CaptureRequest request = captureBuilder.build();
@@ -2423,6 +2566,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 @Override
                 public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
                                                 @NonNull CaptureResult partialResult) {
+
                     int frameCount = (int) (partialResult.getFrameNumber() - baseFrameNumber[0]);
                     Log.v("BurstCounter", "CaptureProgressed! FrameCount:" + frameCount);
                     if (mCaptureResult == null) {
@@ -2706,6 +2850,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         break;
                     case "RAW12":
                         jpegSizes = map.getOutputSizes(ImageFormat.RAW12);
+                        break;
+                    case "RAW_PRIVATE":
+                        jpegSizes = map.getOutputSizes(ImageFormat.RAW_PRIVATE);
                         break;
                     default:
                         jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
