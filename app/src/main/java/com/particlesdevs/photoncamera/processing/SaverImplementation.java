@@ -35,9 +35,11 @@ public class SaverImplementation {
         int offset = 0;
         int capacity = image.getPlanes()[0].getBuffer().capacity();
         var imageFormat = image.getFormat();
-        if (imageFormat== 0x25) {
+        boolean noStride = false;
+        if ((imageFormat== 37) || (imageFormat== 36)) {
             width = image.getWidth();
             height = image.getHeight();
+            noStride = true;
         } else {
             var a = image.getPlanes()[0].getRowStride();
             var b = image.getPlanes()[0].getPixelStride();
@@ -61,7 +63,7 @@ public class SaverImplementation {
             }
         }
         ImageFrame frame = null;
-        if (image.getPlanes()[0].getRowStride() != 0) {
+        if (!noStride && (image.getPlanes()[0].getRowStride() != 0)) {
             frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride(), offset, capacity);
         }
         else {
