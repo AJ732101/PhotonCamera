@@ -103,6 +103,7 @@ import android.hardware.HardwareBuffer;
 //import android.media.MediaFormat.ColorSpace;
 import android.hardware.camera2.params.TonemapCurve;
 
+import org.chickenhook.restrictionbypass.RestrictionBypass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
@@ -116,6 +117,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1136,15 +1138,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private ArrayList<Size> getAllTargets(){
         CameraCharacteristics characteristics =  this.mCameraCharacteristicsMap.get(physicalID);
-        StreamConfigurationMap map = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-        ArrayList<Size> allTargets = new ArrayList<>();
+        StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+        HashSet<Size> uniqueTargets = new HashSet<>();
 
         setTargetFormat();
 
         Size[] targetSizes = map.getOutputSizes(mTargetFormat);
         if(targetSizes != null)
-            allTargets.addAll(Arrays.asList(targetSizes));
+            uniqueTargets.addAll(Arrays.asList(targetSizes));
+
         if(PhotonCamera.getSettings().QuadBayer) {
             useMaximumResolutionKey = false;
             int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
@@ -1156,15 +1159,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
                     if(arraySize != null) {
                         useMaximumResolutionKey = true;
-                        allTargets.add(arraySize);
+                        uniqueTargets.add(arraySize);
                     }
                 }
             }
             if(!useMaximumResolutionKey) {
                 Size[] highResSizes = map.getHighResolutionOutputSizes(mTargetFormat);
-                // Extend targetSizes with high resolution sizes
                 if (highResSizes != null && highResSizes.length > 0) {
-                    allTargets.addAll(Arrays.asList(highResSizes));
+                    uniqueTargets.addAll(Arrays.asList(highResSizes));
                 }
                 var keys = CameraReflectionApi.getCameraCharacteristicsKeys(characteristics, null, true);
                 for (Object keyObj : keys) {
@@ -1178,8 +1180,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     int format = vals[i];
                                     int width = vals[i + 1];
                                     int height = vals[i + 2];
-                                    if (format == mTargetFormat) {
-                                        allTargets.add(new Size(width, height));
+                                    //if (format == mTargetFormat) {
+                                    if (width > 6000) {
+                                        uniqueTargets.add(new Size(width, height));
                                         Log.d(TAG, "Added custom resolution(" + key.getName() + "):" + width + " " + height);
                                     }
                                 }
@@ -1190,8 +1193,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
             }
         }
-        return allTargets;
+
+        // ZULETZT: Konvertiere das Set zurück in eine ArrayList.
+        // Die Reihenfolge der Elemente ist nicht garantiert, was aber für eine Liste
+        // von unterstützten Auflösungen in der Regel keine Rolle spielt.
+        return new ArrayList<>(uniqueTargets);
     }
+
 
     @SuppressLint("MissingPermission")
     public void restartCamera() {
@@ -1323,7 +1331,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
                 if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().QuadBayer) {
-                    mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                    //mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                    //mImageReaderRaw = ImageReader.newInstance(9248, 6944, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 } else {
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 }
@@ -1904,7 +1914,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Handler handler = (executor instanceof Handler) ? (Handler) executor : new Handler(android.os.Looper.myLooper());
 
         try {
-            Method createCustomCaptureSessionMethod = CameraDevice.class.getMethod("createCustomCaptureSession", InputConfiguration.class, List.class, Integer.TYPE, CameraCaptureSession.StateCallback.class, Handler.class);
+            //Method createCustomCaptureSessionMethod = CameraDevice.class.getMethod("createCustomCaptureSession", InputConfiguration.class, List.class, Integer.TYPE, CameraCaptureSession.StateCallback.class, Handler.class);
+            Method createCustomCaptureSessionMethod = RestrictionBypass.getDeclaredMethod(device.getClass(), "createCustomCaptureSession", InputConfiguration.class, List.class, Integer.TYPE, CameraCaptureSession.StateCallback.class, Handler.class);
+            createCustomCaptureSessionMethod.setAccessible(true);
             createCustomCaptureSessionMethod.invoke(device, inputConfig, outputSurfaces, opMode, stateCallback, handler);
             Log.i(TAG, "Invoking createCustomCaptureSession success");
         } catch (NoSuchMethodException e) {
@@ -2402,6 +2414,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             };
 
             mCaptureSession.stopRepeating(); // Zuerst die Live-Vorschau anhalten
+            //captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(3, 3));
             CaptureRequest request = captureBuilder.build();
             mCaptureSession.capture(request, singleShotCaptureCallback, mBackgroundHandler);
             Log.d(TAG, "Single shot capture command sent.");
