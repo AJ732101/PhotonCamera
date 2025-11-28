@@ -40,6 +40,8 @@
         <item>YCBCR_P010</item>
         <item>JPEG</item>
         <item>HEIC</item>
+        <item>JPEG_R</item>
+        <item>HEIC_ULTRA</item>
         <item>None</item>
     </string-array>
 
@@ -48,6 +50,8 @@
         <item>54</item>
         <item>256</item>
         <item>1212500294</item>
+        <item>4101</item>
+        <item>4102</item>
         <item>0</item>
     </string-array>
 
