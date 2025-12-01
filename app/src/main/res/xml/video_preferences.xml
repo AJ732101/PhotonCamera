@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/video_settings_screen_title"
+    android:key="video_settings_category">
+
+    <PreferenceCategory app:key="video_settings_category" app:title="@string/video_settings_screen_title">
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_bitrate_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/bitrate"
+            android:defaultValue="@string/pref_bitrate_default"
+            app:maxValue="240"
+            app:minValue="10"
+            android:icon="@drawable/speed_24px"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_codec_key"
+            android:title="@string/codec"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/compress_24px"
+            android:entries="@array/codec_entries"
+            android:entryValues="@array/codec_entryValues"
+            android:defaultValue="@string/pref_codec_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_video_resolution_key"
+            android:title="@string/video_resolution"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/display_settings_24px"
+            android:entries="@array/video_resolution_entries"
+            android:entryValues="@array/video_resolution_entryValues"
+            android:defaultValue="@string/pref_video_resolution_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_video_framerate_key"
+            android:title="@string/video_framerate"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/fps30fps_24px"
+            android:entries="@array/video_framerate_entries"
+            android:entryValues="@array/video_framerate_entryValues"
+            android:defaultValue="@string/pref_video_framerate_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_noise_processing_key"
+            android:title="@string/noise_processing"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/transition_dissolve_24px"
+            android:entries="@array/noise_processing_entries"
+            android:entryValues="@array/noise_processing_entryValues"
+            android:defaultValue="@string/pref_noise_processing_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_edge_processing_key"
+            android:title="@string/edge_processing"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/e_mobiledata_badge_24px"
+            android:entries="@array/edge_processing_entries"
+            android:entryValues="@array/edge_processing_entryValues"
+            android:defaultValue="@string/pref_edge_processing_default_value" />
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_eis_video_key"
+            android:title="@string/eis_video"
+            android:summary=""
+            android:icon="@drawable/video_stable_24px"
+            android:defaultValue="@bool/pref_eis_video_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_2x_zoom_key"
+            android:title="@string/zoom"
+            android:summary=""
+            android:icon="@drawable/speed_2x_24px"
+            android:defaultValue="@bool/pref_2x_zoom_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_hdr_video_key"
+            android:title="@string/hdr_video"
+            android:summary=""
+            android:icon="@drawable/hdr_on_24px"
+            android:defaultValue="@bool/pref_hdr_video_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_10bit_video_key"
+            android:title="@string/video_10bit"
+            android:summary=""
+            android:icon="@drawable/high_quality_24px"
+            android:defaultValue="@bool/pref_10bit_video_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_new_rec_video_key"
+            android:title="@string/video_new_rec"
+            android:summary=""
+            android:icon="@drawable/video_camera_back_24px"
+            android:defaultValue="@bool/pref_new_rec_video_def_value"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

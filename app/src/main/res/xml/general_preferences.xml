@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/general_settings_screen_title"
+    android:key="general_settings_category">
+
+    <PreferenceCategory app:key="general_settings_category" app:title="@string/general_settings_screen_title">
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_frame_count_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/frame_count"
+            android:defaultValue="@string/pref_framecount_default"
+            app:maxValue="30"
+            app:minValue="1"
+            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_single_frame_quality_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/single_frame_quality"
+            android:defaultValue="@string/pref_single_frame_quality_default"
+            app:maxValue="100"
+            app:minValue="5"
+            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_preview_format_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/preview_format"
+            android:icon="@drawable/preview_24px"
+            android:entries="@array/preview_format_entries"
+            android:entryValues="@array/preview_format_entryValues"
+            android:defaultValue="@string/pref_preview_format_default"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_thumbnail_key"
+            android:defaultValue="@bool/pref_thumbnail_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/thumbnail"
+            android:summary=""
+            android:icon="@drawable/photo_size_select_small_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_wide169_key"
+            android:defaultValue="@bool/pref_wide169_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/wide169"
+            android:summary=""
+            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_energy_safe_key"
+            android:defaultValue="@bool/pref_energy_safe_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/energy_saving"
+            android:summary=""
+            android:icon="@drawable/leaf_icon_15"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_camera_sounds_key"
+            android:defaultValue="@bool/pref_camera_sounds_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/camera_sounds"
+            android:summary=""
+            android:icon="@drawable/ic_camera_sounds"/>
+
+        <ListPreference
+            android:key="@string/pref_show_grid_key"
+            android:defaultValue="@string/pref_show_grid_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/turn_on_grid"
+            app:useSimpleSummaryProvider="true"
+            android:summary=""
+            android:entries="@array/vf_grid_entries"
+            android:entryValues="@array/vf_grid_entryvalues"
+            android:icon="@drawable/ic_settings_grid"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_show_roundedge_key"
+            android:defaultValue="@bool/pref_show_roundedge_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/turn_on_round_edges"
+            android:summary=""
+            android:icon="@drawable/ic_rounded_corner"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_show_watermark_key"
+            android:defaultValue="@bool/pref_show_watermark_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/turn_on_watermark"
+            android:summary=""
+            android:icon="@drawable/ic_watermark"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_af_mode_key"
+            android:title="@string/af_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_focus"
+            android:entries="@array/af_mode_entries"
+            android:entryValues="@array/af_mode_entryvalues"
+            android:defaultValue="@string/pref_af_mode_default_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_ois_key"
+            android:defaultValue="@bool/pref_ois_default"
+            android:title="@string/turn_on_ois"
+            android:summary=""
+            android:icon="@drawable/video_stable_24px"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_aperture_key"
+            android:title="@string/aperture"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/camera_24px"
+            android:entries="@array/aperture_entries"
+            android:entryValues="@array/aperture_entryValues"
+            android:defaultValue="@string/pref_aperture_default_value" />
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_dng_compression_key"
+            android:defaultValue="@bool/pref_dng_compression_default"
+            android:title="@string/turn_on_dng_compression"
+            android:summary=""
+            android:icon="@drawable/compress_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_extend_iso_key"
+            android:defaultValue="@bool/pref_extend_iso_default"
+            android:title="@string/turn_on_extend_iso"
+            android:summary=""
+            android:icon="@drawable/exposure_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_extend_exposure_key"
+            android:defaultValue="@bool/pref_extend_exposure_default"
+            android:title="@string/turn_on_extend_exposure"
+            android:summary=""
+            android:icon="@drawable/ic_timer"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_show_afdata_key"
+            android:defaultValue="@bool/pref_show_afdata_default"
+            android:title="@string/turn_on_afdata"
+            android:summary=""
+            android:icon="@drawable/pest_control_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_show_basic_osd_key"
+            android:defaultValue="@bool/pref_show_basic_osd_default"
+            android:title="@string/turn_on_basic_osd"
+            android:summary=""
+            android:icon="@drawable/ic_developer"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:title="@string/pref_save_per_lens_string"
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_save_per_lens_settings"
+            android:icon="@drawable/ic_multi_lens"
+            app:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

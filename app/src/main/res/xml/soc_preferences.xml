@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/soc_settings_screen_title"
+    android:key="soc_settings_category">
+
+    <PreferenceCategory app:key="soc_settings_category" app:title="@string/soc_settings_screen_title">
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_soc_qualcomm_sharpness_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/soc_qualcomm_sharpness"
+            android:defaultValue="@string/pref_soc_qualcomm_sharpness_default"
+            app:maxValue="6"
+            app:minValue="0"
+            android:icon="@drawable/deblur_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_soc_qualcomm_saturation_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/soc_qualcomm_saturation"
+            android:defaultValue="@string/pref_soc_qualcomm_saturation_default"
+            app:maxValue="10"
+            app:minValue="0"
+            android:icon="@drawable/colors_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_soc_qualcomm_eis_mode_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/soc_qualcomm_eis_mode"
+            android:defaultValue="@string/pref_soc_qualcomm_eis_mode_default"
+            app:maxValue="10"
+            app:minValue="0"
+            android:icon="@drawable/ic_eis_on"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_soc_qualcomm_ai_mode_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/soc_qualcomm_ai_mode"
+            android:defaultValue="@string/pref_soc_qualcomm_ai_mode_default"
+            app:maxValue="10"
+            app:minValue="0"
+            android:icon="@drawable/smart_toy_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_soc_qualcomm_isz_key"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/soc_qualcomm_isz"
+            android:summary="In Sensor Zoom"
+            android:icon="@drawable/zoom_in_24px"
+            android:defaultValue="@bool/pref_eis_video_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_soc_qualcomm_mfnr_key"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/soc_qualcomm_mfnr"
+            android:summary="Multiframe Noise Reduction"
+            android:icon="@drawable/blur_on_24px"
+            android:defaultValue="@bool/pref_eis_video_def_value"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
