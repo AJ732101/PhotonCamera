@@ -58,6 +58,7 @@ public class VendorTagUtils {
                             Log.d(TAG, "Available apertures: " + Arrays.toString(apert));
                             if (Arrays.asList(apert).contains(apertureToUse)) {
                                 Log.d(TAG, "Change aperture to: " + apertureToUse);
+                                //builder.set(CaptureRequest.LENS_APERTURE, apertureToUse);
                                 builder.set(lensAperture, apertureToUse);
                             } else {
                                 Log.w(TAG, "Requested aperture " + apertureToUse + " is not supported, available: " + Arrays.toString(apert));
@@ -71,19 +72,17 @@ public class VendorTagUtils {
 
             var enableInSensorZoomKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableInsensorZoom", Integer.class);
             if (isSupported(builder, enableInSensorZoomKey)) {
-                builder.set(enableInSensorZoomKey, (int) 1);
+                builder.set(enableInSensorZoomKey, PhotonCamera.getSettings().socQualcommUseIsz ? 1 : 0);
             }
 
-            if (PhotonCamera.getSpecific().specificSetting.codeAuroraSaturation != 99) {
-                var useSaturation = new CaptureRequest.Key<>("org.codeaurora.qcamera3.saturation.use_saturation", Integer.class);
-                if (isSupported(builder, useSaturation)) {
-                    builder.set(useSaturation, (int) PhotonCamera.getSpecific().specificSetting.codeAuroraSaturation);
-                }
+            var useSaturation = new CaptureRequest.Key<>("org.codeaurora.qcamera3.saturation.use_saturation", Integer.class);
+            if (isSupported(builder, useSaturation)) {
+                builder.set(useSaturation, (int) PhotonCamera.getSettings().socQualcommSaturation);
             }
 
             var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
             if (isSupported(builder, eisMode)) {
-                builder.set(eisMode, (int) PhotonCamera.getSpecific().specificSetting.codeAuroraEisMode);
+                builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
             }
 
             var enableCinematicMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableCinematicMode", Integer.class);
@@ -93,7 +92,7 @@ public class VendorTagUtils {
 
             var useMfnr = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableMFNR", Integer.class);
             if (isSupported(builder, useMfnr)) {
-                builder.set(useMfnr, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? 1 : 0);
+                builder.set(useMfnr, PhotonCamera.getSettings().socQualcommUseMfnr ? 1 : 0);
             }
 
             var useStatsViszaulize = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableStatsVisualizer", byte.class);
@@ -103,14 +102,13 @@ public class VendorTagUtils {
 
             var sharpnessStrength = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sharpness.strength", Integer.class);
             if (isSupported(builder, sharpnessStrength)) {
-                builder.set(sharpnessStrength, (int) PhotonCamera.getSpecific().specificSetting.codeAuroraSharpnessStrength);
+                builder.set(sharpnessStrength, (int) PhotonCamera.getSettings().socQualcommSharpness);
             }
 
-            if (PhotonCamera.getSpecific().specificSetting.codeAuroraAiMode != 99) {
-                var aiMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.AICameraMode", Integer.class);
-                if (isSupported(builder, aiMode)) {
-                    builder.set(aiMode, (int) PhotonCamera.getSpecific().specificSetting.codeAuroraAiMode);
-                }
+
+            var aiMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.AICameraMode", Integer.class);
+            if (isSupported(builder, aiMode)) {
+                builder.set(aiMode, (int) PhotonCamera.getSettings().socQualcommAiMode);
             }
 
             if (!PhotonCamera.getSpecific().specificSetting.codeAuroraHdrMode.equals("default")) {

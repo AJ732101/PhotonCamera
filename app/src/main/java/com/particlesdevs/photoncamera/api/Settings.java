@@ -16,6 +16,7 @@ public class Settings {
     public boolean watermark;
     public boolean energySaving;
     public boolean aspect169;
+    public boolean useThumbnail;
     public boolean DebugData;
     public boolean roundEdge;
     public boolean align;
@@ -62,6 +63,7 @@ public class Settings {
     public boolean videoEisInPreview;
     public boolean videoHDR;
     public boolean video10bit;
+    public boolean videoNewRec;
     public boolean useExtendIso;
     public boolean useExtendExposure;
     public boolean zoom2X;
@@ -75,6 +77,12 @@ public class Settings {
     public int audioBitrate;
     public int audioChannels;
     public int singleFrameQuality;
+    public int socQualcommSharpness;
+    public int socQualcommSaturation;
+    public int socQualcommEisMode;
+    public int socQualcommAiMode;
+    public boolean socQualcommUseIsz;
+    public boolean socQualcommUseMfnr;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -86,6 +94,7 @@ public class Settings {
         watermark = PreferenceKeys.isShowWatermarkOn();
         energySaving = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
+        useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);
         DebugData = PreferenceKeys.isAfDataOn();
         roundEdge = PreferenceKeys.isRoundEdgeOn();
         sharpness = PreferenceKeys.getSharpnessValue();
@@ -114,24 +123,27 @@ public class Settings {
         gamma = parseGammaArray();
         mCameraID = PreferenceKeys.getCameraID();
         theme = PreferenceKeys.getThemeValue();
-
-        // QualityDoesMatter
+        // QualityDoesMatter - Genaral
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
         useDngCompression = PreferenceKeys.useDngCompression();
-        videoBitrate = PreferenceKeys.getVideoBitrate();
+        singleFrameQuality = PreferenceKeys.getSingleFrameQualityValue();
         apertureToUse = PreferenceKeys.getAperture();
+        useExtendIso = PreferenceKeys.useExtendIsoOn();
+        useExtendExposure = PreferenceKeys.useExtendExposureOn();
+        noiseProcessing = PreferenceKeys.getNoiseProcessing();
+        edgeProcessing = PreferenceKeys.getEdgeProcessing();
+        zoom2X = PreferenceKeys.isZoomOn();
+        // QualityDoesMatter - Video
+        videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();
         videoFramrate = PreferenceKeys.getVideoFramerate();
         videoHeight = PreferenceKeys.getVideoHeight();
         videoEisInPreview = PreferenceKeys.isEisInPreviewVideoOn();
         videoHDR = PreferenceKeys.isHdrVideoOn();
         video10bit = PreferenceKeys.is10bitVideoOn();
-        useExtendIso = PreferenceKeys.useExtendIsoOn();
-        useExtendExposure = PreferenceKeys.useExtendExposureOn();
-        noiseProcessing = PreferenceKeys.getNoiseProcessing();
-        edgeProcessing = PreferenceKeys.getEdgeProcessing();
-        zoom2X = PreferenceKeys.isZoomOn();
+        videoNewRec = PreferenceKeys.isNeRecVideoOn();
+        // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();
         audioProcessingStr = PreferenceKeys.getAudioProcessingStr();
@@ -139,7 +151,13 @@ public class Settings {
         audioSps = PreferenceKeys.getAudioSps();
         audioBitrate = PreferenceKeys.getAudioBitrate();
         audioChannels = PreferenceKeys.getAudioChannels();
-        singleFrameQuality = PreferenceKeys.getSingleFrameQualityValue();
+        // QualityDoesMatter - SoC - Qualcomm/Snapdragon
+        socQualcommSharpness = PreferenceKeys.getSocQualcommSharpness();
+        socQualcommSaturation = PreferenceKeys.getSocQualcommSaturation();
+        socQualcommEisMode = PreferenceKeys.getSocQualcommEisMode();
+        socQualcommAiMode = PreferenceKeys.getSocQualcommAiMode();
+        socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();
+        socQualcommUseMfnr = PreferenceKeys.isSocQualcommMfnrOn();
     }
 
     public void saveID() {

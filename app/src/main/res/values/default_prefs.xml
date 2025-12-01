@@ -6,6 +6,7 @@
     <bool name="pref_energy_safe_default">false</bool>
     <string name="pref_show_grid_default" translatable="false">1</string>
     <bool name="pref_wide169_default">false</bool>
+    <bool name="pref_thumbnail_default">false</bool>
     <bool name="pref_show_watermark_default">true</bool>
     <bool name="pref_save_per_lens_settings">true</bool>
     <bool name="pref_show_afdata_default">false</bool>
@@ -89,6 +90,7 @@
     <bool name="pref_hdr_video_def_value">false</bool>
     <bool name="pref_eis_video_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
+    <bool name="pref_new_rec_video_def_value">false</bool>
     <bool name="pref_2x_zoom_def_value">false</bool>
     <bool name="pref_show_basic_osd_default">true</bool>
     <bool name="pref_ois_default">true</bool>
@@ -103,4 +105,12 @@
     <string name="pref_sps_default_value" translatable="false">49152</string>
     <string name="pref_audio_processing_default_value" translatable="false">9</string>
     <string name="pref_audio_bitrate_default" translatable="false">320</string>
+
+    <!-- SoC settings strings -->
+    <string name="pref_soc_qualcomm_sharpness_default" translatable="false">1</string>
+    <string name="pref_soc_qualcomm_saturation_default" translatable="false">5</string>
+    <string name="pref_soc_qualcomm_eis_mode_default" translatable="false">0</string>
+    <string name="pref_soc_qualcomm_ai_mode_default" translatable="false">0</string>
+    <bool name="pref_soc_qualcomm_isz_default" translatable="false">false</bool>
+    <bool name="pref_soc_qualcomm_mfnr_default" translatable="false">false</bool>
 </resources>

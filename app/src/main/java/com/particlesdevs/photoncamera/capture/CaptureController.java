@@ -102,6 +102,7 @@ import android.media.MediaMuxer;
 import android.hardware.HardwareBuffer;
 //import android.media.MediaFormat.ColorSpace;
 import android.hardware.camera2.params.TonemapCurve;
+import com.particlesdevs.photoncamera.processing.CurvePresets;
 
 import org.chickenhook.restrictionbypass.RestrictionBypass;
 import org.jetbrains.annotations.NotNull;
@@ -285,54 +286,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean unlimitedStarted = false;
     public boolean mFlashed = false;
     public ArrayList<GyroBurst> BurstShakiness;
-
-    float[] highContrastPoints = {
-            0.0f, 0.0f,
-            0.25f, 0.15f,
-            0.50f, 0.50f,
-            0.75f, 0.85f,
-            1.0f, 1.0f
-    };
-    float[] lowContrastPoints = {
-            0.00f, 0.15f,
-            0.25f, 0.30f,
-            0.50f, 0.50f,
-            0.75f, 0.70f,
-            1.00f, 0.85f
-    };
-    float[] linearCurve = {
-            0.00f, 0.00f,
-            0.25f, 0.25f,
-            0.50f, 0.50f,
-            0.75f, 0.75f,
-            1.00f, 1.00f
-    };
-    float[] slog2ApproxPointsA = {
-            0.00f, 0.031f,
-            0.10f, 0.283f,
-            0.20f, 0.384f,
-            0.30f, 0.457f,
-            0.40f, 0.516f,
-            0.50f, 0.567f,
-            0.60f, 0.612f,
-            0.70f, 0.654f,
-            0.80f, 0.693f,
-            0.90f, 0.730f,
-            1.00f, 0.765f
-    };
-    public static final float[] slog2ApproxPointsB = {
-            0.00f, 0.030f,
-            0.10f, 0.150f,
-            0.20f, 0.250f,
-            0.30f, 0.350f,
-            0.40f, 0.450f,
-            0.50f, 0.530f,
-            0.60f, 0.610f,
-            0.70f, 0.700f,
-            0.80f, 0.800f,
-            0.90f, 0.900f,
-            1.00f, 0.950f
-    };
 
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
@@ -1543,7 +1496,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (!PhotonCamera.getSpecific().specificSetting.contrastCurve.contains("slog") &&
                 !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("high") &&
                 !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low")) {
+                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low") &&
+                !PhotonCamera.getSpecific().specificSetting.contrastCurve.contains("style")) {
             return;
         }
 
@@ -1558,7 +1512,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             for (int i = 0; i < points; i++) {
                 float x = i / (float)(points - 1);
 
-                // official S-Log2 Transferfunktion
                 float y;
                 if (x >= 0.011) {
                     y = (0.432699f * (float)Math.log10(10.0f * x + 1.0f) + 0.037584f) / 0.616596f;
@@ -1582,19 +1535,25 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             customCurve = new TonemapCurve(red, green, blue);
         }
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("slogA")) {
-            customCurve = new TonemapCurve(slog2ApproxPointsA, slog2ApproxPointsA, slog2ApproxPointsA);
+            customCurve = new TonemapCurve(CurvePresets.SLOG2_APPROX_POINTS_A, CurvePresets.SLOG2_APPROX_POINTS_A, CurvePresets.SLOG2_APPROX_POINTS_A);
         }
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("slogB")) {
-            customCurve = new TonemapCurve(slog2ApproxPointsB, slog2ApproxPointsB, slog2ApproxPointsB);
+            customCurve = new TonemapCurve(CurvePresets.SLOG2_APPROX_POINTS_B, CurvePresets.SLOG2_APPROX_POINTS_B, CurvePresets.SLOG2_APPROX_POINTS_B);
         }
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("high")) {
-            customCurve = new TonemapCurve(highContrastPoints, highContrastPoints, highContrastPoints);
+            customCurve = new TonemapCurve(CurvePresets.HIGH_CONTRAST_POINTS, CurvePresets.HIGH_CONTRAST_POINTS, CurvePresets.HIGH_CONTRAST_POINTS);
         }
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low")) {
-            customCurve = new TonemapCurve(lowContrastPoints, lowContrastPoints, lowContrastPoints);
+            customCurve = new TonemapCurve(CurvePresets.LOW_CONTRAST_POINTS, CurvePresets.LOW_CONTRAST_POINTS, CurvePresets.LOW_CONTRAST_POINTS);
         }
         else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear")) {
-            customCurve = new TonemapCurve(linearCurve, linearCurve, linearCurve);
+            customCurve = new TonemapCurve(CurvePresets.LINEAR_CURVE, CurvePresets.LINEAR_CURVE, CurvePresets.LINEAR_CURVE);
+        }
+        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("style1")) {
+            customCurve = new TonemapCurve(CurvePresets.RED_CURVE_STYLE_1, CurvePresets.GREEN_CURVE_STYLE_1, CurvePresets.BLUE_CURVE_STYLE_1);
+        }
+        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("style2")) {
+            customCurve = new TonemapCurve(CurvePresets.RED_CURVE_STYLE_1, CurvePresets.BLUE_CURVE_STYLE_1, CurvePresets.GREEN_CURVE_STYLE_1);
         }
 
         if (customCurve != null) {
@@ -1840,7 +1799,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             if (mIsRecordingVideo)
                                 activity.runOnUiThread(() -> {
                                     // Start recording
-                                    if (PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
+                                    if (PhotonCamera.getSettings().videoNewRec) {
                                         //mMediaMuxer.start();
                                     }
                                     else {
@@ -1936,7 +1895,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Surface videoRecordingSurface = null;
         List<Surface> surfaces = Arrays.asList(surface);
         if (mIsRecordingVideo) {
-            if (PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
+            if (PhotonCamera.getSettings().videoNewRec) {
                 if (setUpMediaRecorderNew()) {
                     videoRecordingSurface = mMediaCodecSurface;
                 } else {
@@ -2371,7 +2330,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         captureBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, PhotonCamera.getSettings().noiseProcessing);
         captureBuilder.set(CaptureRequest.EDGE_MODE, PhotonCamera.getSettings().edgeProcessing);
 
-        if (PhotonCamera.getSpecific().specificSetting.createSingleShotThumbnail) {
+        if (PhotonCamera.getSettings().useThumbnail) {
             captureBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, new Size(320, 240));
         }
         boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
@@ -3567,7 +3526,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Log.d(TAG, "stop video recording");
         mIsRecordingVideo = false;
 
-        if (PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
+        if (PhotonCamera.getSettings().videoNewRec) {
             releaseMediaRecorderNew();
         }
         else {

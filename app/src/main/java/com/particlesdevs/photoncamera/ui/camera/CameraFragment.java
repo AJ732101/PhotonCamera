@@ -588,7 +588,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("Prev EIS", String.valueOf(PhotonCamera.getSettings().videoEisInPreview));
                     //stringMap.put("FPS", String.valueOf(captureController.getFpsRangeDef().getLower()));
                     // as long as audio not working with new pipeline
-                    if (!PhotonCamera.getSpecific().specificSetting.useNewRecordingPipeline) {
+                    if (!PhotonCamera.getSettings().videoNewRec) {
                         stringMap.put("--AUDIO--", "--OPTS--");
                         switch (PhotonCamera.getSettings().audioProcessing) {
                             case 0:

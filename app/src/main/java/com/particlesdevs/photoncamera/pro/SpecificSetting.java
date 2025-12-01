@@ -9,7 +9,6 @@ public class SpecificSetting {
     public float[] apertureList;
     // QualityDoesMatter
     public boolean forceNewSettingsInRegularPhotoMode = false;
-    public boolean useNewRecordingPipeline = false;
     public int hotPixelMode = 99;
     public int colorCorrectionAberrationMode = 99;
     public int distortionCorrectionMode = 99;
@@ -32,10 +31,6 @@ public class SpecificSetting {
     public float colorTint = 99.0f;
     public int newRecKeyFrameIntervall = 10;
     public int effectMode = 99;
-    public int codeAuroraSharpnessStrength = 0;
-    public int codeAuroraEisMode = 0;
-    public int codeAuroraSaturation = 99;    //X13U [0 10 5 1], 99 = off
-    public int codeAuroraAiMode = 99;
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
     public String recPrefix = "";

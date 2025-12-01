@@ -45,13 +45,20 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
-        // QualityDoesMatter
-        COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
-        COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
-        COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
+        // QualityDoesMatter - General
+        COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
+        COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
+        COMMON_KEYS.add(Key.KEY_EXTEND_EXPOSURE.mValue);
+        COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
         COMMON_KEYS.add(Key.KEY_OIS_ON.mValue);
         COMMON_KEYS.add(Key.KEY_DNG_COMPRESSION_ON.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_BASIC_OSD.mValue);
+        COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
+        // QualityDoesMatter - Video
+        COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_NEW_REC_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
@@ -59,16 +66,19 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_HEIGHT.mValue);
-        COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
-        COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
-        COMMON_KEYS.add(Key.KEY_EXTEND_EXPOSURE.mValue);
-        COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
+        // QualityDoesMatter - Audio
         COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CHANNELS.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_BITRATE.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_SPS.mValue);
-        COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
+        // QualityDoesMatter - SoC - Qualcomm/Snapdragon
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_EIS_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_AI_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -89,6 +99,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_QUAD_BAYER, resources.getBoolean(R.bool.pref_quad_bayer_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REMOSAIC, resources.getBoolean(R.bool.pref_remosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FPS_PREVIEW, resources.getBoolean(R.bool.pref_fps_preview_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
@@ -98,29 +109,40 @@ public class PreferenceKeys {
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
 
-        // QualityDoesMatter
+        // QualityDoesMatter - General
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_OIS_ON, resources.getBoolean(R.bool.pref_ois_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON, resources.getBoolean(R.bool.pref_dng_compression_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_BASIC_OSD, resources.getBoolean(R.bool.pref_show_basic_osd_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_ISO, resources.getBoolean(R.bool.pref_extend_iso_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
+        // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO, resources.getBoolean(R.bool.pref_10bit_video_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO, resources.getBoolean(R.bool.pref_new_rec_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR, resources.getString(R.string.pref_bitrate_default));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
+        // QualityDoesMatter - Audio
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CHANNELS, resources.getString(R.string.pref_audio_channels_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE, resources.getString(R.string.pref_audio_bitrate_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS, resources.getString(R.string.pref_sps_default_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
+        // QualityDoesMatter - SoC - Qualcomm/Snapdragon
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS, resources.getString(R.string.pref_soc_qualcomm_sharpness_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION, resources.getString(R.string.pref_soc_qualcomm_saturation_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_EIS_MODE, resources.getString(R.string.pref_soc_qualcomm_eis_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_AI_MODE, resources.getString(R.string.pref_soc_qualcomm_ai_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ, resources.getBoolean(R.bool.pref_soc_qualcomm_isz_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR, resources.getBoolean(R.bool.pref_soc_qualcomm_mfnr_default));
+
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -239,6 +261,10 @@ public class PreferenceKeys {
         return getBool(Key.KEY_WIDE169);
     }
 
+    public static boolean isThumbnailOn(){
+        return getBool(Key.KEY_THUMBNAIL);
+    }
+
     public static void setBatterySaver(boolean value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_ENERGY_SAVING,value);
     }
@@ -260,6 +286,9 @@ public class PreferenceKeys {
 
     public static boolean is10bitVideoOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO);
+    }
+    public static boolean isNeRecVideoOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO);
     }
 
     public static String getMode() {
@@ -555,6 +584,30 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY);
     }
 
+    public static int getSocQualcommSharpness() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS);
+    }
+
+    public static int getSocQualcommSaturation() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION);
+    }
+
+    public static int getSocQualcommEisMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_EIS_MODE);
+    }
+
+    public static int getSocQualcommAiMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_AI_MODE);
+    }
+
+    public static boolean isSocQualcommIszOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ);
+    }
+
+    public static boolean isSocQualcommMfnrOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -563,6 +616,7 @@ public class PreferenceKeys {
         KEY_SHOW_WATERMARK(R.string.pref_show_watermark_key),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
+        KEY_THUMBNAIL(R.string.pref_thumbnail_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),
         KEY_HDRX_NR(R.string.pref_hdrx_nr_key),
         KEY_SHOW_ROUND_EDGE(R.string.pref_show_roundedge_key),
@@ -600,6 +654,7 @@ public class PreferenceKeys {
         KEY_HDR_VIDEO(R.string.pref_hdr_video_key),
         KEY_EIS_VIDEO(R.string.pref_eis_video_key),
         KEY_10BIT_VIDEO(R.string.pref_10bit_video_key),
+        KEY_NEW_REC_VIDEO(R.string.pref_new_rec_video_key),
         KEY_VIDEO_HEIGHT(R.string.pref_video_resolution_key),
         KEY_VIDEO_BITRATE_SEEKBAR(R.string.pref_bitrate_key),
         KEY_VIDEO_FRAMERATE(R.string.pref_video_framerate_key),
@@ -609,13 +664,23 @@ public class PreferenceKeys {
         KEY_2X_ZOOM(R.string.pref_2x_zoom_key),
 
         /**
-         * QualityDoesMatter - Video settings keys
+         * QualityDoesMatter - Audio settings keys
          */
         KEY_AUDIO_PROCESSING(R.string.pref_audio_processing_key),
         KEY_AUDIO_CODEC(R.string.pref_audio_codec_key),
         KEY_AUDIO_CHANNELS(R.string.pref_audio_channels_key),
         KEY_AUDIO_BITRATE(R.string.pref_audio_bitrate_key),
         KEY_AUDIO_SPS(R.string.pref_sps_key),
+
+        /**
+         * QualityDoesMatter - SoC - Qualcomm/Snapdragon
+         */
+        KEY_SOC_QUALCOMM_SHARPNESS(R.string.pref_soc_qualcomm_sharpness_key),
+        KEY_SOC_QUALCOMM_SATURATION(R.string.pref_soc_qualcomm_saturation_key),
+        KEY_SOC_QUALCOMM_EIS_MODE(R.string.pref_soc_qualcomm_eis_mode_key),
+        KEY_SOC_QUALCOMM_AI_MODE(R.string.pref_soc_qualcomm_ai_mode_key),
+        KEY_SOC_QUALCOMM_ISZ(R.string.pref_soc_qualcomm_isz_key),
+        KEY_SOC_QUALCOMM_MFNR(R.string.pref_soc_qualcomm_mfnr_key),
 
         /**
          * QualityDoesMatter - other

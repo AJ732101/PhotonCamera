@@ -61,8 +61,6 @@ public final class CameraManager2 {
             } catch (InterruptedException ignored) {}
         }
 
-        //scanAllCameras(cameraManager);
-
         SpecificSetting sp = PhotonCamera.getSpecific().specificSetting;
         String[] ids = sp.cameraIDS;
         Log.d("CameraManager2", "Loaded ids:"+ Arrays.toString(ids));
@@ -212,6 +210,7 @@ public final class CameraManager2 {
         cameraLensData.setFacing(characteristics.get(CameraCharacteristics.LENS_FACING));
         cameraLensData.setCameraFocalLength(characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0]);
         cameraLensData.setCameraAperture(characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_APERTURES)[0]);
+        Log.d(TAG, "setCameraAperture: " + characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_APERTURES)[0]);
         cameraLensData.setCamera35mmFocalLength((36.0f / characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE).getWidth() * cameraLensData.getCameraFocalLength()));
         cameraLensData.setFlashSupported(characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE));
         return cameraLensData;

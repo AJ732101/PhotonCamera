@@ -138,10 +138,12 @@
     <string name="processing_processname">Processing %1$s...</string>
     <string name="turn_on_system_nr">System Noise Reduction</string>
     <string name="wide169" translatable="false">16:9</string>
+    <string name="thumbnail" translatable="true">Thumbnail</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing preview format</string>
 
+    <!-- Extended AUdio and Video settings strings -->
     <string name="turn_on_basic_osd">Show Basic OSD</string>
     <string name="turn_on_ois">OIS</string>
     <string name="turn_on_dng_compression">DNG Compression</string>
@@ -155,6 +157,7 @@
     <string name="hdr_video">HDR Video</string>
     <string name="eis_video">EIS in Preview</string>
     <string name="video_10bit">10 Bit Video</string>
+    <string name="video_new_rec">New Recording Pipeline</string>
     <string name="noise_processing">Noise Processing</string>
     <string name="edge_processing">Edge Processing</string>
     <string name="zoom">Zoom</string>
@@ -169,4 +172,19 @@
     <string name="bracketing_normal">Normal (1x, 4x)</string>
     <string name="bracketing_high">High (1x, 8x)</string>
     <string name="pref_bracketing_key">pref_bracketing_mode_key</string>
+
+    <!-- Submenus -->
+    <string name="general_settings_screen_title">General Settings</string>
+    <string name="stacking_settings_screen_title">Stacking Settings</string>
+    <string name="video_settings_screen_title">Video Settings</string>
+    <string name="audio_settings_screen_title">Audio Settings</string>
+    <string name="soc_settings_screen_title">Soc Speciic Settings</string>
+
+    <!-- SoC settings strings -->
+    <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>
+    <string name="soc_qualcomm_saturation">Qualcomm/Snapdragon Saturation</string>
+    <string name="soc_qualcomm_eis_mode">Qualcomm/Snapdragon EIS Mode</string>
+    <string name="soc_qualcomm_ai_mode">Qualcomm/Snapdragon AI Mode</string>
+    <string name="soc_qualcomm_isz">Qualcomm/Snapdragon ISZ</string>
+    <string name="soc_qualcomm_mfnr">Qualcomm/Snapdragon MFNR</string>
 </resources>

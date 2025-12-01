@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -46,8 +47,46 @@ import java.util.TimeZone;
 import static com.particlesdevs.photoncamera.settings.PreferenceKeys.Key.ALL_DEVICES_NAMES_KEY;
 import static com.particlesdevs.photoncamera.settings.PreferenceKeys.SCOPE_GLOBAL;
 
-public class SettingsActivity extends BaseActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
+public class SettingsActivity extends BaseActivity implements
+        PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
+        PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
     public static boolean toRestartApp;
+
+    public static class GeneralSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.general_preferences, rootKey);
+        }
+    }
+
+    public static class SoCSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.soc_preferences, rootKey);
+        }
+    }
+
+    public static class VideoSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.video_preferences, rootKey);
+        }
+    }
+
+    public static class AudioSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.audio_preferences, rootKey);
+        }
+    }
+
+    public static class StackingSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.stacking_preferences, rootKey);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // --- COLD START FIX ---
@@ -69,6 +108,23 @@ public class SettingsActivity extends BaseActivity implements PreferenceFragment
                 .commit();
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentLifeCycleMonitor(), true);
 
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat caller, @NonNull Preference pref) {
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
+                getClassLoader(),
+                pref.getFragment()
+        );
+        fragment.setArguments(pref.getExtras());
+        fragment.setTargetFragment(caller, 0);
+
+        // Ersetze das aktuelle Fragment durch das neue.
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.settings_container, fragment)
+                .addToBackStack(null)
+                .commit();
+        return true;
     }
 
     public void back(View view) {
@@ -109,6 +165,61 @@ public class SettingsActivity extends BaseActivity implements PreferenceFragment
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
+
+            Preference generalSettingsButton = findPreference("general_settings_screen");
+            if (generalSettingsButton != null) {
+                generalSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new GeneralSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference socSettingsButton = findPreference("soc_settings_screen");
+            if (socSettingsButton != null) {
+                socSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new SoCSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference videoSettingsButton = findPreference("video_settings_screen");
+            if (videoSettingsButton != null) {
+                videoSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new VideoSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference audioSettingsButton = findPreference("audio_settings_screen");
+            if (audioSettingsButton != null) {
+                audioSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new AudioSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference stackingSettingsButton = findPreference("stacking_settings_screen");
+            if (stackingSettingsButton != null) {
+                stackingSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new StackingSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
         }
 
         @Override
@@ -360,6 +471,5 @@ public class SettingsActivity extends BaseActivity implements PreferenceFragment
                 super.onDisplayPreferenceDialog(preference);
             }
         }
-
     }
 }

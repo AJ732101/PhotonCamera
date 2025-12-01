@@ -26,6 +26,7 @@
     <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
     <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
     <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
+    <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>
     <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>
     <string name="pref_edge_processing_key" translatable="false">pref_edge_processing_key</string>
     <string name="pref_2x_zoom_key" translatable="false">pref_2x_zoom_key</string>
@@ -41,6 +42,7 @@
     <string name="pref_show_watermark_key" translatable="false">pref_show_watermark_key</string>
     <string name="pref_energy_safe_key" translatable="false">pref_energy_safe_key</string>
     <string name="pref_wide169_key" translatable="false">pref_wide169_key</string>
+    <string name="pref_thumbnail_key" translatable="false">pref_thumbnail_key</string>
     <string name="pref_enhanced_processing_key" translatable="false">pref_enhanced_processing_key</string>
     <string name="pref_hdrx_nr_key" translatable="false">pref_hdrx_nr_key</string>
     <string name="pref_save_raw_key" translatable="false">pref_save_raw_key</string>
@@ -96,7 +98,6 @@
     <string name="pref_this_device_key" translatable="false">pref_this_device_key</string>
     <string name="_per_lens" translatable="false">_per_lens</string>
 
-
     <string name="pref_category_backup_restore" translatable="false">pref_category_backup_restore</string>
     <string name="pref_backup_preferences_key" translatable="false">pref_backup_preferences_key</string>
     <string name="pref_restore_preferences_key" translatable="false">pref_restore_preferences_key</string>
@@ -105,4 +106,12 @@
     <string name="pref_photoncamera" translatable="false">pref_photoncamera</string>
     <string name="pref_version_key" translatable="false">pref_version_key</string>
     <string name="pref_folders_list" translatable="false">pref_folders_list</string>
+
+    <!-- SoC settings strings -->
+    <string name="pref_soc_qualcomm_sharpness_key" translatable="false">pref_soc_qualcomm_sharpness_key</string>
+    <string name="pref_soc_qualcomm_saturation_key" translatable="false">pref_soc_qualcomm_saturation_key</string>
+    <string name="pref_soc_qualcomm_eis_mode_key" translatable="false">pref_soc_qualcomm_eis_mode_key</string>
+    <string name="pref_soc_qualcomm_ai_mode_key" translatable="false">pref_soc_qualcomm_ai_mode_key</string>
+    <string name="pref_soc_qualcomm_isz_key" translatable="false">pref_soc_qualcomm_isz_key</string>
+    <string name="pref_soc_qualcomm_mfnr_key" translatable="false">pref_soc_qualcomm_mfnr_key</string>
 </resources>

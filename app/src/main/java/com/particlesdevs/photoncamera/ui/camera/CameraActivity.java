@@ -58,6 +58,11 @@ public class CameraActivity extends BaseActivity {
 
         //Preferences Init
         PreferenceManager.setDefaultValues(this, R.xml.preferences, MigrationManager.readAgain);
+        PreferenceManager.setDefaultValues(this, R.xml.general_preferences, MigrationManager.readAgain);
+        PreferenceManager.setDefaultValues(this, R.xml.soc_preferences, MigrationManager.readAgain);
+        PreferenceManager.setDefaultValues(this, R.xml.video_preferences, MigrationManager.readAgain);
+        PreferenceManager.setDefaultValues(this, R.xml.audio_preferences, MigrationManager.readAgain);
+        PreferenceManager.setDefaultValues(this, R.xml.stacking_preferences, MigrationManager.readAgain);
         PreferenceKeys.setDefaults(this);
         PhotonCamera.getSettings().loadCache();
 

@@ -95,10 +95,6 @@ public class Specific {
                     specificSetting.forceNewSettingsInRegularPhotoMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "useNewRecordingPipeline": {
-                    specificSetting.useNewRecordingPipeline = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "useExternalViewer": {
                     specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
                     break;
@@ -153,22 +149,6 @@ public class Specific {
                 }
                 case "effectMode": {
                     specificSetting.effectMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "codeAuroraSharpnessStrength": {
-                    specificSetting.codeAuroraSharpnessStrength = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "codeAuroraEisMode": {
-                    specificSetting.codeAuroraEisMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "codeAuroraSaturation": {
-                    specificSetting.codeAuroraSaturation = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "codeAuroraAiMode": {
-                    specificSetting.codeAuroraAiMode = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "newRecKeyFrameIntervall": {
