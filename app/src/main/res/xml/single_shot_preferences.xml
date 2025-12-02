@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/single_shot_settings_screen_title"
+    android:key="single_shot_settings_category">
+
+    <PreferenceCategory app:key="single_shot_settings_category" app:title="@string/single_shot_settings_screen_title">
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_zsl_key"
+            android:title="@string/zsl"
+            android:summary=""
+            android:icon="@drawable/shutter_speed_24px"
+            android:defaultValue="@bool/pref_zsl_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_scene_and_effect_mode_key"
+            android:title="@string/scene_and_effect_mode"
+            android:summary=""
+            android:icon="@drawable/landscape_2_edit_24px"
+            android:defaultValue="@bool/pref_scene_and_effect_mode_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_new_settings_global_key"
+            android:title="@string/new_settings_global"
+            android:summary="Like ColorCorrectionAberrationMode, DistortionCorrectionMode, ShadingMode, HotPixelMode"
+            android:icon="@drawable/control_point_duplicate_24px"
+            android:defaultValue="@bool/pref_new_settings_global_def_value"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
