@@ -156,6 +156,10 @@
     <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
     <string name="eis_video">EIS in Preview</string>
+    <string name="zsl">Zero Shutter Lag</string>
+    <string name="scene_and_effect_mode">Scene and Effect Mode</string>
+    <string name="new_settings_global">Additional Settings Global</string>
+    <string name="turn_on_10bit">Zero Shutter Lag</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="video_new_rec">New Recording Pipeline</string>
     <string name="noise_processing">Noise Processing</string>
@@ -179,6 +183,7 @@
     <string name="video_settings_screen_title">Video Settings</string>
     <string name="audio_settings_screen_title">Audio Settings</string>
     <string name="soc_settings_screen_title">Soc Speciic Settings</string>
+    <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
 
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>

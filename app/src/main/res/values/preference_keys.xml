@@ -25,6 +25,9 @@
     <string name="pref_aperture_key" translatable="false">pref_aperture_key</string>
     <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
     <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
+    <string name="pref_zsl_key" translatable="false">pref_zsl_key</string>
+    <string name="pref_scene_and_effect_mode_key" translatable="false">pref_scene_and_effect_mode_key</string>
+    <string name="pref_new_settings_global_key" translatable="false">pref_new_settings_global_key</string>
     <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
     <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>
     <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>

@@ -142,7 +142,7 @@ public class TouchFocus {
         }
         builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
         //builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-        if (isSingleShotJpegOrHeic() && PhotonCamera.getSpecific().specificSetting.useSceneAndEffectMode) {
+        if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
             if (!captureController.getParamController().isManualMode()) {
                 builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
                 switch (PhotonCamera.getSettings().selectedMode) {

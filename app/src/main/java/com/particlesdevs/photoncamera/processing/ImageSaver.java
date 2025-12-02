@@ -78,7 +78,7 @@ public class ImageSaver {
             Log.d(TAG,"Implementation:" + implementation);
             implementation.frameCount = desiredFrameCount;
             implementation.newBurst = newBurst;
-            implementation.addImage(mImage);
+            implementation.addImage(mImage, 0);
         } else {
             Image mImage;
             try {
@@ -93,7 +93,7 @@ public class ImageSaver {
         frameCounter++;
     }
 
-    public void directSaveImage(ImageReader mReader) {
+    public void directSaveImage(ImageReader mReader, int orientation) {
         Log.v(TAG, "directSaveImage()");
         Image mImage;
         try {
@@ -109,7 +109,7 @@ public class ImageSaver {
         Log.d(TAG,"Implementation:" + implementation);
         implementation.frameCount = desiredFrameCount;
         implementation.newBurst = newBurst;
-        implementation.addImage(mImage);
+        implementation.addImage(mImage, orientation);
     }
 
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {

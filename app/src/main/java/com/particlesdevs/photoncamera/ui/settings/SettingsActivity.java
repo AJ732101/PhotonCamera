@@ -87,6 +87,13 @@ public class SettingsActivity extends BaseActivity implements
         }
     }
 
+    public static class SingleShotSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.single_shot_preferences, rootKey);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // --- COLD START FIX ---
@@ -215,6 +222,17 @@ public class SettingsActivity extends BaseActivity implements
                 stackingSettingsButton.setOnPreferenceClickListener(preference -> {
                     getParentFragmentManager().beginTransaction()
                             .replace(R.id.settings_container, new StackingSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference singleShotSettingsButton = findPreference("single_shot_settings_screen");
+            if (singleShotSettingsButton != null) {
+                singleShotSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new SingleShotSettingsFragment())
                             .addToBackStack(null)
                             .commit();
                     return true;

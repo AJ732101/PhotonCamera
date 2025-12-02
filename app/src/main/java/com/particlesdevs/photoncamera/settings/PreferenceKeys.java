@@ -79,6 +79,10 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_AI_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
+        // QualityDoesMatter - Single Shot & Video RElated
+        COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
+        COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -142,6 +146,10 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_AI_MODE, resources.getString(R.string.pref_soc_qualcomm_ai_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ, resources.getBoolean(R.bool.pref_soc_qualcomm_isz_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR, resources.getBoolean(R.bool.pref_soc_qualcomm_mfnr_default));
+        // QualityDoesMatter - Single Shot and Video Related
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
 
 
         settingsManager.addListener((settingsManager1, key) -> {
@@ -608,6 +616,18 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR);
     }
 
+    public static boolean isZslOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_ZSL);
+    }
+
+    public static boolean isSceneAndEffectModeOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE);
+    }
+
+    public static boolean isNewSettingsGlobalOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -692,6 +712,14 @@ public class PreferenceKeys {
         KEY_EXTEND_EXPOSURE(R.string.pref_extend_exposure_key),
         KEY_OIS_ON(R.string.pref_ois_key),
         KEY_DNG_COMPRESSION_ON(R.string.pref_dng_compression_key),
+
+        /**
+         * QualityDoesMatter - Single Shot & Video Related
+         */
+        KEY_USE_ZSL(R.string.pref_zsl_key),
+        KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
+        KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
+
 
         /**
          * Enhanced settings keys

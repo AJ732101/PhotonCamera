@@ -63,6 +63,17 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
+        android:key="pref_category_single_shot_key"
+        android:title="@string/single_shot_settings_screen_title">
+        <Preference
+            app:key="single_shot_settings_screen"
+            app:title="Single Shot &amp; Video Specific Settings"
+            app:summary="Configure Single Shot and Video Parameter"
+            android:icon="@drawable/discover_tune_24px" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
         android:key="@string/pref_category_jpg_key"
         android:title="@string/jpg">
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference

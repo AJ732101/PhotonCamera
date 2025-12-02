@@ -8,7 +8,6 @@ public class SpecificSetting {
     public String[] cameraIDS;
     public float[] apertureList;
     // QualityDoesMatter
-    public boolean forceNewSettingsInRegularPhotoMode = false;
     public int hotPixelMode = 99;
     public int colorCorrectionAberrationMode = 99;
     public int distortionCorrectionMode = 99;
@@ -17,12 +16,9 @@ public class SpecificSetting {
     public boolean statisticsHotPixelMapMode = true;
     public boolean xiaomi14Ultra2xHack = false;
     public boolean useExternalViewer = false;
-    public boolean useSceneAndEffectMode = false;
     public boolean useAlternatePreviewTemplate = false;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
-    public boolean useSingleShotZsl = false;
-    public boolean createSingleShotThumbnail = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;

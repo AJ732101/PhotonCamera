@@ -81,8 +81,11 @@ public class Settings {
     public int socQualcommSaturation;
     public int socQualcommEisMode;
     public int socQualcommAiMode;
-    public boolean socQualcommUseIsz;
-    public boolean socQualcommUseMfnr;
+    public boolean socQualcommUseIsz = false;
+    public boolean socQualcommUseMfnr = false;
+    public boolean useZsl = false;
+    public boolean useSceneAndEffectMode = false;
+    public boolean useNewSettingsGloabal = false;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -158,6 +161,10 @@ public class Settings {
         socQualcommAiMode = PreferenceKeys.getSocQualcommAiMode();
         socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();
         socQualcommUseMfnr = PreferenceKeys.isSocQualcommMfnrOn();
+        // QualityDoesMatter - Single Shot & Video Related
+        useZsl = PreferenceKeys.isZslOn();
+        useSceneAndEffectMode = PreferenceKeys.isSceneAndEffectModeOn();
+        useNewSettingsGloabal = PreferenceKeys.isSceneAndEffectModeOn();
     }
 
     public void saveID() {

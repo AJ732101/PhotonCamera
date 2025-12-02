@@ -91,16 +91,8 @@ public class Specific {
                     specificSetting.xiaomi14Ultra2xHack = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "forceNewSettingsInRegularPhotoMode": {
-                    specificSetting.forceNewSettingsInRegularPhotoMode = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "useExternalViewer": {
                     specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "useSceneAndEffectMode": {
-                    specificSetting.useSceneAndEffectMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "useAlternatePreviewTemplate": {
@@ -113,14 +105,6 @@ public class Specific {
                 }
                 case "useCodeAuroraCinematicMode": {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "useSingleShotZsl": {
-                    specificSetting.useSingleShotZsl = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "createSingleShotThumbnail": {
-                    specificSetting.createSingleShotThumbnail = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "statisticsLensShadingMapMode": {

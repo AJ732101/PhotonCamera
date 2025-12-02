@@ -239,6 +239,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public static int mPreviewTargetFormat = ImageFormat.JPEG;
     public boolean isDualSession = false;
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
+    public boolean mFormatsDetectionDone = false;
+    public boolean mHeicIsSupported = false;
+    public boolean mHeicUltraHdrIsSupported = false;
+    public boolean mJpegRIsSupported = false;
+    public boolean mYuv10IsSupported = false;
+    public boolean mRaw10IsSupported = false;
+    public boolean mRaw12IsSupported = false;
+    public boolean mRawSensorIsSupported = false;
+    public boolean mRawPrivateIsSupported = false;
     private final ParamController paramController;
     public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
@@ -306,7 +315,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if (isSingleShotJpegOrHeic()) {
-                mImageSaver.directSaveImage(reader);
+                mImageSaver.directSaveImage(reader, getOrientation());
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;
@@ -1093,6 +1102,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         CameraCharacteristics characteristics =  this.mCameraCharacteristicsMap.get(physicalID);
         StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
+        checkStillImageFormatsSupport(map);
+
         HashSet<Size> uniqueTargets = new HashSet<>();
 
         setTargetFormat();
@@ -1237,6 +1248,100 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         createImageReaderRaw();
     }
 
+    private void checkStillImageFormatsSupport(StreamConfigurationMap map) {
+        if (mFormatsDetectionDone) {
+            return; // one time is enough, device will not gain or loose any formats
+        }
+
+        int[] outputFormats = map.getOutputFormats();
+        mHeicIsSupported = false;
+        mHeicUltraHdrIsSupported = false;
+        mJpegRIsSupported = false;
+        mRaw10IsSupported = false;
+        mRaw12IsSupported = false;
+        mRawPrivateIsSupported = false;
+        mRawSensorIsSupported = false;
+        mYuv10IsSupported = false;
+
+        for (int format : outputFormats) {
+            if (format == ImageFormat.HEIC) {
+                mHeicIsSupported = true;
+            }
+            if (format == ImageFormat.HEIC_ULTRAHDR) {
+                mHeicUltraHdrIsSupported = true;
+            }
+            if (format == ImageFormat.JPEG_R) {
+                mJpegRIsSupported = true;
+            }
+            if (format == ImageFormat.RAW10) {
+                mRaw10IsSupported = true;
+            }
+            if (format == ImageFormat.RAW12) {
+                mRaw12IsSupported = true;
+            }
+            if (format == ImageFormat.RAW_PRIVATE) {
+                mRawPrivateIsSupported = true;
+            }
+            if (format == ImageFormat.RAW_SENSOR) {
+                mRawSensorIsSupported = true;
+            }
+            if (format == ImageFormat.YCBCR_P010) {
+                mYuv10IsSupported = true;
+            }
+        }
+
+        if (mHeicIsSupported) {
+            Log.d(TAG, "HEIC is supported");
+        }
+        else {
+            Log.d(TAG, "HEIC is NOT supported");
+        }
+        if (mHeicUltraHdrIsSupported) {
+            Log.d(TAG, "HEIC_ULTRAHDR is supported");
+        }
+        else {
+            Log.d(TAG, "HEIC_ULTRAHDR is NOT supported");
+        }
+        if (mJpegRIsSupported) {
+            Log.d(TAG, "JPEG_R is supported");
+        }
+        else {
+            Log.d(TAG, "JPEG_R is NOT supported");
+        }
+        if (mRaw10IsSupported) {
+            Log.d(TAG, "RAW10 is supported");
+        }
+        else {
+            Log.d(TAG, "RAW10 is NOT supported");
+        }
+        if (mRaw12IsSupported) {
+            Log.d(TAG, "RAW12 is supported");
+        }
+        else {
+            Log.d(TAG, "RAW12 is NOT supported");
+        }
+        if (mRawPrivateIsSupported) {
+            Log.d(TAG, "RAW_PRIVATE is supported");
+        }
+        else {
+            Log.d(TAG, "RAW_PRIVATE is NOT supported");
+        }
+        if (mRawSensorIsSupported) {
+            Log.d(TAG, "RAW_SENSOR is supported");
+        }
+        else {
+            Log.d(TAG, "RAW_SENSOR is NOT supported");
+        }
+        if (mYuv10IsSupported) {
+            Log.d(TAG, "YCBCR_P010 is supported");
+        }
+        else {
+            Log.d(TAG, "YCBCR_P010 is NOT supported");
+        }
+
+        mFormatsDetectionDone = true;
+    }
+
     private void createImageReaderPreview(String cameraId) {
         if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
@@ -1254,6 +1359,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (map == null) {
             return;
         }
+
+        checkStillImageFormatsSupport(map);
+
         ArrayList<Size> allTargets = getAllTargets();
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
         Size target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
@@ -1279,6 +1387,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (mImageReaderRaw != null) {
                 mImageReaderRaw.close();
             }
+            applyFormatFallback();
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
                 mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
@@ -1295,6 +1404,37 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
         mImageReaderRaw.setOnImageAvailableListener(mOnRawImageAvailableListener, mBackgroundHandler);
+    }
+
+    private void applyFormatFallback() {
+        // RAW formats first
+        if ((mTargetFormat == ImageFormat.RAW10) && !mRaw10IsSupported) {
+            mTargetFormat = ImageFormat.RAW_SENSOR;
+            Log.w(TAG, "Requested RAW10 but not supported -> fallback to RAW_SENSOR");
+        }
+        if ((mTargetFormat == ImageFormat.RAW12) && !mRaw12IsSupported) {
+            mTargetFormat = ImageFormat.RAW_SENSOR;
+            Log.w(TAG, "Requested RAW12 but not supported -> fallback to RAW_SENSOR");
+        }
+        // Bitmap formats
+        if ((mTargetFormat == ImageFormat.HEIC) && !mHeicIsSupported) {
+            mTargetFormat = ImageFormat.JPEG;
+            Log.w(TAG, "Requested HEIC but not supported -> fallback to JPEG");
+        }
+        if ((mTargetFormat == ImageFormat.HEIC_ULTRAHDR) && !mHeicUltraHdrIsSupported) {
+            mTargetFormat = ImageFormat.JPEG;
+            Log.w(TAG, "Requested HEIC_ULTRAHDR but not supported -> fallback to JPEG");
+        }
+        if ((mTargetFormat == ImageFormat.JPEG_R) && !mJpegRIsSupported) {
+            mTargetFormat = ImageFormat.JPEG;
+            Log.w(TAG, "Requested JPEG_R but not supported -> fallback to JPEG");
+        }
+
+        // YUV formats
+        if ((mTargetFormat == ImageFormat.YCBCR_P010) && !mYuv10IsSupported) {
+            mTargetFormat = ImageFormat.YUV_420_888;
+            Log.w(TAG, "Requested YCBCR_P010 but not supported -> fallback to YUV_420_888");
+        }
     }
 
     private Size getAspect(CameraMode targetMode) {
@@ -1440,7 +1580,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
     public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
-        if (!PhotonCamera.getSpecific().specificSetting.forceNewSettingsInRegularPhotoMode) {
+        if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
             if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().frameCount != 1)) {
                 return;
             }
@@ -1486,7 +1626,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void setContrastCurve(CaptureRequest.Builder captureBuilder) {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
-        if (!PhotonCamera.getSpecific().specificSetting.forceNewSettingsInRegularPhotoMode) {
+        if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
             if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().frameCount != 1)) {
                 return;
             }
@@ -1713,24 +1853,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
             for (Surface surfacei : surfaces) {
                 var config = new OutputConfiguration(surfacei);
-                if(!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     config.setPhysicalCameraId(physicalID);
                 }
-                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // activating HDR path
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // video
+                    if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
                         config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
-                }
-                if ((mPreviewTargetFormat == ImageFormat.JPEG_R) || (mPreviewTargetFormat == ImageFormat.YCBCR_P010)) {
-                    if (mImageReaderRaw.getSurface() == surfacei) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Ultra HDR or 10 Bit surface as target (for encoding after image capture)
+                    if ((mTargetFormat == ImageFormat.JPEG_R) || (mTargetFormat == ImageFormat.YCBCR_P010)) {
+                        if (mImageReaderRaw.getSurface() == surfacei) {
                             config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                         }
                     }
                     else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
-                        }
+                        config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
                     }
                 }
                 outputConfigurations.add(config);
@@ -1998,7 +2137,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void setSceneAndEffectMode(CaptureRequest.Builder builder) {
-        if (isSingleShotJpegOrHeic() && PhotonCamera.getSpecific().specificSetting.useSceneAndEffectMode) {
+        if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
             if (!paramController.isManualMode()) {
                 builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
                 switch (PhotonCamera.getSettings().selectedMode) {
@@ -2333,7 +2472,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (PhotonCamera.getSettings().useThumbnail) {
             captureBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, new Size(320, 240));
         }
-        boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
+        //boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
     }
 
     private void captureSingleStillPicture() {
@@ -2344,7 +2483,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             CaptureRequest.Builder captureBuilder = null;
-            if (PhotonCamera.getSpecific().specificSetting.useSingleShotZsl) {
+            if (PhotonCamera.getSettings().useZsl) {
                 captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_ZERO_SHUTTER_LAG);
             }
             else {

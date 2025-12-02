@@ -89,6 +89,9 @@
     <string name="pref_aperture_default_value" translatable="false">99</string>
     <bool name="pref_hdr_video_def_value">false</bool>
     <bool name="pref_eis_video_def_value">false</bool>
+    <bool name="pref_zsl_def_value">false</bool>
+    <bool name="pref_scene_and_effect_mode_def_value">false</bool>
+    <bool name="pref_new_settings_global_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
     <bool name="pref_new_rec_video_def_value">false</bool>
     <bool name="pref_2x_zoom_def_value">false</bool>

@@ -34,7 +34,7 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image) {
+    public void addImage(Image image, int orientation) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && (image.getFormat() == ImageFormat.YCBCR_P010)) {
             String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
@@ -125,24 +125,20 @@ public class YUVSaver extends DefaultSaver{
                 /*switch (usedCodec) {
                     case "AVIF":
                     case "AV1":
-                        maxEncoderRes = getMaximumSupportedResolution("c2.android.av1.encoder", MediaFormat.MIMETYPE_VIDEO_AV1);
                         format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
                         encoder = MediaCodec.createByCodecName("c2.android.av1.encoder");
                         break;
                     case "APV":
-                        maxEncoderRes = getMaximumSupportedResolution("c2.android.apv.encoder", MediaFormat.MIMETYPE_VIDEO_APV);
                         format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
                         encoder = MediaCodec.createByCodecName("c2.android.apv.encoder");
                         break;
                     case "HEIC":
-                        maxEncoderRes = getMaximumSupportedResolution("c2.qti.heic.encoder", MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC);
                         format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
                         encoder = MediaCodec.createByCodecName("c2.qti.heic.encoder");
                         break;
                     case "HEVC":
-                        maxEncoderRes = getMaximumSupportedResolution("c2.qti.hevc.encoder", MediaFormat.MIMETYPE_VIDEO_HEVC);
                         format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
-                        encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder");
+                        encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder.hdr");
                         break;
                 }*/
 
@@ -155,7 +151,7 @@ public class YUVSaver extends DefaultSaver{
                     Log.e(TAG, "Encoder configuration failed", e);
                     throw e;
                 }
-                muxer.setOrientationHint(0);
+                muxer.setOrientationHint(orientation);
 
                 // 2. Start the encoder
                 encoder.start();
@@ -291,11 +287,14 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 200_000_000);
-        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+        format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
         format.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
-        format.setLong(MediaFormat.KEY_DURATION, 1);
+        format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
+
+        //final int BUFFER_SIZE_HINT = width * height * 3 / 2;
+        //format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, BUFFER_SIZE_HINT * 3);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
