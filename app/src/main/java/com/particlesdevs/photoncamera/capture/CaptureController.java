@@ -680,7 +680,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) &&
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+            (PhotonCamera.getSettings().previewFormat == 999999999)) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             return true;
@@ -708,7 +709,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void setTargetFormat() {
         if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
-            mTargetFormat = PhotonCamera.getSettings().previewFormat;
+            var targetFromUi = PhotonCamera.getSettings().previewFormat;
+            if (targetFromUi == 999999999) {
+                mTargetFormat = ImageFormat.YUV_420_888;
+            }
+            else {
+                mTargetFormat = PhotonCamera.getSettings().previewFormat;
+            }
             return;
         }
 

@@ -4,28 +4,18 @@ import android.graphics.ImageFormat;
 import android.media.Image;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
-import android.os.Environment;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-
-import com.particlesdevs.photoncamera.app.PhotonCamera;
-import com.particlesdevs.photoncamera.capture.CaptureController;
-import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
 import androidx.annotation.RequiresApi;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.io.File;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.util.Log;
 
 public class YUVSaver extends DefaultSaver{
     private static final String TAG = "YUVSaver";
@@ -36,12 +26,12 @@ public class YUVSaver extends DefaultSaver{
     @Override
     public void addImage(Image image, int orientation) {
         // Check for 10-bit YUV format to encode as HEIC
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && (image.getFormat() == ImageFormat.YCBCR_P010)) {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
             Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec");
 
             Path storagePath = null;
-            if ((usedCodec.equals("AVIF")) || (usedCodec.equals("AV1"))) {
+            if ((usedCodec.equals("AVIF")) || (usedCodec.equals("AV1")) || (usedCodec.equals("SW_AVIF"))) {
                 storagePath = ImagePath.newAVIFFilePath();
             }
             else if (usedCodec.equals("APV")) {
@@ -51,6 +41,34 @@ public class YUVSaver extends DefaultSaver{
                 storagePath = ImagePath.newHEIFFilePath();
             }
             File heicFile = new File(storagePath.toString());
+
+            // SW based AVIF encoder solution
+            if (usedCodec.equals("SW_AVIF")) {
+                AvifEncoder avifEncoder = new AvifEncoder();
+                try {
+                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation);
+                }
+                catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+                image.close();
+                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
+                return;
+            }
+
+            // SW based HEIC/HEIF encoder solution
+            if (usedCodec.equals("SW_HEIC") || usedCodec.equals("SW_HEIF")) {
+                HeifEncoder heifEncoder = new HeifEncoder();
+                try {
+                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation);
+                }
+                catch (Exception e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+                image.close();
+                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
+                return;
+            }
 
             MediaCodec encoder = null;
             MediaMuxer muxer = null;
