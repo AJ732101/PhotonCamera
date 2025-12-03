@@ -39,7 +39,7 @@ android {
     }
 
     defaultConfig {
-        applicationId 'com.particlesdevs.photonvidcam'
+        applicationId 'com.xiaomi.module.evaluation'
         minSdk 29
         targetSdk 36
         versionCode versionBuild
@@ -148,8 +148,12 @@ dependencies {
     androidTestImplementation 'org.testng:testng:7.11.0'
     implementation 'com.elvishew:xlog:1.11.1'
     implementation 'com.elvishew:xlog-libcat:1.0.0'
-
+    implementation 'com.github.awxkee:avif-coder:2.1.4'
+    //implementation 'io.github.crow-misia.libyuv:libyuv-android:0.30.0'
 }
 repositories {
     mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
 }
