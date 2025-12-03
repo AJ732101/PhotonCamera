@@ -1,1 +1,1 @@
-Android Camera that uses Enhanced image processing
+Android Camera that focuses on video and new image formats
