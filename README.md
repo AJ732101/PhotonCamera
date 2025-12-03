@@ -15,6 +15,7 @@ Android Camera with focus on video recording
 * [MaterialComponents](https://github.com/material-components/material-components-android)
 * [CircleImageView](https://github.com/hdodenhof/CircleImageView)
 * [HorizontalPicker](https://github.com/blazsolar/HorizontalPicker)
+* [Avif-Coder](https://github.com/awxkee/avif-coder)
 
 ## License
 
