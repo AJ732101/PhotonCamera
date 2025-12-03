@@ -14,7 +14,7 @@ public class RAW16Saver extends DefaultSaver{
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation) {
+    public void addImage(Image image, int orientation, int targetFormat) {
         switch (PhotonCamera.getSettings().selectedMode) {
             case RAWVIDEO:
                 Log.d(TAG, "rawvideoaddImage: " + this + " " + mRawVideoProcessor);

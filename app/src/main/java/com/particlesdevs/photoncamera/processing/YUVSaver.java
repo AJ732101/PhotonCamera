@@ -24,26 +24,20 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image, int orientation) {
+    public void addImage(Image image, int orientation, int targetFormat) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
+            int usedTargetFormat = PhotonCamera.getSettings().previewFormat;
             Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec");
 
             Path storagePath = null;
-            if ((usedCodec.equals("AVIF")) || (usedCodec.equals("AV1")) || (usedCodec.equals("SW_AVIF"))) {
-                storagePath = ImagePath.newAVIFFilePath();
-            }
-            else if (usedCodec.equals("APV")) {
-                storagePath = ImagePath.newAPVFilePath();
-            }
-            else {
-                storagePath = ImagePath.newHEIFFilePath();
-            }
-            File heicFile = new File(storagePath.toString());
+            File heicFile = null;
 
             // SW based AVIF encoder solution
-            if (usedCodec.equals("SW_AVIF")) {
+            if (usedTargetFormat == 999999999) {
+                storagePath = ImagePath.newAVIFFilePath();
+                heicFile = new File(storagePath.toString());
                 AvifEncoder avifEncoder = new AvifEncoder();
                 try {
                     avifEncoder.encodeYuvToAvif(image, heicFile, orientation);
@@ -52,12 +46,14 @@ public class YUVSaver extends DefaultSaver{
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
                 image.close();
-                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
+                processingEventsListener.onProcessingFinished("AVIF saved: " + heicFile.getName());
                 return;
             }
 
             // SW based HEIC/HEIF encoder solution
-            if (usedCodec.equals("SW_HEIC") || usedCodec.equals("SW_HEIF")) {
+            if (usedTargetFormat == 999999991) {
+                storagePath = ImagePath.newHEIFFilePath();
+                heicFile = new File(storagePath.toString());
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
                     heifEncoder.encodeYuvToHeif(image, heicFile, orientation);
@@ -66,9 +62,20 @@ public class YUVSaver extends DefaultSaver{
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
                 image.close();
-                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
+                processingEventsListener.onProcessingFinished("HEIF saved: " + heicFile.getName());
                 return;
             }
+
+            if (usedCodec.equals("AVIF") || usedCodec.equals("AV1")) {
+                storagePath = ImagePath.newAVIFFilePath();
+            }
+            else if (usedCodec.equals("APV")) {
+                storagePath = ImagePath.newAPVFilePath();
+            }
+            else {
+                storagePath = ImagePath.newHEIFFilePath();
+            }
+            heicFile = new File(storagePath.toString());
 
             MediaCodec encoder = null;
             MediaMuxer muxer = null;

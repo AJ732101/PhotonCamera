@@ -42,7 +42,8 @@
         <item>HEIC</item>
         <item>JPEG_R</item>
         <item>HEIC_ULTRA</item>
-        <item>AVIF</item>
+        <item>AVIF (SW)</item>
+        <item>HEIC/HEIF (SW) </item>
         <item>None</item>
     </string-array>
 
@@ -54,6 +55,7 @@
         <item>4101</item>
         <item>4102</item>
         <item>999999999</item>
+        <item>999999991</item>
         <item>0</item>
     </string-array>
 

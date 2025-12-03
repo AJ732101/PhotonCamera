@@ -315,7 +315,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if (isSingleShotJpegOrHeic()) {
-                mImageSaver.directSaveImage(reader, getOrientation());
+                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat);
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;
@@ -681,7 +681,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-            (PhotonCamera.getSettings().previewFormat == 999999999)) &&
+            (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
+            (PhotonCamera.getSettings().previewFormat == 999999991)) && // SW HEIC/HEIF
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             return true;
@@ -710,7 +711,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void setTargetFormat() {
         if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
-            if (targetFromUi == 999999999) {
+            if ((targetFromUi == 999999999) || (targetFromUi == 999999991)) { // SW AVIF and HEIC/HEIF
                 mTargetFormat = ImageFormat.YUV_420_888;
             }
             else {

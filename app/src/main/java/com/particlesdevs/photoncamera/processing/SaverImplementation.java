@@ -98,7 +98,7 @@ public class SaverImplementation {
         this.processingEventsListener = processingEventsListener;
     }
 
-    public void addImage(Image image, int orientation) {
+    public void addImage(Image image, int orientation, int targetFormat) {
         //image.close();
     }
 
