@@ -15,11 +15,11 @@ Android Camera with focus on video recording
       <tr>
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg?raw=true" alt="Screenshot 1" width="100%"></td>
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg?raw=true" alt="Screenshot 2" width="100%"></td>
-        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg?raw=true" alt="Screenshot 3" width="100%"></td>
+        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg?raw=true" alt="Screenshot 3" width="100%"></td>
       </tr>
       <tr>
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/05.jpg?raw=true" alt="Screenshot 4" width="100%"></td>
-        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/06.jpg?raw=true" alt="Screenshot 5" width="100%"></td>
+        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg?raw=true" alt="Screenshot 5" width="100%"></td>
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg?raw=true" alt="Screenshot 6" width="100%"></td>
       </tr>
     </table>
