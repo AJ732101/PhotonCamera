@@ -31,7 +31,6 @@ public class SpecificSetting {
     public String newRecColorRange = "full";
     public String recPrefix = "";
     public String YCBCR_P010_TargetFormat = "HEVC";
-    public String rawFormat = "RAW_SENSOR";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO

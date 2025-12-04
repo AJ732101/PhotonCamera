@@ -67,8 +67,9 @@
     <string name="align_method">Align Method</string>
     <string name="color_method">Color Method</string>
     <string name="focus_peaking">Focus Peaking</string>
-    <string name="preview_format">Target Image Format</string>
+    <string name="preview_format">Still Image Format</string>
     <string name="real_preview_format">Preview Format</string>
+    <string name="raw_format">RAW Format</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="about">About</string>

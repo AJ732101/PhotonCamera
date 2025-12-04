@@ -711,23 +711,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         }
 
-        switch (PhotonCamera.getSpecific().specificSetting.rawFormat) {
-            case "RAW_SENSOR":
-                mTargetFormat = ImageFormat.RAW_SENSOR;
-                break;
-            case "RAW10":
-                mTargetFormat = ImageFormat.RAW10;
-                break;
-            case "RAW12":
-                mTargetFormat = ImageFormat.RAW12;
-                break;
-            case "RAW_PRIVATE":
-                mTargetFormat = ImageFormat.RAW_PRIVATE;
-                break;
-            default:
-                mTargetFormat = ImageFormat.RAW_SENSOR;
-                break;
-        }
+        mTargetFormat = PhotonCamera.getSettings().rawFormat;
     }
 
     public CaptureController(Activity activity, ExecutorService processExecutor, CameraEventsListener cameraEventsListener) {
@@ -2951,22 +2935,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             Size[] jpegSizes = map.getOutputSizes(ImageFormat.JPEG);
             if (jpegSizes == null || jpegSizes.length == 0) {
-                switch (PhotonCamera.getSpecific().specificSetting.rawFormat) {
-                    case "RAW_SENSOR":
-                        jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
-                        break;
-                    case "RAW10":
-                        jpegSizes = map.getOutputSizes(ImageFormat.RAW10);
-                        break;
-                    case "RAW12":
-                        jpegSizes = map.getOutputSizes(ImageFormat.RAW12);
-                        break;
-                    case "RAW_PRIVATE":
-                        jpegSizes = map.getOutputSizes(ImageFormat.RAW_PRIVATE);
-                        break;
-                    default:
-                        jpegSizes = map.getOutputSizes(ImageFormat.RAW_SENSOR);
-                }
+                jpegSizes = map.getOutputSizes(PhotonCamera.getSettings().rawFormat);
             }
             if (jpegSizes == null || jpegSizes.length == 0) {
                 return null;

@@ -36,20 +36,18 @@
     </string-array>
 
     <string-array name="preview_format_entries">
-        <item>YUV_420_888</item>
-        <item>YCBCR_P010</item>
         <item>JPEG</item>
         <item>HEIC</item>
         <item>JPEG_R</item>
         <item>HEIC_ULTRA</item>
         <item>AVIF (SW)</item>
         <item>HEIC/HEIF (SW) </item>
-        <item>None</item>
+        <item>JPEG/RAW Stacking</item>
+        <item>Video Codec 8 Bit</item>
+        <item>Video Codec 10 Bit</item>
     </string-array>
 
     <string-array name="preview_format_entryValues">
-        <item>35</item>
-        <item>54</item>
         <item>256</item>
         <item>1212500294</item>
         <item>4101</item>
@@ -57,6 +55,8 @@
         <item>999999999</item>
         <item>999999991</item>
         <item>0</item>
+        <item>35</item>
+        <item>54</item>
     </string-array>
 
     <string-array name="real_preview_format_entries">
@@ -67,6 +67,18 @@
     <string-array name="real_preview_format_entryValues">
         <item>35</item>
         <item>54</item>
+    </string-array>
+
+    <string-array name="raw_format_entries">
+        <item>RAW_SENSOR</item>
+        <item>RAW10</item>
+        <item>RAW12</item>
+    </string-array>
+
+    <string-array name="raw_format_entryValues">
+        <item>32</item>
+        <item>37</item>
+        <item>38</item>
     </string-array>
 
     <string-array name="location_geotag_entryValues">

@@ -155,10 +155,6 @@ public class Specific {
                     specificSetting.YCBCR_P010_TargetFormat = caseS[1];
                     break;
                 }
-                case "rawFormat": {
-                    specificSetting.rawFormat = caseS[1];
-                    break;
-                }
                 case "newRecSurfaceType": {
                     specificSetting.newRecSurfaceType = caseS[1];
                     break;
