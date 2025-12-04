@@ -29,6 +29,14 @@
             android:defaultValue="@string/pref_edge_processing_default_value" />
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_thumbnail_key"
+            android:defaultValue="@bool/pref_thumbnail_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/thumbnail"
+            android:summary=""
+            android:icon="@drawable/photo_size_select_small_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_zsl_key"
             android:title="@string/zsl"
