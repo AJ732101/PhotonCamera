@@ -29,7 +29,7 @@ public class AvifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToAvif(Image image, File outputFile, int orientation) throws IOException {
+    public void encodeYuvToAvif(Image image, File outputFile, int orientation, int quality) throws IOException {
         Log.d(TAG, "Starting AVIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -69,7 +69,7 @@ public class AvifEncoder {
             // 3. Encode the Bitmap to AVIF using the correct method signature.
             //    Parameters based on the screenshot. The last 3 are enums.
             //    Let's use reasonable defaults.
-            byte[] avifByteArray = coder.encodeAvif(rotatedBitmap, 75, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+            byte[] avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
 
             // 4. Verify that the encoder returned data.
             if (avifByteArray == null || avifByteArray.length == 0) {

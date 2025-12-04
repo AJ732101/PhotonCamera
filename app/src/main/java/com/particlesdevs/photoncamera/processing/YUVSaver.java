@@ -24,7 +24,7 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image, int orientation, int targetFormat) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
@@ -40,7 +40,7 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 AvifEncoder avifEncoder = new AvifEncoder();
                 try {
-                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation);
+                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
@@ -56,7 +56,7 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
-                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation);
+                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));

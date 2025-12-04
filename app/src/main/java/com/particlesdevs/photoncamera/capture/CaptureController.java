@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -315,7 +316,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if (isSingleShotJpegOrHeic()) {
-                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat);
+                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality);
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;

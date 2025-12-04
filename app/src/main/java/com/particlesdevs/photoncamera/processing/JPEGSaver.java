@@ -18,7 +18,7 @@ public class JPEGSaver extends DefaultSaver {
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         try {
             IMAGE_BUFFER.add(getFrame(image));

@@ -27,7 +27,7 @@ public class HeifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToHeif(Image image, File outputFile, int orientation) throws IOException {
+    public void encodeYuvToHeif(Image image, File outputFile, int orientation, int quality) throws IOException {
         Log.d(TAG, "Starting HEIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -67,7 +67,7 @@ public class HeifEncoder {
             // 3. Encode the Bitmap to HEIF using the correct method signature.
             //    Parameters based on the screenshot. The last 3 are enums.
             //    Let's use reasonable defaults.
-            byte[] heifByteArray = coder.encodeHeic(rotatedBitmap, PreciseMode.LOSSY, new HeifQualityArg.Quality(75));
+            byte[] heifByteArray = coder.encodeHeic(rotatedBitmap, PreciseMode.LOSSY, new HeifQualityArg.Quality(quality));
 
             // 4. Verify that the encoder returned data.
             if (heifByteArray == null || heifByteArray.length == 0) {
