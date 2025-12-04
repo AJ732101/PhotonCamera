@@ -692,17 +692,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setPreviewFormat() {
-        switch (PhotonCamera.getSpecific().specificSetting.previewFormat) {
-            case "YCBCR_P010":
-                mPreviewTargetFormat = ImageFormat.YCBCR_P010;
-                break;
-            case "JPEG":
-                mPreviewTargetFormat = ImageFormat.JPEG;
-                break;
-            default:
-                mPreviewTargetFormat = ImageFormat.YUV_420_888;
-                break;
-        }
+        mPreviewTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
 
         if (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) {
             mPreviewTargetFormat = ImageFormat.YCBCR_P010;

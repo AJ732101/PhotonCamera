@@ -67,7 +67,8 @@
     <string name="align_method">Align Method</string>
     <string name="color_method">Color Method</string>
     <string name="focus_peaking">Focus Peaking</string>
-    <string name="preview_format">Preview Format</string>
+    <string name="preview_format">Target Image Format</string>
+    <string name="real_preview_format">Preview Format</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="about">About</string>
@@ -141,7 +142,7 @@
     <string name="thumbnail" translatable="true">Thumbnail</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
-    <string name="session_on_configure_failed">Session configuration failed try changing preview format</string>
+    <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>
 
     <!-- Extended AUdio and Video settings strings -->
     <string name="turn_on_basic_osd">Show Basic OSD</string>

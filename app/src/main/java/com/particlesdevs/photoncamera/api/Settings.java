@@ -42,6 +42,7 @@ public class Settings {
     public int colorMethod;
     public int focusPeak;
     public int previewFormat;
+    public int realPreviewFormat;
     public String mCameraID;
     public float[] toneMap;
     public float[] gamma;
@@ -121,6 +122,7 @@ public class Settings {
         colorMethod = PreferenceKeys.getColorMethodValue();
         focusPeak = PreferenceKeys.getFocusPeakValue();
         previewFormat = PreferenceKeys.getPreviewFormatValue();
+        realPreviewFormat = PreferenceKeys.getRealPreviewFormatValue();
         selectedMode = CameraMode.valueOf(PreferenceKeys.getCameraModeOrdinal());
         toneMap = parseToneMapArray();
         gamma = parseGammaArray();

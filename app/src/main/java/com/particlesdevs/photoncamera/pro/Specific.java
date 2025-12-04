@@ -171,10 +171,6 @@ public class Specific {
                     specificSetting.codeAuroraHdrMode = caseS[1];
                     break;
                 }
-                case "previewFormat": {
-                    specificSetting.previewFormat = caseS[1];
-                    break;
-                }
             }
         }
 

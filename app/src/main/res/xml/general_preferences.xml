@@ -24,7 +24,7 @@
             android:defaultValue="@string/pref_single_frame_quality_default"
             app:maxValue="100"
             app:minValue="5"
-            android:icon="@drawable/ic_burst_mode_black_24dp"/>
+            android:icon="@drawable/humidity_percentage_24px"/>
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
@@ -35,6 +35,16 @@
             android:entries="@array/preview_format_entries"
             android:entryValues="@array/preview_format_entryValues"
             android:defaultValue="@string/pref_preview_format_default"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_real_preview_format_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/real_preview_format"
+            android:icon="@drawable/preview_24px"
+            android:entries="@array/real_preview_format_entries"
+            android:entryValues="@array/real_preview_format_entryValues"
+            android:defaultValue="@string/pref_real_preview_format_default"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_thumbnail_key"

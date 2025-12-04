@@ -35,7 +35,6 @@ public class SpecificSetting {
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
-    public String previewFormat = "YUV_420_888"; // YUV_420_888, YCBCR_P010
     public SpecificSetting(){
     }
 }

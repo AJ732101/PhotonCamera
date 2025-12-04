@@ -45,6 +45,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
+        COMMON_KEYS.add(Key.KEY_REAL_PREVIEW_FORMAT.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
@@ -109,6 +110,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BRACKETING_MODE, 0); // Default to disable bracketing
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, resources.getString(R.string.pref_preview_format_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REAL_PREVIEW_FORMAT, resources.getString(R.string.pref_real_preview_format_default));
         settingsManager.setDefaults(Key.CAMERA_ID, resources.getString(R.string.camera_id_default), new String[]{"0", "1"});
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
@@ -361,6 +363,10 @@ public class PreferenceKeys {
 
     public static int getPreviewFormatValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT);
+    }
+
+    public static int getRealPreviewFormatValue() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_REAL_PREVIEW_FORMAT);
     }
 
     public static int getCFAValue() {
@@ -658,6 +664,7 @@ public class PreferenceKeys {
         KEY_COLOR_METHOD(R.string.pref_color_method_key),
         KEY_FOCUS_PEAK(R.string.pref_peak_method_key),
         KEY_PREVIEW_FORMAT(R.string.pref_preview_format_key),
+        KEY_REAL_PREVIEW_FORMAT(R.string.pref_real_preview_format_key),
         KEY_TELEGRAM(R.string.pref_telegram_channel_key),
         KEY_CONTRIBUTORS(R.string.pref_contributors_key),
         KEY_THEME(R.string.pref_theme_key),

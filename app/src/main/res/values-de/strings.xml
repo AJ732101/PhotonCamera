@@ -60,6 +60,7 @@
     <string name="cfa">Color Filter Array / Bayer Farbfilter</string>
     <string name="align_method">Ausrichtungs Methode</string>
     <string name="preview_format">Vorschau/Sucher Format</string>
+    <string name="real_preview_format">Vorschau Format</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
     <string name="about">Über</string>
@@ -118,6 +119,7 @@
     <string name="long_press_to_deselect">Lang gedrückt halten um Auswahl aufzuheben</string>
     <string name="golden_ratio">Goldener Schnitt</string>
     <string name="diag_triangle">Diagon. Dreiecke</string>
+    <string name="thumbnail">Eingebettete Vorschau</string>
     <string name="gallery_folders">Galerie Verzeichnisse</string>
     <string name="options">Optionen</string>
     <string name="session_on_configure_failed">Session Konfiguration fehlerhaft, versuchen Sie ein anderes Vorschauformat</string>
@@ -136,8 +138,10 @@
     <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
     <string name="eis_video">EIS in Vorschau</string>
+    <string name="turn_on_10bit">Minimale Auslöseverzögerung</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="jpg">JPEG</string>
+    <string name="video_new_rec">Neue Aufnahmemethode</string>
     <string name="noise_processing">Rauschminderung</string>
     <string name="edge_processing">Kantenverarbeitung</string>
     <string name="zoom">Zoom</string>
@@ -146,4 +150,23 @@
     <string name="audio_channels">Kanäle</string>
     <string name="sps">SPS</string>
     <string name="noise_toggle_text">Rauschminderung</string>
+    <string name="zsl">Minimale Auslöseverzögerung</string>
+    <string name="scene_and_effect_mode">Szenen und Effekt Modi</string>
+    <string name="new_settings_global">Zusätzliche Einstellungen global anwenden</string>
+    <string name="exposure_bracketing">Belichtungsreihe (Bracketing)</string>
+    <string name="bracketing_off">Aus (1x)</string>
+    <string name="bracketing_normal">Mittel (1x, 4x)</string>
+    <string name="bracketing_high">Hoch (1x, 8x)</string>
+    <string name="general_settings_screen_title">Allgemeine Einstellungen</string>
+    <string name="stacking_settings_screen_title">Stacking Einstellungen</string>
+    <string name="video_settings_screen_title">Video Einstellungen</string>
+    <string name="audio_settings_screen_title">Audio Einstellungen</string>
+    <string name="soc_settings_screen_title">SoC spezifische Einstellungen</string>
+    <string name="single_shot_settings_screen_title">Einzelbild und Video Einstellungen</string>
+    <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Schärfe</string>
+    <string name="soc_qualcomm_saturation">Qualcomm/Snapdragon Sättigung</string>
+    <string name="soc_qualcomm_eis_mode">Qualcomm/Snapdragon EIS Modus</string>
+    <string name="soc_qualcomm_ai_mode">Qualcomm/Snapdragon KI Modus</string>
+    <string name="soc_qualcomm_isz">Qualcomm/Snapdragon ISZ</string>
+    <string name="soc_qualcomm_mfnr">Qualcomm/Snapdragon MFNR</string>
 </resources>
