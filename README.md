@@ -7,6 +7,12 @@ Android Camera with focus on video recording
 
 [![Telegram - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonCameraEN)
 
+## Screenshots
+
+<p align="center">
+<img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/00.jpg?raw=true" alt="PhotonVidCam">
+</p>
+
 ## Libraries used by PhotonVidCam
 
 * [Glide](https://github.com/bumptech/glide)
