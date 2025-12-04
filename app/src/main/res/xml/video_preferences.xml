@@ -47,26 +47,6 @@
             android:entryValues="@array/video_framerate_entryValues"
             android:defaultValue="@string/pref_video_framerate_default_value" />
 
-        <ListPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_noise_processing_key"
-            android:title="@string/noise_processing"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/transition_dissolve_24px"
-            android:entries="@array/noise_processing_entries"
-            android:entryValues="@array/noise_processing_entryValues"
-            android:defaultValue="@string/pref_noise_processing_default_value" />
-
-        <ListPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_edge_processing_key"
-            android:title="@string/edge_processing"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/e_mobiledata_badge_24px"
-            android:entries="@array/edge_processing_entries"
-            android:entryValues="@array/edge_processing_entryValues"
-            android:defaultValue="@string/pref_edge_processing_default_value" />
-
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_eis_video_key"
