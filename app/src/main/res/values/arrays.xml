@@ -153,6 +153,7 @@
         <item>Fast</item>
         <item>Quality</item>
         <item>Minimal</item>
+        <item>ZSL</item>
     </string-array>
 
     <string-array name="noise_processing_entryValues">
@@ -160,18 +161,21 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
     </string-array>
 
     <string-array name="edge_processing_entries">
         <item>Off</item>
         <item>Fast</item>
         <item>Quality</item>
+        <item>ZSL</item>
     </string-array>
 
     <string-array name="edge_processing_entryValues">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
 
     <string-array name="audio_processing_entries">
