@@ -94,6 +94,13 @@ public class SettingsActivity extends BaseActivity implements
         }
     }
 
+    public static class SensorAndMoreSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.sensor_and_more_preferences, rootKey);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // --- COLD START FIX ---
@@ -233,6 +240,17 @@ public class SettingsActivity extends BaseActivity implements
                 singleShotSettingsButton.setOnPreferenceClickListener(preference -> {
                     getParentFragmentManager().beginTransaction()
                             .replace(R.id.settings_container, new SingleShotSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference sensorAndMoreSettingsButton = findPreference("sensor_and_more_settings_screen");
+            if (sensorAndMoreSettingsButton != null) {
+                sensorAndMoreSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new SensorAndMoreSettingsFragment())
                             .addToBackStack(null)
                             .commit();
                     return true;

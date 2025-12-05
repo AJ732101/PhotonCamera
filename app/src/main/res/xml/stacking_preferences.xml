@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/stacking_settings_screen_title"
-    android:key="stacking_settings_category">
+    android:key="stacking_settings_category"
+    android:paddingBottom="56dp">>
 
     <PreferenceCategory app:key="stacking_settings_category" app:title="@string/stacking_settings_screen_title">
 
@@ -170,6 +171,10 @@
             android:entries="@array/focuspeakset_entries"
             android:entryValues="@array/focuspeakset_entryValues"
             android:defaultValue="@string/pref_focus_peak_default"/>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
 
     </PreferenceCategory>
 

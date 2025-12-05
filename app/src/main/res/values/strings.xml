@@ -145,7 +145,7 @@
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>
 
-    <!-- Extended AUdio and Video settings strings -->
+    <!-- Extended Audio and Video settings strings -->
     <string name="turn_on_basic_osd">Show Basic OSD</string>
     <string name="turn_on_ois">OIS</string>
     <string name="turn_on_dng_compression">DNG Compression</string>
@@ -186,6 +186,9 @@
     <string name="audio_settings_screen_title">Audio Settings</string>
     <string name="soc_settings_screen_title">Soc Speciic Settings</string>
     <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
+    <string name="sensor_and_more_settings_screen_title">Sensor Settings (and more)</string>
+    <string name="sensor_settings_screen_title">Sensor Settings</string>
+    <string name="other_settings_screen_title">Other Settings</string>
 
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>
@@ -194,4 +197,11 @@
     <string name="soc_qualcomm_ai_mode">Qualcomm/Snapdragon AI Mode</string>
     <string name="soc_qualcomm_isz">Qualcomm/Snapdragon ISZ</string>
     <string name="soc_qualcomm_mfnr">Qualcomm/Snapdragon MFNR</string>
+
+    <!-- Sensor and more settings strings -->
+    <string name="hot_pixel_mode">Hot Pixel Mode</string>
+    <string name="color_correction_aberration_mode">Color Correction Aberration Mode</string>
+    <string name="distortion_correction_mode">Distortion Correction Mode</string>
+    <string name="shading_mode">Shading Mode</string>
+    <string name="alternate_preview_template">Alternate Preview Template</string>
 </resources>

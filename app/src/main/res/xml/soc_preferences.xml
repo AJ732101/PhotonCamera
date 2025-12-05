@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/soc_settings_screen_title"
-    android:key="soc_settings_category">
+    android:key="soc_settings_category"
+    android:paddingBottom="56dp">>
 
     <PreferenceCategory app:key="soc_settings_category" app:title="@string/soc_settings_screen_title">
 
@@ -59,6 +60,10 @@
             android:summary="Multiframe Noise Reduction"
             android:icon="@drawable/blur_on_24px"
             android:defaultValue="@bool/pref_eis_video_def_value"/>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
 
     </PreferenceCategory>
 

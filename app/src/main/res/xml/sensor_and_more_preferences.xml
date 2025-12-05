@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/sensor_and_more_settings_screen_title"
+    android:key="sensor_and_more_settings_category"
+    android:paddingBottom="56dp">>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        app:key="sensor_and_more_settings_category"
+        app:title="@string/sensor_settings_screen_title">
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_hot_pixel_mode_key"
+            android:title="@string/hot_pixel_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/local_fire_department_24px"
+            android:entries="@array/hot_pixel_mode_entries"
+            android:entryValues="@array/hot_pixel_mode_entryValues"
+            android:defaultValue="@string/pref_hot_pixel_mode_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_color_correction_aberration_mode_key"
+            android:title="@string/color_correction_aberration_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/invert_colors_24px"
+            android:entries="@array/color_correction_aberration_mode_entries"
+            android:entryValues="@array/color_correction_aberration_mode_entryValues"
+            android:defaultValue="@string/pref_color_correction_aberration_mode_key" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_distortion_correction_mode_key"
+            android:title="@string/distortion_correction_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/vrpano_24px"
+            android:entries="@array/distortion_correction_mode_entries"
+            android:entryValues="@array/distortion_correction_mode_entryValues"
+            android:defaultValue="@string/pref_distortion_correction_mode_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_shading_mode_key"
+            android:title="@string/shading_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/blur_linear_24px"
+            android:entries="@array/shading_mode_entries"
+            android:entryValues="@array/shading_mode_entryValues"
+            android:defaultValue="@string/pref_shading_mode_default_value" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        app:key="sensor_and_more_settings_category"
+        app:title="@string/other_settings_screen_title">
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_alternate_preview_template_key"
+            android:title="@string/alternate_preview_template"
+            android:summary=""
+            android:icon="@drawable/preview_24px"
+            android:defaultValue="@bool/pref_alternate_preview_template_default_value"/>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

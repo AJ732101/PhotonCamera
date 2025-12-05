@@ -119,4 +119,11 @@
     <string name="pref_soc_qualcomm_ai_mode_key" translatable="false">pref_soc_qualcomm_ai_mode_key</string>
     <string name="pref_soc_qualcomm_isz_key" translatable="false">pref_soc_qualcomm_isz_key</string>
     <string name="pref_soc_qualcomm_mfnr_key" translatable="false">pref_soc_qualcomm_mfnr_key</string>
+
+    <!-- Sensor and More/Other settings strings -->
+    <string name="pref_hot_pixel_mode_key" translatable="false">pref_hot_pixel_mode_key</string>
+    <string name="pref_color_correction_aberration_mode_key" translatable="false">pref_color_correction_aberration_mode_key</string>
+    <string name="pref_distortion_correction_mode_key" translatable="false">pref_distortion_correction_mode_key</string>
+    <string name="pref_shading_mode_key" translatable="false">pref_shading_mode_key</string>
+    <string name="pref_alternate_preview_template_key" translatable="false">pref_alternate_preview_template_key</string>
 </resources>

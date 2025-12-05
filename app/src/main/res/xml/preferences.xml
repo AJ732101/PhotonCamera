@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orderingFromXml="true"
-        android:title="@string/settings"
-        android:key="prefscreen">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/settings"
+    android:key="prefscreen"
+    android:paddingBottom="56dp">>
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
@@ -70,6 +71,17 @@
             app:title="Single Shot &amp; Video Specific Settings"
             app:summary="Configure Single Shot and Video Parameter"
             android:icon="@drawable/discover_tune_24px" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        android:key="pref_category_sensor_and_more_key"
+        android:title="@string/sensor_and_more_settings_screen_title">
+        <Preference
+            app:key="sensor_and_more_settings_screen"
+            app:title="Sensor Settings &amp; more"
+            app:summary="Configure Sensor related Settings (and more)"
+            android:icon="@drawable/vrpano_24px" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -216,6 +228,10 @@
                 android:persistent="false"
                 android:key="@string/all_devices_names"/>
         </PreferenceScreen>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
 
     </PreferenceCategory>
 

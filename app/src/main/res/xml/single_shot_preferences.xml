@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/single_shot_settings_screen_title"
-    android:key="single_shot_settings_category">
+    android:key="single_shot_settings_category"
+    android:paddingBottom="56dp">>
 
     <PreferenceCategory app:key="single_shot_settings_category" app:title="@string/single_shot_settings_screen_title">
 
@@ -67,6 +68,10 @@
             android:summary="Like ColorCorrectionAberrationMode, DistortionCorrectionMode, ShadingMode, HotPixelMode"
             android:icon="@drawable/control_point_duplicate_24px"
             android:defaultValue="@bool/pref_new_settings_global_def_value"/>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
 
     </PreferenceCategory>
 

@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/video_settings_screen_title"
-    android:key="video_settings_category">
+    android:key="video_settings_category"
+    android:paddingBottom="56dp">>
 
     <PreferenceCategory app:key="video_settings_category" app:title="@string/video_settings_screen_title">
 
@@ -78,6 +79,10 @@
             android:summary=""
             android:icon="@drawable/video_camera_back_24px"
             android:defaultValue="@bool/pref_new_rec_video_def_value"/>
+
+        <Preference
+            android:layout_height="56dp"
+            android:selectable="false" />
 
     </PreferenceCategory>
 

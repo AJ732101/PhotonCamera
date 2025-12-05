@@ -81,10 +81,16 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_AI_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
-        // QualityDoesMatter - Single Shot & Video RElated
+        // QualityDoesMatter - Single Shot & Video Related
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
+        // QualityDoesMatter - Sensor Related (and more)
+        COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_DISTORTION_CORRECTION_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_SHADING_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_ALTERNATE_PREVIEW_TEMPLATE.mValue);
     }
 
     private final SettingsManager settingsManager;
@@ -154,7 +160,12 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
-
+        // QualityDoesMatter - Sensor Related and More
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE, resources.getString(R.string.pref_hot_pixel_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_CORRECTION_ABERRATION_MODE, resources.getString(R.string.pref_color_correction_aberration_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISTORTION_CORRECTION_MODE, resources.getString(R.string.pref_distortion_correction_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHADING_MODE, resources.getString(R.string.pref_shading_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE, resources.getBoolean(R.bool.pref_alternate_preview_template_default_value));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -641,6 +652,26 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL);
     }
 
+    public static int getHotPixelMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE);
+    }
+
+    public static int getColorCorrectionAberrationMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_COLOR_CORRECTION_ABERRATION_MODE);
+    }
+
+    public static int getDistortionCorrectionMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_DISTORTION_CORRECTION_MODE);
+    }
+
+    public static int getShadingMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SHADING_MODE);
+    }
+
+    public static boolean useAlternatePreviewTemplate() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -735,6 +766,14 @@ public class PreferenceKeys {
         KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
 
+        /**
+         * QualityDoesMatter - Sensor Related (and more)
+         */
+        KEY_HOT_PIXEL_MODE(R.string.pref_hot_pixel_mode_key),
+        KEY_COLOR_CORRECTION_ABERRATION_MODE(R.string.pref_color_correction_aberration_mode_key),
+        KEY_DISTORTION_CORRECTION_MODE(R.string.pref_distortion_correction_mode_key),
+        KEY_SHADING_MODE(R.string.pref_shading_mode_key),
+        KEY_ALTERNATE_PREVIEW_TEMPLATE(R.string.pref_alternate_preview_template_key),
 
         /**
          * Enhanced settings keys

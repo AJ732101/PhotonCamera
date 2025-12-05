@@ -373,4 +373,62 @@
         <item>3</item>
         <item>10</item>
     </integer-array>
+
+    <string-array name="hot_pixel_mode_entries">
+        <item>Off</item>
+        <item>Fast</item>
+        <item>Quality</item>
+        <item>Device Default</item>
+    </string-array>
+
+    <string-array name="hot_pixel_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>99</item>
+    </string-array>
+
+    <string-array name="color_correction_aberration_mode_entries">
+        <item>Off</item>
+        <item>Fast</item>
+        <item>Quality</item>
+        <item>Device Default</item>
+    </string-array>
+
+    <string-array name="color_correction_aberration_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>99</item>
+    </string-array>
+
+    <string-array name="distortion_correction_mode_entries">
+        <item>Off</item>
+        <item>Fast</item>
+        <item>Quality</item>
+        <item>Device Default</item>
+    </string-array>
+
+    <string-array name="distortion_correction_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>99</item>
+    </string-array>
+
+    <string-array name="shading_mode_entries">
+        <item>Off</item>
+        <item>Fast</item>
+        <item>Quality</item>
+        <item>Device Default</item>
+    </string-array>
+
+    <string-array name="shading_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>99</item>
+    </string-array>
+
+
 </resources>

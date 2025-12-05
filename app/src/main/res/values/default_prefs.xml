@@ -118,4 +118,11 @@
     <string name="pref_soc_qualcomm_ai_mode_default" translatable="false">0</string>
     <bool name="pref_soc_qualcomm_isz_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_mfnr_default" translatable="false">false</bool>
+
+    <!-- Sensor and more settings strings -->
+    <string name="pref_hot_pixel_mode_default_value" translatable="false">99</string>
+    <string name="pref_color_correction_aberration_mode_default_value" translatable="false">99</string>
+    <string name="pref_distortion_correction_mode_default_value" translatable="false">99</string>
+    <string name="pref_shading_mode_default_value" translatable="false">99</string>
+    <bool name="pref_alternate_preview_template_default_value">false</bool>
 </resources>

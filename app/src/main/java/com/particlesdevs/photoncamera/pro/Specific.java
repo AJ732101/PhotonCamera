@@ -63,22 +63,6 @@ public class Specific {
         for (String str : noGuiYetStr) {
             String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
             switch (caseS[0]) {
-                case "hotPixelMode": {
-                    specificSetting.hotPixelMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "colorCorrectionAberrationMode": {
-                    specificSetting.colorCorrectionAberrationMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "distortionCorrectionMode": {
-                    specificSetting.distortionCorrectionMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "shadingMode": {
-                    specificSetting.shadingMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "exposureCompensation": {
                     specificSetting.exposureCompensation = Integer.parseInt(caseS[1]);
                     break;
@@ -93,10 +77,6 @@ public class Specific {
                 }
                 case "useExternalViewer": {
                     specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "useAlternatePreviewTemplate": {
-                    specificSetting.useAlternatePreviewTemplate = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "useCodeAuroraMultiFrameNoiseReduction": {

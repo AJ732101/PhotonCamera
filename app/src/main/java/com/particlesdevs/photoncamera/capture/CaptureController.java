@@ -1575,14 +1575,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         captureBuilder.set(CaptureRequest.STATISTICS_HOT_PIXEL_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsHotPixelMapMode);
         if ((PhotonCamera.getSpecific().specificSetting.exposureCompensation != 99) && !isPreview)
             captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSpecific().specificSetting.exposureCompensation);
-        if (PhotonCamera.getSpecific().specificSetting.hotPixelMode != 99)
-            captureBuilder.set(CaptureRequest.HOT_PIXEL_MODE, PhotonCamera.getSpecific().specificSetting.hotPixelMode);
-        if (PhotonCamera.getSpecific().specificSetting.colorCorrectionAberrationMode != 99)
-            captureBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, PhotonCamera.getSpecific().specificSetting.colorCorrectionAberrationMode);
-        if (PhotonCamera.getSpecific().specificSetting.distortionCorrectionMode != 99)
-            captureBuilder.set(CaptureRequest.DISTORTION_CORRECTION_MODE, PhotonCamera.getSpecific().specificSetting.distortionCorrectionMode);
-        if (PhotonCamera.getSpecific().specificSetting.shadingMode != 99)
-            captureBuilder.set(CaptureRequest.SHADING_MODE, PhotonCamera.getSpecific().specificSetting.shadingMode);
+        if (PhotonCamera.getSettings().hotPixelMode != 99)
+            captureBuilder.set(CaptureRequest.HOT_PIXEL_MODE, PhotonCamera.getSettings().hotPixelMode);
+        if (PhotonCamera.getSettings().colorCorrectionAberrationMode != 99)
+            captureBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, PhotonCamera.getSettings().colorCorrectionAberrationMode);
+        if (PhotonCamera.getSettings().distortionCorrectionMode != 99)
+            captureBuilder.set(CaptureRequest.DISTORTION_CORRECTION_MODE, PhotonCamera.getSettings().distortionCorrectionMode);
+        if (PhotonCamera.getSettings().shadingMode != 99)
+            captureBuilder.set(CaptureRequest.SHADING_MODE, PhotonCamera.getSettings().shadingMode);
         if (PhotonCamera.getSpecific().specificSetting.statisticsLensShadingMapMode != 99)
             captureBuilder.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsLensShadingMapMode);
         if (PhotonCamera.getSpecific().specificSetting.statisticsOisDataMode != 99)
@@ -2051,7 +2051,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (mIsRecordingVideo) {
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
         } else {
-            if (PhotonCamera.getSpecific().specificSetting.useAlternatePreviewTemplate) {
+            if (PhotonCamera.getSettings().useAlternatePreviewTemplate) {
                 mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             }
             else {

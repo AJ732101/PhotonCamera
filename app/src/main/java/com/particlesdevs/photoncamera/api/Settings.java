@@ -88,6 +88,12 @@ public class Settings {
     public boolean useZsl = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useNewSettingsGloabal = false;
+    // QualityDoesMatter - Single Shot & Video Related
+    public int hotPixelMode = 99;
+    public int colorCorrectionAberrationMode = 99;
+    public int distortionCorrectionMode = 99;
+    public int shadingMode = 99;
+    public boolean useAlternatePreviewTemplate = false;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -138,9 +144,6 @@ public class Settings {
         apertureToUse = PreferenceKeys.getAperture();
         useExtendIso = PreferenceKeys.useExtendIsoOn();
         useExtendExposure = PreferenceKeys.useExtendExposureOn();
-        noiseProcessing = PreferenceKeys.getNoiseProcessing();
-        edgeProcessing = PreferenceKeys.getEdgeProcessing();
-        zoom2X = PreferenceKeys.isZoomOn();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();
@@ -168,7 +171,16 @@ public class Settings {
         // QualityDoesMatter - Single Shot & Video Related
         useZsl = PreferenceKeys.isZslOn();
         useSceneAndEffectMode = PreferenceKeys.isSceneAndEffectModeOn();
-        useNewSettingsGloabal = PreferenceKeys.isSceneAndEffectModeOn();
+        useNewSettingsGloabal = PreferenceKeys.isNewSettingsGlobalOn();
+        noiseProcessing = PreferenceKeys.getNoiseProcessing();
+        edgeProcessing = PreferenceKeys.getEdgeProcessing();
+        zoom2X = PreferenceKeys.isZoomOn();
+        // QualityDoesMatter - Single Shot & Video Related
+        hotPixelMode = PreferenceKeys.getHotPixelMode();
+        colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
+        distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
+        shadingMode = PreferenceKeys.getShadingMode();
+        useAlternatePreviewTemplate = PreferenceKeys.useAlternatePreviewTemplate();
     }
 
     public void saveID() {
