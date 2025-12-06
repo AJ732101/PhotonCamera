@@ -430,5 +430,32 @@
         <item>99</item>
     </string-array>
 
+    <string-array name="ten_bit_surface_target_entries">
+        <item>HEVC (HEVC Codec)</item>
+        <item>HEIC (HEIC Codec)</item>
+        <item>AVIF (AV1 Codec)</item>
+        <item>APV (APV Codec)</item>
+    </string-array>
+
+    <string-array name="ten_bit_surface_target_entryValues">
+        <item>HEVC</item>
+        <item>HEIC</item>
+        <item>AVIF</item>
+        <item>APV</item>
+    </string-array>
+
+    <string-array name="digital_zoom_factor_entries">
+        <item>1.5</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="digital_zoom_factor_entryValues">
+        <item>1.5f</item>
+        <item>2.0f</item>
+        <item>3.0f</item>
+        <item>4.0f</item>
+    </string-array>
 
 </resources>

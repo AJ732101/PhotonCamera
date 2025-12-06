@@ -167,7 +167,8 @@
     <string name="noise_processing">Noise Processing</string>
     <string name="edge_processing">Edge Processing</string>
     <string name="zoom">Zoom</string>
-    <string name="audio_processing">Processing</string>
+    <string name="digital_zoom_factor">Digital Zoom Factor</string>
+    <string name="audio_processing">Source</string>
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Channels</string>
     <string name="sps">SPS</string>
@@ -204,4 +205,5 @@
     <string name="distortion_correction_mode">Distortion Correction Mode</string>
     <string name="shading_mode">Shading Mode</string>
     <string name="alternate_preview_template">Alternate Preview Template</string>
+    <string name="ten_bit_surface_target">YCBCR_P010 Target Format</string>
 </resources>

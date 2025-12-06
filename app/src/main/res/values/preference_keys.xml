@@ -33,6 +33,7 @@
     <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>
     <string name="pref_edge_processing_key" translatable="false">pref_edge_processing_key</string>
     <string name="pref_2x_zoom_key" translatable="false">pref_2x_zoom_key</string>
+    <string name="pref_digital_zoom_factor_key" translatable="false">pref_digital_zoom_factor_key</string>
     <string name="pref_audio_processing_key" translatable="false">pref_audio_processing_key</string>
     <string name="pref_audio_codec_key" translatable="false">pref_audio_codec_key</string>
     <string name="pref_audio_channels_key" translatable="false">pref_audio_channels_key</string>
@@ -126,4 +127,5 @@
     <string name="pref_distortion_correction_mode_key" translatable="false">pref_distortion_correction_mode_key</string>
     <string name="pref_shading_mode_key" translatable="false">pref_shading_mode_key</string>
     <string name="pref_alternate_preview_template_key" translatable="false">pref_alternate_preview_template_key</string>
+    <string name="pref_ten_bit_surface_target_key" translatable="false">pref_ten_bit_surface_target_key</string>
 </resources>

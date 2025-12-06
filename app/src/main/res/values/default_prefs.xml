@@ -104,6 +104,7 @@
     <bool name="pref_extend_exposure_default">false</bool>
     <string name="pref_noise_processing_default_value" translatable="false">0</string>
     <string name="pref_edge_processing_default_value" translatable="false">0</string>
+    <string name="pref_digital_zoom_factor_default_value" translatable="false">2.0f</string>
     <string name="pref_audio_codec_default_value" translatable="false">3</string>
     <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
@@ -125,4 +126,5 @@
     <string name="pref_distortion_correction_mode_default_value" translatable="false">99</string>
     <string name="pref_shading_mode_default_value" translatable="false">99</string>
     <bool name="pref_alternate_preview_template_default_value">false</bool>
+    <string name="pref_ten_bit_surface_target_default_value" translatable="false">HEVC</string>
 </resources>

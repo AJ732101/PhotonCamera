@@ -69,6 +69,16 @@
             android:icon="@drawable/control_point_duplicate_24px"
             android:defaultValue="@bool/pref_new_settings_global_def_value"/>
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_digital_zoom_factor_key"
+            android:title="@string/digital_zoom_factor"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/zoom_in_24px"
+            android:entries="@array/digital_zoom_factor_entries"
+            android:entryValues="@array/digital_zoom_factor_entryValues"
+            android:defaultValue="@string/pref_digital_zoom_factor_default_value" />
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

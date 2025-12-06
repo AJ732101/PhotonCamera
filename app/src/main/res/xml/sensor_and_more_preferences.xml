@@ -67,6 +67,16 @@
             android:icon="@drawable/preview_24px"
             android:defaultValue="@bool/pref_alternate_preview_template_default_value"/>
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_ten_bit_surface_target_key"
+            android:title="@string/ten_bit_surface_target"
+            android:summary="Used video codec if Still Image Format is Video Codec 10 Bit"
+            android:icon="@drawable/av1_24px"
+            android:entries="@array/ten_bit_surface_target_entries"
+            android:entryValues="@array/ten_bit_surface_target_entryValues"
+            android:defaultValue="@string/pref_ten_bit_surface_target_default_value" />
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

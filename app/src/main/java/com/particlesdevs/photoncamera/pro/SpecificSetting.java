@@ -10,14 +10,12 @@ public class SpecificSetting {
     // QualityDoesMatter
     public int exposureCompensation = 99;
     public boolean statisticsHotPixelMapMode = true;
-    public boolean xiaomi14Ultra2xHack = false;
     public boolean useExternalViewer = false;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
-    public float singleShotZoomFactor = 99;
     public int colorTemperature = 99;
     public float colorTint = 99.0f;
     public int newRecKeyFrameIntervall = 10;
@@ -25,7 +23,6 @@ public class SpecificSetting {
     public String contrastCurve = "off";
     public String newRecColorRange = "full";
     public String recPrefix = "";
-    public String YCBCR_P010_TargetFormat = "HEVC";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO

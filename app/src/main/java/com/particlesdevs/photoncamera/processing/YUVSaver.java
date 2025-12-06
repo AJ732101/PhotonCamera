@@ -27,7 +27,7 @@ public class YUVSaver extends DefaultSaver{
     public void addImage(Image image, int orientation, int targetFormat, int quality) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
-            String usedCodec = PhotonCamera.getSpecific().specificSetting.YCBCR_P010_TargetFormat;
+            String usedCodec = PhotonCamera.getSettings().tenBitSurfaceTarget;
             int usedTargetFormat = PhotonCamera.getSettings().previewFormat;
             Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec");
 

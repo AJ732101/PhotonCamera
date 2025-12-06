@@ -94,6 +94,8 @@ public class Settings {
     public int distortionCorrectionMode = 99;
     public int shadingMode = 99;
     public boolean useAlternatePreviewTemplate = false;
+    public String tenBitSurfaceTarget = "HEVC";
+    public float digitalZoomFactor = 2;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -175,12 +177,14 @@ public class Settings {
         noiseProcessing = PreferenceKeys.getNoiseProcessing();
         edgeProcessing = PreferenceKeys.getEdgeProcessing();
         zoom2X = PreferenceKeys.isZoomOn();
+        digitalZoomFactor = PreferenceKeys.getDigitalZoomFactorValue();
         // QualityDoesMatter - Single Shot & Video Related
         hotPixelMode = PreferenceKeys.getHotPixelMode();
         colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
         distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
         shadingMode = PreferenceKeys.getShadingMode();
         useAlternatePreviewTemplate = PreferenceKeys.useAlternatePreviewTemplate();
+        tenBitSurfaceTarget = PreferenceKeys.getTenBitSurfaceTarget();
     }
 
     public void saveID() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <import type="com.particlesdevs.photoncamera.settings.PreferenceKeys"/>
@@ -45,6 +45,7 @@
         tools:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/top_bar_content_wrapper"
             bindViewGroupChildrenRotate="@{uimodel}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -54,12 +55,11 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
             tools:visibility="visible">
 
+            <!-- Unsichtbare Elemente, die keine Constraints in der Kette benötigen -->
             <ToggleButton
                 android:id="@+id/hdrx_toggle_button"
                 android:layout_width="48dp"
@@ -70,13 +70,40 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/eis_toggle_button"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="gone" />
 
+            <ToggleButton
+                android:id="@+id/quad_res_toggle_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/quad_button"
+                android:checked="@{PreferenceKeys.isQuadBayerOn()}"
+                android:onClick="@{top_bar_click_listener}"
+                android:textOff=""
+                android:textOn=""
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="gone" />
+
+            <ToggleButton
+                android:id="@+id/fps_toggle_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/fps_button"
+                android:checked="@{PreferenceKeys.isFpsPreviewOn()}"
+                android:onClick="@{top_bar_click_listener}"
+                android:textOff=""
+                android:textOn=""
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="gone" />
+
+
+            <!-- Kette der sichtbaren Elemente -->
             <ToggleButton
                 android:id="@+id/eis_toggle_button"
                 android:layout_width="48dp"
@@ -87,10 +114,11 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/countdown_timer_button"
-                app:layout_constraintStart_toEndOf="@+id/hdrx_toggle_button"
+                app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/countdown_timer_button"
                 tools:visibility="visible" />
 
             <com.particlesdevs.photoncamera.ui.camera.views.TimerButton
@@ -103,42 +131,10 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{timer_visible ? View.VISIBLE : View.GONE}"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/quad_res_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/eis_toggle_button"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-
-            <ToggleButton
-                android:id="@+id/quad_res_toggle_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/quad_button"
-                android:checked="@{PreferenceKeys.isQuadBayerOn()}"
-                android:onClick="@{top_bar_click_listener}"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fps_toggle_button"
-                app:layout_constraintStart_toEndOf="@+id/countdown_timer_button"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-
-            <ToggleButton
-                android:id="@+id/fps_toggle_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/fps_button"
-                android:checked="@{PreferenceKeys.isFpsPreviewOn()}"
-                android:onClick="@{top_bar_click_listener}"
-                android:textOff=""
-                android:textOn=""
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/grid_toggle_button"
-                app:layout_constraintStart_toEndOf="@+id/quad_res_toggle_button"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
             <Button
@@ -151,10 +147,10 @@
                 android:textOff=""
                 android:textOn=""
                 app:backgroundTint="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/flash_button"
-                app:layout_constraintStart_toEndOf="@+id/fps_toggle_button"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/countdown_timer_button"
+                app:layout_constraintEnd_toStartOf="@+id/flash_button"
                 tools:visibility="visible" />
 
             <com.particlesdevs.photoncamera.ui.camera.views.FlashButton
@@ -167,10 +163,10 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility='@{flash_visible ? View.VISIBLE:View.GONE, default=visible}'
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/noise_toggle_button"
-                app:layout_constraintStart_toEndOf="@+id/grid_toggle_button"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/grid_toggle_button"
+                app:layout_constraintEnd_toStartOf="@+id/noise_toggle_button"
                 tools:visibility="visible" />
 
             <ToggleButton
@@ -183,10 +179,10 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{noise_visible ? View.VISIBLE : View.GONE}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/edge_toggle_button"
-                app:layout_constraintStart_toEndOf="@+id/flash_button"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/flash_button"
+                app:layout_constraintEnd_toStartOf="@+id/edge_toggle_button"
                 tools:visibility="visible" />
 
             <ToggleButton
@@ -199,43 +195,41 @@
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{edge_visible ? View.VISIBLE : View.GONE}"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/zoom_toggle_button"
                 app:layout_constraintStart_toEndOf="@+id/noise_toggle_button"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-
-            <ImageButton
-                android:id="@+id/settings_button"
-                style="@style/Widget.AppCompat.ImageButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="1dp"
-                android:background="@drawable/ic_settings"
-                android:onClick="@{top_bar_click_listener}"
-                android:src="@drawable/ic_settings"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/zoom_toggle_button"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/zoom_toggle_button"
                 tools:visibility="visible" />
 
             <ToggleButton
                 android:id="@+id/zoom_toggle_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_marginEnd="14dp"
                 android:background="@drawable/zoom_button"
                 android:checked="@{PreferenceKeys.isZoomOn()}"
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{zoom_visible ? View.VISIBLE : View.GONE}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/settings_button"
-                app:layout_constraintStart_toEndOf="@+id/edge_toggle_button"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/edge_toggle_button"
+                app:layout_constraintEnd_toStartOf="@+id/settings_button"
+                tools:visibility="visible" />
+
+            <ImageButton
+                android:id="@+id/settings_button"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_settings"
+                android:onClick="@{top_bar_click_listener}"
+                android:src="@drawable/ic_settings"
+                android:visibility="visible"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/zoom_toggle_button"
+                app:layout_constraintEnd_toEndOf="parent"
                 tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

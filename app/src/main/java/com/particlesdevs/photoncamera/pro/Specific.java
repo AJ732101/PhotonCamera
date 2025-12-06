@@ -71,10 +71,6 @@ public class Specific {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "xiaomi14Ultra2xHack": {
-                    specificSetting.xiaomi14Ultra2xHack = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "useExternalViewer": {
                     specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
                     break;
@@ -97,10 +93,6 @@ public class Specific {
                 }
                 case "toneMapGamma": {
                     specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
-                    break;
-                }
-                case "singleShotZoomFactor": {
-                    specificSetting.singleShotZoomFactor = Float.parseFloat(caseS[1]);
                     break;
                 }
                 case "colorTemperature": {
@@ -129,10 +121,6 @@ public class Specific {
                 }
                 case "recPrefix": {
                     specificSetting.recPrefix = caseS[1];
-                    break;
-                }
-                case "YCBCR_P010_TargetFormat": {
-                    specificSetting.YCBCR_P010_TargetFormat = caseS[1];
                     break;
                 }
                 case "newRecSurfaceType": {

@@ -61,9 +61,6 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_NEW_REC_VIDEO.mValue);
-        COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
-        COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
-        COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_BITRATE_SEEKBAR.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
@@ -85,6 +82,10 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
+        COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
+        COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
+        COMMON_KEYS.add(Key.KEY_DIGITAL_ZOOM_FACTOR.mValue);
         // QualityDoesMatter - Sensor Related (and more)
         COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
@@ -131,14 +132,11 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO, resources.getBoolean(R.bool.pref_10bit_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO, resources.getBoolean(R.bool.pref_new_rec_video_def_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
@@ -160,12 +158,17 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR, resources.getString(R.string.pref_digital_zoom_factor_default_value));
         // QualityDoesMatter - Sensor Related and More
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE, resources.getString(R.string.pref_hot_pixel_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_CORRECTION_ABERRATION_MODE, resources.getString(R.string.pref_color_correction_aberration_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISTORTION_CORRECTION_MODE, resources.getString(R.string.pref_distortion_correction_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHADING_MODE, resources.getString(R.string.pref_shading_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE, resources.getBoolean(R.bool.pref_alternate_preview_template_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TEN_BIT_SURFACE_TARGET, resources.getString(R.string.pref_ten_bit_surface_target_default_value));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -672,6 +675,15 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE);
     }
 
+    public static String getTenBitSurfaceTarget() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_TEN_BIT_SURFACE_TARGET);
+    }
+
+    public static float getDigitalZoomFactorValue() {
+        return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR);
+    }
+
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -765,6 +777,7 @@ public class PreferenceKeys {
         KEY_USE_ZSL(R.string.pref_zsl_key),
         KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
+        KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
 
         /**
          * QualityDoesMatter - Sensor Related (and more)
@@ -774,6 +787,7 @@ public class PreferenceKeys {
         KEY_DISTORTION_CORRECTION_MODE(R.string.pref_distortion_correction_mode_key),
         KEY_SHADING_MODE(R.string.pref_shading_mode_key),
         KEY_ALTERNATE_PREVIEW_TEMPLATE(R.string.pref_alternate_preview_template_key),
+        KEY_TEN_BIT_SURFACE_TARGET(R.string.pref_ten_bit_surface_target_key),
 
         /**
          * Enhanced settings keys
