@@ -54,7 +54,7 @@ public class SettingsBarEntryProvider extends ViewModel {
 
     public SettingsBarEntryProvider() {
         //createEntries();
-        //allEntries.add(hdrxEntry);
+        allEntries.add(hdrxEntry);
         allEntries.add(flashEntry);
         allEntries.add(timerEntry);
         allEntries.add(saveRawEntry);

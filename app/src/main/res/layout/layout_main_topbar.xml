@@ -113,12 +113,12 @@
                 android:onClick="@{top_bar_click_listener}"
                 android:textOff=""
                 android:textOn=""
-                android:visibility="visible"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="@{eis_visible ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/countdown_timer_button"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
             <com.particlesdevs.photoncamera.ui.camera.views.TimerButton

@@ -1,11 +1,14 @@
 package com.particlesdevs.photoncamera.ui.camera.model;
 
 import android.graphics.Bitmap;
+import android.widget.Toast;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
 import com.particlesdevs.photoncamera.BR;
+import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.capture.CaptureController;
 
 /**
  * Class that holds the ui state, for now the orientation
@@ -15,8 +18,20 @@ public class CameraFragmentModel extends BaseObservable {
     private int duration;
     private Bitmap bitmap;
     private boolean settingsBarVisibility;
+    private boolean viewfinderMaginified = false;
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
+
+    public void onMagnifyViewfinderClicked() {
+        if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().magnifyViewfinder();
+            viewfinderMaginified = !viewfinderMaginified;
+        }
+    }
+    @Bindable
+    public boolean isViewfinderMagnified() {
+        return settingsBarVisibility;
+    }
 
     @Bindable
     public float getScreenAspectRatio() {

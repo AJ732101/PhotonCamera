@@ -249,6 +249,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean mRaw12IsSupported = false;
     public boolean mRawSensorIsSupported = false;
     public boolean mRawPrivateIsSupported = false;
+    public boolean mIsViewFinderMagnified = false;
     private final ParamController paramController;
     public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
@@ -2243,6 +2244,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             } catch (IllegalStateException e) {
                 Log.e(TAG, "Failed to start camera preview.", e);
             }
+        }
+    }
+
+    public void magnifyViewfinder () {
+        if (mIsViewFinderMagnified) {
+            if (PhotonCamera.getSettings().zoom2X) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+            }
+            else {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+            }
+        }
+        else {
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 4.0f);
+        }
+        mIsViewFinderMagnified = !mIsViewFinderMagnified;
+
+        try {
+            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Failed to update zoom for preview.", e);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "Failed to update zoom, camera is not available.", e);
         }
     }
 
