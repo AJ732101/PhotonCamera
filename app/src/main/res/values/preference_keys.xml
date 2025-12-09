@@ -13,35 +13,7 @@
     <string name="pref_preview_resolution_key" translatable="false">pref_show_afdata_key</string>
     <string name="pref_show_afdata_key" translatable="false">pref_show_afdata_key</string>
 
-    <string name="pref_show_basic_osd_key" translatable="false">pref_show_basic_osd_key</string>
-    <string name="pref_ois_key" translatable="false">pref_ois_key</string>
-    <string name="pref_use_external_gallery_key" translatable="false">pref_use_external_gallery_key</string>
-    <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
-    <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>
-    <string name="pref_extend_exposure_key" translatable="false">pref_extend_exposure_key</string>
-    <string name="pref_bitrate_key" translatable="false">pref_bitrate_key</string>
-    <string name="pref_codec_key" translatable="false">pref_codec_key</string>
-    <string name="pref_video_resolution_key" translatable="false">pref_video_resolution_key</string>
-    <string name="pref_video_framerate_key" translatable="false">pref_video_framerate_key</string>
-    <string name="pref_aperture_key" translatable="false">pref_aperture_key</string>
-    <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
-    <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
-    <string name="pref_zsl_key" translatable="false">pref_zsl_key</string>
-    <string name="pref_scene_and_effect_mode_key" translatable="false">pref_scene_and_effect_mode_key</string>
-    <string name="pref_new_settings_global_key" translatable="false">pref_new_settings_global_key</string>
-    <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
-    <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>
-    <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>
-    <string name="pref_edge_processing_key" translatable="false">pref_edge_processing_key</string>
-    <string name="pref_2x_zoom_key" translatable="false">pref_2x_zoom_key</string>
-    <string name="pref_digital_zoom_factor_key" translatable="false">pref_digital_zoom_factor_key</string>
-    <string name="pref_audio_processing_key" translatable="false">pref_audio_processing_key</string>
-    <string name="pref_audio_codec_key" translatable="false">pref_audio_codec_key</string>
-    <string name="pref_audio_channels_key" translatable="false">pref_audio_channels_key</string>
-    <string name="pref_sps_key" translatable="false">pref_sps_key</string>
-    <string name="pref_audio_bitrate_key" translatable="false">pref_audio_bitrate_key</string>
-
-    <string name="pref_enable_system_nr_key" translatable="false">pref_enable_system_nr_key</string>
+        <string name="pref_enable_system_nr_key" translatable="false">pref_enable_system_nr_key</string>
     <string name="pref_save_per_lens_settings" translatable="false">pref_save_per_lens_settings</string>
     <string name="pref_disable_aligning_key" translatable="false">pref_disable_aligning_key</string>
     <string name="pref_show_watermark_key" translatable="false">pref_show_watermark_key</string>
@@ -114,6 +86,33 @@
     <string name="pref_version_key" translatable="false">pref_version_key</string>
     <string name="pref_folders_list" translatable="false">pref_folders_list</string>
 
+    <!-- General settings strings -->
+    <string name="pref_show_basic_osd_key" translatable="false">pref_show_basic_osd_key</string>
+    <string name="pref_ois_key" translatable="false">pref_ois_key</string>
+    <string name="pref_use_external_gallery_key" translatable="false">pref_use_external_gallery_key</string>
+    <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
+    <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>
+    <string name="pref_extend_exposure_key" translatable="false">pref_extend_exposure_key</string>
+
+    <!-- Video settings strings -->
+    <string name="pref_bitrate_key" translatable="false">pref_bitrate_key</string>
+    <string name="pref_codec_key" translatable="false">pref_codec_key</string>
+    <string name="pref_video_resolution_key" translatable="false">pref_video_resolution_key</string>
+    <string name="pref_video_framerate_key" translatable="false">pref_video_framerate_key</string>
+    <string name="pref_aperture_key" translatable="false">pref_aperture_key</string>
+    <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
+    <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
+    <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
+    <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>
+    <string name="pref_keyframe_interval_key" translatable="false">pref_keyframe_interval_key</string>
+
+    <!-- Audio settings strings -->
+    <string name="pref_audio_processing_key" translatable="false">pref_audio_processing_key</string>
+    <string name="pref_audio_codec_key" translatable="false">pref_audio_codec_key</string>
+    <string name="pref_audio_channels_key" translatable="false">pref_audio_channels_key</string>
+    <string name="pref_sps_key" translatable="false">pref_sps_key</string>
+    <string name="pref_audio_bitrate_key" translatable="false">pref_audio_bitrate_key</string>
+
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_key" translatable="false">pref_soc_qualcomm_sharpness_key</string>
     <string name="pref_soc_qualcomm_saturation_key" translatable="false">pref_soc_qualcomm_saturation_key</string>
@@ -131,6 +130,13 @@
     <string name="pref_ten_bit_surface_target_key" translatable="false">pref_ten_bit_surface_target_key</string>
 
     <!-- Single Shot and Video settings strings -->
+    <string name="pref_noise_processing_key" translatable="false">pref_noise_processing_key</string>
+    <string name="pref_edge_processing_key" translatable="false">pref_edge_processing_key</string>
+    <string name="pref_2x_zoom_key" translatable="false">pref_2x_zoom_key</string>
+    <string name="pref_digital_zoom_factor_key" translatable="false">pref_digital_zoom_factor_key</string>
     <string name="pref_contrast_curve_key" translatable="false">pref_contrast_curve_key</string>
     <string name="pref_effect_mode_key" translatable="false">pref_effect_mode_key</string>
+    <string name="pref_zsl_key" translatable="false">pref_zsl_key</string>
+    <string name="pref_scene_and_effect_mode_key" translatable="false">pref_scene_and_effect_mode_key</string>
+    <string name="pref_new_settings_global_key" translatable="false">pref_new_settings_global_key</string>
 </resources>

@@ -153,7 +153,7 @@
     <string name="turn_on_extend_iso">Extend ISO</string>
     <string name="turn_on_extend_exposure">Extend Exposure</string>
 
-    <!-- Extended Audio and Video settings strings -->
+    <!-- Video settings strings -->
     <string name="codec">Codec</string>
     <string name="video_resolution">Resolution</string>
     <string name="video_framerate">Framerate</string>
@@ -164,6 +164,7 @@
     <string name="turn_on_10bit">Zero Shutter Lag</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="video_new_rec">New Recording Pipeline</string>
+    <string name="keyframe_interval">Keyframe Interval</string>
 
     <!-- Audio settings strings -->
     <string name="audio_processing">Source</string>

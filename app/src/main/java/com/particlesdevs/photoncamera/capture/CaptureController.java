@@ -3199,8 +3199,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     encoderInfo.getMaxBitrateForMimeType(mimeVid)/(1024*1024) + "MBit/s)");
         }
         format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, PhotonCamera.getSpecific().specificSetting.newRecKeyFrameIntervall);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, PhotonCamera.getSettings().videoFramrate);
+
+        int keyframeIntervalInFrames = PhotonCamera.getSettings().keyframeInterval;
+        int videoFramrate = PhotonCamera.getSettings().videoFramrate;
+        float intervalInSeconds = (float) keyframeIntervalInFrames / videoFramrate;
+        int finalInterval = Math.max(1, Math.round(intervalInSeconds));
+        format.setFloat(MediaFormat.KEY_I_FRAME_INTERVAL, intervalInSeconds);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             if (PhotonCamera.getSettings().video10bit && PhotonCamera.getSettings().videoHDR) {
@@ -3564,7 +3569,25 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);
         mMediaRecorder.setCaptureRate(PhotonCamera.getSettings().videoFramrate);
+        try {
+            int keyframeIntervalInFrames = PhotonCamera.getSettings().keyframeInterval;
+            int videoFramrate = PhotonCamera.getSettings().videoFramrate;
+            float intervalInSeconds = (float) keyframeIntervalInFrames / videoFramrate;
+            int finalInterval = Math.max(1, Math.round(intervalInSeconds));
 
+            Method setVideoKeyFrameInterval = RestrictionBypass.getDeclaredMethod(MediaRecorder.class, "setVideoKeyFrameInterval", int.class);
+            if (setVideoKeyFrameInterval != null) {
+                setVideoKeyFrameInterval.invoke(mMediaRecorder, finalInterval);
+                Log.d(TAG, "Successfully set keyframe interval to " + finalInterval + "s via RestrictionBypass.");
+            }
+            else {
+                Log.w(TAG, "setVideoKeyFrameInterval method not found even with RestrictionBypass. Skipping.");
+            }
+        } catch (NoSuchMethodException e) {
+            Log.w(TAG, "setVideoKeyFrameInterval method not found even with RestrictionBypass. Skipping.");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set keyframe interval via RestrictionBypass.", e);
+        }
 
         if (Math.min(vidWidth, maxEncRes.getWidth()) == 2048) {
             mMediaRecorder.setVideoSize(1920, 1920);

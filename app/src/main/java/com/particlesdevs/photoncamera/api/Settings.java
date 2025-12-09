@@ -99,6 +99,7 @@ public class Settings {
     public boolean useExternalGallery = true;
     public String contrastCurve = "off";
     public int effectMode = 0;
+    public int keyframeInterval = 10;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -159,6 +160,7 @@ public class Settings {
         videoHDR = PreferenceKeys.isHdrVideoOn();
         video10bit = PreferenceKeys.is10bitVideoOn();
         videoNewRec = PreferenceKeys.isNeRecVideoOn();
+        keyframeInterval = PreferenceKeys.getKeyframeInterval();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();

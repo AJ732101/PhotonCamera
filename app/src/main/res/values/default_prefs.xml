@@ -105,6 +105,7 @@
     <bool name="pref_new_settings_global_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
     <bool name="pref_new_rec_video_def_value">false</bool>
+    <string name="pref_keyframe_interval_default_value" translatable="false">10</string>
 
     <!-- Audio settings strings -->
     <string name="pref_audio_codec_default_value" translatable="false">3</string>

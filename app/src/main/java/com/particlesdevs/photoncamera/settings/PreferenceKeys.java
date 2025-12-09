@@ -66,6 +66,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_HEIGHT.mValue);
+        COMMON_KEYS.add(Key.KEY_KEYFRAME_INTERVAL.mValue);
         // QualityDoesMatter - Audio
         COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
@@ -145,6 +146,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR, resources.getString(R.string.pref_bitrate_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_KEYFRAME_INTERVAL, resources.getString(R.string.pref_keyframe_interval_default_value));
         // QualityDoesMatter - Audio
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
@@ -701,6 +703,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EFFECT_MODE);
     }
 
+    public static int getKeyframeInterval() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_KEYFRAME_INTERVAL);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -758,6 +764,7 @@ public class PreferenceKeys {
         KEY_NOISE_PROCESSING(R.string.pref_noise_processing_key),
         KEY_EDGE_PROCESSING(R.string.pref_edge_processing_key),
         KEY_2X_ZOOM(R.string.pref_2x_zoom_key),
+        KEY_KEYFRAME_INTERVAL(R.string.pref_keyframe_interval_key),
 
         /**
          * QualityDoesMatter - Audio settings keys

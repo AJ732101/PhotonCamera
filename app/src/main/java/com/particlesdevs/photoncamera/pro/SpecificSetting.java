@@ -17,7 +17,6 @@ public class SpecificSetting {
     public float toneMapGamma = 99;
     public int colorTemperature = 99;
     public float colorTint = 99.0f;
-    public int newRecKeyFrameIntervall = 10;
     public String newRecColorRange = "full";
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";

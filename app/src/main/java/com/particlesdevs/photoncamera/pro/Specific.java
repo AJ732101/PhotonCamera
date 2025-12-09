@@ -103,10 +103,6 @@ public class Specific {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
                 }
-                case "newRecKeyFrameIntervall": {
-                    specificSetting.newRecKeyFrameIntervall = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "newRecColorRange": {
                     specificSetting.newRecColorRange = caseS[1];
                     break;

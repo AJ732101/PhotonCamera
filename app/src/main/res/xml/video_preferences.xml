@@ -10,8 +10,8 @@
     <PreferenceCategory app:key="video_settings_category" app:title="@string/video_settings_screen_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
-            android:key="@string/pref_bitrate_key"
             android:layout="@layout/preference_seekbar"
+            android:key="@string/pref_bitrate_key"
             android:title="@string/bitrate"
             android:defaultValue="@string/pref_bitrate_default"
             app:maxValue="240"
@@ -79,6 +79,15 @@
             android:summary=""
             android:icon="@drawable/video_camera_back_24px"
             android:defaultValue="@bool/pref_new_rec_video_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:layout="@layout/preference_seekbar"
+            android:key="@string/pref_keyframe_interval_key"
+            android:title="@string/keyframe_interval"
+            android:defaultValue="@string/pref_keyframe_interval_default_value"
+            app:maxValue="100"
+            app:minValue="1"
+            android:icon="@drawable/arrow_range_24px"/>
 
         <Preference
             android:layout_height="56dp"
