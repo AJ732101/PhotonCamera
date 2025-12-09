@@ -39,6 +39,10 @@ public class GLPreview extends GLSurfaceView {
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
+    public MainRenderer getRenderer() {
+        return mRenderer;
+    }
+
     public void fireOnSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int w, int h) {
         handler.post(() -> {
             if (surfaceTextureListener != null)

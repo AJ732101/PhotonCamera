@@ -71,16 +71,16 @@ public class Specific {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "useExternalViewer": {
-                    specificSetting.useExternalViewer = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "useCodeAuroraMultiFrameNoiseReduction": {
                     specificSetting.useCodeAuroraMultiFrameNoiseReduction = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "useCodeAuroraCinematicMode": {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "useAlternateMagnifierMode": {
+                    specificSetting.useAlternateMagnifierMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "statisticsLensShadingMapMode": {
@@ -103,16 +103,8 @@ public class Specific {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
                 }
-                case "effectMode": {
-                    specificSetting.effectMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "newRecKeyFrameIntervall": {
                     specificSetting.newRecKeyFrameIntervall = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "contrastCurve": {
-                    specificSetting.contrastCurve = caseS[1];
                     break;
                 }
                 case "newRecColorRange": {

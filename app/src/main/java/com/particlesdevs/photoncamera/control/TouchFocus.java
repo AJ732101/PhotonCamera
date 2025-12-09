@@ -150,20 +150,20 @@ public class TouchFocus {
                 switch (PhotonCamera.getSettings().selectedMode) {
                     case NIGHT:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_NIGHT);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 0) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         break;
                     case MOTION:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_SPORTS);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 0) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         break;
                     case PHOTO:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_HDR);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 0) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
                         break;

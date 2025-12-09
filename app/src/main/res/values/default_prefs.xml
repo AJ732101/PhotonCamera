@@ -84,11 +84,20 @@
     <string name="pref_raw_mode_default_value" translatable="false">0</string>
     <bool name="pref_show_gradient_def_value">false</bool>
 
+    <!-- General settings strings -->
+    <string name="pref_aperture_default_value" translatable="false">99</string>
+    <bool name="pref_dng_compression_default">false</bool>
+    <bool name="pref_use_external_gallery_default">true</bool>
+    <bool name="pref_show_basic_osd_default">true</bool>
+    <bool name="pref_ois_default">true</bool>
+    <bool name="pref_extend_iso_default">false</bool>
+    <bool name="pref_extend_exposure_default">false</bool>
+
+    <!-- Video settings strings -->
     <string name="pref_bitrate_default" translatable="false">60</string>
     <string name="pref_codec_default_value" translatable="false">HEVC</string>
     <string name="pref_video_resolution_default_value" translatable="false">2160</string>
     <string name="pref_video_framerate_default_value" translatable="false">30</string>
-    <string name="pref_aperture_default_value" translatable="false">99</string>
     <bool name="pref_hdr_video_def_value">false</bool>
     <bool name="pref_eis_video_def_value">false</bool>
     <bool name="pref_zsl_def_value">false</bool>
@@ -96,21 +105,22 @@
     <bool name="pref_new_settings_global_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
     <bool name="pref_new_rec_video_def_value">false</bool>
-    <bool name="pref_2x_zoom_def_value">false</bool>
-    <bool name="pref_show_basic_osd_default">true</bool>
-    <bool name="pref_ois_default">true</bool>
-    <bool name="pref_dng_compression_default">false</bool>
-    <bool name="pref_extend_iso_default">false</bool>
-    <bool name="pref_extend_exposure_default">false</bool>
-    <string name="pref_noise_processing_default_value" translatable="false">0</string>
-    <string name="pref_edge_processing_default_value" translatable="false">0</string>
-    <string name="pref_digital_zoom_factor_default_value" translatable="false">2.0f</string>
+
+    <!-- Audio settings strings -->
     <string name="pref_audio_codec_default_value" translatable="false">3</string>
     <string name="pref_audio_bitrate_default_value" translatable="false">256</string>
     <string name="pref_audio_channels_default_value" translatable="false">2</string>
     <string name="pref_sps_default_value" translatable="false">49152</string>
     <string name="pref_audio_processing_default_value" translatable="false">9</string>
     <string name="pref_audio_bitrate_default" translatable="false">320</string>
+
+    <!-- Single Shot and Video settings strings -->
+    <string name="pref_noise_processing_default_value" translatable="false">0</string>
+    <string name="pref_edge_processing_default_value" translatable="false">0</string>
+    <string name="pref_digital_zoom_factor_default_value" translatable="false">2.0f</string>
+    <bool name="pref_2x_zoom_def_value">false</bool>
+    <string name="pref_contrast_curve_default_value" translatable="false">off</string>
+    <string name="pref_effect_mode_default_value" translatable="false">0</string>
 
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_default" translatable="false">1</string>

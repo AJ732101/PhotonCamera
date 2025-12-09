@@ -96,6 +96,9 @@ public class Settings {
     public boolean useAlternatePreviewTemplate = false;
     public String tenBitSurfaceTarget = "HEVC";
     public float digitalZoomFactor = 2;
+    public boolean useExternalGallery = true;
+    public String contrastCurve = "off";
+    public int effectMode = 0;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -138,7 +141,7 @@ public class Settings {
         gamma = parseGammaArray();
         mCameraID = PreferenceKeys.getCameraID();
         theme = PreferenceKeys.getThemeValue();
-        // QualityDoesMatter - Genaral
+        // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
         useDngCompression = PreferenceKeys.useDngCompression();
@@ -146,6 +149,7 @@ public class Settings {
         apertureToUse = PreferenceKeys.getAperture();
         useExtendIso = PreferenceKeys.useExtendIsoOn();
         useExtendExposure = PreferenceKeys.useExtendExposureOn();
+        useExternalGallery = PreferenceKeys.useExternalGallery();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();
@@ -185,6 +189,8 @@ public class Settings {
         shadingMode = PreferenceKeys.getShadingMode();
         useAlternatePreviewTemplate = PreferenceKeys.useAlternatePreviewTemplate();
         tenBitSurfaceTarget = PreferenceKeys.getTenBitSurfaceTarget();
+        contrastCurve = PreferenceKeys.getContrastCurve();
+        effectMode = PreferenceKeys.getEffectMode();
     }
 
     public void saveID() {

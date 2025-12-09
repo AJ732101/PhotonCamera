@@ -458,4 +458,52 @@
         <item>4.0f</item>
     </string-array>
 
+    <string-array name="contrast_curve_entries">
+        <item>Off</item>
+        <item>Linear</item>
+        <item>High</item>
+        <item>Low</item>
+        <item>Slog2</item>
+        <item>SlogA</item>
+        <item>SlogB</item>
+        <item>Style1</item>
+        <item>Style2</item>
+    </string-array>
+
+    <string-array name="contrast_curve_entryValues">
+        <item>off</item>
+        <item>linear</item>
+        <item>high</item>
+        <item>low</item>
+        <item>slog2</item>
+        <item>slogA</item>
+        <item>slogB</item>
+        <item>style1</item>
+        <item>style2</item>
+    </string-array>
+
+    <string-array name="effect_mode_entries">
+        <item>Off</item>
+        <item>Monochrome</item>
+        <item>Negative</item>
+        <item>Solarize</item>
+        <item>Sepia</item>
+        <item>Posterize</item>
+        <item>Whiteboard</item>
+        <item>Blackboard</item>
+        <item>Aqua</item>
+    </string-array>
+
+    <string-array name="effect_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
 </resources>

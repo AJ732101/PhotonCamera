@@ -139,7 +139,7 @@ final class CameraUIController implements CameraUIEventsListener,
                 break;
 
             case R.id.gallery_image_button:
-                if (PhotonCamera.getSpecific().specificSetting.useExternalViewer) {
+                if (PhotonCamera.getSettings().useExternalGallery) {
                     Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
 
                     if (lastImageUri != null) {

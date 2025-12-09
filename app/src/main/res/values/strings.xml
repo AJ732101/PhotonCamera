@@ -145,12 +145,15 @@
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>
 
-    <!-- Extended Audio and Video settings strings -->
+    <!-- General settings strings -->
     <string name="turn_on_basic_osd">Show Basic OSD</string>
     <string name="turn_on_ois">OIS</string>
+    <string name="turn_use_external_gallery">Use External Gallery</string>
     <string name="turn_on_dng_compression">DNG Compression</string>
     <string name="turn_on_extend_iso">Extend ISO</string>
     <string name="turn_on_extend_exposure">Extend Exposure</string>
+
+    <!-- Extended Audio and Video settings strings -->
     <string name="codec">Codec</string>
     <string name="video_resolution">Resolution</string>
     <string name="video_framerate">Framerate</string>
@@ -158,20 +161,26 @@
     <string name="audio">Audio</string>
     <string name="hdr_video">HDR Video</string>
     <string name="eis_video">EIS in Preview</string>
-    <string name="zsl">Zero Shutter Lag</string>
-    <string name="scene_and_effect_mode">Scene and Effect Mode</string>
-    <string name="new_settings_global">Additional Settings Global</string>
     <string name="turn_on_10bit">Zero Shutter Lag</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="video_new_rec">New Recording Pipeline</string>
-    <string name="noise_processing">Noise Processing</string>
-    <string name="edge_processing">Edge Processing</string>
-    <string name="zoom">Zoom</string>
-    <string name="digital_zoom_factor">Digital Zoom Factor</string>
+
+    <!-- Audio settings strings -->
     <string name="audio_processing">Source</string>
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Channels</string>
     <string name="sps">SPS</string>
+
+    <!-- Single Shot and Video settings strings -->
+    <string name="scene_and_effect_mode">Scene and Effect Mode</string>
+    <string name="new_settings_global">Additional Settings Global</string>
+    <string name="noise_processing">Noise Processing</string>
+    <string name="edge_processing">Edge Processing</string>
+    <string name="zoom">Zoom</string>
+    <string name="digital_zoom_factor">Digital Zoom Factor</string>
+    <string name="contrast_curve">Contrast Curve</string>
+    <string name="effect_mode">Effect Mode</string>
+    <string name="zsl">Zero Shutter Lag</string>
 
     <!-- Bracketing mode strings -->
     <string name="exposure_bracketing">Exposure Bracketing</string>

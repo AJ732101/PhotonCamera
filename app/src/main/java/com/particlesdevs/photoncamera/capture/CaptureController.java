@@ -58,6 +58,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
+
+import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
 import android.util.Rational;
@@ -250,6 +252,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean mRawSensorIsSupported = false;
     public boolean mRawPrivateIsSupported = false;
     public boolean mIsViewFinderMagnified = false;
+    private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
     private final ParamController paramController;
     public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
@@ -1588,7 +1591,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsLensShadingMapMode);
         if (PhotonCamera.getSpecific().specificSetting.statisticsOisDataMode != 99)
             captureBuilder.set(CaptureRequest.STATISTICS_OIS_DATA_MODE, PhotonCamera.getSpecific().specificSetting.statisticsOisDataMode);
-        if (!PhotonCamera.getSpecific().specificSetting.contrastCurve.isBlank()) {
+        if (!PhotonCamera.getSettings().contrastCurve.equals("off")) {
             setContrastCurve(captureBuilder);
         }
         else if (PhotonCamera.getSpecific().specificSetting.toneMapGamma != 99) {
@@ -1617,17 +1620,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // look for keywords
-        if (!PhotonCamera.getSpecific().specificSetting.contrastCurve.contains("slog") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("high") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low") &&
-                !PhotonCamera.getSpecific().specificSetting.contrastCurve.contains("style")) {
+        if (!PhotonCamera.getSettings().contrastCurve.contains("slog") &&
+            !PhotonCamera.getSettings().contrastCurve.equals("high") &&
+            !PhotonCamera.getSettings().contrastCurve.equals("linear") &&
+            !PhotonCamera.getSettings().contrastCurve.equals("low") &&
+            !PhotonCamera.getSettings().contrastCurve.contains("style")) {
             return;
         }
 
         TonemapCurve customCurve = null;
         captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_CONTRAST_CURVE);
-        if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("slog2")) {
+        if (PhotonCamera.getSettings().contrastCurve.equals("slog2")) {
             int points = 64;
             float[] red = new float[points * 2];
             float[] green = new float[points * 2];
@@ -1658,25 +1661,25 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             customCurve = new TonemapCurve(red, green, blue);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("slogA")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("slogA")) {
             customCurve = new TonemapCurve(CurvePresets.SLOG2_APPROX_POINTS_A, CurvePresets.SLOG2_APPROX_POINTS_A, CurvePresets.SLOG2_APPROX_POINTS_A);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("slogB")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("slogB")) {
             customCurve = new TonemapCurve(CurvePresets.SLOG2_APPROX_POINTS_B, CurvePresets.SLOG2_APPROX_POINTS_B, CurvePresets.SLOG2_APPROX_POINTS_B);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("high")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("high")) {
             customCurve = new TonemapCurve(CurvePresets.HIGH_CONTRAST_POINTS, CurvePresets.HIGH_CONTRAST_POINTS, CurvePresets.HIGH_CONTRAST_POINTS);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("low")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("low")) {
             customCurve = new TonemapCurve(CurvePresets.LOW_CONTRAST_POINTS, CurvePresets.LOW_CONTRAST_POINTS, CurvePresets.LOW_CONTRAST_POINTS);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("linear")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("linear")) {
             customCurve = new TonemapCurve(CurvePresets.LINEAR_CURVE, CurvePresets.LINEAR_CURVE, CurvePresets.LINEAR_CURVE);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("style1")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("style1")) {
             customCurve = new TonemapCurve(CurvePresets.RED_CURVE_STYLE_1, CurvePresets.GREEN_CURVE_STYLE_1, CurvePresets.BLUE_CURVE_STYLE_1);
         }
-        else if (PhotonCamera.getSpecific().specificSetting.contrastCurve.equals("style2")) {
+        else if (PhotonCamera.getSettings().contrastCurve.equals("style2")) {
             customCurve = new TonemapCurve(CurvePresets.RED_CURVE_STYLE_1, CurvePresets.BLUE_CURVE_STYLE_1, CurvePresets.GREEN_CURVE_STYLE_1);
         }
 
@@ -2115,20 +2118,20 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 switch (PhotonCamera.getSettings().selectedMode) {
                     case NIGHT:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_NIGHT);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 0) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         break;
                     case MOTION:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_SPORTS);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 0) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         break;
                     case PHOTO:
                         builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_HDR);
-                        if ((PhotonCamera.getSpecific().specificSetting.effectMode != 99) && (PhotonCamera.getSpecific().specificSetting.effectMode <= 18)) {
-                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSpecific().specificSetting.effectMode);
+                        if (PhotonCamera.getSettings().effectMode != 99) {
+                            builder.set(CaptureRequest.CONTROL_EFFECT_MODE, PhotonCamera.getSettings().effectMode);
                         }
                         break;
                 }
@@ -2250,23 +2253,46 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void magnifyViewfinder () {
         if (mIsViewFinderMagnified) {
             if (PhotonCamera.getSettings().zoom2X) {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+                if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+                    if (mMainRenderer != null) {
+                        mMainRenderer.setMagnifyEnabled(false);
+                    }
+                }
+                else {
+                   mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+                }
             }
             else {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+                    if (mMainRenderer != null) {
+                        mMainRenderer.setMagnifyEnabled(false);
+                    }
+                }
+                else {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                }
             }
         }
         else {
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 4.0f);
+            if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+                if (mMainRenderer != null) {
+                    mMainRenderer.setMagnifyEnabled(true);
+                }
+            }
+            else {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 4.0f);
+            }
         }
         mIsViewFinderMagnified = !mIsViewFinderMagnified;
 
-        try {
-            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "Failed to update zoom for preview.", e);
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "Failed to update zoom, camera is not available.", e);
+        if (!PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+            try {
+                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Failed to update zoom for preview.", e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to update zoom, camera is not available.", e);
+            }
         }
     }
 
@@ -3658,6 +3684,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             cameraEventsListener.onRequestTriggerMediaScanner(Uri.fromFile(vid));
         }
         createCameraPreviewSession(false);
+    }
+
+    public void setMainRenderer(com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer renderer) {
+        mMainRenderer = renderer;
     }
 
     @Override

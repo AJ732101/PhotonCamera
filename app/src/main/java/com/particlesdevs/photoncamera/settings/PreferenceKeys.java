@@ -56,6 +56,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_DNG_COMPRESSION_ON.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_BASIC_OSD.mValue);
         COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
+        COMMON_KEYS.add(Key.KEY_USE_EXTERNAL_GALLERY.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -86,6 +87,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
         COMMON_KEYS.add(Key.KEY_DIGITAL_ZOOM_FACTOR.mValue);
+        COMMON_KEYS.add(Key.KEY_CONTRAST_CURVE.mValue);
+        COMMON_KEYS.add(Key.KEY_EFFECT_MODE.mValue);
         // QualityDoesMatter - Sensor Related (and more)
         COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
@@ -132,6 +135,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_APERTURE, resources.getString(R.string.pref_aperture_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_EXTERNAL_GALLERY, resources.getBoolean(R.bool.pref_use_external_gallery_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -162,6 +166,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR, resources.getString(R.string.pref_digital_zoom_factor_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE, resources.getString(R.string.pref_contrast_curve_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EFFECT_MODE, resources.getString(R.string.pref_effect_mode_default_value));
         // QualityDoesMatter - Sensor Related and More
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE, resources.getString(R.string.pref_hot_pixel_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_CORRECTION_ABERRATION_MODE, resources.getString(R.string.pref_color_correction_aberration_mode_default_value));
@@ -683,6 +689,17 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR);
     }
 
+    public static boolean useExternalGallery() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_EXTERNAL_GALLERY);
+    }
+
+    public static String getContrastCurve() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
+    }
+
+    public static int getEffectMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EFFECT_MODE);
+    }
 
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
@@ -725,6 +742,7 @@ public class PreferenceKeys {
         KEY_AE_MODE(R.string.pref_ae_mode_key),
         KEY_BRACKETING_MODE(R.string.pref_bracketing_key),
         KEY_COUNTDOWN_TIMER(R.string.pref_countdown_timer_key),
+        KEY_USE_EXTERNAL_GALLERY(R.string.pref_use_external_gallery_key),
 
         /**
          * QualityDoesMatter - Video settings keys
@@ -778,6 +796,8 @@ public class PreferenceKeys {
         KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
+        KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
+        KEY_EFFECT_MODE(R.string.pref_effect_mode_key),
 
         /**
          * QualityDoesMatter - Sensor Related (and more)

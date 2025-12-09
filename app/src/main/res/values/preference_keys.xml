@@ -15,6 +15,7 @@
 
     <string name="pref_show_basic_osd_key" translatable="false">pref_show_basic_osd_key</string>
     <string name="pref_ois_key" translatable="false">pref_ois_key</string>
+    <string name="pref_use_external_gallery_key" translatable="false">pref_use_external_gallery_key</string>
     <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
     <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>
     <string name="pref_extend_exposure_key" translatable="false">pref_extend_exposure_key</string>
@@ -128,4 +129,8 @@
     <string name="pref_shading_mode_key" translatable="false">pref_shading_mode_key</string>
     <string name="pref_alternate_preview_template_key" translatable="false">pref_alternate_preview_template_key</string>
     <string name="pref_ten_bit_surface_target_key" translatable="false">pref_ten_bit_surface_target_key</string>
+
+    <!-- Single Shot and Video settings strings -->
+    <string name="pref_contrast_curve_key" translatable="false">pref_contrast_curve_key</string>
+    <string name="pref_effect_mode_key" translatable="false">pref_effect_mode_key</string>
 </resources>

@@ -23,6 +23,6 @@ void main() {
     float w = (diff * diff) /(denoiseK + (diff * diff));
     vec4 dc = vec4(1.0,0.0,1.0,0.0);
     if(enablePeak)
-        color = color + dc*32.0*diff*w;
+    color = color + dc*32.0*diff*w;
     Output = color;
 }

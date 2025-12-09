@@ -81,6 +81,14 @@
             android:summary=""
             android:icon="@drawable/video_stable_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_use_external_gallery_key"
+            android:defaultValue="@bool/pref_use_external_gallery_default"
+            android:title="@string/turn_use_external_gallery"
+            android:summary=""
+            android:icon="@drawable/photo_prints_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

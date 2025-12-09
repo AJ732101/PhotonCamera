@@ -40,6 +40,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -293,6 +295,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         hdrIndicatorTextView = cameraFragmentBinding.hdrIndicatorText;
         currentIsoTextView = cameraFragmentBinding.currentIsoText;
         currentShutterTextView = cameraFragmentBinding.currentShutterText;
+
+        MainRenderer mainRenderer = textureView.getRenderer();
+        if (captureController != null && mainRenderer != null) {
+            captureController.setMainRenderer(mainRenderer);
+        }
+
         initSettingsBar();
     }
 
@@ -488,7 +496,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     (PhotonCamera.getSettings().previewFormat == 999999991)) && // SW HEIC/HEIF
                     (PhotonCamera.getSettings().rawSaver != 2)) {
                     stringMap.put("Mode", "SINGLE SHOT");
-                    switch (PhotonCamera.getSpecific().specificSetting.effectMode) {
+                    switch (PhotonCamera.getSettings().effectMode ) {
                         case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
                             stringMap.put("Effectmode:", "Mono");
                             break;

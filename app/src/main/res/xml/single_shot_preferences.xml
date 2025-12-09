@@ -79,6 +79,26 @@
             android:entryValues="@array/digital_zoom_factor_entryValues"
             android:defaultValue="@string/pref_digital_zoom_factor_default_value" />
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_contrast_curve_key"
+            android:title="@string/contrast_curve"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/show_chart_24px"
+            android:entries="@array/contrast_curve_entries"
+            android:entryValues="@array/contrast_curve_entryValues"
+            android:defaultValue="@string/pref_contrast_curve_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_effect_mode_key"
+            android:title="@string/effect_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/show_chart_24px"
+            android:entries="@array/effect_mode_entries"
+            android:entryValues="@array/effect_mode_entryValues"
+            android:defaultValue="@string/pref_effect_mode_default_value" />
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

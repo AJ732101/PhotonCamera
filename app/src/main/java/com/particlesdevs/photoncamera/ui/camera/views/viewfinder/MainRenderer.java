@@ -27,6 +27,10 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private final FloatBuffer pTexCoord;
     private final float[] mTexRotateMatrix = new float[]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
+    private int mNormalProgram;
+    private int mMagnifyProgram;
+    private volatile boolean mIsMagnifyEnabled = false;
+
     private SurfaceTexture mSTexture;
 
     private boolean mGLInit = false;
@@ -58,6 +62,17 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 mUpdateST = false;
             }
         }
+
+        int currentProgram;
+        if (mIsMagnifyEnabled) {
+            currentProgram = mMagnifyProgram;
+        } else {
+            currentProgram = mNormalProgram;
+        }
+
+        GLES20.glUseProgram(currentProgram);
+        GLES20.glUniform2f(resolutionLocation, mView.getWidth(), mView.getHeight());
+
         GLES20.glUniformMatrix4fv(uTexRotateMatrix, 1, false, mTexRotateMatrix, 0);
         GLES20.glUniform1i(enablePeak, PhotonCamera.getSettings().focusPeak);
         GLES20.glVertexAttribPointer(vPosition, 2, GLES20.GL_FLOAT, false, 4 * 2, pVertex);
@@ -70,6 +85,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int vPosition;
     private int vTexCoord;
     private int enablePeak;
+    private int resolutionLocation;
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         initTex();
@@ -78,18 +94,24 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
         String vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
         String fss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_fs.glsl");
-        int hProgram = loadShader(vss_default, fss_default);
-        GLES20.glUseProgram(hProgram);
-        uTexRotateMatrix = GLES20.glGetUniformLocation(hProgram, "uTexRotateMatrix");
+        String fss_magnify = PhotonCamera.getAssetLoader().getString("shaders/preview/main_magnification_fs.glsl");
+
+        mNormalProgram= loadShader(vss_default, fss_default);
+        mMagnifyProgram = loadShader(vss_default, fss_magnify);
+
+        GLES20.glUseProgram(mNormalProgram);
+        uTexRotateMatrix = GLES20.glGetUniformLocation(mNormalProgram, "uTexRotateMatrix");
         GLES20.glUniformMatrix4fv(uTexRotateMatrix, 1, false, mTexRotateMatrix, 0);
-        vPosition = GLES20.glGetAttribLocation(hProgram, "vPosition");
-        vTexCoord = GLES20.glGetAttribLocation(hProgram, "vTexCoord");
-        enablePeak = GLES20.glGetUniformLocation(hProgram, "enablePeak");
+        vPosition = GLES20.glGetAttribLocation(mNormalProgram, "vPosition");
+        vTexCoord = GLES20.glGetAttribLocation(mNormalProgram, "vTexCoord");
+        enablePeak = GLES20.glGetUniformLocation(mNormalProgram, "enablePeak");
+        resolutionLocation = GLES20.glGetUniformLocation(mNormalProgram, "resolution");
         GLES20.glVertexAttribPointer(vPosition, 2, GLES20.GL_FLOAT, false, 4 * 2, pVertex);
         GLES20.glVertexAttribPointer(vTexCoord, 2, GLES20.GL_FLOAT, false, 4 * 2, pTexCoord);
+
         GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glEnableVertexAttribArray(vTexCoord);
-        GLES20.glUniform2f(GLES20.glGetUniformLocation(hProgram, "resolution"), mView.getWidth(), mView.getHeight());
+        //GLES20.glUniform2f(GLES20.glGetUniformLocation(mNormalProgram, "resolution"), mView.getWidth(), mView.getHeight());
         mGLInit = true;
         mView.fireOnSurfaceTextureAvailable(mSTexture, 0, 0);
     }
@@ -98,7 +120,9 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         GLES30.glViewport(0, 0, width, height);
     }
 
-
+    public void setMagnifyEnabled(boolean enabled) {
+        mIsMagnifyEnabled = enabled;
+    }
 
     public SurfaceTexture getmSTexture() {
         return mSTexture;
