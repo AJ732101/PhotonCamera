@@ -93,6 +93,7 @@
     <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
     <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>
     <string name="pref_extend_exposure_key" translatable="false">pref_extend_exposure_key</string>
+    <string name="pref_alternate_loupe_key" translatable="false">pref_alternate_loupe_key</string>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_key" translatable="false">pref_bitrate_key</string>

@@ -196,90 +196,90 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/aux_buttons_container" />
 
-        <FrameLayout
-            android:id="@+id/dummy_reference_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:clickable="false"
-            app:layout_constraintBaseline_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="3:4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:visibility="visible" />
+            <FrameLayout
+                android:id="@+id/dummy_reference_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:clickable="false"
+                app:layout_constraintBaseline_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="3:4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
+                tools:visibility="visible" />
 
-        <com.particlesdevs.photoncamera.ui.camera.views.AuxButtonsLayout
-            android:id="@+id/aux_buttons_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/aux_container_margin"
-            android:layout_marginBottom="6dp"
-            android:background="@drawable/aux_container_background"
-            android:orientation="vertical"
-            app:bindViewGroupChildrenRotate="@{uimodel}"
-            app:layout_constraintBottom_toTopOf="@+id/manual_mode"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.97"
-            app:setActiveId="@{auxmodel.currentCameraId}"
-            app:setAuxButtonModel="@{auxmodel}"
-            tools:layout_height="100dp"
-            tools:layout_width="50dp" />
+            <com.particlesdevs.photoncamera.ui.camera.views.AuxButtonsLayout
+                android:id="@+id/aux_buttons_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/aux_container_margin"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/aux_container_background"
+                android:orientation="vertical"
+                app:bindViewGroupChildrenRotate="@{uimodel}"
+                app:layout_constraintBottom_toTopOf="@+id/manual_mode"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.97"
+                app:setActiveId="@{auxmodel.currentCameraId}"
+                app:setAuxButtonModel="@{auxmodel}"
+                tools:layout_height="100dp"
+                tools:layout_width="50dp" />
 
-        <include
-            android:id="@+id/manual_mode"
-            layout="@layout/manual_palette"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/layout_bottombar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            tools:visibility="visible" />
+            <include
+                android:id="@+id/manual_mode"
+                layout="@layout/manual_palette"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/layout_bottombar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintVertical_bias="1.0"
+                tools:visibility="visible" />
 
-        <ImageView
-            android:id="@+id/open_close_manual"
-            android:layout_width="@dimen/arrow_size"
-            android:layout_height="@dimen/arrow_size"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/chevron_up"
-            android:contentDescription="Arrow"
-            android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@id/layout_bottombar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            <ImageView
+                android:id="@+id/open_close_manual"
+                android:layout_width="@dimen/arrow_size"
+                android:layout_height="@dimen/arrow_size"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/chevron_up"
+                android:contentDescription="Arrow"
+                android:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@id/layout_bottombar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
-        <include
-            android:id="@+id/layout_bottombar"
-            layout="@layout/layout_main_bottombar"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dummy_reference_view" />
+            <include
+                android:id="@+id/layout_bottombar"
+                layout="@layout/layout_main_bottombar"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dummy_reference_view" />
 
-        <com.particlesdevs.photoncamera.ui.camera.views.settingsbar.SettingsBarLayout
-            android:id="@+id/settings_bar"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:elevation="@dimen/standard_20"
-            app:bindRotate="@{uimodel}"
-            app:layout_constraintBottom_toTopOf="@id/layout_bottombar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_max="300dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:settingsBarVisibility="@{uimodel.settingsBarVisibility}" />
+            <com.particlesdevs.photoncamera.ui.camera.views.settingsbar.SettingsBarLayout
+                android:id="@+id/settings_bar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:elevation="@dimen/standard_20"
+                app:bindRotate="@{uimodel}"
+                app:layout_constraintBottom_toTopOf="@id/layout_bottombar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_max="300dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:settingsBarVisibility="@{uimodel.settingsBarVisibility}" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include

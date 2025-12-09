@@ -79,10 +79,6 @@ public class Specific {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "useAlternateMagnifierMode": {
-                    specificSetting.useAlternateMagnifierMode = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;

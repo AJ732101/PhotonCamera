@@ -22,7 +22,6 @@ public class SpecificSetting {
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
-    public boolean useAlternateMagnifierMode = false;
     public SpecificSetting(){
     }
 }

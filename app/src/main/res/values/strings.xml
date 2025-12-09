@@ -152,6 +152,7 @@
     <string name="turn_on_dng_compression">DNG Compression</string>
     <string name="turn_on_extend_iso">Extend ISO</string>
     <string name="turn_on_extend_exposure">Extend Exposure</string>
+    <string name="turn_on_alternate_loupe">Alternate Loupe (Center Magnifier)</string>
 
     <!-- Video settings strings -->
     <string name="codec">Codec</string>

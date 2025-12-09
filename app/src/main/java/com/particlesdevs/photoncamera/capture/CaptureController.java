@@ -2253,39 +2253,45 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void magnifyViewfinder () {
         if (mIsViewFinderMagnified) {
             if (PhotonCamera.getSettings().zoom2X) {
-                if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+                if (PhotonCamera.getSettings().useAlternateLoupe) {
                     if (mMainRenderer != null) {
                         mMainRenderer.setMagnifyEnabled(false);
                     }
                 }
                 else {
-                   mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+                    }
                 }
             }
             else {
-                if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+                if (PhotonCamera.getSettings().useAlternateLoupe) {
                     if (mMainRenderer != null) {
                         mMainRenderer.setMagnifyEnabled(false);
                     }
                 }
                 else {
-                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                    }
                 }
             }
         }
         else {
-            if (PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+            if (PhotonCamera.getSettings().useAlternateLoupe) {
                 if (mMainRenderer != null) {
                     mMainRenderer.setMagnifyEnabled(true);
                 }
             }
             else {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 4.0f);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 4.0f);
+                }
             }
         }
         mIsViewFinderMagnified = !mIsViewFinderMagnified;
 
-        if (!PhotonCamera.getSpecific().specificSetting.useAlternateMagnifierMode) {
+        if (!PhotonCamera.getSettings().useAlternateLoupe) {
             try {
                 mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
             } catch (CameraAccessException e) {

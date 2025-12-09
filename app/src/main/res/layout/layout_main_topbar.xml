@@ -217,14 +217,14 @@
                 app:layout_constraintEnd_toStartOf="@+id/settings_button"
                 tools:visibility="visible" />
 
-            <ImageButton
+            <Button
                 android:id="@+id/settings_button"
-                style="@style/Widget.AppCompat.ImageButton"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="@drawable/ic_settings"
                 android:onClick="@{top_bar_click_listener}"
                 android:src="@drawable/ic_settings"
+                android:scaleType="center"
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"

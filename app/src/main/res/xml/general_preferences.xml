@@ -89,6 +89,14 @@
             android:summary=""
             android:icon="@drawable/photo_prints_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_alternate_loupe_key"
+            android:defaultValue="@bool/pref_use_alternate_loupe_default"
+            android:title="@string/turn_on_alternate_loupe"
+            android:summary="If on a part of the center is 4x magnified, if off the whole viewfinder ist 4x magnified"
+            android:icon="@drawable/zoom_in_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

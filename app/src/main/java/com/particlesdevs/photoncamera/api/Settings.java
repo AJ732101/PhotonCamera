@@ -97,6 +97,7 @@ public class Settings {
     public String tenBitSurfaceTarget = "HEVC";
     public float digitalZoomFactor = 2;
     public boolean useExternalGallery = true;
+    public boolean useAlternateLoupe = true;
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
@@ -151,6 +152,7 @@ public class Settings {
         useExtendIso = PreferenceKeys.useExtendIsoOn();
         useExtendExposure = PreferenceKeys.useExtendExposureOn();
         useExternalGallery = PreferenceKeys.useExternalGallery();
+        useAlternateLoupe = PreferenceKeys.useAlternateLupe();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();
