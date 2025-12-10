@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.BlackLevelPattern;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -242,5 +243,32 @@ public class CameraReflectionApi {
 
     public static Field[] getAllMetadataFields() {
         return CameraMetadata.class.getDeclaredFields();
+    }
+
+    private static CaptureResult.Key<byte[]> sHdr10PlusOemKey;
+
+    public static byte[] getHdr10PlusOem(TotalCaptureResult result) {
+        // Use a static variable to cache the reflective lookup for performance.
+        // This avoids doing the expensive reflection work for every single frame.
+        if (sHdr10PlusOemKey == null) {
+            try {
+                // Get the hidden STATICS_HDR10_PLUS_OEM field from the CaptureResult class.
+                Field field = RestrictionBypass.getDeclaredField(CaptureResult.class, "STATISTICS_HDR10_PLUS_OEM");
+                // Since it's a static field, the first argument to get() is null.
+                sHdr10PlusOemKey = (CaptureResult.Key<byte[]>) field.get(null);
+            } catch (Exception e) {
+                // If it fails once, it will likely always fail. Log an error.
+                Log.e("CameraAPI", "Failed to get CaptureResult.Key for STATISTICS_HDR10_PLUS_OEM", e);
+                // Return null to indicate that the key is not available.
+                return null;
+            }
+        }
+
+        // If the key was successfully retrieved, use it to get the value from the result.
+        if (sHdr10PlusOemKey != null) {
+            return result.get(sHdr10PlusOemKey);
+        }
+
+        return null;
     }
 }

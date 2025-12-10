@@ -26,6 +26,7 @@ public class FileManager {
     public static File sPHOTON_RAW_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Raw//");
     public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//HEIC_10_Bit//");
     public static File sPHOTON_APV_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//APV//");
+    public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//M4A//");
     public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//AVIF//");
     public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Tuning//");
     public static File sDCIM_CAMERA = new File(sEXTERNAL_DIR + "//DCIM//Camera//");
@@ -39,6 +40,7 @@ public class FileManager {
         Log.d(TAG, "CreatedFolder : " + sPHOTON_TEN_BIT_HEIC_DIR + '=' + sPHOTON_TEN_BIT_HEIC_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_AVIF_DIR + '=' + sPHOTON_AVIF_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_APV_DIR + '=' + sPHOTON_APV_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_M4A_DIR + '=' + sPHOTON_M4A_DIR.mkdirs());
     }
 
     public static void ScanRemovedFile(File f){

@@ -36,6 +36,10 @@ public class ImagePath {
         return getNewImageFilePath("heif");
     }
 
+    public static Path newAudioFilePath() {
+        return getNewImageFilePath("m4a");
+    }
+
     public static Path newAVIFFilePath() {
         return getNewImageFilePath("avif");
     }
@@ -61,6 +65,9 @@ public class ImagePath {
         }
         else if (extension.equalsIgnoreCase("apv")) {
             dir = FileManager.sPHOTON_APV_DIR;
+        }
+        else if (extension.equalsIgnoreCase("m4a")) {
+            dir = FileManager.sPHOTON_M4A_DIR;
         }
         String addOptions = "";
         if (PhotonCamera.getSettings().zoom2X) {

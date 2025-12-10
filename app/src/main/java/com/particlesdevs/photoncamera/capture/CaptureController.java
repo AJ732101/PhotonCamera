@@ -53,12 +53,14 @@ import android.media.MediaCodecInfo;
 import android.media.AudioRecord;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 
+import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
@@ -113,6 +115,9 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -356,6 +361,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * MediaRecorder
      */
     private MediaRecorder mMediaRecorder = null;
+    private MediaRecorder mAudioRecorder = null;
     private MediaFormat mVideoFormat = null;
     private MediaFormat mAudioFormat = null;
     private MediaCodec mVideoCodec = null;
@@ -486,6 +492,26 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
+            if (mIsRecordingVideo && // Use your actual state variable for recording
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                    PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus) {
+
+                // 1. Get the dynamic HDR10+ metadata using your reflection helper.
+                byte[] hdr10PlusData = CameraReflectionApi.getHdr10PlusOem(result);
+
+                if (hdr10PlusData != null) {
+                    // 2. Create a Bundle to hold the parameter.
+                    Bundle params = new Bundle();
+                    params.putByteArray(MediaCodec.PARAMETER_KEY_HDR10_PLUS_INFO, hdr10PlusData);
+
+                    // 3. Apply the parameter to the video codec.
+                    // Make sure your mVideoCodec instance is accessible here.
+                    if (mVideoCodec != null) {
+                        mVideoCodec.setParameters(params);
+                    }
+                }
+            }
+
             Object exposure = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
             Object iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
             Object focus = result.get(CaptureResult.LENS_FOCUS_DISTANCE);
@@ -689,7 +715,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
             (PhotonCamera.getSettings().previewFormat == 999999991)) && // SW HEIC/HEIF
             (PhotonCamera.getSettings().rawSaver != 2) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
         return false;
@@ -1333,7 +1360,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
-        if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+        else if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             maxImagerReaderImages = 1;
         }
 
@@ -2395,6 +2422,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     int frameCount = (int) (result.getFrameNumber() - baseFrameNumber[0]);
                     Log.v("BurstCounter", "CaptureCompleted! FrameCount:" + frameCount);
                     long frametime = 100;
+
                     Object time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
                     if(time != null) frametime = (long)time;
                     cameraEventsListener.onFrameCaptureCompleted(
@@ -2883,9 +2911,49 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return (SystemClock.elapsedRealtime() - mCaptureTimer) > PRECAPTURE_TIMEOUT_MS;
     }
 
+    public void setupAudioRecorder(String filePath) {
+        if (mAudioRecorder == null) {
+            mAudioRecorder = new MediaRecorder();
+        }
+
+        try {
+            // 1. Define output file path
+            if (filePath.isEmpty()) {
+                Path audioFilePath = ImagePath.getNewImageFilePath("m4a");
+                filePath = audioFilePath.toString();
+            }
+
+            // 2. Configure the MediaRecorder
+            mAudioRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
+            mAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mAudioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mAudioRecorder.setAudioEncodingBitRate(PhotonCamera.getSettings().audioBitrate * 1024);
+            mAudioRecorder.setAudioSamplingRate(PhotonCamera.getSettings().audioSps);
+            mAudioRecorder.setAudioChannels(PhotonCamera.getSettings().audioChannels);
+            mAudioRecorder.setOutputFile(filePath);
+
+            // 3. Prepare and start recording
+            mAudioRecorder.prepare();
+            mAudioRecorder.start();
+            Log.d(TAG, "Audio recording started, saving to: " + filePath);
+
+        } catch (IOException e) {
+            Log.e(TAG, "prepare() failed for audio recording", e);
+        }
+    }
+
+    public void releaseAudioRecorder() {
+        if (mAudioRecorder != null) {
+            mAudioRecorder.stop();
+            mAudioRecorder.release();
+            mAudioRecorder = null;
+        }
+    }
+
     public void callUnlimitedEnd() {
         onUnlimited = false;
         //mImageSaver.unlimitedEnd();
+        releaseAudioRecorder();
         mBackgroundHandler.post(() -> mImageSaver.processEnd());
         abortCaptures();
         createCameraPreviewSession(false);
@@ -2894,6 +2962,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void callUnlimitedStart() {
         onUnlimited = true;
+        setupAudioRecorder("");
         takePicture();
     }
 
@@ -3125,7 +3194,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         if (PhotonCamera.getSettings().videoCodec.equals("HEVC") || PhotonCamera.getSettings().videoCodec.equals("H265")) {
             if (PhotonCamera.getSettings().video10bit && PhotonCamera.getSettings().videoHDR) {
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10);
+                format.setInteger(MediaFormat.KEY_PROFILE, PhotonCamera.getSettings().hdrMode);
             }
             else if (PhotonCamera.getSettings().video10bit && !PhotonCamera.getSettings().videoHDR) {
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
@@ -3217,7 +3286,36 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (PhotonCamera.getSettings().video10bit && PhotonCamera.getSettings().videoHDR) {
                 format.setFeatureEnabled("hdr-editing", true);
                 format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
+                var test = PhotonCamera.getSettings().transferFunction;
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().transferFunction);
+
+                if (PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10) {
+                    ByteBuffer hdrStaticInfo = ByteBuffer.allocate(25);
+                    hdrStaticInfo.order(ByteOrder.LITTLE_ENDIAN);
+
+                    // Mastering Display Color Primaries (e.g., P3 or BT.2020)
+                    // For BT.2020 primaries:
+                    hdrStaticInfo.putShort(0, (short) (0.708 * 50000));  // Primary R, x
+                    hdrStaticInfo.putShort(2, (short) (0.292 * 50000));  // Primary R, y
+                    hdrStaticInfo.putShort(4, (short) (0.170 * 50000));  // Primary G, x
+                    hdrStaticInfo.putShort(6, (short) (0.797 * 50000));  // Primary G, y
+                    hdrStaticInfo.putShort(8, (short) (0.131 * 50000));  // Primary B, x
+                    hdrStaticInfo.putShort(10, (short) (0.046 * 50000)); // Primary B, y
+                    hdrStaticInfo.putShort(12, (short) (0.3127 * 50000)); // White Point, x
+                    hdrStaticInfo.putShort(14, (short) (0.3290 * 50000)); // White Point, y
+
+                    // Mastering Display Max/Min Luminance (in Nits)
+                    // These are typical values for high-end mastering displays.
+                    hdrStaticInfo.putShort(16, (short) (1000 * 10000));      // Max luminance (e.g., 1000 Nits)
+                    hdrStaticInfo.putShort(18, (short) (0.005 * 10000));     // Min luminance (e.g., 0.005 Nits)
+
+                    // Content Light Level Information
+                    hdrStaticInfo.putShort(20, (short) 1000); // MaxCLL: Maximum Content Light Level (e.g., 1000 Nits)
+                    hdrStaticInfo.putShort(22, (short) 400);  // MaxFALL: Maximum Frame-Average Light Level (e.g., 400 Nits)
+
+                    format.setByteBuffer(MediaFormat.KEY_HDR_STATIC_INFO, hdrStaticInfo);
+                }
             }
             else {
                 format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
@@ -3296,7 +3394,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         MediaCodec videoEncoder = null;
         try {
-            videoEncoder = MediaCodec.createEncoderByType(mimeVid);
+            if (PhotonCamera.getSettings().videoEncoderName.equals("Device Default") || !mimeVid.equals(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
+                videoEncoder = MediaCodec.createEncoderByType(mimeVid);
+            }
+            else {
+                videoEncoder = MediaCodec.createByCodecName(PhotonCamera.getSettings().videoEncoderName);
+            }
+
             //maxEncoderRes = maxEncoderSizes.getMaxResForMimeType(mimeVid);
         }
         catch (Exception e) {
@@ -3325,6 +3429,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mediaMuxer.setOrientationHint(getOrientation());
         }
         Log.d(TAG, "createMediaMuxer done - " + mediaMuxer.toString());
+
+        String fullPath = vid.getAbsolutePath();
+        int lastDotIndex = fullPath.lastIndexOf('.');
+        String audioPath;
+        if (lastDotIndex > 0) {
+            audioPath = fullPath.substring(0, lastDotIndex);
+        } else {
+            audioPath = fullPath;
+        }
+        audioPath += ".m4a";
+        setupAudioRecorder(audioPath);
+
         return mediaMuxer;
     }
 
@@ -3399,6 +3515,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             showToast("Invalid Recording Configuration");
             return false;
         }
+
         Log.d(TAG, "setUpMediaRecorderNew done");
         return true;
     }
@@ -3689,6 +3806,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void stopRecordingVideo() {
         Log.d(TAG, "stop video recording");
         mIsRecordingVideo = false;
+
+        releaseAudioRecorder();
 
         if (PhotonCamera.getSettings().videoNewRec) {
             releaseMediaRecorderNew();
