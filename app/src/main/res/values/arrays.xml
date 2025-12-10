@@ -506,4 +506,42 @@
         <item>8</item>
     </string-array>
 
+    <string-array name="hdr_mode_entries">
+        <item>HDR10</item>
+        <item>HDR10+</item>
+    </string-array>
+
+    <string-array name="hdr_mode_entryValues">
+        <item>4096</item>
+        <item>8192</item>
+    </string-array>
+
+    <string-array name="transfer_function_entries">
+        <item>SDR</item>
+        <item>Linear</item>
+        <item>HDR - HLG (ITU-R BT.2100)</item>
+        <item>HDR - PQ (SMPTE ST 2084)</item>
+    </string-array>
+
+    <string-array name="transfer_function_entryValues">
+        <item>3</item>
+        <item>1</item>
+        <item>7</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="video_encoder_name_entries">
+        <item>Device Default</item>
+        <item>c2.qti.hevc.encoder</item>
+        <item>c2.qti.hevc.encoder.hdr</item>
+        <item>OMX.qcom.video.encoder.hevc</item>
+    </string-array>
+
+    <string-array name="video_encoder_name_entryValues">
+        <item>Device Default</item>
+        <item>c2.qti.hevc.encoder</item>
+        <item>c2.qti.hevc.encoder.hdr</item>
+        <item>OMX.qcom.video.encoder.hevc</item>
+    </string-array>
+
 </resources>

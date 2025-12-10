@@ -57,7 +57,7 @@
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
         app:key="sensor_and_more_settings_category"
-        app:title="@string/other_settings_screen_title">
+        app:title="@string/other_settings_separator_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"

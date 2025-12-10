@@ -106,6 +106,9 @@
     <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
     <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>
     <string name="pref_keyframe_interval_key" translatable="false">pref_keyframe_interval_key</string>
+    <string name="pref_hdr_mode_key" translatable="false">pref_hdr_mode_key</string>
+    <string name="pref_transfer_function_key" translatable="false">pref_transfer_function_key</string>
+    <string name="pref_video_encoder_name_key" translatable="false">pref_video_encoder_name_key</string>
 
     <!-- Audio settings strings -->
     <string name="pref_audio_processing_key" translatable="false">pref_audio_processing_key</string>

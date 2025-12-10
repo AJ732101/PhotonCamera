@@ -68,6 +68,9 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIDEO_FRAMERATE.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_HEIGHT.mValue);
         COMMON_KEYS.add(Key.KEY_KEYFRAME_INTERVAL.mValue);
+        COMMON_KEYS.add(Key.KEY_HDR_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_TRANSFER_FUNCTION.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_ENCODER_NAME.mValue);
         // QualityDoesMatter - Audio
         COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
@@ -149,6 +152,9 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, resources.getString(R.string.pref_video_resolution_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR, resources.getString(R.string.pref_bitrate_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_KEYFRAME_INTERVAL, resources.getString(R.string.pref_keyframe_interval_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_MODE, resources.getString(R.string.pref_hdr_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME, resources.getString(R.string.pref_video_codec_name_default_value));
         // QualityDoesMatter - Audio
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
@@ -712,6 +718,17 @@ public class PreferenceKeys {
     public static int getKeyframeInterval() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_KEYFRAME_INTERVAL);
     }
+    public static int getHdrMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_HDR_MODE);
+    }
+
+    public static int getTransferFunction() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION);
+    }
+
+    public static String getVideoEncoderName() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME);
+    }
 
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
@@ -772,6 +789,9 @@ public class PreferenceKeys {
         KEY_EDGE_PROCESSING(R.string.pref_edge_processing_key),
         KEY_2X_ZOOM(R.string.pref_2x_zoom_key),
         KEY_KEYFRAME_INTERVAL(R.string.pref_keyframe_interval_key),
+        KEY_HDR_MODE(R.string.pref_hdr_mode_key),
+        KEY_TRANSFER_FUNCTION(R.string.pref_transfer_function_key),
+        KEY_VIDEO_ENCODER_NAME(R.string.pref_video_encoder_name_key),
 
         /**
          * QualityDoesMatter - Audio settings keys

@@ -101,6 +101,9 @@ public class Settings {
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
+    public int hdrMode = 4096;
+    public int transferFunction = 7;
+    public String videoEncoderName = "Device Default";
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -163,6 +166,9 @@ public class Settings {
         video10bit = PreferenceKeys.is10bitVideoOn();
         videoNewRec = PreferenceKeys.isNeRecVideoOn();
         keyframeInterval = PreferenceKeys.getKeyframeInterval();
+        hdrMode = PreferenceKeys.getHdrMode();
+        transferFunction = PreferenceKeys.getTransferFunction();
+        videoEncoderName = PreferenceKeys.getVideoEncoderName();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();

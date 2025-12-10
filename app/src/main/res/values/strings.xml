@@ -166,6 +166,9 @@
     <string name="video_10bit">10 Bit Video</string>
     <string name="video_new_rec">New Recording Pipeline</string>
     <string name="keyframe_interval">Keyframe Interval</string>
+    <string name="hdr_mode">HDR Mode</string>
+    <string name="transfer_function">Transfer Function</string>
+    <string name="video_encoder_name">Video Encoder Name</string>
 
     <!-- Audio settings strings -->
     <string name="audio_processing">Source</string>
@@ -189,7 +192,7 @@
     <string name="bracketing_off">Off (1x)</string>
     <string name="bracketing_normal">Normal (1x, 4x)</string>
     <string name="bracketing_high">High (1x, 8x)</string>
-    <string name="pref_bracketing_key">pref_bracketing_mode_key</string>
+    <string name="pref_bracketing_key" translatable="false">pref_bracketing_mode_key</string>
 
     <!-- Submenus -->
     <string name="general_settings_screen_title">General Settings</string>
@@ -200,7 +203,8 @@
     <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
     <string name="sensor_and_more_settings_screen_title">Sensor Settings (and more)</string>
     <string name="sensor_settings_screen_title">Sensor Settings</string>
-    <string name="other_settings_screen_title">Other Settings</string>
+    <string name="other_settings_separator_title">Other Settings</string>
+    <string name="new_rec_separator_title">New Recording Pipeline</string>
 
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>

@@ -80,14 +80,51 @@
             android:icon="@drawable/video_camera_back_24px"
             android:defaultValue="@bool/pref_new_rec_video_def_value"/>
 
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
-            android:layout="@layout/preference_seekbar"
-            android:key="@string/pref_keyframe_interval_key"
-            android:title="@string/keyframe_interval"
-            android:defaultValue="@string/pref_keyframe_interval_default_value"
-            app:maxValue="100"
-            app:minValue="1"
-            android:icon="@drawable/arrow_range_24px"/>
+        <PreferenceCategory
+            android:layout="@layout/preference_category_layout"
+            app:key="sensor_and_more_settings_category"
+            app:title="@string/new_rec_separator_title">
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+                android:layout="@layout/preference_seekbar"
+                android:key="@string/pref_keyframe_interval_key"
+                android:title="@string/keyframe_interval"
+                android:defaultValue="@string/pref_keyframe_interval_default_value"
+                app:maxValue="100"
+                app:minValue="1"
+                android:icon="@drawable/arrow_range_24px"/>
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_video_encoder_name_key"
+                android:title="@string/video_encoder_name"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/compress_24px"
+                android:entries="@array/video_encoder_name_entries"
+                android:entryValues="@array/video_encoder_name_entryValues"
+                android:defaultValue="@string/pref_video_codec_name_default_value" />
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_hdr_mode_key"
+                android:title="@string/hdr_mode"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/hdr_on_24px"
+                android:entries="@array/hdr_mode_entries"
+                android:entryValues="@array/hdr_mode_entryValues"
+                android:defaultValue="@string/pref_hdr_mode_default_value" />
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_transfer_function_key"
+                android:title="@string/transfer_function"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/show_chart_24px"
+                android:entries="@array/transfer_function_entries"
+                android:entryValues="@array/transfer_function_entryValues"
+                android:defaultValue="@string/pref_transfer_function_default_value" />
+
+        </PreferenceCategory>
 
         <Preference
             android:layout_height="56dp"

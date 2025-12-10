@@ -94,7 +94,7 @@
             android:key="@string/pref_effect_mode_key"
             android:title="@string/effect_mode"
             app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/show_chart_24px"
+            android:icon="@drawable/wand_shine_24px"
             android:entries="@array/effect_mode_entries"
             android:entryValues="@array/effect_mode_entryValues"
             android:defaultValue="@string/pref_effect_mode_default_value" />
