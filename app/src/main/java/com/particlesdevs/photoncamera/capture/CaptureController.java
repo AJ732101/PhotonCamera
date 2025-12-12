@@ -1699,6 +1699,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    private void setIsoPriorityMode(CaptureRequest.Builder reqBuilder, int desiredIso) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            reqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+            reqBuilder.set(CaptureRequest.CONTROL_AE_PRIORITY_MODE, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY);
+            reqBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, desiredIso);
+        }
+    }
+
     public void setContrastCurve(CaptureRequest.Builder captureBuilder) {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
         if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
