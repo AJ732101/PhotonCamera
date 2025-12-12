@@ -5,6 +5,9 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Bundle;
+
+import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
@@ -98,7 +101,7 @@ public class SaverImplementation {
         this.processingEventsListener = processingEventsListener;
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
         //image.close();
     }
 

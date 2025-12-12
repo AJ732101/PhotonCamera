@@ -4,8 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.media.Image;
 import android.os.Build;
+import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.util.Log;
 import com.radzivon.bartoshyk.avif.coder.HeifCoder;
@@ -13,6 +15,7 @@ import com.radzivon.bartoshyk.avif.coder.HeifQualityArg;
 import com.radzivon.bartoshyk.avif.coder.PreciseMode;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class HeifEncoder {
@@ -27,7 +30,7 @@ public class HeifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToHeif(Image image, File outputFile, int orientation, int quality) throws IOException {
+    public void encodeYuvToHeif(Image image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException {
         Log.d(TAG, "Starting HEIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -78,8 +81,8 @@ public class HeifEncoder {
             java.nio.file.Files.write(outputFile.toPath(), heifByteArray);
             Log.d(TAG, "Successfully saved HEIF file to: " + outputFile.getAbsolutePath() + " (" + heifByteArray.length / 1024 + " KB)");
 
+            XmpMetaDataWriter.writeXmpMetadata(outputFile, metadata);
         } finally {
-            // As per your screenshot, there is no .release() method, so we don't call it.
             // The Bitmap should be recycled to free up memory.
             if (rotatedBitmap != null && !rotatedBitmap.isRecycled()) {
                 rotatedBitmap.recycle();

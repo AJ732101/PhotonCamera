@@ -1,6 +1,9 @@
 package com.particlesdevs.photoncamera.processing;
 
 import android.media.Image;
+import android.os.Bundle;
+
+import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.processing.DefaultSaver;
@@ -18,7 +21,7 @@ public class HEICSaver extends DefaultSaver {
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         try {
             //IMAGE_BUFFER.add(getFrame(image));

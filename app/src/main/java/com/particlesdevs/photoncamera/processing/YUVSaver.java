@@ -7,8 +7,10 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Size;
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 
 import java.nio.ByteBuffer;
 import java.io.File;
@@ -24,7 +26,7 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image, int orientation, int targetFormat, int quality) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSettings().tenBitSurfaceTarget;
@@ -40,7 +42,7 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 AvifEncoder avifEncoder = new AvifEncoder();
                 try {
-                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality);
+                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality, metadata);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
@@ -56,7 +58,7 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
-                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality);
+                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality, metadata);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
@@ -231,47 +233,6 @@ public class YUVSaver extends DefaultSaver{
                     }
                     // Loop until EOS is reached
                 }
-
-                /*boolean encodingSuccessful = false;
-                while (true) {
-                    int outputBufferId = encoder.dequeueOutputBuffer(bufferInfo, 10000);
-                    if (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                        Log.d(TAG, "Encoder output format changed. Adding track to muxer.");
-                        MediaFormat newFormat = encoder.getOutputFormat();
-                        trackIndex = muxer.addTrack(newFormat);
-                        muxer.start();
-                        muxerStarted = true;
-                    } else if (outputBufferId >= 0) {
-                        ByteBuffer outputBuffer = encoder.getOutputBuffer(outputBufferId);
-                        if (outputBuffer == null) {
-                            throw new RuntimeException("encoder.getOutputBuffer returned null");
-                        }
-
-                        if (bufferInfo.size > 0 && muxerStarted) {
-                            // Adjust buffer to the actual data size
-                            outputBuffer.position(bufferInfo.offset);
-                            outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-
-                            Log.d(TAG, "Writing sample data to muxer. Size: " + bufferInfo.size + " bytes");
-                            muxer.writeSampleData(trackIndex, outputBuffer, bufferInfo);
-                            encodingSuccessful = true;
-                        }
-
-                        encoder.releaseOutputBuffer(outputBufferId, false);
-
-                        // Check for the end of the stream flag
-                        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                            if (!encodingSuccessful) {
-                                throw new IOException("Encoder finished without producing any data. Check encoder configuration and input data.");
-                            }
-                            Log.d(TAG, "End of stream reached. Encoding successful.");
-                            break; // Exit the loop
-                        }
-                    } else if (outputBufferId == MediaCodec.INFO_TRY_AGAIN_LATER) {
-                        Log.d(TAG, "No output from encoder available yet. Retrying...");
-                    }
-                    // Continue looping
-                }*/
 
                 Log.d(TAG, "Successfully saved HEIC/AVIF/APV still image to: " + heicFile.getAbsolutePath());
                 processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());

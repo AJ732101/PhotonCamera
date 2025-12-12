@@ -115,6 +115,8 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -306,6 +308,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean mFlashed = false;
     public ArrayList<GyroBurst> BurstShakiness;
 
+    public Bundle mMetaData = null;
+
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
@@ -325,7 +329,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         @Override
         public void onImageAvailable(ImageReader reader) {
             if (isSingleShotJpegOrHeic()) {
-                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality);
+                if (mMetaData == null) {
+                    mMetaData = new Bundle();
+                }
+                if (mCaptureResult != null) {
+                    Integer iso = mCaptureResult.get(CaptureResult.SENSOR_SENSITIVITY);
+                    if (iso != null) {
+                        mMetaData.putInt("iso", iso);
+                    }
+
+                    Long exposureTime = mCaptureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+                    if (exposureTime != null) {
+                        mMetaData.putLong("exposureTime", exposureTime);
+                    }
+
+                    Float focalLength = mCaptureResult.get(CaptureResult.LENS_FOCAL_LENGTH);
+                    if (focalLength != null) {
+                        mMetaData.putFloat("focalLength", focalLength);
+                    }
+
+                    // Add more metadata as needed...
+                    // e.g., metadata.putString("make", Build.MANUFACTURER);
+                }
+                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;
@@ -495,6 +521,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (mIsRecordingVideo && // Use your actual state variable for recording
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                     PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus) {
+
+                mCaptureResult = result;
 
                 // 1. Get the dynamic HDR10+ metadata using your reflection helper.
                 byte[] hdr10PlusData = CameraReflectionApi.getHdr10PlusOem(result);
@@ -1592,7 +1620,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         });
     }
-    public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) {
+    public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) throws CameraAccessException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
         if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
             if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().frameCount != 1)) {
@@ -1625,15 +1653,48 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_GAMMA_VALUE);
             captureBuilder.set(CaptureRequest.TONEMAP_GAMMA, 1/PhotonCamera.getSpecific().specificSetting.toneMapGamma);
         }
-        if (PhotonCamera.getSpecific().specificSetting.colorTemperature != 99) {
-            try {
-                captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
-                android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
+
+        // check if CaptureRequest.COLOR_CORRECTION_MODE_CCT is supported
+        boolean supportsColorTemperature = false;
+        try {
+            CameraCharacteristics.Key<int[]> key = new CameraCharacteristics.Key<>("android.colorCorrection.availableModes", int[].class);
+            int[] availableCorrectionModes = mCameraManager.getCameraCharacteristics("0").get(key);
+            Log.d(TAG, "Supported color correction methods:");
+            for (int mode : availableCorrectionModes) {
+                if (mode == 0) {
+                    Log.d(TAG, "   COLOR_CORRECTION_MODE_TRANSFORM_MATRIX");
+                }
+                if (mode == 1) {
+                    Log.d(TAG, "   COLOR_CORRECTION_MODE_FAST");
+                }
+                if (mode == 2) {
+                    Log.d(TAG, "   COLOR_CORRECTION_MODE_HIGH_QUALITY");
+                }
+                if (mode == 3) {
+                    supportsColorTemperature = true;
+                    Log.d(TAG, "   COLOR_CORRECTION_MODE_CCT");
+                }
             }
-            catch (Exception e){
-                Log.d(TAG, "setCaptureRequestBuilder:"+e);
+        }
+        catch (Exception e) {
+            Log.d(TAG, "Exception: " + e.getMessage());
+        }
+
+        if (PhotonCamera.getSpecific().specificSetting.colorTemperature != 99) {
+            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) && supportsColorTemperature) {
+                captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_CCT);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TEMPERATURE, PhotonCamera.getSpecific().specificSetting.colorTemperature);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TINT, (int) PhotonCamera.getSpecific().specificSetting.colorTint);
+            } else {
+                try {
+                    captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
+                    captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
+                    android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
+                    captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
+                } catch (Exception e) {
+                    Log.d(TAG, "setCaptureRequestBuilder:" + e);
+                }
             }
         }
     }
@@ -2101,7 +2162,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mPreviewAFMode = PreferenceKeys.getAfMode();
 
         // QualityDoesMatter
-        setAdvancedParameters(mPreviewRequestBuilder, true);
+        try {
+            setAdvancedParameters(mPreviewRequestBuilder, true);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
@@ -2423,6 +2492,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Log.v("BurstCounter", "CaptureCompleted! FrameCount:" + frameCount);
                     long frametime = 100;
 
+                    mCaptureResult = result;
+
                     Object time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
                     if(time != null) frametime = (long)time;
                     cameraEventsListener.onFrameCaptureCompleted(
@@ -2493,7 +2564,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void applySingleShotSettings(CaptureRequest.Builder captureBuilder) {
-        setAdvancedParameters(captureBuilder, false);
+        try {
+            setAdvancedParameters(captureBuilder, false);
+        } catch (CameraAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, false, useMaximumResolutionKey);
 
         setDigitalZoomFactor(captureBuilder);
@@ -2545,6 +2626,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
+                    mCaptureResult = result;
                     Log.d(TAG, "Single shot capture completed.");
                 }
 
@@ -2595,7 +2677,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
 
             // QualityDoesMatter
-            setAdvancedParameters(captureBuilder, false);
+            try {
+                setAdvancedParameters(captureBuilder, false);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
@@ -2735,6 +2825,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
 
+                    mCaptureResult = result;
                     int frameCount = (int) (result.getFrameNumber() - baseFrameNumber[0]);
                     Log.v("BurstCounter", "CaptureCompleted! FrameCount:" + frameCount);
                     Object time = result.get(CaptureResult.SENSOR_TIMESTAMP);

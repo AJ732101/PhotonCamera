@@ -2,6 +2,10 @@ package com.particlesdevs.photoncamera.processing;
 
 import android.media.Image;
 import android.os.AsyncTask;
+import android.os.Bundle;
+
+import androidx.exifinterface.media.ExifInterface;
+
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.R;
@@ -14,7 +18,7 @@ public class RAW16Saver extends DefaultSaver{
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
         switch (PhotonCamera.getSettings().selectedMode) {
             case RAWVIDEO:
                 Log.d(TAG, "rawvideoaddImage: " + this + " " + mRawVideoProcessor);

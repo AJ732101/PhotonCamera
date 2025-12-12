@@ -8,6 +8,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Bundle;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
@@ -78,7 +79,7 @@ public class ImageSaver {
             Log.d(TAG,"Implementation:" + implementation);
             implementation.frameCount = desiredFrameCount;
             implementation.newBurst = newBurst;
-            implementation.addImage(mImage, 0, 0, 75);
+            implementation.addImage(mImage, 0, 0, 75, null);
         } else {
             Image mImage;
             try {
@@ -93,7 +94,7 @@ public class ImageSaver {
         frameCounter++;
     }
 
-    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality) {
+    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality, Bundle metadata) {
         Log.v(TAG, "directSaveImage()");
         Image mImage;
         try {
@@ -109,7 +110,7 @@ public class ImageSaver {
         Log.d(TAG,"Implementation:" + implementation);
         implementation.frameCount = desiredFrameCount;
         implementation.newBurst = newBurst;
-        implementation.addImage(mImage, orientation, targetFormat, quality);
+        implementation.addImage(mImage, orientation, targetFormat, quality, metadata);
     }
 
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
