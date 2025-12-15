@@ -154,6 +154,7 @@
     <string name="turn_on_extend_exposure">Extend Exposure</string>
     <string name="turn_on_alternate_loupe">Alternate Loupe (Center Magnifier)</string>
     <string name="virtual_horizon">Virtual Horizon</string>
+    <string name="virtual_horizon_text">Virtual Horizon Angle Text</string>
 
     <!-- Video settings strings -->
     <string name="codec">Codec</string>

@@ -99,6 +99,7 @@ public class Settings {
     public boolean useExternalGallery = true;
     public boolean useAlternateLoupe = true;
     public boolean useVirtualHorizon = true;
+    public boolean useVirtualHorizonText = false;
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
@@ -158,6 +159,7 @@ public class Settings {
         useExternalGallery = PreferenceKeys.useExternalGallery();
         useAlternateLoupe = PreferenceKeys.useAlternateLupe();
         useVirtualHorizon = PreferenceKeys.useVirtualHorizon();
+        useVirtualHorizonText = PreferenceKeys.useVirtualHorizonText();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();

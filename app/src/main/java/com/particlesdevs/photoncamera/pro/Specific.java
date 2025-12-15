@@ -75,10 +75,6 @@ public class Specific {
                     specificSetting.useCodeAuroraMultiFrameNoiseReduction = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "showVirtualHorizonText": {
-                    specificSetting.showVirtualHorizonText = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "useCodeAuroraCinematicMode": {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
                     break;

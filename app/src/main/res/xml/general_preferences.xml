@@ -105,6 +105,14 @@
             android:summary=""
             android:icon="@drawable/rotation_3d_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_virtual_horizon_text_key"
+            android:defaultValue="@bool/pref_virtual_horizon_text_default"
+            android:title="@string/virtual_horizon_text"
+            android:summary=""
+            android:icon="@drawable/text_rotation_angledown_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

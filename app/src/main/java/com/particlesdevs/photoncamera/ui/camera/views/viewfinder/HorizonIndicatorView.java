@@ -114,7 +114,7 @@ public class HorizonIndicatorView extends View {
         super.onDraw(canvas);
         int centerX = getWidth() / 2;
         int centerY = getHeight() / 2;
-        if (isViewfinderMagnified) {
+        if (isViewfinderMagnified && PhotonCamera.getSettings().useAlternateLoupe) {
             centerY -= offset;
         }
         float lineHalf = LINE_LENGTH_PX / 2f;
@@ -133,12 +133,12 @@ public class HorizonIndicatorView extends View {
         canvas.rotate(currentDisplayRotation, centerX, centerY);
         canvas.drawLine(centerX - 220, centerY, centerX - 180, centerY, targetPaint);
         canvas.drawLine(centerX + 180, centerY, centerX + 220, centerY, targetPaint);
-        if (PhotonCamera.getSpecific().specificSetting.showVirtualHorizonText) {
+        if (PhotonCamera.getSettings().useVirtualHorizonText) {
             String formattedPitch = String.format(Locale.US, "%.2f°", pitchAngle);
             String formattedRoll = String.format(Locale.US, "%.2f°", rollAngle);
             String formattedYaw = String.format(Locale.US, "%.2f°", yawAngle);
-            canvas.drawText(formattedPitch, centerX - lineHalf - 180, centerY + 35, debugTextPaintRed);
-            canvas.drawText(formattedRoll, centerX - lineHalf - 180, centerY - 35, debugTextPaintYellow);
+            canvas.drawText(formattedPitch, centerX - lineHalf - 150, centerY + 35, debugTextPaintRed);
+            canvas.drawText(formattedRoll, centerX - lineHalf - 150, centerY - 35, debugTextPaintYellow);
             //canvas.drawText(formattedYaw, centerX - lineHalf - 180, centerY - 70, debugTextPaintGreen);
         }
         canvas.restore();
