@@ -26,6 +26,7 @@ public class VendorTagUtils {
         }
         return supported;
     }
+
     @SuppressLint({"NewApi", "LocalSuppress"})
     public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
         boolean isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
@@ -171,6 +172,31 @@ public class VendorTagUtils {
                 if (isSupported(builder, enableAIDenoiser)) {
                     builder.set(enableAIDenoiser, (int) 1);
                 }
+
+                /*var liveHdrMode = new CaptureRequest.Key<>("samsung.android.control.liveHdrMode", Integer.class);
+                if (isSupported(builder, liveHdrMode)) {
+                    builder.set(liveHdrMode, (int)4);
+                }
+
+                var liveHdrLevel = new CaptureRequest.Key<>("samsung.android.control.liveHdrLevel", Integer.class);
+                if (isSupported(builder, liveHdrLevel)) {
+                    builder.set(liveHdrLevel, (int)1);
+                }*/
+
+                /*var captureHint = new CaptureRequest.Key<>("samsung.android.control.captureHint", Integer.class);
+                if (isSupported(builder, captureHint)) {
+                    builder.set(captureHint, (int)0);
+                }*/
+
+                /*var colorTemperature = new CaptureRequest.Key<>("samsung.android.control.colorTemperature", Integer.class);
+                if (isSupported(builder, colorTemperature)) {
+                    builder.set(colorTemperature, (int)6000);
+                }*/
+
+                /*var flipMode = new CaptureRequest.Key<>("samsung.android.control.flipMode", Integer.class);
+                if (isSupported(builder, flipMode)) {
+                    builder.set(flipMode, (int)1);
+                }*/
             }
 
             if (burst) {

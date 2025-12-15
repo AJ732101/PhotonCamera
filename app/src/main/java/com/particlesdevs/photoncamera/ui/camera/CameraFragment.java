@@ -41,6 +41,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.HorizonIndicatorView;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
@@ -161,6 +162,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private SettingsBarEntryProvider settingsBarEntryProvider;
     private ManualModeConsole manualModeConsole;
     public float displayAspectRatio;
+    private HorizonIndicatorView mHorizonIndicatorView;
 
     public CameraFragment() {
         Log.v(TAG, "fragment created");
@@ -295,6 +297,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         hdrIndicatorTextView = cameraFragmentBinding.hdrIndicatorText;
         currentIsoTextView = cameraFragmentBinding.currentIsoText;
         currentShutterTextView = cameraFragmentBinding.currentShutterText;
+        mHorizonIndicatorView = cameraFragmentBinding.layoutViewfinder.horizonIndicatorView;
 
         MainRenderer mainRenderer = textureView.getRenderer();
         if (captureController != null && mainRenderer != null) {
@@ -359,6 +362,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         AsyncTask.execute(() -> {
             PhotonCamera.getGyro().register();
             PhotonCamera.getGravity().register();
+            PhotonCamera.getHorizonAndGear().register();
             burstPlayer = MediaPlayer.create(activity, R.raw.sound_burst2);
             endPlayer = MediaPlayer.create(activity,R.raw.sound_end);
             cameraFragmentViewModel.updateGalleryThumb(null);
@@ -386,6 +390,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         timerHandlerAlways.removeCallbacks(timerRunnableAlways);
         PhotonCamera.getGravity().unregister();
         PhotonCamera.getGyro().unregister();
+        PhotonCamera.getHorizonAndGear().unregister();
         PhotonCamera.getSettings().saveID();
         captureController.closeCamera();
 //        stopBackgroundThread();
@@ -462,6 +467,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         if (captureController == null) {
             return;
         }
+
+        if (PhotonCamera.getSpecific().specificSetting.showVirtualHorizon && (mHorizonIndicatorView != null) && (PhotonCamera.getHorizonAndGear() != null)) {
+            mHorizonIndicatorView.updateDisplayRotation(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
+            mHorizonIndicatorView.updateAngles(PhotonCamera.getHorizonAndGear().getRoll(), PhotonCamera.getHorizonAndGear().getPitch(), PhotonCamera.getHorizonAndGear().getYaw());
+        }
+
         surfaceView.post(() -> {
             captureController.videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));

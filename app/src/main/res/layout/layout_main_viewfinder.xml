@@ -64,6 +64,16 @@
                     app:layout_constraintTop_toTopOf="@id/texture"
                     android:background="#00000000"
                     tools:visibility="visible" />
+
+            <com.particlesdevs.photoncamera.ui.camera.views.viewfinder.HorizonIndicatorView
+                    android:id="@+id/horizon_indicator_view"
+                    android:layout_width="420dp"
+                    android:layout_height="420dp"
+                    app:layout_constraintTop_toTopOf="@+id/texture"
+                    app:layout_constraintBottom_toBottomOf="@+id/texture"
+                    app:layout_constraintStart_toStartOf="@+id/texture"
+                    app:layout_constraintEnd_toEndOf="@+id/texture" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--Capture Progress circle-->

@@ -12,6 +12,8 @@ public class SpecificSetting {
     public boolean statisticsHotPixelMapMode = true;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
+    public boolean showVirtualHorizon = true;
+    public boolean showVirtualHorizonText = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;

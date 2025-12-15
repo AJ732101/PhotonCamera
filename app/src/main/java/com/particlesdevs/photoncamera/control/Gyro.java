@@ -107,6 +107,7 @@ public class Gyro {
     boolean integrate = false;
     float x,y,z;
     private ArrayList<GyroBurst> BurstShakiness;
+
     public void PrepareGyroBurst(long[] capturingTimes,ArrayList<GyroBurst> burstShakiness) {
         lock = true;
         capturingNumber = 0;
@@ -130,7 +131,6 @@ public class Gyro {
         lock = false;
     }
 
-
     public void CaptureGyroBurst() {
         //Save previous
         if(gyroburst){
@@ -144,6 +144,7 @@ public class Gyro {
         gyroburst = true;
         capturingNumber++;
     }
+
     public void CompleteGyroBurst() {
         if(gyroburst) {
             gyroburst = false;
@@ -156,6 +157,7 @@ public class Gyro {
             //Log.d(TAG, "GyroBurst counter:" + BurstShakiness.size()+" sampleCount:"+counter+" shakiness:"+gyroBurst.shakiness);
         }
     }
+
     public void CompleteSequence() {
         integrate = false;
         gyroburst = false;
