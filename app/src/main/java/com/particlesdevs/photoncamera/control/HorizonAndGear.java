@@ -18,7 +18,7 @@ public class HorizonAndGear implements SensorEventListener {
     private final Sensor mRotationVectorSensor;
     private final float[] mRotationVector = new float[5]; // Use 5 for compatibility
 
-    private static final int MOVING_AVERAGE_SIZE = 15;
+    private static final int MOVING_AVERAGE_SIZE = 10;
     private final Queue<Float> mYawHistory = new LinkedList<>();
     private final Queue<Float> mPitchHistory = new LinkedList<>();
     private final Queue<Float> mRollHistory = new LinkedList<>();

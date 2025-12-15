@@ -58,6 +58,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
         COMMON_KEYS.add(Key.KEY_USE_EXTERNAL_GALLERY.mValue);
         COMMON_KEYS.add(Key.KEY_USE_ALTERNATE_LOUPE.mValue);
+        COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -142,6 +143,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SINGLE_FRAME_QUALITY, resources.getString(R.string.pref_single_frame_quality_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_EXTERNAL_GALLERY, resources.getBoolean(R.bool.pref_use_external_gallery_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ALTERNATE_LOUPE, resources.getBoolean(R.bool.pref_use_alternate_loupe_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON, resources.getBoolean(R.bool.pref_virtual_horizon_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -707,6 +709,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_ALTERNATE_LOUPE);
     }
 
+    public static boolean useVirtualHorizon() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON);
+    }
+
     public static String getContrastCurve() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
     }
@@ -773,6 +779,7 @@ public class PreferenceKeys {
         KEY_COUNTDOWN_TIMER(R.string.pref_countdown_timer_key),
         KEY_USE_EXTERNAL_GALLERY(R.string.pref_use_external_gallery_key),
         KEY_USE_ALTERNATE_LOUPE(R.string.pref_alternate_loupe_key),
+        KEY_VIRTUAL_HORIZON(R.string.pref_virtual_horizon_key),
 
         /**
          * QualityDoesMatter - Video settings keys

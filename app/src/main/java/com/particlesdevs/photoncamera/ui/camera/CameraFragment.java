@@ -468,9 +468,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             return;
         }
 
-        if (PhotonCamera.getSpecific().specificSetting.showVirtualHorizon && (mHorizonIndicatorView != null) && (PhotonCamera.getHorizonAndGear() != null)) {
+        if (PhotonCamera.getSettings().useVirtualHorizon && (mHorizonIndicatorView != null) && (PhotonCamera.getHorizonAndGear() != null)) {
             mHorizonIndicatorView.updateDisplayRotation(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
             mHorizonIndicatorView.updateAngles(PhotonCamera.getHorizonAndGear().getRoll(), PhotonCamera.getHorizonAndGear().getPitch(), PhotonCamera.getHorizonAndGear().getYaw());
+            if (getCameraFragmentViewModel() != null) {
+                mHorizonIndicatorView.setViewfinderMagnified(getCameraFragmentViewModel().getCameraFragmentModel().isViewfinderMagnified());
+            }
         }
 
         surfaceView.post(() -> {

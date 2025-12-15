@@ -97,6 +97,14 @@
             android:summary="If on a part of the center is 4x magnified, if off the whole viewfinder ist 4x magnified"
             android:icon="@drawable/zoom_in_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_virtual_horizon_key"
+            android:defaultValue="@bool/pref_virtual_horizon_default"
+            android:title="@string/virtual_horizon"
+            android:summary=""
+            android:icon="@drawable/rotation_3d_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

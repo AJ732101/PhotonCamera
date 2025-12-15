@@ -30,7 +30,7 @@ public class CameraFragmentModel extends BaseObservable {
     }
     @Bindable
     public boolean isViewfinderMagnified() {
-        return settingsBarVisibility;
+        return viewfinderMaginified;
     }
 
     @Bindable

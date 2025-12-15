@@ -30,7 +30,8 @@ public class HorizonIndicatorView extends View {
     private float yawAngle = 0f;
     private int currentDisplayRotation = Surface.ROTATION_0;
     private final int LINE_LENGTH_PX = 400;
-    int offset = 300; // so that the focus loupe is not too close to the virtual horizon
+    private boolean isViewfinderMagnified = false;
+    int offset = 350; // so that the focus loupe is not too close to the virtual horizon
 
     private final Paint debugTextPaintYellow;
     private final Paint debugTextPaintRed;
@@ -87,7 +88,7 @@ public class HorizonIndicatorView extends View {
     }
 
     /**
-     * NEW: Updates the current display orientation from the outside.
+     * Updates the current display orientation from the outside.
      * @param rotation The display rotation value (e.g., Surface.ROTATION_90).
      */
     public void updateDisplayRotation(int rotation) {
@@ -97,11 +98,25 @@ public class HorizonIndicatorView extends View {
         }
     }
 
+    /**
+     * Updates the state of the viewfinder magnifier.
+     * @param isMagnified True if the viewfinder is currently magnified.
+     */
+    public void setViewfinderMagnified(boolean isMagnified) {
+        if (this.isViewfinderMagnified != isMagnified) {
+            this.isViewfinderMagnified = isMagnified;
+            invalidate();
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         int centerX = getWidth() / 2;
-        int centerY = getHeight() / 2 + offset;
+        int centerY = getHeight() / 2;
+        if (isViewfinderMagnified) {
+            centerY -= offset;
+        }
         float lineHalf = LINE_LENGTH_PX / 2f;
         float pitchDist = 2 * abs(pitchAngle);
 
