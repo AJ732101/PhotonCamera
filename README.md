@@ -25,6 +25,9 @@ Android Camera with focus on video recording
     </table>
 </p>
 
+## Feature List
+[Click here for a detailed Feature List](https://aj732101.github.io/PhotonVidCam/FeatureList.html)
+
 ## Libraries used by PhotonVidCam
 
 * [Glide](https://github.com/bumptech/glide)
