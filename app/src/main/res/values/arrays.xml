@@ -545,7 +545,7 @@
     </string-array>
 
     <string-array name="lut_name_entries">
-        <item>lut.png</item>
+        <item>None</item>
     </string-array>
 
     <string-array name="lut_name_entryValues">
