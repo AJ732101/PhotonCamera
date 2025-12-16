@@ -1,6 +1,6 @@
 # PhotonVidCam
 
-Android Camera with focus on video recording
+Android Camera with focus on video recording and unprocessed single shot still images (by keeping its multiframe stacking capabilities inherited from Photon Camera) 
 
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 ## Links
