@@ -41,6 +41,7 @@
     <string name="pref_expocompensation_seekbar_key" translatable="false">pref_expocompensation_seekbar_key</string>
     <string name="pref_align_method_key" translatable="false">pref_align_method_key</string>
     <string name="pref_color_method_key" translatable="false">pref_color_method_key</string>
+    <string name="pref_lut_key" translatable="false">pref_lut_key</string>
     <string name="pref_peak_method_key" translatable="false">pref_peak_method_key</string>
     <string name="pref_preview_format_key" translatable="false">pref_preview_format_key</string>
     <string name="pref_real_preview_format_key" translatable="false">pref_real_preview_format_key</string>

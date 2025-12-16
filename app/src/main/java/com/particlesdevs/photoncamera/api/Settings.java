@@ -106,6 +106,7 @@ public class Settings {
     public int hdrMode = 4096;
     public int transferFunction = 7;
     public String videoEncoderName = "Device Default";
+    public String lutName = "None";
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -148,6 +149,7 @@ public class Settings {
         gamma = parseGammaArray();
         mCameraID = PreferenceKeys.getCameraID();
         theme = PreferenceKeys.getThemeValue();
+        lutName = PreferenceKeys.getLutName();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();

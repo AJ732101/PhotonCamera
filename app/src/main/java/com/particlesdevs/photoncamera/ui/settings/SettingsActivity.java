@@ -44,6 +44,13 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
+import androidx.preference.ListPreference;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import com.particlesdevs.photoncamera.util.FileManager;
+
 import static com.particlesdevs.photoncamera.settings.PreferenceKeys.Key.ALL_DEVICES_NAMES_KEY;
 import static com.particlesdevs.photoncamera.settings.PreferenceKeys.SCOPE_GLOBAL;
 
@@ -84,6 +91,48 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.stacking_preferences, rootKey);
+
+            ListPreference lutPreference = findPreference(getString(R.string.pref_lut_key));
+
+            if (lutPreference != null) {
+                List<CharSequence> entries = new ArrayList<>();
+                List<CharSequence> entryValues = new ArrayList<>();
+
+                if (lutPreference.getEntries() != null) {
+                    Collections.addAll(entries, lutPreference.getEntries());
+                    Collections.addAll(entryValues, lutPreference.getEntryValues());
+                }
+
+                // --- HIER IST DIE KORREKTUR ---
+                // FileManager.sPHOTON_TUNING_DIR ist bereits ein File-Objekt.
+                File tuningDir = FileManager.sPHOTON_TUNING_DIR;
+                // --- ENDE DER KORREKTUR ---
+
+                if (tuningDir.exists() && tuningDir.isDirectory()) {
+                    File[] files = tuningDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+
+                    if (files != null) {
+                        for (File file : files) {
+                            String fileName = file.getName();
+                            if (!entryValues.contains(fileName)) {
+                                entries.add(fileName);
+
+                                entryValues.add(fileName);
+                            }
+                        }
+                    }
+                }
+
+                lutPreference.setEntries(entries.toArray(new CharSequence[0]));
+                lutPreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+
+                String currentValue = lutPreference.getValue();
+                if (currentValue == null || !entryValues.contains(currentValue)) {
+                    if (!entryValues.isEmpty()) {
+                        lutPreference.setValueIndex(0);
+                    }
+                }
+            }
         }
     }
 

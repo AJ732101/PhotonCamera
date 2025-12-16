@@ -66,6 +66,7 @@
     <string name="cfa">Bayer Filter Pattern</string>
     <string name="align_method">Align Method</string>
     <string name="color_method">Color Method</string>
+    <string name="color_lut">Color LUT (Look Up Table)</string>
     <string name="focus_peaking">Focus Peaking</string>
     <string name="preview_format">Still Image Format</string>
     <string name="real_preview_format">Preview Format</string>

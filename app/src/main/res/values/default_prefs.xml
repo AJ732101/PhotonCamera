@@ -71,6 +71,7 @@
     <string name="pref_noise_merge_seekbar_default" translatable="false">3.0</string>
     <string name="pref_compressor_seekbar_default" translatable="false">6.0</string>
     <string name="pref_align_method_default" translatable="false">1</string>
+    <string name="pref_lut_name_default" translatable="false">lut.png</string>
     <string name="pref_focus_peak_default" translatable="false">0</string>
     <string name="pref_color_method_default" translatable="false">0</string>
     <string name="pref_codec_default" translatable="false">HEVC</string>

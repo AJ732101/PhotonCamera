@@ -544,4 +544,12 @@
         <item>OMX.qcom.video.encoder.hevc</item>
     </string-array>
 
+    <string-array name="lut_name_entries">
+        <item>lut.png</item>
+    </string-array>
+
+    <string-array name="lut_name_entryValues">
+        <item>lut.png</item>
+    </string-array>
+
 </resources>

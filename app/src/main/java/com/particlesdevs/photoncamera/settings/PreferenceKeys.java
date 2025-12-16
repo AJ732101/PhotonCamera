@@ -47,6 +47,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_REAL_PREVIEW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_RAW_FORMAT.mValue);
+        COMMON_KEYS.add(Key.KEY_LUT_NAME.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
@@ -133,7 +134,7 @@ public class PreferenceKeys {
         settingsManager.setDefaults(Key.CAMERA_ID, resources.getString(R.string.camera_id_default), new String[]{"0", "1"});
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
-
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LUT_NAME, resources.getString(R.string.pref_lut_name_default));
         // QualityDoesMatter - General
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_OIS_ON, resources.getBoolean(R.bool.pref_ois_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON, resources.getBoolean(R.bool.pref_dng_compression_default));
@@ -742,6 +743,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME);
     }
 
+    public static String getLutName() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_LUT_NAME);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -770,6 +775,7 @@ public class PreferenceKeys {
         KEY_SATURATION_SEEKBAR(R.string.pref_saturation_seekbar_key),
         KEY_ALIGN_METHOD(R.string.pref_align_method_key),
         KEY_COLOR_METHOD(R.string.pref_color_method_key),
+        KEY_LUT_NAME(R.string.pref_lut_key),
         KEY_FOCUS_PEAK(R.string.pref_peak_method_key),
         KEY_PREVIEW_FORMAT(R.string.pref_preview_format_key),
         KEY_REAL_PREVIEW_FORMAT(R.string.pref_real_preview_format_key),
