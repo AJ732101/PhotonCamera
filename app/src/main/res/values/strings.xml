@@ -209,6 +209,17 @@
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
 
+    <string name="general_settings_screen_summary">No dedicated category</string>
+    <string name="stacking_settings_screen_summary">Multiframe related settings (HDRX)</string>
+    <string name="video_settings_screen_summary">Video related settings</string>
+    <string name="audio_settings_screen_summary">Audio related settings</string>
+    <string name="soc_settings_screen_summary">SoC (CPU/GPU/ISP) related settings</string>
+    <string name="single_shot_settings_screen_summary">Single shot and video settings</string>
+    <string name="sensor_and_more_settings_screen_summary">Sensor related settings (and more)</string>
+    <string name="sensor_settings_screen_summary">Sensor related settings</string>
+    <string name="other_settings_separator_summary">Other settings</string>
+    <string name="new_rec_separator_summary">New recording pipeline (MediaFormat/MediaCodec/MediaMuxer)</string>
+
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>
     <string name="soc_qualcomm_saturation">Qualcomm/Snapdragon Saturation</string>

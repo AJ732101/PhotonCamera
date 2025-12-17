@@ -20,6 +20,16 @@
             android:entryValues="@array/raw_mode_entryvalues"
             android:defaultValue="@string/pref_raw_mode_default_value"/>
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_lut_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/color_lut"
+            android:icon="@drawable/colors_24px"
+            android:entries="@array/lut_name_entries"
+            android:entryValues="@array/lut_name_entryValues"
+            android:defaultValue="@string/pref_lut_name_default"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_hdrx_nr_key"
             android:defaultValue="@bool/pref_hdrx_nr_default"
@@ -151,16 +161,6 @@
             android:entries="@array/colorset_entries"
             android:entryValues="@array/colorset_entryValues"
             android:defaultValue="@string/pref_align_method_default"/>
-
-        <ListPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_lut_key"
-            app:useSimpleSummaryProvider="true"
-            android:title="@string/color_lut"
-            android:icon="@drawable/colors_24px"
-            android:entries="@array/lut_name_entries"
-            android:entryValues="@array/lut_name_entryValues"
-            android:defaultValue="@string/pref_lut_name_default"/>
 
         <Preference
             android:layout_height="56dp"

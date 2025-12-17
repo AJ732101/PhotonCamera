@@ -59,7 +59,7 @@
     <string name="pref_show_grid_title">Gitterlinien anzeigen</string>
     <string name="cfa">Color Filter Array / Bayer Farbfilter</string>
     <string name="align_method">Ausrichtungs Methode</string>
-    <string name="preview_format">Vorschau/Sucher Format</string>
+    <string name="preview_format">Ziel Format</string>
     <string name="real_preview_format">Vorschau Format</string>
     <string name="raw_format">RAW Format</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
@@ -134,6 +134,7 @@
     <string name="turn_on_extend_iso">ISO erweitern</string>
     <string name="turn_on_extend_exposure">Belichtungszeit erweitern</string>
     <string name="turn_on_alternate_loupe">Alternative Fokusvergrößerung (Fokuslupe)</string>
+    <string name="virtual_horizon_text">Winkelangabe Virtueller Horizont</string>
     <string name="codec">Codec</string>
     <string name="video_resolution">Auflösung</string>
     <string name="video_framerate">Bildwiederholfrequenz</string>
@@ -170,6 +171,7 @@
     <string name="soc_settings_screen_title">SoC spezifische Einstellungen</string>
     <string name="single_shot_settings_screen_title">Einzelbild und Video Einstellungen</string>
     <string name="new_rec_separator_title">Neue Aufnahmemethode</string>
+    <string name="new_rec_separator_summary">Neu Aufnahmemethode</string>
     <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Schärfe</string>
     <string name="soc_qualcomm_saturation">Qualcomm/Snapdragon Sättigung</string>
     <string name="soc_qualcomm_eis_mode">Qualcomm/Snapdragon EIS Modus</string>
@@ -189,4 +191,14 @@
     <string name="ten_bit_surface_target">YCBCR_P010 Zielformat</string>
     <string name="hdr_mode">HDR Modus</string>
     <string name="transfer_function">Transferfunktion</string>
+    <string name="virtual_horizon">Virtueller Horizont</string>
+    <string name="general_settings_screen_summary">Keine spezielle Kategorie</string>
+    <string name="stacking_settings_screen_summary">Mehrfachbelichtungs bezogene Einstellungen (HDRX)</string>
+    <string name="video_settings_screen_summary">Video bezogene Einstellungen</string>
+    <string name="audio_settings_screen_summary">Audio bezogene Einstellungen</string>
+    <string name="soc_settings_screen_summary">SoC (CPU/GPU/ISP) bezogene Einstellungen</string>
+    <string name="single_shot_settings_screen_summary">Einzelbelichtungs- und Video bezogene Einstellungen</string>
+    <string name="sensor_and_more_settings_screen_summary">Sensor bezogene Einstellungen (und mehr)</string>
+    <string name="sensor_settings_screen_summary">Sensor bezogene Einstellungen</string>
+    <string name="other_settings_separator_summary">Einstellungen ohne Kategorie</string>
 </resources>
