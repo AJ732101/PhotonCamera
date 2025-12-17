@@ -10,6 +10,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+
+import com.particlesdevs.photoncamera.gallery.files.GalleryFileOperations;
+import com.particlesdevs.photoncamera.gallery.files.ImageFile;
 import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
 import com.particlesdevs.photoncamera.util.Log;
 import android.webkit.MimeTypeMap;
@@ -140,17 +143,28 @@ final class CameraUIController implements CameraUIEventsListener,
 
             case R.id.gallery_image_button:
                 if (PhotonCamera.getSettings().useExternalGallery) {
-                    Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
+                    // Use the already corrected method to fetch the latest media object (photo or video)
+                    ImageFile latestMedia = GalleryFileOperations.fetchLatestImage(cameraFragment.requireContext().getContentResolver());
 
-                    if (lastImageUri != null) {
+                    if (latestMedia != null) {
                         try {
-                            // Den MIME-Typ dynamisch basierend auf der Dateiendung der URI ermitteln
-                            String mimeType = getMimeType(cameraFragment.requireContext(), lastImageUri);
-                            Log.d(TAG, "Opening URI: " + lastImageUri + " with MIME type: " + mimeType);
+                            // Get the URI from our fetched object
+                            Uri mediaUri = latestMedia.getFileUri();
 
-                            // Intent mit URI UND dem korrekten MIME-Typ erstellen
+                            // Get the MIME type dynamically and safely from the ContentResolver
+                            String mimeType = cameraFragment.requireContext().getContentResolver().getType(mediaUri);
+
+                            // If the resolver fails, fall back to a generic type
+                            if (mimeType == null) {
+                                // You could also use your own getMimeType() here as a secondary fallback
+                                mimeType = "*/*";
+                            }
+
+                            Log.d(TAG, "Opening URI: " + mediaUri + " with MIME type: " + mimeType);
+
+                            // Create an Intent with the correct URI and the dynamically determined MIME type
                             Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(lastImageUri, mimeType);
+                            intent.setDataAndType(mediaUri, mimeType);
                             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cameraFragment.requireContext());
@@ -163,44 +177,15 @@ final class CameraUIController implements CameraUIEventsListener,
                             cameraFragment.startActivity(intent);
 
                         } catch (ActivityNotFoundException e) {
-                            Toast.makeText(cameraFragment.getContext(), "Keine App zum Öffnen dieses Dateityps gefunden.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(cameraFragment.getContext(), "No app found to open this file type.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(cameraFragment.getContext(), "Kein Bild in der Galerie gefunden.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(cameraFragment.getContext(), "No media found in gallery.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     cameraFragment.launchGallery();
                 }
                 break;
-
-
-            /*case R.id.gallery_image_button:
-                if (PhotonCamera.getSpecific().specificSetting.useExternalViewer) {
-                    Uri lastImageUri = MediaStoreUtils.getLatestImageUri(cameraFragment.requireContext().getContentResolver());
-
-                    if (lastImageUri != null) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, lastImageUri);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cameraFragment.requireContext());
-                        String galleryPackage = prefs.getString(GalleryChooserActivity.KEY_DEFAULT_GALLERY_PACKAGE, null);
-
-                        if (galleryPackage != null) {
-                            intent.setPackage(galleryPackage);
-                        }
-
-                        try {
-                            cameraFragment.startActivity(intent);
-                        } catch (ActivityNotFoundException e) {
-                            Toast.makeText(cameraFragment.getContext(), "No gallery app found", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(cameraFragment.getContext(), "No image in gallery app found", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    cameraFragment.launchGallery();
-                }
-                break;*/
 
             case R.id.eis_toggle_button:
                 PreferenceKeys.setEisPhoto(!PreferenceKeys.isEisPhotoOn());
@@ -328,6 +313,11 @@ final class CameraUIController implements CameraUIEventsListener,
                 PreferenceKeys.setCameraModeOrdinal(CameraMode.VIDEO.ordinal());
                 break;
         }
+
+        if (cameraFragment.getCameraFragmentViewModel() != null) {
+            cameraFragment.getCameraFragmentViewModel().updateGalleryThumb(null);
+        }
+
         this.restartCamera();
     }
 

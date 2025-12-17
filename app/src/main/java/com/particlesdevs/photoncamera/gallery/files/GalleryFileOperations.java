@@ -10,6 +10,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+
+import com.particlesdevs.photoncamera.api.CameraMode;
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import androidx.annotation.NonNull;
@@ -66,52 +69,6 @@ public class GalleryFileOperations {
     public static List<ImageFile> extractAllSelectedImages() {
         ArrayList<ImageFile> imageFiles = new ArrayList<>();
         SELECTED_FOLDERS.forEach(imagesFolder -> imageFiles.addAll(imagesFolder.getAllImageFiles()));
-/*
-        ArrayList<ImageFile> images = new ArrayList<>();
-        String[] projection = new String[]{MediaStore.MediaColumns.DATA,MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.SIZE};
-
-        String selectionColumn = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ? MediaStore.Images.Media.BUCKET_ID : MediaStore.Images.Media.DATA;
-        String selection = "";
-        for (int i = 0; i < selectedFolders.size(); i++) {
-            if (i == selectedFolders.size() - 1)
-                selection = selection.concat(selectionColumn).concat(" like ? ");
-            else
-                selection = selection.concat(selectionColumn).concat(" like ? OR ");
-        }
-        //String selection = selectionColumn + " like ? OR " + selectionColumn + " like ? OR " + selectionColumn + " like ?";
-        String[] selectionArgs = selectedFolders.toArray(new String[]{});
-
-        String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
-        final Cursor cursor = contentResolver.query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder);
-
-        if (cursor != null) {
-
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            int displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
-            int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-
-
-            while (cursor.moveToNext()) {
-                long id = cursor.getLong(idColumn);
-                Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-                String displayName = cursor.getString(displayNameColumn);
-                long dateModified = TimeUnit.SECONDS.toMillis(cursor.getLong(dateModifiedColumn));
-                long size = cursor.getLong(sizeColumn);
-                String absolutePath=cursor.getString(dataColumn);
-
-                ImageFile image = new ImageFile(id, contentUri, displayName, dateModified, size,absolutePath);
-                images.add(image);
-            }
-            cursor.close();
-        }
-*/
         imageFiles.sort(Comparator.comparingLong(value -> -value.getLastModified()));
         return imageFiles;
     }
@@ -120,52 +77,90 @@ public class GalleryFileOperations {
     public static ImageFile fetchLatestImage(ContentResolver contentResolver) {
         ImageFile imageFile = null;
 
-        String[] projection = new String[]{MediaStore.MediaColumns.DATA,MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.SIZE};
-
-        // Determine the column to use for selection based on Android version
-        String selectionColumn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? MediaStore.Images.Media.RELATIVE_PATH : MediaStore.Images.Media.DATA;
-
-        // Build the selection string dynamically based on the number of included folders
-        StringBuilder selectionBuilder = new StringBuilder();
-        for (int i = 0; i < INCLUDED_IMAGE_FOLDERS.length; i++) {
-            selectionBuilder.append(selectionColumn).append(" LIKE ?");
-            if (i < INCLUDED_IMAGE_FOLDERS.length - 1) {
-                selectionBuilder.append(" OR ");
-            }
-        }
-        String selection = selectionBuilder.toString();
-
-        // The arguments for the selection
+        // --- Common variables for both paths ---
+        String[] projection = {
+                MediaStore.MediaColumns.DATA,
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.MediaColumns.DATE_ADDED,
+                MediaStore.MediaColumns.SIZE
+        };
+        String sortOrder = MediaStore.MediaColumns.DATE_ADDED + " DESC";
         String[] selectionArgs = INCLUDED_IMAGE_FOLDERS;
 
-        // Sort order to get the latest image first
-        String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+        // --- Path-specific variables ---
+        Uri queryUri;
+        Uri baseContentUri;
+        String selection;
 
-        // Perform the query using the ContentResolver, not a 'db' object
-        final Cursor cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            // -- Video specific assignments --
+            queryUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            baseContentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+
+            String selectionColumn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                    MediaStore.Video.Media.RELATIVE_PATH : MediaStore.Video.Media.DATA;
+
+            StringBuilder selectionBuilder = new StringBuilder();
+            for (int i = 0; i < INCLUDED_IMAGE_FOLDERS.length; i++) {
+                selectionBuilder.append(selectionColumn).append(" LIKE ?");
+                if (i < INCLUDED_IMAGE_FOLDERS.length - 1) {
+                    selectionBuilder.append(" OR ");
+                }
+            }
+            selection = selectionBuilder.toString();
+
+        } else {
+            // -- Photo specific assignments --
+            queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            baseContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+            String selectionColumn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
+                    MediaStore.Images.Media.RELATIVE_PATH : MediaStore.Images.Media.DATA;
+
+            StringBuilder selectionBuilder = new StringBuilder();
+            for (int i = 0; i < INCLUDED_IMAGE_FOLDERS.length; i++) {
+                selectionBuilder.append(selectionColumn).append(" LIKE ?");
+                if (i < INCLUDED_IMAGE_FOLDERS.length - 1) {
+                    selectionBuilder.append(" OR ");
+                }
+            }
+            selection = selectionBuilder.toString();
+        }
+
+        // --- Common query and processing logic ---
+        try (Cursor cursor = contentResolver.query(
+                queryUri,
                 projection,
                 selection,
                 selectionArgs,
-                sortOrder);
+                sortOrder
+        )) {
 
-        if (cursor != null) {
-            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            int displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
-            int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            if (cursor != null && cursor.moveToFirst()) {
+                // Get column indices once
+                int idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
+                int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
+                int displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+                int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE);
+                int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
 
-            if (cursor.moveToFirst()) {
+                // Extract data for the first (latest) entry
                 long id = cursor.getLong(idColumn);
-                Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+                Uri contentUri = ContentUris.withAppendedId(baseContentUri, id);
                 String displayName = cursor.getString(displayNameColumn);
                 long dateModified = TimeUnit.SECONDS.toMillis(cursor.getLong(dateModifiedColumn));
                 long size = cursor.getLong(sizeColumn);
-                String absolutePath=cursor.getString(dataColumn);
-                imageFile = new ImageFile(id, contentUri, displayName, dateModified, size,absolutePath);
+                String absolutePath = cursor.getString(dataColumn);
+
+                // Create the result object
+                imageFile = new ImageFile(id, contentUri, displayName, dateModified, size, absolutePath);
             }
-            cursor.close();
+        } catch (Exception e) {
+            // Log any errors during the query
+            Log.e("GalleryFileOperations", "Error fetching latest media file.", e);
         }
+
         return imageFile;
     }
 
@@ -236,82 +231,126 @@ public class GalleryFileOperations {
 
     public static ArrayList<ImagesFolder> FindAllFoldersWithImages(@NonNull ContentResolver contentResolver) {
 
+        // Clear the global list before fetching
         ALL_FOLDERS.clear();
-        boolean is_folder_already_added = false;
-        int position = 0;
-        int column_index_data, column_bucket_name,column_bucket_id,column_id,column_date_modified,column_display_name,column_size;
-        Uri uri;
-        uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.BUCKET_ID,MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.SIZE};
+        // --- Part 1: Fetch all folders containing IMAGES ---
+        Uri imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] imageProjection = {
+                MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+                MediaStore.Images.Media.BUCKET_ID,
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.DATE_ADDED,
+                MediaStore.Images.Media.SIZE
+        };
+        // Query images, ordered by date to have the newest ones first
+        try (Cursor imageCursor = contentResolver.query(imageUri, imageProjection, null, null, MediaStore.Images.Media.DATE_TAKEN + " DESC")) {
+            if (imageCursor != null) {
+                // Get column indices once
+                int image_column_index_data = imageCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                int image_column_bucket_name = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+                int image_column_bucket_id = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID);
+                int image_column_id = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+                int image_column_date_modified = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
+                int image_column_display_name = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+                int image_column_size = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
 
-        final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        final Cursor cursor = contentResolver.query(uri, projection, null, null, orderBy + " DESC");
-        if (cursor != null) {
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_bucket_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-            column_bucket_id = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID);
-            column_id = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            column_date_modified = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
-            column_display_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            column_size = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+                while (imageCursor.moveToNext()) {
+                    String bucketName = imageCursor.getString(image_column_bucket_name);
+                    if (bucketName == null) continue;
 
-            while (cursor.moveToNext()) {
-                long id = cursor.getLong(column_id);
-                String displayName = cursor.getString(column_display_name);
-                Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-                long dateModified = TimeUnit.SECONDS.toMillis(cursor.getLong(column_date_modified));
-                long size = cursor.getLong(column_size);
-                String absolutePathOfImage = cursor.getString(column_index_data);
-                long bucketId = cursor.getLong(column_bucket_id);
-                String bucketName = cursor.getString(column_bucket_name);
+                    // Find existing folder or create a new one
+                    ImagesFolder folder = ALL_FOLDERS.stream()
+                            .filter(f -> f.getFolderName().equals(bucketName))
+                            .findFirst()
+                            .orElse(null);
 
-
-//                Log.i("Path", absolutePathOfImage);
-//                Log.i("Folder", bucketName);
-//                Log.i("FolderID", String.valueOf(bucketId));
-                if (bucketName == null) {
-                    continue;
-                }
-                for (int i = 0; i < ALL_FOLDERS.size(); i++) {
-                    String fname = ALL_FOLDERS.get(i).getFolderName();
-                    if (fname == null){
-                        ALL_FOLDERS.remove(i);
-                        i--;
-                        continue;
+                    if (folder == null) {
+                        folder = new ImagesFolder();
+                        folder.setFolderName(bucketName);
+                        folder.setFolderId(imageCursor.getLong(image_column_bucket_id));
+                        folder.setAllImageFiles(new ArrayList<>());
+                        ALL_FOLDERS.add(folder);
                     }
 
-                    if (fname.equals(bucketName)) {
-                        is_folder_already_added = true;
-                        position = i;
-                        break;
-                    } else {
-                        is_folder_already_added = false;
-                    }
-                }
+                    // Extract file data and add it to the folder
+                    long id = imageCursor.getLong(image_column_id);
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+                    String displayName = imageCursor.getString(image_column_display_name);
+                    long dateModified = TimeUnit.SECONDS.toMillis(imageCursor.getLong(image_column_date_modified));
+                    long size = imageCursor.getLong(image_column_size);
+                    String absolutePathOfImage = imageCursor.getString(image_column_index_data);
 
-                if (is_folder_already_added) {
-                    ALL_FOLDERS.get(position).getAllImageFiles().add(new ImageFile(id, contentUri, displayName, dateModified, size, absolutePathOfImage));
-                } else {
-                    ArrayList<ImageFile> imageFileList = new ArrayList<>();
-                    imageFileList.add(new ImageFile(id, contentUri, displayName, dateModified, size, absolutePathOfImage));
-
-                    ImagesFolder newFolder = new ImagesFolder();
-                    newFolder.setFolderName(bucketName);
-                    newFolder.setFolderId(bucketId);
-                    newFolder.setAllImageFiles(imageFileList);
-                    ALL_FOLDERS.add(newFolder);
+                    folder.getAllImageFiles().add(new ImageFile(id, contentUri, displayName, dateModified, size, absolutePathOfImage));
                 }
             }
-            cursor.close();
         }
-        //find latest image:
-        ALL_FOLDERS.forEach(imagesFolder -> {
-            imagesFolder.getAllImageFiles().sort(Comparator.comparingLong(value -> -value.getLastModified()));
-            imagesFolder.topImage = imagesFolder.getAllImageFiles().get(0);
-        });
-        ALL_FOLDERS.sort(Comparator.comparing(o -> o.folderName));
+
+        // --- Part 2: Fetch all folders containing VIDEOS and merge them ---
+        Uri videoUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        String[] videoProjection = {
+                MediaStore.MediaColumns.DATA,
+                MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+                MediaStore.Video.Media.BUCKET_ID,
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.DATE_ADDED,
+                MediaStore.Video.Media.SIZE
+        };
+        // Query videos, ordered by date
+        try (Cursor videoCursor = contentResolver.query(videoUri, videoProjection, null, null, MediaStore.Video.Media.DATE_TAKEN + " DESC")) {
+            if (videoCursor != null) {
+                // Get column indices once
+                int video_column_index_data = videoCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                int video_column_bucket_name = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME);
+                int video_column_bucket_id = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID);
+                int video_column_id = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
+                int video_column_date_modified = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED);
+                int video_column_display_name = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME);
+                int video_column_size = videoCursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
+
+                while (videoCursor.moveToNext()) {
+                    String bucketName = videoCursor.getString(video_column_bucket_name);
+                    if (bucketName == null) continue;
+
+                    // Find existing folder (might have been created by the image scan) or create a new one
+                    ImagesFolder folder = ALL_FOLDERS.stream()
+                            .filter(f -> f.getFolderName().equals(bucketName))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (folder == null) {
+                        folder = new ImagesFolder();
+                        folder.setFolderName(bucketName);
+                        folder.setFolderId(videoCursor.getLong(video_column_bucket_id));
+                        folder.setAllImageFiles(new ArrayList<>());
+                        ALL_FOLDERS.add(folder);
+                    }
+
+                    // Extract file data and add it to the folder
+                    long id = videoCursor.getLong(video_column_id);
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+                    String displayName = videoCursor.getString(video_column_display_name);
+                    long dateModified = TimeUnit.SECONDS.toMillis(videoCursor.getLong(video_column_date_modified));
+                    long size = videoCursor.getLong(video_column_size);
+                    String absolutePathOfImage = videoCursor.getString(video_column_index_data);
+
+                    folder.getAllImageFiles().add(new ImageFile(id, contentUri, displayName, dateModified, size, absolutePathOfImage));
+                }
+            }
+        }
+
+        // --- Part 3: Set top image for each folder ---
+        // After all files are added, find the newest file in each folder to use as a thumbnail
+        for(ImagesFolder folder : ALL_FOLDERS){
+            if(folder.getAllImageFiles() != null && !folder.getAllImageFiles().isEmpty()){
+                folder.getAllImageFiles().sort(Comparator.comparingLong(ImageFile::getLastModified).reversed());
+                folder.topImage = folder.getAllImageFiles().get(0);
+            }
+        }
+
         return ALL_FOLDERS;
     }
-
 }
