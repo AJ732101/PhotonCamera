@@ -411,7 +411,7 @@ public class Parameters {
             }
         }
         Converter.multiply(Converter.sXYZtoProPhoto, sensorToXYZ, /*out*/sensorToProPhoto);
-        File customCCT = new File(Environment.getExternalStorageDirectory() + "//DCIM//PhotonCamera//", "customCCT.txt");
+        File customCCT = new File(Environment.getExternalStorageDirectory() + "//DCIM//PhotonVidCam//", "customCCT.txt");
         //ColorSpaceTransform CST = PhotonCamera.getCaptureController().mColorSpaceTransform;//= result.get(CaptureResult.COLOR_CORRECTION_TRANSFORM);
         ColorSpaceTransform CST = result.get(CaptureResult.COLOR_CORRECTION_TRANSFORM);
         assert calibration2 != null;

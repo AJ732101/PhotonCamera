@@ -22,13 +22,13 @@ public class FileManager {
     };
     public static File sEXTERNAL_DIR = Environment.getExternalStorageDirectory();
     public static File sCACHE_DIR;
-    public static File sPHOTON_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//");
-    public static File sPHOTON_RAW_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Raw//");
-    public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//HEIC_10_Bit//");
-    public static File sPHOTON_APV_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//APV//");
-    public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//M4A//");
-    public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//AVIF//");
-    public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonCamera//Tuning//");
+    public static File sPHOTON_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//");
+    public static File sPHOTON_RAW_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//Raw//");
+    public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//HEIC_10_Bit//");
+    public static File sPHOTON_APV_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//APV//");
+    public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//M4A//");
+    public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//AVIF//");
+    public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//Tuning//");
     public static File sDCIM_CAMERA = new File(sEXTERNAL_DIR + "//DCIM//Camera//");
     public static List<File> tempImageFiles;
 

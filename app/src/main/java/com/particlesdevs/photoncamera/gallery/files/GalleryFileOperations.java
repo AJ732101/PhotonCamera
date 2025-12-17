@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
  */
 public class GalleryFileOperations {
     public static final int REQUEST_PERM_DELETE = 1010;
-    private static final String[] INCLUDED_IMAGE_FOLDERS = new String[]{"%DCIM/PhotonCamera/%", "%DCIM/PhotonCamera/Raw/%", "%DCIM/Camera/%"};
+    private static final String[] INCLUDED_IMAGE_FOLDERS = new String[]{"%DCIM/PhotonVidCam/%", "%DCIM/PhotonVidCam/Raw/%", "%DCIM/PhotonVidCam/AVIF/%",
+            "%DCIM/PhotonVidCam/APV/%", "%DCIM/PhotonVidCam/M4A/%", "%DCIM/PhotonVidCam/HEIC_10_Bit/%", "%DCIM/Camera/%"};
     private static final ArrayList<String> SELECTED_FOLDERS_IDS = new ArrayList<>();
     private static final ArrayList<ImagesFolder> ALL_FOLDERS = new ArrayList<>();
     private static final ArrayList<ImagesFolder> SELECTED_FOLDERS = new ArrayList<>();
@@ -121,17 +122,32 @@ public class GalleryFileOperations {
 
         String[] projection = new String[]{MediaStore.MediaColumns.DATA,MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.SIZE};
 
+        // Determine the column to use for selection based on Android version
         String selectionColumn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? MediaStore.Images.Media.RELATIVE_PATH : MediaStore.Images.Media.DATA;
-        String selection = selectionColumn + " like ? OR " + selectionColumn + " like ? OR " + selectionColumn + " like ?";
+
+        // Build the selection string dynamically based on the number of included folders
+        StringBuilder selectionBuilder = new StringBuilder();
+        for (int i = 0; i < INCLUDED_IMAGE_FOLDERS.length; i++) {
+            selectionBuilder.append(selectionColumn).append(" LIKE ?");
+            if (i < INCLUDED_IMAGE_FOLDERS.length - 1) {
+                selectionBuilder.append(" OR ");
+            }
+        }
+        String selection = selectionBuilder.toString();
+
+        // The arguments for the selection
         String[] selectionArgs = INCLUDED_IMAGE_FOLDERS;
 
+        // Sort order to get the latest image first
         String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
 
+        // Perform the query using the ContentResolver, not a 'db' object
         final Cursor cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection,
                 selection,
                 selectionArgs,
                 sortOrder);
+
         if (cursor != null) {
             int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
             int dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);

@@ -34,6 +34,7 @@ public class MediaStoreUtils {
                 "image/jpeg",        // .jpg
                 "image/heic",        // .heic
                 "image/heif",        // .heif
+                "image/avif",        // .avif
                 "image/x-adobe-dng", // .dng
                 "video/mp4",         // .mp4
                 "video/webm"         // .webm
