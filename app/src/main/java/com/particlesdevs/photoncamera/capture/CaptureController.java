@@ -2675,7 +2675,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                         PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
                             }
                             else {
-                                mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, videoRotation,
+                                mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, getOrientation(),
                                         PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
                             }
                         } else {
