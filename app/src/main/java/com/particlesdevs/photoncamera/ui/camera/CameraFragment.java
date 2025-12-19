@@ -947,7 +947,6 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             mCameraUIView.activateShutterButton(true);
             mCameraUIView.lockUIForBurst(false);
             stopNotification();
-
         }
 
         @Override
@@ -957,7 +956,6 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 if (savedFilePath != null) {
                     triggerMediaScanner(imageUri = Uri.fromFile(savedFilePath.toFile()));
                     logD("ImageSaved: " + savedFilePath);
-//                    showSnackBar("ImageSaved: " + savedFilePath.toString());
                 }
                 cameraFragmentViewModel.updateGalleryThumb(imageUri);
             } else {

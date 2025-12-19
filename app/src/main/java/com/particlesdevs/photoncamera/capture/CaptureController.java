@@ -46,6 +46,7 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.AudioFormat;
 import android.media.CamcorderProfile;
+import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaCodecList;
 import android.media.MediaRecorder;
@@ -62,6 +63,7 @@ import android.os.SystemClock;
 
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
+import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
 import android.util.Rational;
@@ -141,6 +143,7 @@ import java.util.concurrent.TimeUnit;
 import android.hardware.camera2.params.InputConfiguration;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_OFF;
 import static android.hardware.camera2.CameraMetadata.CONTROL_AE_MODE_ON;
@@ -260,6 +263,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean mRawPrivateIsSupported = false;
     public boolean mIsViewFinderMagnified = false;
     private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
+    private final AtomicBoolean mIsProcessingImage = new AtomicBoolean(false);
     private final ParamController paramController;
     public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
@@ -351,7 +355,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     // Add more metadata as needed...
                     // e.g., metadata.putString("make", Build.MANUFACTURER);
                 }
-                mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
+
+                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    processImageWithLutAndSave(reader);
+                } else {
+                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
+                }
+                return;
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;
@@ -729,11 +739,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return true;
     }
 
+    public boolean isSingleShotSwEncoder() {
+        if ((PhotonCamera.getSettings().frameCount == 1) &&
+            ((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991)) &&
+            (PhotonCamera.getSettings().rawSaver != 2) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isSingleShotJpegOrHeic() {
-        var test1 = PhotonCamera.getSettings().frameCount;
-        var test2 = PhotonCamera.getSettings().previewFormat;
-        var test3 = PhotonCamera.getSettings().rawSaver;
-        var test4 = PhotonCamera.getSettings().selectedMode;
         if ((PhotonCamera.getSettings().frameCount == 1) &&
            ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
@@ -1994,6 +2011,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 // QualityDoesMatter
                                 setAdvancedParameters(mPreviewRequestBuilder, true);
 
+                                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                                    File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
+                                    mMainRenderer.setLut(previewLut);
+                                    mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
+                                }
+                                else {
+                                    mMainRenderer.setLutEnabled(false);
+                                }
+
                                 if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
                                     List<CaptureRequest> highSpeedRequests = highSpeedSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
                                 }
@@ -2068,6 +2094,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             } else {
                 mCameraDevice.createCaptureSession(surfaces, stateCallback, mBackgroundHandler);
             }
+
             if (cameraEventsListener != null) {
                 cameraEventsListener.onPreviewStarted();
             }
@@ -2607,6 +2634,60 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, new Size(320, 240));
         }
         //boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
+    }
+
+    private void processImageWithLutAndSave(ImageReader reader) {
+        if (!mIsProcessingImage.compareAndSet(false, true)) {
+            Log.w(TAG, "processImageWithLutAndSave is already running, skipping this frame.");
+            // WICHTIG: Das ankommende Bild trotzdem aus dem Reader nehmen und verwerfen, um ihn nicht zu blockieren.
+            try (Image image = reader.acquireLatestImage()) {
+                // Nichts tun, das try-with-resources schließt das Bild automatisch.
+            } catch (Exception ignored) {}
+            return;
+        }
+
+        try {
+            Image image = reader.acquireLatestImage();
+            if (image == null) {
+                Log.e(TAG, "Could not acquire image for LUT processing.");
+                mIsProcessingImage.set(false);
+                return;
+            }
+
+            final int sensorWidth = image.getWidth();
+            final int sensorHeight = image.getHeight();
+            final int orientation = getOrientation();
+            final boolean isSideways = (orientation == 90 || orientation == 270);
+
+            final int targetWidth = isSideways ? sensorHeight : sensorWidth;
+            final int targetHeight = isSideways ? sensorWidth : sensorHeight;
+
+            if (mMainRenderer != null) {
+                Log.d(TAG, "Requesting LUT processing from MainRenderer.");
+                mMainRenderer.processYuvImage(image, orientation, (processedData) -> {
+                    try {
+                        if (processedData != null) {
+                            Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
+                            // ÜBERGIB die KORREKTEN Zieldimensionen an den ImageSaver.
+                            mImageSaver.directSaveImageLut(processedData, targetWidth, targetHeight, 0,
+                                    PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
+                        } else {
+                            Log.e(TAG, "LUT processing failed, renderer returned null data.");
+                        }
+                    } finally {
+                        mIsProcessingImage.set(false);
+                    }
+                });
+            } else {
+                Log.e(TAG, "MainRenderer is null, cannot process image with LUT. Closing image.");
+                image.close();
+                mIsProcessingImage.set(false);
+            }
+        }
+        catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            mIsProcessingImage.set(false);
+        }
     }
 
     private void captureSingleStillPicture() {

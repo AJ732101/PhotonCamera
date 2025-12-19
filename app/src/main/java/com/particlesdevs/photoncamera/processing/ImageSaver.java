@@ -10,6 +10,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
 
+import com.particlesdevs.photoncamera.api.CameraEventsListener;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -111,6 +112,34 @@ public class ImageSaver {
         implementation.frameCount = desiredFrameCount;
         implementation.newBurst = newBurst;
         implementation.addImage(mImage, orientation, targetFormat, quality, metadata);
+    }
+
+    public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
+                                   Bundle metadata, CameraEventsListener processingEventsListener) {
+        Log.v(TAG, "directSaveImageLut() - Starting quick JPEG test");
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(imageData);
+        Path jpegFilePath;
+        jpegFilePath = ImagePath.newJPGFilePath();
+
+        ParseExif.ExifData exifData = new ParseExif.ExifData();
+        if(metadata != null) {
+            exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
+            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("focalLength")); // Beispiel, anpassen falls nötig
+            exifData.EXPOSURE_TIME = String.valueOf(metadata.getLong("exposureTime"));
+        }
+
+        Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
+        boolean success = Util.saveBitmapAsJPG(jpegFilePath, bitmap, JPG_QUALITY, exifData);
+
+        if (success) {
+            Log.d(TAG, "Quick JPEG test successful!");
+        } else {
+            Log.e(TAG, "Quick JPEG test failed!");
+        }
+
+        processingEventsListener.onProcessingFinished("LUT processed JPEG: " + jpegFilePath);
     }
 
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
