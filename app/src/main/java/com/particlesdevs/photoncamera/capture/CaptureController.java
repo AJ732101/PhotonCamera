@@ -2663,21 +2663,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             final int sensorWidth = image.getWidth();
             final int sensorHeight = image.getHeight();
             boolean isSideways = (videoRotation == 90 || videoRotation == 270);
+            int rotation = getOrientation();
+            if (isSideways) {
+                rotation = videoRotation;
+            }
 
             if (mMainRenderer != null) {
                 Log.d(TAG, "Requesting LUT processing from MainRenderer.");
-                mMainRenderer.processYuvImage(image, getOrientation(), (processedData) -> {
+                mMainRenderer.processYuvImage(image, rotation, (processedData) -> {
                     try {
                         if (processedData != null) {
                             Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                            if (isSideways) {
-                                mImageSaver.directSaveImageLut(processedData, sensorWidth, sensorHeight, videoRotation,
-                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
-                            }
-                            else {
-                                mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, getOrientation(),
-                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
-                            }
+                            mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, videoRotation,
+                                    PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
                         } else {
                             Log.e(TAG, "LUT processing failed, renderer returned null data.");
                         }

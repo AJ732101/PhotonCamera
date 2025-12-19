@@ -130,7 +130,21 @@ public class ImageSaver {
             exifData.EQUIVALENT_35MM = String.valueOf(metadata.getInt("focalLength35mm"));
             exifData.EXPOSURE_TIME = String.valueOf(metadata.getLong("exposureTime"));
             exifData.IMAGE_DESCRIPTION = "PhotonVidCam LUT processed JPEG";
-            exifData.ORIENTATION = String.valueOf(orientation);
+            switch (orientation) {
+                case 0:
+                    exifData.ORIENTATION = "3";
+                    break;
+                case 180:
+                    exifData.ORIENTATION = "3";
+                    break;
+                case 90:
+                    exifData.ORIENTATION = "6";
+                    break;
+                case -90:
+                case 270:
+                    exifData.ORIENTATION = "8";
+                    break;
+            }
         }
 
         Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
