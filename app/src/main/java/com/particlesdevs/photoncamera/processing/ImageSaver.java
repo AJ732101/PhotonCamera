@@ -126,8 +126,11 @@ public class ImageSaver {
         ParseExif.ExifData exifData = new ParseExif.ExifData();
         if(metadata != null) {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
-            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("focalLength")); // Beispiel, anpassen falls nötig
+            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("focalLength"));
+            exifData.EQUIVALENT_35MM = String.valueOf(metadata.getInt("focalLength35mm"));
             exifData.EXPOSURE_TIME = String.valueOf(metadata.getLong("exposureTime"));
+            exifData.IMAGE_DESCRIPTION = "PhotonVidCam LUT processed JPEG";
+            exifData.ORIENTATION = String.valueOf(orientation);
         }
 
         Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
@@ -158,8 +161,7 @@ public class ImageSaver {
     public static class Util {
         public static boolean saveBitmapAsJPG(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
             exifData.COMPRESSION = String.valueOf(jpgQuality);
-            exifData.EQUIVALENT_35MM = "23mm";
-            exifData.SOFTWARE = "Photon Camera";
+            exifData.SOFTWARE = "PhotonVidCam";
             try {
                 OutputStream outputStream = Files.newOutputStream(fileToSave);
                 img.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);
@@ -174,27 +176,6 @@ public class ImageSaver {
                 return false;
             }
         }
-
-        /*public static boolean saveBitmapAsAVIF(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
-            exifData.COMPRESSION = String.valueOf(jpgQuality);
-            try {
-                OutputStream outputStream = Files.newOutputStream(fileToSave);
-                //img.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);
-                HeifCoder coder = new HeifCoder();
-                var buffer = coder.encodeAvif(img, jpgQuality, PreciseMode.LOSSY, AvifSpeed.EIGHT);
-                outputStream.write(buffer);
-                outputStream.flush();
-                outputStream.close();
-                img.recycle();
-                //ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
-                //inter.saveAttributes();
-                return true;
-            } catch (IOException e) {
-                //e.printStackTrace();
-                Log.d(TAG,"AVIF save error:"+Log.getStackTraceString(e));
-                return false;
-            }
-        }*/
 
         public static boolean saveBitmapAsPNG(Path fileToSave, Bitmap img, int pngQuality, ParseExif.ExifData exifData) {
             try {

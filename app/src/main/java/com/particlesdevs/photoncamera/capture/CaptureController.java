@@ -63,6 +63,7 @@ import android.os.SystemClock;
 
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
+import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
@@ -350,6 +351,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Float focalLength = mCaptureResult.get(CaptureResult.LENS_FOCAL_LENGTH);
                     if (focalLength != null) {
                         mMetaData.putFloat("focalLength", focalLength);
+                    }
+
+                    Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+                    CameraLensData camLensData = lensDataMap.get(physicalID);
+                    if (camLensData != null) {
+                        mMetaData.putFloat("focalLength35mm", (float)Math.ceil(camLensData.getCamera35mmFocalLength()));
                     }
 
                     // Add more metadata as needed...
@@ -2639,9 +2646,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void processImageWithLutAndSave(ImageReader reader) {
         if (!mIsProcessingImage.compareAndSet(false, true)) {
             Log.w(TAG, "processImageWithLutAndSave is already running, skipping this frame.");
-            // WICHTIG: Das ankommende Bild trotzdem aus dem Reader nehmen und verwerfen, um ihn nicht zu blockieren.
             try (Image image = reader.acquireLatestImage()) {
-                // Nichts tun, das try-with-resources schließt das Bild automatisch.
+
             } catch (Exception ignored) {}
             return;
         }
@@ -2656,21 +2662,22 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             final int sensorWidth = image.getWidth();
             final int sensorHeight = image.getHeight();
-            final int orientation = getOrientation();
-            final boolean isSideways = (orientation == 90 || orientation == 270);
-
-            final int targetWidth = isSideways ? sensorHeight : sensorWidth;
-            final int targetHeight = isSideways ? sensorWidth : sensorHeight;
+            boolean isSideways = (videoRotation == 90 || videoRotation == 270);
 
             if (mMainRenderer != null) {
                 Log.d(TAG, "Requesting LUT processing from MainRenderer.");
-                mMainRenderer.processYuvImage(image, orientation, (processedData) -> {
+                mMainRenderer.processYuvImage(image, getOrientation(), (processedData) -> {
                     try {
                         if (processedData != null) {
                             Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                            // ÜBERGIB die KORREKTEN Zieldimensionen an den ImageSaver.
-                            mImageSaver.directSaveImageLut(processedData, targetWidth, targetHeight, 0,
-                                    PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
+                            if (isSideways) {
+                                mImageSaver.directSaveImageLut(processedData, sensorWidth, sensorHeight, videoRotation,
+                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
+                            }
+                            else {
+                                mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, videoRotation,
+                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
+                            }
                         } else {
                             Log.e(TAG, "LUT processing failed, renderer returned null data.");
                         }

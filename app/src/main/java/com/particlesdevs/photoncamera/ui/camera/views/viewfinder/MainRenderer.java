@@ -75,6 +75,10 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int mImageHeight;
     private final Context mContext;
     private static final String TAG = MainRenderer.class.getSimpleName();
+    private final float[] mOffscreenRotationMatrix = new float[16];
+    private int uOffscreenTexRotateMatrixHandle_YUV;
+    private int uOffscreenTexRotateMatrixHandle_LUT;
+
 
     MainRenderer(GLPreview view) {
         mView = view;
@@ -329,8 +333,10 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         mYTextureHandle = GLES20.glGetUniformLocation(mYuvToRgbProgram, "y_texture");
         mUTextureHandle = GLES20.glGetUniformLocation(mYuvToRgbProgram, "u_texture");
         mVTextureHandle = GLES20.glGetUniformLocation(mYuvToRgbProgram, "v_texture");
-    }
+        uOffscreenTexRotateMatrixHandle_YUV = GLES20.glGetUniformLocation(mYuvToRgbProgram, "uTexRotateMatrix");
+        uOffscreenTexRotateMatrixHandle_LUT = GLES20.glGetUniformLocation(mLutProgram, "uTexRotateMatrix");
 
+    }
 
     private void setupOffscreenFramebuffer(int width, int height) {
         GLES20.glDeleteFramebuffers(1, mFboId, 0);
@@ -368,40 +374,26 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     public void processYuvImage(final Image image, final int orientation, final Consumer<ByteBuffer> onComplete) {
         mView.queueEvent(() -> {
             if (hTexLut == null) {
-                image.close();onComplete.accept(null);
+                try { image.close(); } catch (Exception ignored) {}
+                onComplete.accept(null);
                 return;
             }
 
-            // --- SCHRITT 1: Dimensionen korrekt definieren ---
-            // 'image.getWidth()' und 'image.getHeight()' sind die tatsächlichen,
-            // ungedrehten Dimensionen, wie die Daten vom Sensor kommen.
             final int sensorWidth = image.getWidth();
             final int sensorHeight = image.getHeight();
-
-            // 'mImageWidth' und 'mImageHeight' sind die Zieldimensionen nach der Rotation.
-            boolean isSideways = (orientation == 90 || orientation == 270);
+            final boolean isSideways = (orientation == 90 || orientation == 270);
             mImageWidth = isSideways ? sensorHeight : sensorWidth;
             mImageHeight = isSideways ? sensorWidth : sensorHeight;
 
             setupOffscreenFramebuffer(mImageWidth, mImageHeight);
 
-            // --- SCHRITT 2: Stabile Datenkopie ---
-            // Wir verwenden die robuste manuelle Kopie, da sie nachweislich funktioniert.
-            Image.Plane yPlane = image.getPlanes()[0];
-            Image.Plane uPlane = image.getPlanes()[1];
-            Image.Plane vPlane = image.getPlanes()[2];
-
-            int chromaWidth = sensorWidth / 2;
-            int chromaHeight = sensorHeight / 2;
-
-            ByteBuffer yBuffer = copyPlaneData(yPlane, sensorWidth, sensorHeight);
-            ByteBuffer uBuffer = copyPlaneData(uPlane, chromaWidth, chromaHeight);
-            ByteBuffer vBuffer = copyPlaneData(vPlane, chromaWidth, chromaHeight);
+            ByteBuffer yBuffer = copyPlaneData(image.getPlanes()[0], sensorWidth, sensorHeight);
+            ByteBuffer uBuffer = copyPlaneData(image.getPlanes()[1], sensorWidth / 2, sensorHeight / 2);
+            ByteBuffer vBuffer = copyPlaneData(image.getPlanes()[2], sensorWidth / 2, sensorHeight / 2);
 
             int[] yuvTextureIds = new int[3];
             GLES20.glGenTextures(3, yuvTextureIds, 0);
 
-            // --- SCHRITT 3: Texturen mit den ungedrehten Sensor-Dimensionen laden ---
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextureIds[0]);
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, sensorWidth, sensorHeight, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, yBuffer);
@@ -409,25 +401,27 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextureIds[1]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, chromaWidth, chromaHeight, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, uBuffer);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, sensorWidth / 2, sensorHeight / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, uBuffer);
             setupTextureParameters();
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextureIds[2]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, chromaWidth, chromaHeight, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, vBuffer);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, sensorWidth / 2, sensorHeight / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, vBuffer);
             setupTextureParameters();
 
-            // --- SCHRITT 4: Rendering mit korrekter Rotation ---
-            // Wähle den korrekten Koordinaten-Buffer für die Rotation aus
-            FloatBuffer texCoordBuffer = isSideways ? mOffscreenTexCoordBufferRotated : mOffscreenTexCoordBuffer;
+            image.close();
 
-            // Binde den FBO und setze den Viewport auf die *rotierten* Zieldimensionen
+            Matrix.setIdentityM(mOffscreenRotationMatrix, 0);
+            Matrix.translateM(mOffscreenRotationMatrix, 0, 0.5f, 0.5f, 0.0f);
+            Matrix.rotateM(mOffscreenRotationMatrix, 0, -orientation, 0.0f, 0.0f, 1.0f);
+            Matrix.translateM(mOffscreenRotationMatrix, 0, -0.5f, -0.5f, 0.0f);
+
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFboId[0]);
             GLES20.glViewport(0, 0, mImageWidth, mImageHeight);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-            // --- Erster Render-Durchlauf (YUV -> RGB) ---
             GLES20.glUseProgram(mYuvToRgbProgram);
+            GLES20.glUniformMatrix4fv(uOffscreenTexRotateMatrixHandle_YUV, 1, false, mOffscreenRotationMatrix, 0);
             GLES20.glUniform1i(mYTextureHandle, 0);
             GLES20.glUniform1i(mUTextureHandle, 1);
             GLES20.glUniform1i(mVTextureHandle, 2);
@@ -435,14 +429,17 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             mOffscreenVertexBuffer.position(0);
             GLES20.glVertexAttribPointer(mYuvPositionHandle, 2, GLES20.GL_FLOAT, false, 0, mOffscreenVertexBuffer);
             GLES20.glEnableVertexAttribArray(mYuvPositionHandle);
-
-            texCoordBuffer.position(0);
-            GLES20.glVertexAttribPointer(mYuvTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, texCoordBuffer);
+            mOffscreenTexCoordBuffer.position(0);
+            GLES20.glVertexAttribPointer(mYuvTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mOffscreenTexCoordBuffer);
             GLES20.glEnableVertexAttribArray(mYuvTexCoordHandle);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
-            // --- Zweiter Render-Durchlauf (LUT anwenden) ---
             GLES20.glUseProgram(mLutProgram);
+
+            Matrix.setIdentityM(mOffscreenRotationMatrix, 0);
+
+            GLES20.glUniformMatrix4fv(uOffscreenTexRotateMatrixHandle_LUT, 1, false, mOffscreenRotationMatrix, 0);
+            GLES20.glUniformMatrix4fv(uSTMatrix_Lut, 1, false, mSTMatrix, 0);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mFboTextureId[0]);
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutProgram, "sTexture"), 0);
@@ -460,13 +457,11 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             mOffscreenVertexBuffer.position(0);
             GLES20.glVertexAttribPointer(vPosition_Lut, 2, GLES20.GL_FLOAT, false, 0, mOffscreenVertexBuffer);
             GLES20.glEnableVertexAttribArray(vPosition_Lut);
-
-            texCoordBuffer.position(0);
-            GLES20.glVertexAttribPointer(vTexCoord_Lut, 2, GLES20.GL_FLOAT, false, 0, texCoordBuffer);
+            mOffscreenTexCoordBuffer.position(0);
+            GLES20.glVertexAttribPointer(vTexCoord_Lut, 2, GLES20.GL_FLOAT, false, 0, mOffscreenTexCoordBuffer);
             GLES20.glEnableVertexAttribArray(vTexCoord_Lut);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
-            // --- Ergebnis auslesen und zurückgeben ---
             ByteBuffer processedData = ByteBuffer.allocateDirect(mImageWidth * mImageHeight * 4);
             processedData.order(ByteOrder.nativeOrder());
             GLES20.glReadPixels(0, 0, mImageWidth, mImageHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, processedData);

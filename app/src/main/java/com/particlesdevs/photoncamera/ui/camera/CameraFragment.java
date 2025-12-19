@@ -557,7 +557,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 //stringMap.put("Shutter3", String.valueOf(expoPair.exposure));
                 stringMap.put("Aperture", String.valueOf(result.get(CaptureResult.LENS_APERTURE)));
                 stringMap.put("Focal length", String.valueOf(result.get(CaptureResult.LENS_FOCAL_LENGTH)) + "mm");
-                                float len35mm = 0;
+                float len35mm = 0;
                 if (physCamId == null) {
                     var lensData = mCameraLensDataMap.get(camID);
                     len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());

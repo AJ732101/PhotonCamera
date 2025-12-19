@@ -126,7 +126,9 @@ public class ParseExif {
         inter.setAttribute(TAG_COLOR_SPACE, data.COLOR_SPACE);
         inter.setAttribute(TAG_EXIF_VERSION, data.EXIF_VERSION);
         inter.setAttribute(TAG_IMAGE_DESCRIPTION, data.IMAGE_DESCRIPTION);
-        //inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
+        inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
+        inter.setAttribute(TAG_ORIENTATION, data.ORIENTATION);
+
         //inter.setAttribute("FocalLengthIn35mmFormat", data.EQUIVALENT_35MM);
         inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, "23mm");
         inter.setAttribute("FocalLengthIn35mmFormat", "23mm");
@@ -169,5 +171,6 @@ public class ParseExif {
         public String FOCAL_LENGTH;
         public String EQUIVALENT_35MM = "23mm";
         public String SOFTWARE = "PhotonVidCam";
+        public String ORIENTATION = "0";
     }
 }
