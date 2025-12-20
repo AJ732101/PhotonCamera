@@ -35,7 +35,6 @@ public class ImageSaver {
     /**
      * Image frame buffer
      */
-    public static final int JPG_QUALITY = 98;
     private static final String TAG = "ImageSaver";
 
     public SaverImplementation implementation;
@@ -147,6 +146,7 @@ public class ImageSaver {
         else {
             imageDescriptionBuilder.append("\n   Vignette Correction: ").append(PhotonCamera.getSettings().shadingMode);
         }
+        imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
         return imageDescriptionBuilder.toString();
     }
@@ -163,17 +163,19 @@ public class ImageSaver {
         ParseExif.ExifData exifData = new ParseExif.ExifData();
         if(metadata != null) {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
-            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("aperture"));
+            exifData.F_NUMBER = String.valueOf(metadata.getFloat("aperture"));
             exifData.EXPOSURE_TIME = metadata.getString("exposureTimeStr");
-            exifData.IMAGE_DESCRIPTION = createProcessingString(); //"PhotonVidCam LUT processed JPEG";
-            exifData.EXIF_VERSION = "0231";
+            exifData.IMAGE_DESCRIPTION = createProcessingString();
+            exifData.EXIF_VERSION = "0232";
+            exifData.COMPRESSION = String.valueOf(PhotonCamera.getSettings().singleFrameQuality);
+            exifData.COLOR_SPACE = "sRGB";
             float focalLength = metadata.getFloat("focalLength");
             if (focalLength > 0) {
-                exifData.FOCAL_LENGTH = (int) (focalLength * 100) + "/100"; // z.B. "870/100"
+                exifData.FOCAL_LENGTH = (int) (focalLength * 100) + "/100";
             }
             float focalLength35mm = metadata.getFloat("focalLength35mm");
             if (focalLength35mm > 0) {
-                exifData.EQUIVALENT_35MM = String.valueOf(Math.round(focalLength35mm)); // z.B. "24"
+                exifData.EQUIVALENT_35MM = String.valueOf(Math.round(focalLength35mm));
             }
 
             switch (orientation) {
@@ -194,7 +196,7 @@ public class ImageSaver {
         }
 
         Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
-        boolean success = Util.saveBitmapAsJPG(jpegFilePath, bitmap, JPG_QUALITY, exifData);
+        boolean success = Util.saveBitmapAsJPG(jpegFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
 
         if (success) {
             Log.d(TAG, "Quick JPEG test successful!");

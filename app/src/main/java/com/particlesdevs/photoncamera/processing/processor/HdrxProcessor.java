@@ -153,6 +153,7 @@ public class HdrxProcessor extends ProcessorBase {
         processingParameters.FillDynamicParameters(captureResult, captureRequest,ISO);
         processingParameters.cameraRotation = cameraRotation;
 
+        exifData.EQUIVALENT_35MM = String.valueOf(PhotonCamera.getParameters().current35mmFocalLength);
         exifData.IMAGE_DESCRIPTION = processingParameters.toString();
         ImageFrameDeblur imageFrameDeblur = new ImageFrameDeblur(processingParameters);
         imageFrameDeblur.firstFrameGyro = images.get(0).frameGyro.clone();
@@ -316,8 +317,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
         imageFile = Paths.get(imageFile.toAbsolutePath() + ".jpg");
         //Saves the final bitmap
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, img,
-                ImageSaver.JPG_QUALITY, exifData);
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
 
         try {
             processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);

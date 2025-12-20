@@ -77,13 +77,15 @@ public class ParseExif {
         data.SENSITIVITY_TYPE = String.valueOf(ExifInterface.SENSITIVITY_TYPE_ISO_SPEED);
         data.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(isonum);
         data.F_NUMBER = resultget(result, LENS_APERTURE);
+        if (TAG_F_NUMBER.isBlank() || TAG_F_NUMBER.isEmpty()) {
+            data.F_NUMBER = String.valueOf(result.get(LENS_APERTURE));
+        }
         data.EQUIVALENT_35MM = "23mm";
         String focal = resultget(result, LENS_FOCAL_LENGTH);
         if (!focal.isEmpty()) {
             focal = requestget(request, CaptureRequest.LENS_FOCAL_LENGTH);
             data.FOCAL_LENGTH = ((int) (100 * Double.parseDouble(focal))) + "/100";
         }
-        data.APERTURE_VALUE = String.valueOf(result.get(LENS_APERTURE));
         String exposure = resultget(result, SENSOR_EXPOSURE_TIME);
         if (!exposure.isEmpty()) {
             exposure = requestget(request, CaptureRequest.SENSOR_EXPOSURE_TIME);
@@ -112,23 +114,22 @@ public class ParseExif {
             e.printStackTrace();
             return inter;
         }
+        inter.setAttribute(TAG_EXIF_VERSION, data.EXIF_VERSION);
         inter.setAttribute(TAG_SENSITIVITY_TYPE, data.SENSITIVITY_TYPE);
         inter.setAttribute(TAG_PHOTOGRAPHIC_SENSITIVITY, data.PHOTOGRAPHIC_SENSITIVITY);
         inter.setAttribute(TAG_F_NUMBER, data.F_NUMBER);
         inter.setAttribute(TAG_FOCAL_LENGTH, data.FOCAL_LENGTH);
         inter.setAttribute(TAG_COPYRIGHT, data.COPYRIGHT);
-        inter.setAttribute(TAG_APERTURE_VALUE, data.APERTURE_VALUE);
+        inter.setAttribute(TAG_APERTURE_VALUE, data.F_NUMBER);
         inter.setAttribute(TAG_EXPOSURE_TIME, data.EXPOSURE_TIME);
         inter.setAttribute(ExifInterface.TAG_DATETIME, data.DATETIME);
         inter.setAttribute(TAG_MODEL, data.MODEL);
         inter.setAttribute(TAG_MAKE, data.MAKE);
         inter.setAttribute(TAG_COMPRESSION, data.COMPRESSION);
         inter.setAttribute(TAG_COLOR_SPACE, data.COLOR_SPACE);
-        inter.setAttribute(TAG_EXIF_VERSION, data.EXIF_VERSION);
         inter.setAttribute(TAG_IMAGE_DESCRIPTION, data.IMAGE_DESCRIPTION);
         inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
         inter.setAttribute(TAG_ORIENTATION, data.ORIENTATION);
-        inter.setAttribute(TAG_F_NUMBER, data.APERTURE_VALUE);
         inter.setAttribute(TAG_SOFTWARE, "PhotonVidCam");
         return inter;
     }
@@ -157,7 +158,6 @@ public class ParseExif {
         public final String COPYRIGHT = "PhotonVidCam";
         public String SENSITIVITY_TYPE;
         public String PHOTOGRAPHIC_SENSITIVITY;
-        public String APERTURE_VALUE;
         public String COMPRESSION;
         public String COLOR_SPACE;
         public String EXIF_VERSION;

@@ -42,6 +42,7 @@
         <item>HEIC_ULTRA</item>
         <item>AVIF (SW)</item>
         <item>HEIC/HEIF (SW) </item>
+        <item>JPEG LUT (SW) </item>
         <item>JPEG/RAW Stacking</item>
         <item>Video Codec 8 Bit</item>
         <item>Video Codec 10 Bit</item>
@@ -54,6 +55,7 @@
         <item>4102</item>
         <item>999999999</item>
         <item>999999991</item>
+        <item>999999992</item>
         <item>0</item>
         <item>35</item>
         <item>54</item>

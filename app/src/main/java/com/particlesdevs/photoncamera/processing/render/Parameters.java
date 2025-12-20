@@ -87,7 +87,7 @@ public class Parameters {
     public float[] ColorMatrix2 = new float[9];
     public float[] calibrationTransform2 = new float[9];
     public float[] ForwardTransform2 = new float[9];
-
+    public int current35mmFocalLength = 0;
 
     public void FillConstParameters(CameraCharacteristics characteristics, Point size) {
         rawSize = size;
@@ -562,6 +562,7 @@ public class Parameters {
                 "\n Color=" + PhotonCamera.getSettings().colorMethod +
                 "\n PreviewFormat=" + PhotonCamera.getSettings().previewFormat +
                 "\n FocalL=" + FltFormat(focalLength) +
+                "\n LUT=" + PhotonCamera.getSettings().lutName +
                 "\n Version=" + PhotonCamera.getVersion();
     }
 

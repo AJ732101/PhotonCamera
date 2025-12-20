@@ -232,6 +232,7 @@ public class PhotonCamera extends Application {
         mDebugger = new Debugger();
         //test();
     }
+
     //  a MemoryInfo object for the device's current memory status.
     /*public ActivityManager.MemoryInfo AvailableMemory() {
         ActivityManager activityManager = (ActivityManager) mCameraActivity.SystemService(ACTIVITY_SERVICE);

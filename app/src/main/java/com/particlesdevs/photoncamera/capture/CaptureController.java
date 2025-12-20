@@ -333,6 +333,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+            if (lensDataMap != null) {
+                CameraLensData camLensData = lensDataMap.get(physicalID);
+                if (camLensData != null) {
+                    PhotonCamera.getParameters().current35mmFocalLength = (int) Math.ceil(camLensData.getCamera35mmFocalLength());
+                }
+            }
             if (isSingleShotJpegOrHeic()) {
                 if (mMetaData == null) {
                     mMetaData = new Bundle();
@@ -368,12 +375,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Float aperture = mCaptureResult.get(CaptureResult.LENS_APERTURE);
                     if (focalLength != null) {
                         mMetaData.putFloat("aperture", aperture);
-                    }
-
-                    Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
-                    CameraLensData camLensData = lensDataMap.get(physicalID);
-                    if (camLensData != null) {
-                        mMetaData.putFloat("focalLength35mm", (float)Math.ceil(camLensData.getCamera35mmFocalLength()));
                     }
 
                     // Add more metadata as needed...
