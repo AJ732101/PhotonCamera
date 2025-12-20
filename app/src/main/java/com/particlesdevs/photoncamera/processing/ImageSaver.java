@@ -114,6 +114,43 @@ public class ImageSaver {
         implementation.addImage(mImage, orientation, targetFormat, quality, metadata);
     }
 
+    public String createProcessingString() {
+        StringBuilder imageDescriptionBuilder = new StringBuilder();
+        imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
+        imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
+        imageDescriptionBuilder.append("\n   Noise Reduction: ").append((PhotonCamera.getSettings().noiseProcessing > 0) ? "Enabled" : "Disabled");
+        imageDescriptionBuilder.append("\n   Edge Processing: ").append((PhotonCamera.getSettings().edgeProcessing > 0) ? "Enabled" : "Disabled");
+        imageDescriptionBuilder.append("\n   Digital Zoom: ").append(PhotonCamera.getSettings().zoom2X ? "Enabled" : "Disabled");
+        imageDescriptionBuilder.append("\n   SoC Saturation: ").append(PhotonCamera.getSettings().socQualcommSaturation);
+        imageDescriptionBuilder.append("\n   SoC Sharpness: ").append(PhotonCamera.getSettings().socQualcommSharpness);
+        if (PhotonCamera.getSettings().hotPixelMode == 99) {
+            imageDescriptionBuilder.append("\n   Hot Pixel Mode: Device Default");
+        }
+        else {
+            imageDescriptionBuilder.append("\n   Hot Pixel Mode: ").append(PhotonCamera.getSettings().hotPixelMode);
+        }
+        if (PhotonCamera.getSettings().colorCorrectionAberrationMode == 99) {
+            imageDescriptionBuilder.append("\n   Aberration Correction: Device Default");
+        }
+        else {
+            imageDescriptionBuilder.append("\n   Aberration Correction: ").append(PhotonCamera.getSettings().colorCorrectionAberrationMode);
+        }
+        if (PhotonCamera.getSettings().distortionCorrectionMode == 99) {
+            imageDescriptionBuilder.append("\n   Distortion Correction: Device Default");
+        }
+        else {
+            imageDescriptionBuilder.append("\n   Distortion Correction: ").append(PhotonCamera.getSettings().distortionCorrectionMode);
+        }
+        if (PhotonCamera.getSettings().shadingMode == 99) {
+            imageDescriptionBuilder.append("\n   Vignette Correction: Device Default");
+        }
+        else {
+            imageDescriptionBuilder.append("\n   Vignette Correction: ").append(PhotonCamera.getSettings().shadingMode);
+        }
+
+        return imageDescriptionBuilder.toString();
+    }
+
     public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
                                    Bundle metadata, CameraEventsListener processingEventsListener) {
         Log.v(TAG, "directSaveImageLut() - Starting quick JPEG test");
@@ -128,7 +165,7 @@ public class ImageSaver {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
             exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("aperture"));
             exifData.EXPOSURE_TIME = metadata.getString("exposureTimeStr");
-            exifData.IMAGE_DESCRIPTION = "PhotonVidCam LUT processed JPEG";
+            exifData.IMAGE_DESCRIPTION = createProcessingString(); //"PhotonVidCam LUT processed JPEG";
             exifData.EXIF_VERSION = "0231";
             float focalLength = metadata.getFloat("focalLength");
             if (focalLength > 0) {
