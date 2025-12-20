@@ -126,10 +126,19 @@ public class ImageSaver {
         ParseExif.ExifData exifData = new ParseExif.ExifData();
         if(metadata != null) {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
-            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("focalLength"));
-            exifData.EQUIVALENT_35MM = String.valueOf(metadata.getInt("focalLength35mm"));
-            exifData.EXPOSURE_TIME = String.valueOf(metadata.getLong("exposureTime"));
+            exifData.APERTURE_VALUE = String.valueOf(metadata.getFloat("aperture"));
+            exifData.EXPOSURE_TIME = metadata.getString("exposureTimeStr");
             exifData.IMAGE_DESCRIPTION = "PhotonVidCam LUT processed JPEG";
+            exifData.EXIF_VERSION = "0231";
+            float focalLength = metadata.getFloat("focalLength");
+            if (focalLength > 0) {
+                exifData.FOCAL_LENGTH = (int) (focalLength * 100) + "/100"; // z.B. "870/100"
+            }
+            float focalLength35mm = metadata.getFloat("focalLength35mm");
+            if (focalLength35mm > 0) {
+                exifData.EQUIVALENT_35MM = String.valueOf(Math.round(focalLength35mm)); // z.B. "24"
+            }
+
             switch (orientation) {
                 case 0:
                     exifData.ORIENTATION = "3";

@@ -127,7 +127,8 @@ public class TouchFocus {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
             (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-            (PhotonCamera.getSettings().previewFormat == 999999991)) && // SW HEIC/HEIF
+            (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
+            (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
            return true;

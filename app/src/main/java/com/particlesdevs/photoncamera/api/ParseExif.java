@@ -128,10 +128,7 @@ public class ParseExif {
         inter.setAttribute(TAG_IMAGE_DESCRIPTION, data.IMAGE_DESCRIPTION);
         inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
         inter.setAttribute(TAG_ORIENTATION, data.ORIENTATION);
-
-        //inter.setAttribute("FocalLengthIn35mmFormat", data.EQUIVALENT_35MM);
-        inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, "23mm");
-        inter.setAttribute("FocalLengthIn35mmFormat", "23mm");
+        inter.setAttribute(TAG_F_NUMBER, data.APERTURE_VALUE);
         inter.setAttribute(TAG_SOFTWARE, "PhotonVidCam");
         return inter;
     }
@@ -157,7 +154,7 @@ public class ParseExif {
     public static class ExifData {
         public final String MODEL = Build.MODEL;
         public final String MAKE = Build.BRAND;
-        public final String COPYRIGHT = "PhotonCamera";
+        public final String COPYRIGHT = "PhotonVidCam";
         public String SENSITIVITY_TYPE;
         public String PHOTOGRAPHIC_SENSITIVITY;
         public String APERTURE_VALUE;

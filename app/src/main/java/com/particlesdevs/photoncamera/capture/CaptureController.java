@@ -344,13 +344,30 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
 
                     Long exposureTime = mCaptureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+                    String strExposureTime = "";
+                    if (exposureTime != null && exposureTime > 0) {
+                        if (exposureTime >= 1_000_000_000L) {
+                            double seconds = exposureTime / 1_000_000_000.0;
+                            strExposureTime = String.format(Locale.getDefault(), "%.1fs", seconds);
+                        } else {
+                            long divisor = (long) (1_000_000_000.0 / exposureTime);
+                            strExposureTime = "1/" + divisor;
+                        }
+                    }
+
                     if (exposureTime != null) {
                         mMetaData.putLong("exposureTime", exposureTime);
+                        mMetaData.putString("exposureTimeStr", strExposureTime);
                     }
 
                     Float focalLength = mCaptureResult.get(CaptureResult.LENS_FOCAL_LENGTH);
                     if (focalLength != null) {
                         mMetaData.putFloat("focalLength", focalLength);
+                    }
+
+                    Float aperture = mCaptureResult.get(CaptureResult.LENS_APERTURE);
+                    if (focalLength != null) {
+                        mMetaData.putFloat("aperture", aperture);
                     }
 
                     Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
@@ -363,7 +380,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     // e.g., metadata.putString("make", Build.MANUFACTURER);
                 }
 
-                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
+                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
+                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
                     processImageWithLutAndSave(reader);
                 } else {
                     mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
@@ -380,7 +400,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mBackgroundHandler.post(() -> mImageSaver.initProcess(reader));
             }
         }
-
     };
     private Range<Integer> FpsRangeDef;
     private Range<Integer> FpsRangeHigh;
@@ -748,9 +767,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean isSingleShotSwEncoder() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-            ((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991)) &&
+            //((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991) || (PhotonCamera.getSettings().previewFormat == 999999992)) &&
+            (PhotonCamera.getSettings().previewFormat == 999999992) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -765,9 +786,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
             (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-            (PhotonCamera.getSettings().previewFormat == 999999991)) && // SW HEIC/HEIF
+            (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
+            (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -785,7 +808,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void setTargetFormat() {
         if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
-            if ((targetFromUi == 999999999) || (targetFromUi == 999999991)) { // SW AVIF and HEIC/HEIF
+            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT
                 mTargetFormat = ImageFormat.YUV_420_888;
             }
             else {
@@ -2018,7 +2041,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 // QualityDoesMatter
                                 setAdvancedParameters(mPreviewRequestBuilder, true);
 
-                                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
+                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
+                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
                                     File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
                                     mMainRenderer.setLut(previewLut);
                                     mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
