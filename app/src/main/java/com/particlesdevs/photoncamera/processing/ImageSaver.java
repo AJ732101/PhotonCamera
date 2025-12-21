@@ -8,9 +8,11 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 
 import com.particlesdevs.photoncamera.api.CameraEventsListener;
+import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -232,6 +234,9 @@ public class ImageSaver {
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
                 inter.saveAttributes();
+                MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                        new String[]{fileToSave.toFile().getAbsolutePath()},
+                        new String[]{"image/jpeg"}, null);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -248,6 +253,9 @@ public class ImageSaver {
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
                 inter.saveAttributes();
+                MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                        new String[]{fileToSave.toFile().getAbsolutePath()},
+                        new String[]{"image/png"}, null);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -284,6 +292,9 @@ public class ImageSaver {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);
                 dngCreator.writeBuffer(outputStream, buffer, parameters.rawSize.x, parameters.rawSize.y);
                 outputStream.close();
+                MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                        new String[]{dngFilePath.toFile().getAbsolutePath()},
+                        new String[]{"image/dng"}, null);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;

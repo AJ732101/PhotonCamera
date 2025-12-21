@@ -204,6 +204,7 @@ public class PhotonCamera extends Application {
     public void onCreate() {
         registerActivityLifecycleCallbacks(new ActivityLifecycleMonitor());
         sPhotonCamera = this;
+        ContextProvider.setContext(this);
         Log.d("PhotonCamera", "Initializing PhotonCamera Modules");
         initModules();
         super.onCreate();
