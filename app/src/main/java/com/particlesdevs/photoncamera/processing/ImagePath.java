@@ -83,6 +83,11 @@ public class ImagePath {
                 }
             }
         }
+        if (extension.isEmpty() || extension.isBlank())
+        {
+            extension = "jpg";
+        }
+
         return Paths.get(dir.getAbsolutePath(), generateNewFileName() + addOptions + '.' + extension);
     }
 

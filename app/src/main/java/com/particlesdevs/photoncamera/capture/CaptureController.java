@@ -383,8 +383,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                 if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
-                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
+                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
                     mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
@@ -772,7 +771,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == 999999992) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -791,7 +789,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -2044,8 +2041,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                                 if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
                                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
-                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
+                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                                     File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
                                     mMainRenderer.setLut(previewLut);
                                     mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
@@ -3165,7 +3161,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void callUnlimitedEnd() {
         onUnlimited = false;
         //mImageSaver.unlimitedEnd();
-        releaseAudioRecorder();
+        if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
+            releaseAudioRecorder();
+        }
         mBackgroundHandler.post(() -> mImageSaver.processEnd());
         abortCaptures();
         createCameraPreviewSession(false);
@@ -3174,7 +3172,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void callUnlimitedStart() {
         onUnlimited = true;
-        setupAudioRecorder("");
+        if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
+            setupAudioRecorder("");
+        }
         takePicture();
     }
 
