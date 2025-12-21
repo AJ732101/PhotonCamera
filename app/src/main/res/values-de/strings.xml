@@ -116,7 +116,7 @@
     <string name="version_title">Version</string>
     <string name="contributors_title">Beitragende↗</string>
     <string name="eis_toggle_text">Bild Stabilisierung</string>
-    <string name="photon_camera_summary">Open-Source Android Kamera mit fortgeschrittener Bildverarbeitung</string>
+    <string name="photon_camera_summary">Open-Source Android Kamera mit Fokus auf natürlich wirkende Fotos und Video (unter Beibehaltung des Erbes der originalen Photon Camera mit Mehrfachbelichtungs-Stacking)</string>
     <string name="long_press_to_deselect">Lang gedrückt halten um Auswahl aufzuheben</string>
     <string name="golden_ratio">Goldener Schnitt</string>
     <string name="diag_triangle">Diagon. Dreiecke</string>

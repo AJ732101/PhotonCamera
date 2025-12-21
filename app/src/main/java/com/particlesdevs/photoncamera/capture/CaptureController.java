@@ -771,6 +771,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == 999999992) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -789,6 +790,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
@@ -1430,7 +1432,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void createImageReaderPreview(String cameraId) {
-        if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) || PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+        if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) ||
+                PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) ||
+                PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
         else if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {

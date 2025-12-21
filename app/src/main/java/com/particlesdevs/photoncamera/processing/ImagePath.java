@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
+import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.FileManager;
 
@@ -83,8 +84,7 @@ public class ImagePath {
                 }
             }
         }
-        if (extension.isEmpty() || extension.isBlank())
-        {
+        if ((extension.isEmpty() || extension.isBlank()) && PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             extension = "jpg";
         }
 

@@ -95,6 +95,7 @@
                 android:title="@string/turn_on_system_nr"
                 android:summary=""
                 android:icon="@drawable/ic_gradient_black_24dp"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_disable_aligning_key"
                 android:defaultValue="@bool/pref_disable_align_default"
@@ -102,6 +103,7 @@
                 android:title="@string/disable_aligning"
                 android:summary=""
                 android:icon="@drawable/ic_format_align_justify_black_24dp"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_chroma_nr_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -111,6 +113,7 @@
                 app:maxValue="65"
                 app:minValue="1"
                 android:icon="@drawable/ic_burst_mode_black_24dp"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:key="@string/pref_luma_nr_seekbar_key"
                 android:layout="@layout/preference_seekbar"
@@ -120,6 +123,7 @@
                 app:maxValue="65"
                 app:minValue="1"
                 android:icon="@drawable/ic_grain_black_24dp"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_enhanced_processing_key"
                 android:defaultValue="@bool/pref_enhanced_processing_default"
@@ -133,6 +137,7 @@
         android:layout="@layout/preference_category_layout"
         android:key="@string/pref_theme_category_key"
         android:title="@string/theme">
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_theme_key"
@@ -142,6 +147,7 @@
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_entryValues"
             android:defaultValue="@string/pref_theme_default_value" />
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_theme_accent_key"
@@ -151,6 +157,7 @@
             android:entries="@array/theme_accent_entries"
             android:entryValues="@array/theme_accent_entryValues"
             android:defaultValue="@string/pref_theme_accent_default_value"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_show_gradient_key"
@@ -158,45 +165,53 @@
             android:summary=""
             android:icon="@drawable/ic_gradient_black_24dp"
             android:defaultValue="@bool/pref_show_gradient_def_value"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"
             android:key="@string/pref_category_backup_restore"
             android:title="@string/backup_restore">
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.BackupPreferences
                 android:icon="@drawable/ic_save"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/backup"
                 android:key="@string/pref_backup_preferences_key"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.RestorePreference
                 android:icon="@drawable/ic_restore"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/restore"
                 android:key="@string/pref_restore_preferences_key"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ResetPreferences
                 android:icon="@drawable/ic_refresh"
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/reset"
                 android:key="@string/pref_reset_preferences_key"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
             android:layout="@layout/preference_category_layout"
             android:key="@string/pref_category_about_key"
             android:title="@string/about">
+
         <PreferenceScreen
                 android:layout="@layout/preference_with_margin"
                 android:title="@string/about"
                 android:key="@string/pref_about_key"
                 android:icon="@drawable/ic_baseline_info_24">
+
             <Preference
                 android:layout="@layout/preference_about"
                 android:title="@string/app_name"
                 android:summary="@string/photon_camera_summary"
                 android:key="@string/pref_photoncamera"
                 android:enabled="false"
-                android:icon="@drawable/ic_splash">
+                android:icon="@drawable/qualitydoesmatter">
+
             </Preference>
             <Preference
                 android:key="@string/pref_version_key"
@@ -204,29 +219,27 @@
                 android:layout="@layout/preference_about"
                 android:summary="@string/version_summary"
                 android:enabled="false"/>
+
             <Preference
                 android:layout="@layout/preference_about"
                 app:singleLineTitle="true"
                 android:enabled="false"
                 android:persistent="false"
                 android:key="@string/pref_this_device_key"/>
+
             <Preference
                 android:layout="@layout/preference_about"
                 android:key="@string/pref_contributors_key"
                 android:icon="@drawable/ic_github"
                 android:title="@string/contributors_title"
-                android:summary="AJ732101/QualityDoesMatter (Foundation by: eszdman, assasinfil, killerink, mirai, Urnyx05, vibhorSrv, snajdovski)"/>
+                android:summary="AJ732101/QualityDoesMatter\n(Foundation by: eszdman, assasinfil, killerink, mirai, Urnyx05, vibhorSrv, snajdovski)"/>
+
             <Preference
                 android:layout="@layout/preference_about"
                 android:title="@string/telegram"
                 android:icon="@drawable/ic_telegram"
                 android:key="@string/pref_telegram_channel_key"/>
-            <Preference
-                android:layout="@layout/preference_about"
-                android:title="@string/supported_devices"
-                android:enabled="false"
-                android:persistent="false"
-                android:key="@string/all_devices_names"/>
+
         </PreferenceScreen>
 
         <Preference
