@@ -79,6 +79,22 @@ public class Specific {
                     specificSetting.useCodeAuroraCinematicMode = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "modeShowUnlimited": {
+                    specificSetting.modeShowUnlimited = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "modeShowMotion": {
+                    specificSetting.modeShowMotion = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "modeShowNight": {
+                    specificSetting.modeShowNight = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "modeShowRawVideo": {
+                    specificSetting.modeShowRawVideo = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;

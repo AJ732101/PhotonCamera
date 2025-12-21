@@ -5,6 +5,8 @@ import androidx.annotation.StringRes;
 import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum CameraMode {
@@ -15,10 +17,15 @@ public enum CameraMode {
     NIGHT(R.string.mode_night),
     VIDEO(R.string.mode_video);
 
-    int stringId;
+    public final int stringId;
 
     CameraMode(@StringRes int stringId) {
         this.stringId = stringId;
+    }
+
+    @StringRes
+    public int getStringId() {
+        return stringId;
     }
 
     public static CameraMode valueOf(int modeOrdinal) {
@@ -34,4 +41,22 @@ public enum CameraMode {
         return Stream.of(values()).map(mode -> mode.stringId).toArray(Integer[]::new);
     }
 
+    public static List<CameraMode> getAvailableModes() {
+        return Stream.of(values())
+                .filter(mode -> {
+                    switch (mode) {
+                        case UNLIMITED:
+                            return PhotonCamera.getSpecific().specificSetting.modeShowUnlimited;
+                        case MOTION:
+                            return PhotonCamera.getSpecific().specificSetting.modeShowMotion;
+                        case NIGHT:
+                            return PhotonCamera.getSpecific().specificSetting.modeShowNight;
+                        case RAWVIDEO:
+                            return PhotonCamera.getSpecific().specificSetting.modeShowRawVideo;
+                        default:
+                            return true;
+                    }
+                })
+                .collect(Collectors.toList());
+    }
 }

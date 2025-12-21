@@ -19,15 +19,10 @@ import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.ui.camera.views.modeswitcher.wefika.horizontalpicker.HorizontalPicker;
 import com.particlesdevs.photoncamera.util.Utilities;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static androidx.constraintlayout.widget.ConstraintSet.GONE;
 
-/**
- * This Class is a dumb 'View' which contains view components visible in the main Camera User Interface
- * <p>
- * It gets instantiated in {@link CameraFragment#onViewCreated(View, Bundle)}
- */
 class CameraUIViewImpl implements CameraUIView {
     private static final String TAG = "CameraUIView";
     private final CameraFragment cameraFragment;
@@ -39,6 +34,8 @@ class CameraUIViewImpl implements CameraUIView {
     private LayoutBottombuttonsBinding bottombuttons;
     private CameraUIEventsListener uiEventsListener;
     private CameraModeState currentState;
+    private List<CameraMode> availableModes;
+    private CameraMode currentMode;
 
     CameraUIViewImpl(CameraFragment cameraFragment) {
         this.cameraFragment = cameraFragment;
@@ -50,12 +47,6 @@ class CameraUIViewImpl implements CameraUIView {
         this.mModePicker = cameraFragment.cameraFragmentBinding.layoutBottombar.modeSwitcher.modePickerView;
         this.initListeners();
         this.initModeSwitcher();
-        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            this.currentState = new VideoModeState(); //init mode
-        }
-        else {
-            this.currentState = new PhotoMotionModeState();
-        }
     }
 
     private void initListeners() {
@@ -64,23 +55,48 @@ class CameraUIViewImpl implements CameraUIView {
     }
 
     private void initModeSwitcher() {
-        this.mModePicker.setValues(Arrays.stream(CameraMode.nameIds()).map(cameraFragment.activity::getString).toArray(String[]::new));
+        this.availableModes = CameraMode.getAvailableModes();
+        this.mModePicker.setValues(availableModes.stream().map(mode -> cameraFragment.getString(mode.getStringId())).toArray(String[]::new));
         this.mModePicker.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        this.mModePicker.setOnItemSelectedListener(index -> switchToMode(CameraMode.valueOf(index)));
-        this.mModePicker.setSelectedItem(PreferenceKeys.getCameraModeOrdinal());
+        this.mModePicker.setOnItemSelectedListener(index -> {
+            if (index >= 0 && index < availableModes.size()) {
+                switchToMode(availableModes.get(index));
+            }
+        });
+
+        CameraMode persistedMode = CameraMode.valueOf(PreferenceKeys.getCameraModeOrdinal());
+        CameraMode initialMode;
+
+        if (availableModes.contains(persistedMode)) {
+            initialMode = persistedMode;
+        } else {
+            initialMode = CameraMode.VIDEO; // Default to VIDEO if persisted mode is not available
+        }
+
+        if (!availableModes.contains(initialMode)) {
+            initialMode = availableModes.isEmpty() ? null : availableModes.get(0);
+        }
+
+        if (initialMode != null) {
+            // Update the source of truth (preferences) so the controller can read the correct state
+            PreferenceKeys.setCameraModeOrdinal(initialMode.ordinal());
+            this.mModePicker.setSelectedItem(availableModes.indexOf(initialMode));
+            updateStateForMode(initialMode); // Set initial UI state
+        } else {
+            this.mModePicker.setVisibility(View.GONE); // Hide picker if no modes are available
+        }
     }
 
     @Override
-    public void activateShutterButton(boolean status) {
-        this.mShutterButton.post(() -> {
-            this.mShutterButton.setActivated(status);
-            this.mShutterButton.setClickable(status);
-        });
+    public void setCameraUIEventsListener(CameraUIEventsListener cameraUIEventsListener) {
+        this.uiEventsListener = cameraUIEventsListener;
+        // DO NOT call onCameraModeChanged here. The controller will read the correct mode
+        // from preferences when it initializes.
     }
 
-
-    private void switchToMode(CameraMode cameraMode) {
-        Log.d(TAG, "Current Mode:" + cameraMode.name());
+    private void updateStateForMode(CameraMode cameraMode) {
+        Log.d(TAG, "Updating state for Mode:" + cameraMode.name());
+        this.currentMode = cameraMode;
         switch (cameraMode) {
             case VIDEO:
                 currentState = new VideoModeState();
@@ -97,9 +113,23 @@ class CameraUIViewImpl implements CameraUIView {
                 currentState = new NightModeState();
                 break;
         }
-
         currentState.reConfigureModeViews(cameraMode);
-        uiEventsListener.onCameraModeChanged(cameraMode);
+    }
+
+    private void switchToMode(CameraMode cameraMode) {
+        // This is called on user interaction. At this point, the listener is guaranteed to be ready.
+        updateStateForMode(cameraMode);
+        if (uiEventsListener != null) {
+            uiEventsListener.onCameraModeChanged(cameraMode);
+        }
+    }
+
+    @Override
+    public void activateShutterButton(boolean status) {
+        this.mShutterButton.post(() -> {
+            this.mShutterButton.setActivated(status);
+            this.mShutterButton.setClickable(status);
+        });
     }
 
     private void toggleConstraints(CameraMode mode) {
@@ -121,7 +151,6 @@ class CameraUIViewImpl implements CameraUIView {
                     camera_containerLP.topToTop = -1;
                     camera_containerLP.topToBottom = R.id.layout_topbar;
             }
-
         }
     }
 
@@ -171,54 +200,34 @@ class CameraUIViewImpl implements CameraUIView {
 
     @Override
     public void lockUIForBurst(boolean locked) {
-        
-        // Lock/unlock bottom bar buttons (except shutter button)
         if (this.bottombuttons != null) {
-                this.bottombuttons.galleryImageButton.post(() -> this.bottombuttons.galleryImageButton.setEnabled(!locked));
-            // Note: shutter button remains enabled for burst control
+            this.bottombuttons.galleryImageButton.post(() -> this.bottombuttons.galleryImageButton.setEnabled(!locked));
         }
-        
-        // Lock/unlock mode picker
         if (this.mModePicker != null) {
             this.mModePicker.post(() -> this.mModePicker.setEnabled(!locked));
         }
-        
-        // Lock/unlock aux buttons container - disable touch events
         if (cameraFragment.cameraFragmentBinding != null) {
             cameraFragment.cameraFragmentBinding.auxButtonsContainer.post(() -> {
                 cameraFragment.cameraFragmentBinding.auxButtonsContainer.setEnabled(!locked);
-                // Also set alpha to visually indicate disabled state
                 cameraFragment.cameraFragmentBinding.auxButtonsContainer.setAlpha(locked ? 0.5f : 1.0f);
                 cameraFragment.auxButtonsViewModel.setEnabled(!locked);
             });
         }
-        
-        // Lock/unlock settings bar - disable touch events and reduce alpha
         if (cameraFragment.cameraFragmentBinding != null) {
             cameraFragment.cameraFragmentBinding.settingsBar.post(() -> {
                 cameraFragment.cameraFragmentBinding.settingsBar.setEnabled(!locked);
                 cameraFragment.cameraFragmentBinding.settingsBar.setAlpha(locked ? 0.5f : 1.0f);
             });
         }
-        
-        // Lock/unlock manual mode console - disable swipe gestures
         if (cameraFragment.cameraFragmentBinding != null) {
             cameraFragment.cameraFragmentBinding.manualMode.post(() -> {
                 cameraFragment.cameraFragmentBinding.manualMode.setEnabled(!locked);
                 cameraFragment.cameraFragmentBinding.manualMode.setAlpha(locked ? 0.5f : 1.0f);
             });
         }
-        
-        // Lock/unlock touch focus by disabling the swipe controls
         if (cameraFragment.textureView != null) {
-            // Disable touch events on the texture view to prevent focus/swipe during burst
             cameraFragment.textureView.post(() -> cameraFragment.textureView.setEnabled(!locked));
         }
-    }
-
-    @Override
-    public void setCameraUIEventsListener(CameraUIEventsListener cameraUIEventsListener) {
-        this.uiEventsListener = cameraUIEventsListener;
     }
 
     @Override
@@ -247,13 +256,10 @@ class CameraUIViewImpl implements CameraUIView {
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.eis_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.hdrx_entry_layout, View.GONE);
-
-
             toggleConstraints(mode);
         }
     }
 
-    //
     public class UnlimitedModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
@@ -274,12 +280,10 @@ class CameraUIViewImpl implements CameraUIView {
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.hdrx_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.eis_entry_layout, View.GONE);
-
             toggleConstraints(mode);
         }
     }
 
-    //
     public class PhotoMotionModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
@@ -300,8 +304,7 @@ class CameraUIViewImpl implements CameraUIView {
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
-            }
-            else {
+            } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
@@ -320,7 +323,6 @@ class CameraUIViewImpl implements CameraUIView {
             mShutterButton.setBackgroundResource(R.drawable.roundbutton);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
-
             toggleConstraints(mode);
         }
     }
@@ -343,8 +345,7 @@ class CameraUIViewImpl implements CameraUIView {
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.VISIBLE);
-            }
-            else {
+            } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
@@ -363,7 +364,6 @@ class CameraUIViewImpl implements CameraUIView {
             mShutterButton.setBackgroundResource(R.drawable.roundbutton);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
-
             toggleConstraints(mode);
         }
     }
