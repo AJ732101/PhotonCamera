@@ -206,7 +206,7 @@ public class ImageSaver {
             Log.e(TAG, "Quick JPEG test failed!");
         }
 
-        processingEventsListener.onProcessingFinished("LUT processed JPEG: " + jpegFilePath);
+        processingEventsListener.onProcessingFinished("LUT processed JPEG: " + jpegFilePath.toAbsolutePath().toString());
     }
 
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
@@ -234,9 +234,9 @@ public class ImageSaver {
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
                 inter.saveAttributes();
-                MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
                         new String[]{fileToSave.toFile().getAbsolutePath()},
-                        new String[]{"image/jpeg"}, null);
+                        new String[]{"image/jpeg"}, null);*/
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();

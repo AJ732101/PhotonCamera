@@ -36,11 +36,13 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
+import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.HorizonIndicatorView;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
@@ -944,10 +946,62 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         @Override
         public void onProcessingFinished(Object obj) {
             logD("onProcessingFinished: " + obj);
-            mCameraUIView.setProcessingProgressBarIndeterminate(false);
-            mCameraUIView.activateShutterButton(true);
+            mCameraUIView.setProcessingProgressBarIndeterminate(false);    mCameraUIView.activateShutterButton(true);
             mCameraUIView.lockUIForBurst(false);
             stopNotification();
+            boolean sleep = false;
+
+            if (obj instanceof String) {
+                String message = (String) obj;
+                String filePath = null;
+                String mimeType = null;
+
+                String jpegPrefix = "LUT processed JPEG: ";
+                String heicPrefix = "HEIF saved: ";
+                String avifPrefix = "AVIF saved: ";
+
+                if (message.startsWith(jpegPrefix)) {
+                    filePath = message.substring(jpegPrefix.length());
+                    mimeType = "image/jpeg";
+                } else if (message.startsWith(heicPrefix)) {
+                    filePath = message.substring(heicPrefix.length());
+                    mimeType = "image/heic";
+                    sleep = true;
+                } else if (message.startsWith(avifPrefix)) {
+                    filePath = message.substring(avifPrefix.length());
+                    mimeType = "image/avif";
+                    sleep = true;
+                }
+
+                if (filePath != null && !filePath.isEmpty() && mimeType != null) {
+                    final String finalFilePath = filePath;
+                    final String finalMimeType = mimeType;
+
+                    Runnable scanRunnable = () -> {
+                        logD("Triggering MediaScanner for path: " + finalFilePath);
+                        MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                                new String[]{finalFilePath},
+                                new String[]{finalMimeType},
+                                (path, uri) -> {
+                                    logD("MediaScanner finished for: " + path);
+                                    if (uri != null) {
+                                        if (activity != null) {
+                                            activity.runOnUiThread(() -> {
+                                                cameraFragmentViewModel.updateGalleryThumb(uri);
+                                            });
+                                        }
+                                    }
+                                });
+                    };
+
+                    if (sleep) {
+                        logD("Waiting 3 seconds before scanning " + finalFilePath);
+                        new Handler(Looper.getMainLooper()).postDelayed(scanRunnable, 100);
+                    } else {
+                        scanRunnable.run();
+                    }
+                }
+            }
         }
 
         @Override

@@ -340,7 +340,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     PhotonCamera.getParameters().current35mmFocalLength = (int) Math.ceil(camLensData.getCamera35mmFocalLength());
                 }
             }
-            if (isSingleShotJpegOrHeic()) {
+            if (isSingleShotJpegOrAvifOrHeic()) {
                 if (mMetaData == null) {
                     mMetaData = new Bundle();
                 }
@@ -381,7 +381,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     // e.g., metadata.putString("make", Build.MANUFACTURER);
                 }
 
-                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
+                if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) &&
                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
@@ -778,7 +778,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return false;
     }
 
-    public boolean isSingleShotJpegOrHeic() {
+    public boolean isSingleShotJpegOrAvifOrHeic() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
            ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
@@ -806,7 +806,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setTargetFormat() {
-        if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
+        if (PhotonCamera.getSettings().rawFormat == 2) {
+            mTargetFormat = PhotonCamera.getSettings().rawFormat;
+            return;
+        }
+        if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
             if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT
                 mTargetFormat = ImageFormat.YUV_420_888;
@@ -1437,7 +1441,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
-        else if (isSingleShotJpegOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+        else if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             maxImagerReaderImages = 1;
         }
 
@@ -1483,9 +1487,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 Size newSize = customRawResForCamId(physicalID);
                 mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
-                if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().QuadBayer) {
-                    //mImageReaderRaw = ImageReader.newInstance(8192, 6144, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
-                    //mImageReaderRaw = ImageReader.newInstance(9248, 6944, mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                if (isSingleShotJpegOrAvifOrHeic() && PhotonCamera.getSettings().QuadBayer) {
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 } else {
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
@@ -1958,6 +1960,28 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //activity.runOnUiThread(() -> cameraEventsListener.onCharacteristicsUpdated(characteristics));
     }
 
+    public boolean activateLut() {
+        boolean test1 = isSingleShotJpegOrAvifOrHeic();
+        boolean test2 = isSingleShotSwEncoder();
+        boolean test3 = PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO);
+        boolean test4 = PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO);
+        int test5 = PhotonCamera.getSettings().rawSaver;
+
+        if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
+                !(PhotonCamera.getSettings().rawSaver == 2)) {
+            File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
+            mMainRenderer.setLut(previewLut);
+            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
+            return true;
+        }
+        else {
+            mMainRenderer.setLutEnabled(false);
+            return false;
+        }
+    }
+
     Surface surface;
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
@@ -2040,19 +2064,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
                                 }
 
-                                // QualityDoesMatter
                                 setAdvancedParameters(mPreviewRequestBuilder, true);
-
-                                if ((!isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
-                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-                                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
-                                    File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
-                                    mMainRenderer.setLut(previewLut);
-                                    mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
-                                }
-                                else {
-                                    mMainRenderer.setLutEnabled(false);
-                                }
+                                activateLut();
 
                                 if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
                                     List<CaptureRequest> highSpeedRequests = highSpeedSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
@@ -2277,7 +2290,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void setSceneAndEffectMode(CaptureRequest.Builder builder) {
-        if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
+        if (isSingleShotJpegOrAvifOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
             if (!paramController.isManualMode()) {
                 builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
                 switch (PhotonCamera.getSettings().selectedMode) {
@@ -2776,7 +2789,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             // single shot logic
-            if (isSingleShotJpegOrHeic()) {
+            if (isSingleShotJpegOrAvifOrHeic()) {
                 captureSingleStillPicture();
                 return;
             }

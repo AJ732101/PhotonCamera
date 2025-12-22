@@ -6,6 +6,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
+import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Size;
@@ -16,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.io.File;
 import java.nio.file.Path;
 
+import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -43,12 +45,15 @@ public class YUVSaver extends DefaultSaver{
                 AvifEncoder avifEncoder = new AvifEncoder();
                 try {
                     avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality, metadata);
+                    /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                            new String[]{heicFile.getAbsolutePath()},
+                            new String[]{"image/avif"}, null);*/
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
                 image.close();
-                processingEventsListener.onProcessingFinished("AVIF saved: " + heicFile.getName());
+                processingEventsListener.onProcessingFinished("AVIF saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
 
@@ -59,12 +64,15 @@ public class YUVSaver extends DefaultSaver{
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
                     heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality, metadata);
+                    /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                            new String[]{heicFile.getAbsolutePath()},
+                            new String[]{"image/heic"}, null);*/
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
                 image.close();
-                processingEventsListener.onProcessingFinished("HEIF saved: " + heicFile.getName());
+                processingEventsListener.onProcessingFinished("HEIF saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
 
