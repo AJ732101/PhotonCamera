@@ -100,6 +100,7 @@ public class Settings {
     public boolean useAlternateLoupe = true;
     public boolean useVirtualHorizon = true;
     public boolean useVirtualHorizonText = false;
+    public boolean useLosslessSwEncoding = false;
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
@@ -207,6 +208,7 @@ public class Settings {
         tenBitSurfaceTarget = PreferenceKeys.getTenBitSurfaceTarget();
         contrastCurve = PreferenceKeys.getContrastCurve();
         effectMode = PreferenceKeys.getEffectMode();
+        useLosslessSwEncoding = PreferenceKeys.isLosslessSwEncodingOn();
     }
 
     public void saveID() {

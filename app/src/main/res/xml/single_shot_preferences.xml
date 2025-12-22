@@ -69,6 +69,14 @@
             android:icon="@drawable/control_point_duplicate_24px"
             android:defaultValue="@bool/pref_new_settings_global_def_value"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_lossless_sw_encoding_key"
+            android:title="@string/lossless_sw_encoding"
+            android:summary=""
+            android:icon="@drawable/high_quality_24px"
+            android:defaultValue="@bool/pref_lossless_sw_encoding_def_value"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_digital_zoom_factor_key"

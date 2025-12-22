@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 import com.radzivon.bartoshyk.avif.coder.HeifCoder;
 import com.radzivon.bartoshyk.avif.coder.HeifQualityArg;
@@ -70,7 +71,13 @@ public class HeifEncoder {
             // 3. Encode the Bitmap to HEIF using the correct method signature.
             //    Parameters based on the screenshot. The last 3 are enums.
             //    Let's use reasonable defaults.
-            byte[] heifByteArray = coder.encodeHeic(rotatedBitmap, PreciseMode.LOSSY, new HeifQualityArg.Quality(quality));
+            byte[] heifByteArray = null;
+            if (PhotonCamera.getSettings().useLosslessSwEncoding) {
+                heifByteArray = coder.encodeHeic(rotatedBitmap, PreciseMode.LOSSLESS, new HeifQualityArg.Quality(quality));
+            }
+            else {
+                heifByteArray = coder.encodeHeic(rotatedBitmap, PreciseMode.LOSSY, new HeifQualityArg.Quality(quality));
+            }
 
             // 4. Verify that the encoder returned data.
             if (heifByteArray == null || heifByteArray.length == 0) {

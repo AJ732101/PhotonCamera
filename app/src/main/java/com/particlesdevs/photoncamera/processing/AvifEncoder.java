@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 import com.radzivon.bartoshyk.avif.coder.AvifChromaSubsampling;
 import com.radzivon.bartoshyk.avif.coder.AvifSpeed;
@@ -72,7 +73,13 @@ public class AvifEncoder {
             // 3. Encode the Bitmap to AVIF using the correct method signature.
             //    Parameters based on the screenshot. The last 3 are enums.
             //    Let's use reasonable defaults.
-            byte[] avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+            byte[] avifByteArray = null;
+            if (PhotonCamera.getSettings().useLosslessSwEncoding) {
+                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+            }
+            else {
+                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+            }
 
             // 4. Verify that the encoder returned data.
             if (avifByteArray == null || avifByteArray.length == 0) {

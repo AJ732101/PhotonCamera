@@ -146,4 +146,5 @@
     <string name="pref_zsl_key" translatable="false">pref_zsl_key</string>
     <string name="pref_scene_and_effect_mode_key" translatable="false">pref_scene_and_effect_mode_key</string>
     <string name="pref_new_settings_global_key" translatable="false">pref_new_settings_global_key</string>
+    <string name="pref_lossless_sw_encoding_key" translatable="false">pref_lossless_sw_encoding_key</string>
 </resources>

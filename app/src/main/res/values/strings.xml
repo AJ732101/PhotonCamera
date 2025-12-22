@@ -181,6 +181,7 @@
 
     <!-- Single Shot and Video settings strings -->
     <string name="scene_and_effect_mode">Scene and Effect Mode</string>
+    <string name="lossless_sw_encoding">Lossless SW Encoding (AVIF, HEIC/HEIF)</string>
     <string name="new_settings_global">Additional Settings Global</string>
     <string name="noise_processing">Noise Processing</string>
     <string name="edge_processing">Edge Processing</string>

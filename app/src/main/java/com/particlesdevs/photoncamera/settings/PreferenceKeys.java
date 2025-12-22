@@ -91,6 +91,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
+        COMMON_KEYS.add(Key.KEY_LOSSLESS_SW_ENCODING.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
@@ -177,6 +178,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING, resources.getBoolean(R.bool.pref_lossless_sw_encoding_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
@@ -676,6 +678,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL);
     }
 
+    public static boolean isLosslessSwEncodingOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING);
+    }
+
     public static int getHotPixelMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE);
     }
@@ -849,6 +855,7 @@ public class PreferenceKeys {
         KEY_USE_ZSL(R.string.pref_zsl_key),
         KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
+        KEY_LOSSLESS_SW_ENCODING(R.string.pref_lossless_sw_encoding_key),
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EFFECT_MODE(R.string.pref_effect_mode_key),
