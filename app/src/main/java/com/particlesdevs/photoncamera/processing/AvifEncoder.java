@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import com.radzivon.bartoshyk.avif.coder.AvifChromaSubsampling;
 import com.radzivon.bartoshyk.avif.coder.AvifSpeed;
@@ -18,8 +19,10 @@ import com.radzivon.bartoshyk.avif.coder.HeifCoder;
 import com.radzivon.bartoshyk.avif.coder.PreciseMode;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class AvifEncoder {
 
@@ -33,7 +36,7 @@ public class AvifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToAvif(Image image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException {
+    public void encodeYuvToAvif(Image image, File outputFile, int orientation, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         Log.d(TAG, "Starting AVIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -46,8 +49,13 @@ public class AvifEncoder {
                 originalBitmap = ImageUtils.yuv8BitToBitmap(image);
                 break;
             case ImageFormat.YCBCR_P010:
-                originalBitmap = ImageUtils.p010SdrToBitmap1010102(image);
-                break;
+                try {
+                    originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
+                    saveF16BitmapToPng(originalBitmap, outputFile);
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new IOException("GL-based P010 conversion failed", e);
+                }
+            break;
         }
 
         // 2. CORRECT: Physically rotate the Bitmap if needed
@@ -91,11 +99,24 @@ public class AvifEncoder {
             Log.d(TAG, "Successfully saved AVIF file to: " + outputFile.getAbsolutePath() + " (" + avifByteArray.length / 1024 + " KB)");
 
             XmpMetaDataWriter.writeXmpMetadata(outputFile, metadata);
-        } finally {
+        }
+        catch (Exception e) {
+            Log.e(TAG, "AVIF encoding failed.", e);
+        }
+        finally {
             // The Bitmap should be recycled to free up memory.
             if (rotatedBitmap != null && !rotatedBitmap.isRecycled()) {
                 rotatedBitmap.recycle();
             }
+        }
+    }
+
+    public static void saveF16BitmapToPng(Bitmap f16Bitmap, File outputFile) {
+        try (FileOutputStream out = new FileOutputStream(outputFile)) {
+            f16Bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            Log.d(TAG, "F16 PNG saved successful: " + outputFile.getPath());
+        } catch (IOException e) {
+            Log.e(TAG, "F16 PNG saved FAILED", e);
         }
     }
 }

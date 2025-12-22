@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
+import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.media.Image;
 import android.media.MediaCodec;
@@ -13,12 +14,16 @@ import android.util.Size;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutionException;
 
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 
 public class YUVSaver extends DefaultSaver{
@@ -28,7 +33,7 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSettings().tenBitSurfaceTarget;
@@ -38,16 +43,38 @@ public class YUVSaver extends DefaultSaver{
             Path storagePath = null;
             File heicFile = null;
 
+            // SW based PNG encoder solution
+            if (usedTargetFormat == 999999993) {
+                storagePath = ImagePath.newPNGFilePath();
+                heicFile = new File(storagePath.toString());
+
+                Bitmap originalBitmap = null;
+                Bitmap rotatedBitmap = null;
+
+                // 1. Convert the YUV Image to a high-precision Bitmap
+                switch (image.getFormat()) {
+                    case ImageFormat.YCBCR_P010:
+                        try {
+                            originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
+                            AvifEncoder.saveF16BitmapToPng(originalBitmap, heicFile);
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                }
+
+                image.close();
+                processingEventsListener.onProcessingFinished("PNG saved: " + storagePath.toAbsolutePath().toString());
+            }
+
             // SW based AVIF encoder solution
             if (usedTargetFormat == 999999999) {
                 storagePath = ImagePath.newAVIFFilePath();
                 heicFile = new File(storagePath.toString());
                 AvifEncoder avifEncoder = new AvifEncoder();
                 try {
-                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality, metadata);
-                    /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
-                            new String[]{heicFile.getAbsolutePath()},
-                            new String[]{"image/avif"}, null);*/
+                    avifEncoder.encodeYuvToAvif(image, heicFile, orientation, quality, metadata, renderer);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
@@ -64,9 +91,6 @@ public class YUVSaver extends DefaultSaver{
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
                     heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality, metadata);
-                    /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
-                            new String[]{heicFile.getAbsolutePath()},
-                            new String[]{"image/heic"}, null);*/
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));
@@ -446,5 +470,23 @@ public class YUVSaver extends DefaultSaver{
         }
 
         return true;
+    }
+
+    public void saveP010Raw(Image image, File file) {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
+            byte[] yBytes = new byte[yBuffer.remaining()];
+            yBuffer.get(yBytes);
+            fos.write(yBytes);
+
+            ByteBuffer uvBuffer = image.getPlanes()[1].getBuffer();
+            byte[] uvBytes = new byte[uvBuffer.remaining()];
+            uvBuffer.get(uvBytes);
+            fos.write(uvBytes);
+
+            Log.d(TAG, "P010 successfully saved");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

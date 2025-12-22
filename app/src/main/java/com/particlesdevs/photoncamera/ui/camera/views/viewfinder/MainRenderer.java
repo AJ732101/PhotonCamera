@@ -1,6 +1,8 @@
 package com.particlesdevs.photoncamera.ui.camera.views.viewfinder;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.opengl.GLES11Ext;
@@ -8,7 +10,11 @@ import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.Build;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.processing.opengl.GLImage;
@@ -27,6 +33,9 @@ import java.util.function.Consumer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
@@ -79,6 +88,10 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int uOffscreenTexRotateMatrixHandle_YUV;
     private int uOffscreenTexRotateMatrixHandle_LUT;
 
+    // 10 bit logic
+    private int mP010ToF16Program;
+    private int mP010_vPosition;
+    private int mP010_Ytex, mP010_Utex, mP010_Vtex;
 
     MainRenderer(GLPreview view) {
         mView = view;
@@ -167,6 +180,17 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         initTex();
+
+        String p010_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_vs.glsl");
+        String p010_fs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_fs.glsl");
+        mP010ToF16Program = loadShader(p010_vs, p010_fs);
+
+        mP010_vPosition = GLES20.glGetAttribLocation(mP010ToF16Program, "aPosition");
+        mP010_Ytex = GLES20.glGetUniformLocation(mP010ToF16Program, "y_texture");
+        mP010_Utex = GLES20.glGetUniformLocation(mP010ToF16Program, "u_texture");
+
+        mP010_Vtex = mP010_Utex;
+
         mSTexture = new SurfaceTexture(hTex[0]);
         mSTexture.setOnFrameAvailableListener(this);
         String vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
@@ -261,19 +285,21 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     }
 
     private static int loadShader(String vss, String fss) {
-        String SupportedVersion = GetSupportedVersion();
-        vss = SupportedVersion + "\n #line 1\n" + vss;
-        fss = SupportedVersion + "\n #line 1\n" + fss;
+        if (!vss.startsWith("#version")) {
+            vss = "#version 300 es\n" + vss;
+        }
+        if (!fss.startsWith("#version")) {
+            fss = "#version 300 es\n" + fss;
+        }
+
         int vshader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vshader, vss);
         GLES20.glCompileShader(vshader);
         int[] compiled = new int[1];
         GLES20.glGetShaderiv(vshader, GLES20.GL_COMPILE_STATUS, compiled, 0);
         if (compiled[0] == 0) {
-            Log.e("Shader", "Could not compile vshader");
-            Log.v("Shader", "Could not compile vshader:" + GLES20.glGetShaderInfoLog(vshader));
-            GLES20.glDeleteShader(vshader);
-            vshader = 0;
+            Log.e("Shader", "V-Shader Error: " + GLES20.glGetShaderInfoLog(vshader));
+            return 0;
         }
 
         int fshader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
@@ -281,10 +307,8 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         GLES20.glCompileShader(fshader);
         GLES20.glGetShaderiv(fshader, GLES20.GL_COMPILE_STATUS, compiled, 0);
         if (compiled[0] == 0) {
-            Log.e("Shader", "Could not compile fshader");
-            Log.v("Shader", "Could not compile fshader:" + GLES20.glGetShaderInfoLog(fshader));
-            GLES20.glDeleteShader(fshader);
-            fshader = 0;
+            Log.e("Shader", "F-Shader Error: " + GLES20.glGetShaderInfoLog(fshader));
+            return 0;
         }
 
         int program = GLES20.glCreateProgram();
@@ -369,6 +393,13 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+    }
+
+    private void setupTextureParameters(int target, int filter) {
+        GLES20.glTexParameteri(target, GLES20.GL_TEXTURE_MIN_FILTER, filter);
+        GLES20.glTexParameteri(target, GLES20.GL_TEXTURE_MAG_FILTER, filter);
+        GLES20.glTexParameteri(target, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(target, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
     }
 
     public void processYuvImage(final Image image, final int orientation, final Consumer<ByteBuffer> onComplete) {
@@ -526,6 +557,116 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         directBuffer.rewind();
         return directBuffer;
     }
+
+    public Future<Bitmap> processP010SdrImageGL(final Image image) {
+        Callable<Bitmap> task = () -> {
+            // 1. Validierung
+            if (image == null || image.getFormat() != ImageFormat.YCBCR_P010) {
+                if (image != null) image.close();
+                throw new IllegalArgumentException("Image must be in YCBCR_P010 format");
+            }
+
+            final int width = image.getWidth();
+            final int height = image.getHeight();
+            final Image.Plane[] planes = image.getPlanes();
+
+            // 2. Framebuffer Setup (HDR/F16)
+            int[] fboId = new int[1];
+            int[] rboId = new int[1];
+            int[] fboTextureId = new int[1];
+            setupGenericFramebuffer(fboId, rboId, fboTextureId, width, height, true);
+
+            // Wir benötigen nur 2 Texturen für P010 (Y und UV-Interleaved)
+            int[] yuvTextures = new int[2];
+            GLES20.glGenTextures(2, yuvTextures, 0);
+
+            try {
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 2);
+
+                ByteBuffer yBuffer = planes[0].getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, planes[0].getRowStride() / 2);
+
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[0]);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_R16UI, width, height, 0, GLES30.GL_RED_INTEGER, GLES30.GL_UNSIGNED_SHORT, yBuffer);
+                setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
+
+
+                ByteBuffer uvBuffer = planes[1].getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, planes[1].getRowStride() / 4);
+
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[1]);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RG16UI, width / 2, height / 2, 0, GLES30.GL_RG_INTEGER, GLES30.GL_UNSIGNED_SHORT, uvBuffer);
+                setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
+
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, 0);
+
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId[0]);
+                GLES20.glViewport(0, 0, width, height);
+                GLES20.glUseProgram(mP010ToF16Program);
+
+                GLES20.glUniform1i(mP010_Ytex, 0);
+                GLES20.glUniform1i(mP010_Utex, 1);
+                GLES20.glUniform1i(mP010_Vtex, 1);
+
+                pVertex.position(0);
+                GLES20.glVertexAttribPointer(mP010_vPosition, 2, GLES20.GL_FLOAT, false, 8, pVertex);
+                GLES20.glEnableVertexAttribArray(mP010_vPosition);
+                GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+                ByteBuffer processedBuffer = ByteBuffer.allocateDirect(width * height * 8);
+                processedBuffer.order(ByteOrder.nativeOrder());
+                GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES30.GL_HALF_FLOAT, processedBuffer);
+
+                Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGBA_F16);
+                resultBitmap.copyPixelsFromBuffer(processedBuffer);
+
+                return resultBitmap;
+
+            } finally {
+                image.close();
+                GLES20.glDeleteTextures(2, yuvTextures, 0);
+                GLES20.glDeleteFramebuffers(1, fboId, 0);
+                GLES20.glDeleteRenderbuffers(1, rboId, 0);
+                GLES20.glDeleteTextures(1, fboTextureId, 0);
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+            }
+        };
+
+        FutureTask<Bitmap> futureTask = new FutureTask<>(task);
+        mView.queueEvent(futureTask);
+        return futureTask;
+    }
+
+    private void setupGenericFramebuffer(int[] fboId, int[] rboId, int[] textureId, int width, int height, boolean useHdr) {
+        if (fboId[0] > 0) GLES20.glDeleteFramebuffers(1, fboId, 0);
+        if (rboId[0] > 0) GLES20.glDeleteRenderbuffers(1, rboId, 0);
+        if (textureId[0] > 0) GLES20.glDeleteTextures(1, textureId, 0);
+
+        GLES20.glGenFramebuffers(1, fboId, 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId[0]);
+
+        GLES20.glGenTextures(1, textureId, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId[0]);
+
+        if (useHdr) {
+            GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RGBA16F, width, height, 0, GLES20.GL_RGBA, GLES30.GL_HALF_FLOAT, null);
+        } else {
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, width, height, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        }
+
+        setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_LINEAR);
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, textureId[0], 0);
+
+        GLES20.glGenRenderbuffers(1, rboId, 0);
+        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, rboId[0]);
+        GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, width, height);
+        GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, rboId[0]);
+
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+    }
+
 
     public void setOrientation(int or) { Matrix.setRotateM(mTexRotateMatrix, 0, or, 0f, 0f, -1f); }
     public void setTransform(@NonNull android.graphics.Matrix matrix) {}

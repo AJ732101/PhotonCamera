@@ -959,6 +959,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String jpegPrefix = "LUT processed JPEG: ";
                 String heicPrefix = "HEIF saved: ";
                 String avifPrefix = "AVIF saved: ";
+                String pngPrefix = "PNG saved: ";
 
                 if (message.startsWith(jpegPrefix)) {
                     filePath = message.substring(jpegPrefix.length());
@@ -970,6 +971,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 } else if (message.startsWith(avifPrefix)) {
                     filePath = message.substring(avifPrefix.length());
                     mimeType = "image/avif";
+                    sleep = true;
+                } else if (message.startsWith(pngPrefix)) {
+                    filePath = message.substring(pngPrefix.length());
+                    mimeType = "image/png";
                     sleep = true;
                 }
 

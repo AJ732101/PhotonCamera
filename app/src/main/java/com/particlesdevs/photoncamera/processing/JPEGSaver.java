@@ -9,6 +9,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.processing.DefaultSaver;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.ProcessingEventsListener;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,7 +22,7 @@ public class JPEGSaver extends DefaultSaver {
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         try {
             IMAGE_BUFFER.add(getFrame(image));

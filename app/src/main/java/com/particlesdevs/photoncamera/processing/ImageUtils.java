@@ -7,6 +7,11 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Utility class for Image conversions.
@@ -125,6 +130,76 @@ public class ImageUtils {
     }
 
     /**
+     * Converts a 10-bit YCBCR_P010 (Rec. 709, SDR) Image to a RGBA_F16 Bitmap.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static Bitmap p010SdrToBitmapF16(Image image) {
+        if (image.getFormat() != ImageFormat.YCBCR_P010) {
+            throw new IllegalArgumentException("Image must be in YCBCR_P010 format");
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        // Create a Bitmap that can store high-precision float values per channel.
+        // This is the format the avif-coder library's JNI layer expects for high bit-depth content.
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGBA_F16, true);
+
+        Image.Plane yPlane = image.getPlanes()[0];
+        Image.Plane uvPlane = image.getPlanes()[1]; // In P010, U and V are interleaved
+
+        ByteBuffer yBuffer = yPlane.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer uvBuffer = uvPlane.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+
+        int yRowStride = yPlane.getRowStride();
+        int uvRowStride = uvPlane.getRowStride();
+        int uvPixelStride = uvPlane.getPixelStride();
+
+        // We will prepare the pixels as a flat float array (R, G, B, A, R, G, B, A, ...)
+        float[] rgbaFloats = new float[width * height * 4];
+
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                // Step 1: Read 10-bit Y, U, V integer values from the buffers.
+                // The data is stored in 16-bit shorts, so we read a short and shift away the 6 padding bits.
+                int y_10bit = (yBuffer.getShort(j * yRowStride + i * 2) & 0xFFFF) >> 6;
+                int uvIndex = (j / 2) * uvRowStride + (i / 2) * uvPixelStride;
+                int u_10bit = (uvBuffer.getShort(uvIndex) & 0xFFFF) >> 6;
+                int v_10bit = (uvBuffer.getShort(uvIndex + 2) & 0xFFFF) >> 6; // Next short for V
+
+                // Step 2: Convert 10-bit integer Y'CbCr' to normalized float values.
+                // This uses the same integer-based math as your 1010102 version for consistency.
+                float c = y_10bit - 64.f;
+                float d = u_10bit - 512.f;
+                float e = v_10bit - 512.f;
+
+                // Step 3: Y'CbCr' to R'G'B' conversion (integer math, then converted to float)
+                float r_float = (298.f * c + 409.f * e + 128.f) / 256.f;
+                float g_float = (298.f * c - 100.f * d - 208.f * e + 128.f) / 256.f;
+                float b_float = (298.f * c + 516.f * d + 128.f) / 256.f;
+
+                // Step 4: Normalize from 10-bit range (0-1023) to float range [0.0, 1.0]
+                // and clamp to ensure values are valid.
+                float r = Math.max(0.0f, Math.min(1.0f, r_float / 1023.0f));
+                float g = Math.max(0.0f, Math.min(1.0f, g_float / 1023.0f));
+                float b = Math.max(0.0f, Math.min(1.0f, b_float / 1023.0f));
+
+                // Step 5: Fill the float array for the bitmap buffer.
+                int pixelIndex = (j * width + i) * 4;
+                rgbaFloats[pixelIndex]     = r;
+                rgbaFloats[pixelIndex + 1] = g;
+                rgbaFloats[pixelIndex + 2] = b;
+                rgbaFloats[pixelIndex + 3] = 1.0f; // Alpha channel
+            }
+        }
+
+        // Step 6: Efficiently copy the prepared float data into the RGBA_F16 bitmap.
+        bitmap.copyPixelsFromBuffer(java.nio.FloatBuffer.wrap(rgbaFloats));
+
+        return bitmap;
+    }
+
+    /**
      * Converts a YUV_420_888 (8-bit) Image to a standard ARGB_8888 Bitmap.
      */
     public static Bitmap yuv8BitToBitmap(Image image) {
@@ -179,4 +254,24 @@ public class ImageUtils {
             return ((float)Math.exp((hlgValue - HLG_C) / HLG_A) + HLG_B) / 12.0f;
         }
     }
+
+    /**
+     * Converts a 10-bit YCBCR_P010 Image to an RGBA_F16 Bitmap using OpenGL shaders for performance.
+     * This method is significantly faster than CPU-based conversion.
+     *
+     * @param image The 10-bit YUV Image object.
+     * @param renderer The active MainRenderer instance to execute GL commands.
+     * @return A Bitmap in RGBA_F16 format.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static Bitmap p010SdrToF16BitmapGL(Image image, MainRenderer renderer) throws ExecutionException, InterruptedException {
+        if (renderer == null) {
+            throw new IllegalArgumentException("MainRenderer instance cannot be null for GL-based conversion.");
+        }
+        // Delegate the complex GL task to the renderer and wait for the result.
+        Future<Bitmap> futureBitmap = renderer.processP010SdrImageGL(image);
+        // This will block until the GL thread has finished processing and returned the bitmap.
+        return futureBitmap.get();
+    }
+
 }

@@ -386,7 +386,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
-                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData);
+                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat,
+                            PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
                 }
                 return;
             }
@@ -811,13 +812,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         }
         if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
-            var targetFromUi = PhotonCamera.getSettings().previewFormat;
+            mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
+            /*var targetFromUi = PhotonCamera.getSettings().previewFormat;
             if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT
-                mTargetFormat = ImageFormat.YUV_420_888;
+                mTargetFormat = ImageFormat.YCBCR_P010;
             }
             else {
                 mTargetFormat = PhotonCamera.getSettings().previewFormat;
-            }
+            }*/
             return;
         }
 

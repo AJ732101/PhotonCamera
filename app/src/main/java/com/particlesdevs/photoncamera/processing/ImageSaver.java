@@ -14,6 +14,7 @@ import android.os.Bundle;
 import com.particlesdevs.photoncamera.api.CameraEventsListener;
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -81,7 +82,7 @@ public class ImageSaver {
             Log.d(TAG,"Implementation:" + implementation);
             implementation.frameCount = desiredFrameCount;
             implementation.newBurst = newBurst;
-            implementation.addImage(mImage, 0, 0, 75, null);
+            implementation.addImage(mImage, 0, 0, 75, null, null);
         } else {
             Image mImage;
             try {
@@ -96,7 +97,7 @@ public class ImageSaver {
         frameCounter++;
     }
 
-    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality, Bundle metadata) {
+    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         Log.v(TAG, "directSaveImage()");
         Image mImage;
         try {
@@ -112,7 +113,7 @@ public class ImageSaver {
         Log.d(TAG,"Implementation:" + implementation);
         implementation.frameCount = desiredFrameCount;
         implementation.newBurst = newBurst;
-        implementation.addImage(mImage, orientation, targetFormat, quality, metadata);
+        implementation.addImage(mImage, orientation, targetFormat, quality, metadata, renderer);
     }
 
     public String createProcessingString() {

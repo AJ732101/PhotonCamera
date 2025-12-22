@@ -15,7 +15,7 @@ import java.util.List;
 
 public class FileManager {
     private static final String TAG = "FileManager";
-    private static final List<String> ACCEPTED_FILES_EXTENSIONS = Arrays.asList("JPG", "JPEG", "DNG", "HEIC", "AVIF");
+    private static final List<String> ACCEPTED_FILES_EXTENSIONS = Arrays.asList("JPG", "JPEG", "DNG", "HEIC", "AVIF", "PNG");
     private static final FilenameFilter FILENAME_FILTER = (dir, name) -> {
         int index = name.lastIndexOf(46);
         return ACCEPTED_FILES_EXTENSIONS.contains(-1 == index ? "" : name.substring(index + 1).toUpperCase()) && new File(dir, name).length() > 0;
@@ -26,6 +26,7 @@ public class FileManager {
     public static File sPHOTON_RAW_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//Raw//");
     public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//HEIC_10_Bit//");
     public static File sPHOTON_APV_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//APV//");
+    public static File sPHOTON_PNG_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//PNG//");
     public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//M4A//");
     public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//AVIF//");
     public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//Tuning//");
@@ -40,6 +41,7 @@ public class FileManager {
         Log.d(TAG, "CreatedFolder : " + sPHOTON_TEN_BIT_HEIC_DIR + '=' + sPHOTON_TEN_BIT_HEIC_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_AVIF_DIR + '=' + sPHOTON_AVIF_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_APV_DIR + '=' + sPHOTON_APV_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_PNG_DIR + '=' + sPHOTON_PNG_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_M4A_DIR + '=' + sPHOTON_M4A_DIR.mkdirs());
     }
 

@@ -13,6 +13,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.control.GyroBurst;
 import com.particlesdevs.photoncamera.processing.processor.ProcessorBase;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +102,7 @@ public class SaverImplementation {
         this.processingEventsListener = processingEventsListener;
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         //image.close();
     }
 
