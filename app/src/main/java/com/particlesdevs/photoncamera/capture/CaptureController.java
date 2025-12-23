@@ -386,8 +386,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
-                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat,
-                            PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
+                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
                 }
                 return;
             }
@@ -812,14 +811,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         }
         if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
-            mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
-            /*var targetFromUi = PhotonCamera.getSettings().previewFormat;
+            var targetFromUi = PhotonCamera.getSettings().previewFormat;
             if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT
-                mTargetFormat = ImageFormat.YCBCR_P010;
+                mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
             }
             else {
                 mTargetFormat = PhotonCamera.getSettings().previewFormat;
-            }*/
+            }
             return;
         }
 
@@ -1973,7 +1971,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
                 !(PhotonCamera.getSettings().rawSaver == 2)) {
-            File previewLut = new File(FileManager.sPHOTON_TUNING_DIR,PhotonCamera.getSettings().lutName);
+            File previewLut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
+            if (!previewLut.exists()) {
+                previewLut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
+            }
             mMainRenderer.setLut(previewLut);
             mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
             return true;
@@ -2115,7 +2116,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     };
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                int SessionType =  SessionConfiguration.SESSION_REGULAR;
+                int SessionType =  PhotonCamera.getSpecific().specificSetting.sessionType; //SessionConfiguration.SESSION_REGULAR;
                 if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
                     SessionType =  SessionConfiguration.SESSION_HIGH_SPEED;
                 }
@@ -2720,6 +2721,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
                         } else {
                             Log.e(TAG, "LUT processing failed, renderer returned null data.");
+                            cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
                         }
                     } finally {
                         mIsProcessingImage.set(false);

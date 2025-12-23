@@ -30,6 +30,7 @@ public class FileManager {
     public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//M4A//");
     public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//AVIF//");
     public static File sPHOTON_TUNING_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//Tuning//");
+    public static File sPHOTON_LUT_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//LUTs//");
     public static File sDCIM_CAMERA = new File(sEXTERNAL_DIR + "//DCIM//Camera//");
     public static List<File> tempImageFiles;
 
@@ -43,6 +44,7 @@ public class FileManager {
         Log.d(TAG, "CreatedFolder : " + sPHOTON_APV_DIR + '=' + sPHOTON_APV_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_PNG_DIR + '=' + sPHOTON_PNG_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_M4A_DIR + '=' + sPHOTON_M4A_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_LUT_DIR + '=' + sPHOTON_LUT_DIR.mkdirs());
     }
 
     public static void ScanRemovedFile(File f){

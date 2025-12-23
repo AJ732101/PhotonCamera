@@ -1,3 +1,4 @@
+
 #extension GL_OES_EGL_image_external_essl3 : require
 precision highp float;
 
@@ -8,6 +9,30 @@ uniform float              POSTLUTSIZE;
 uniform float              POSTLUTSIZETILES;
 
 out vec4 Output;
+
+vec3 tonemap(vec3 color) {
+    return color / (color + vec3(1.0));
+}
+
+vec3 partialTonemap1(vec3 color) {
+    float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float threshold = 0.9;
+
+    if (luminance <= threshold) {
+        return color;
+    } else {
+        float remapped = (luminance - threshold) / (1.0 - threshold);
+        float transition = pow(remapped, 0.7);
+        vec3 highColor = mix(color, vec3(1.0), transition * 0.5);
+        return min(highColor, vec3(1.0));
+    }
+}
+
+vec3 partialTonemap2(vec3 color) {
+    float threshold = 0.9;
+    vec3 upper = (color - threshold) / (1.0 - threshold);
+    return mix(color, 1.0 - exp(-(color - threshold) * 5.0) * (1.0 - threshold), step(threshold, color));
+}
 
 vec3 applyLut(in vec3 textureColor) {
     textureColor = clamp(textureColor, 0.0, 1.0);
@@ -41,7 +66,8 @@ vec3 applyLut(in vec3 textureColor) {
 
 void main() {
     vec3 hdrColor = texture(sTexture, texCoord).rgb;
-    vec3 finalColor = applyLut(hdrColor);
+    vec3 tonemappedColor = tonemap(hdrColor);
+    vec3 finalColor = applyLut(tonemappedColor);
+
     Output = vec4(finalColor, 1.0);
 }
-

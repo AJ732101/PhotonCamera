@@ -946,7 +946,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         @Override
         public void onProcessingFinished(Object obj) {
             logD("onProcessingFinished: " + obj);
-            mCameraUIView.setProcessingProgressBarIndeterminate(false);    mCameraUIView.activateShutterButton(true);
+            mCameraUIView.setProcessingProgressBarIndeterminate(false);
+            mCameraUIView.activateShutterButton(true);
             mCameraUIView.lockUIForBurst(false);
             stopNotification();
             boolean sleep = false;

@@ -103,11 +103,7 @@ public class SettingsActivity extends BaseActivity implements
                     Collections.addAll(entryValues, lutPreference.getEntryValues());
                 }
 
-                // --- HIER IST DIE KORREKTUR ---
-                // FileManager.sPHOTON_TUNING_DIR ist bereits ein File-Objekt.
                 File tuningDir = FileManager.sPHOTON_TUNING_DIR;
-                // --- ENDE DER KORREKTUR ---
-
                 if (tuningDir.exists() && tuningDir.isDirectory()) {
                     File[] files = tuningDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
 
@@ -116,7 +112,21 @@ public class SettingsActivity extends BaseActivity implements
                             String fileName = file.getName();
                             if (!entryValues.contains(fileName)) {
                                 entries.add(fileName);
+                                entryValues.add(fileName);
+                            }
+                        }
+                    }
+                }
 
+                File lutDir = FileManager.sPHOTON_LUT_DIR;
+                if (lutDir.exists() && lutDir.isDirectory()) {
+                    File[] files = lutDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+
+                    if (files != null) {
+                        for (File file : files) {
+                            String fileName = file.getName();
+                            if (!entryValues.contains(fileName)) {
+                                entries.add(fileName);
                                 entryValues.add(fileName);
                             }
                         }

@@ -1,5 +1,7 @@
 package com.particlesdevs.photoncamera.ui.camera.views.viewfinder;
 
+import static com.particlesdevs.photoncamera.util.FileManager.sPHOTON_TUNING_DIR;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -19,6 +21,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.processing.opengl.GLImage;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
+import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 
 import java.io.BufferedReader;
@@ -29,6 +32,8 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.function.Consumer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -196,13 +201,24 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         String vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
         String fss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_fs.glsl");
         String fss_magnify = PhotonCamera.getAssetLoader().getString("shaders/preview/main_magnification_fs.glsl");
-        String fss_lut = PhotonCamera.getAssetLoader().getString("shaders/preview/main_lut_fs.glsl");
+        String fss_lut = "";
+        File lutFs = new File(sPHOTON_TUNING_DIR, "main_lut_fs.glsl");
+        if (lutFs.exists()) {
+            try {
+                fss_lut = new String(Files.readAllBytes(lutFs.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
+            }
+        }
+        else {
+            fss_lut = PhotonCamera.getAssetLoader().getString("shaders/preview/main_lut_fs.glsl");
+        }
         mNormalProgram = loadShader(vss_default, fss_default);
         mMagnifyProgram = loadShader(vss_default, fss_magnify);
         mLutProgram = loadShader(vss_default, fss_lut);
-        Log.d("MainRenderer", "mNormalProgram ID: " + mNormalProgram);
-        Log.d("MainRenderer", "mMagnifyProgram ID: " + mMagnifyProgram);
-        Log.d("MainRenderer", "mLutProgram ID: " + mLutProgram);
+        Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
+        Log.d(TAG, "mMagnifyProgram ID: " + mMagnifyProgram);
+        Log.d(TAG, "mLutProgram ID: " + mLutProgram);
         uTexRotateMatrix_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uTexRotateMatrix");
         uSTMatrix_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uSTMatrix");
         vPosition_Normal = GLES20.glGetAttribLocation(mNormalProgram, "vPosition");
@@ -245,10 +261,10 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 GLImage lutbm = new GLImage(currentLutFile);
                 hTexLut = new GLTexture(lutbm, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE, 0);
                 lutSize = lutbm.size.x;
-                Log.d("MainRenderer", "Successfully loaded LUT: " + currentLutFile.getName() + " with size: " + lutSize);
+                Log.d(TAG, "Successfully loaded LUT: " + currentLutFile.getName() + " with size: " + lutSize);
             }
         } catch (Exception e) {
-            Log.e("MainRenderer", "Failed to load LUT image.", e);
+            Log.e(TAG, "Failed to load LUT image.", e);
         }
         lutUpdateNeeded = false;
     }
