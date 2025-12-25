@@ -2699,6 +2699,25 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (PhotonCamera.getSettings().useThumbnail) {
             captureBuilder.set(CaptureRequest.JPEG_THUMBNAIL_SIZE, new Size(320, 240));
         }
+
+        if (paramController.isManualMode()) {
+            Log.d(TAG, "Applying manual exposure settings.");
+
+            captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_OFF);
+
+            int currentISO = (int)paramController.getCurrentISOValue();
+            captureBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, currentISO);
+
+            long shutterSpeedNs = (long)paramController.getCurrentExposureValue();
+            captureBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, shutterSpeedNs);
+
+            captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_OFF);
+            RggbChannelVector gains = new RggbChannelVector(1.0f, 1.0f, 1.0f, 1.0f);
+            captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
+
+            Log.d(TAG, "Manual settings applied: ISO=" + currentISO + ", Shutter=" + shutterSpeedNs + "ns");
+        }
         //boolean gainMapRes = requestGainMap(captureBuilder, mCameraCharacteristics);
     }
 
@@ -3116,6 +3135,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * @param aeMode         possible values = 0, 1, 2, 3
      */
     private void setAEMode(CaptureRequest.Builder requestBuilder, int aeMode) {
+        if (aeMode == CONTROL_AE_MODE_ON) {
+            Log.d(TAG, "Requested AE Mode: ON");
+        }
+        else if (aeMode == CONTROL_AE_MODE_OFF) {
+            Log.d(TAG, "Requested AE Mode: OFF");
+        }
+
         if (requestBuilder != null) {
             if (mFlashSupported) {
                 requestBuilder.set(CONTROL_AE_MODE, Math.max(aeMode, 1));//here AE_MODE will never be OFF(0)
