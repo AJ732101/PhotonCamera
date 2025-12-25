@@ -419,10 +419,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * A {@link CameraCaptureSession } for camera preview.
      */
     private CameraCaptureSession mCaptureSession = null;
+    private CameraConstrainedHighSpeedCaptureSession mHighSpeedCaptureSession = null;
     /**
      * MediaRecorder
      */
     private MediaRecorder mMediaRecorder = null;
+    boolean mIsHighSpeedSupported = false;
     private MediaRecorder mAudioRecorder = null;
     private MediaFormat mVideoFormat = null;
     private MediaFormat mAudioFormat = null;
@@ -439,6 +441,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * Whether the app is recording video now
      */
     public boolean mIsRecordingVideo;
+    Surface mVideoRecordingSurface = null;
     private Size target;
     private float mFocus;
     public int mPreviewAFMode;
@@ -1569,8 +1572,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
 
         // If image format is provided, use it to determine supported sizes; else use target class
-        StreamConfigurationMap config = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        StreamConfigurationMap config = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
         Size[] allSizes = config.getOutputSizes(SurfaceTexture.class);
 
@@ -2008,6 +2010,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             // Here, we create a CameraCaptureSession for camera preview.
             List<Surface> surfaces = configureSurfaces(isBurstSession);
+            // check high speed request
+            int SessionType = PhotonCamera.getSpecific().specificSetting.sessionType;
+            int[] capabilities = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+            if (capabilities != null) {
+                for (int capability : capabilities) {
+                    if (capability == CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO) {
+                        mIsHighSpeedSupported = true;
+                        break;
+                    }
+                }
+            }
+            boolean isHighSpeedSessionRequested = mIsRecordingVideo && mIsHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120);
+
+            if (isHighSpeedSessionRequested) {
+                SessionType = SessionConfiguration.SESSION_HIGH_SPEED;
+                Log.d(TAG, "Requesting High-Speed-Session. Filtering surfaces...");
+                if (mVideoRecordingSurface != null) {
+                    surfaces.clear();
+                    surfaces.add(mVideoRecordingSurface);
+                    Log.d(TAG, "High-Speed mode: Using ONLY the video recording surface.");
+                }
+            }
+
             Log.d(TAG, "createCameraPreviewSession() surfaces:" + Arrays.toString(surfaces.toArray()));
             ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
             for (Surface surfacei : surfaces) {
@@ -2034,92 +2059,92 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 outputConfigurations.add(config);
             }
 
-            CameraCaptureSession.StateCallback stateCallback =
-                    new CameraCaptureSession.StateCallback() {
-                        @Override
-                        public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "CameraCaptureSession onConfigured():" + cameraCaptureSession);
-                            // The camera is already closed
-                            if (null == mCameraDevice) {
-                                return;
-                            }
-                            // When the session is ready, we start displaying the preview.
-                            mCaptureSession = cameraCaptureSession;
-                            CameraConstrainedHighSpeedCaptureSession highSpeedSession = null;
-                            if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
-                                highSpeedSession = (CameraConstrainedHighSpeedCaptureSession) cameraCaptureSession;
-                            }
-                            try {
-                                // Auto focus should be continuous for camera preview.
-                                //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                // Flash is automatically enabled when necessary.
-                                resetPreviewAEMode();
-                                Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
-                                VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
-                                // Finally, we start displaying the camera preview.
-                                boolean combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview;
-                                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                                    combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview || (PhotonCamera.getSettings().videoFramrate == 60);
-                                }
-                                if (!combinedFpsResult60) {
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
-                                } else {
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
-                                }
-
-                                setAdvancedParameters(mPreviewRequestBuilder, true);
-                                activateLut();
-
-                                if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
-                                    List<CaptureRequest> highSpeedRequests = highSpeedSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
-                                }
-                                mPreviewInputRequest = mPreviewRequestBuilder.build();
-                                if (isBurstSession && isDualSession) {
-                                    switch (CameraFragment.mSelectedMode) {
-                                        case NIGHT:
-                                        case PHOTO:
-                                        case MOTION:
-                                            mCaptureSession.captureBurst(captures, CaptureCallback, mBackgroundHandler);
-                                            break;
-                                        case UNLIMITED:
-                                        case RAWVIDEO:
-                                            mCaptureSession.setRepeatingBurst(captures, CaptureCallback, mBackgroundHandler);
-                                            break;
-                                    }
-                                } else {
-                                    //if(mSelectedMode != CameraMode.VIDEO)
-                                    mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
-                                    unlockFocus();
-                                }
-                            } catch (Exception e) {
-                                Log.e(TAG, Log.getStackTraceString(e));
-                            }
-                            if (mIsRecordingVideo)
-                                activity.runOnUiThread(() -> {
-                                    // Start recording
-                                    if (PhotonCamera.getSettings().videoNewRec) {
-                                        //mMediaMuxer.start();
-                                    }
-                                    else {
-                                        if (mMediaRecorder != null) {
-                                            mMediaRecorder.start();
-                                        }
-                                    }
-                                });
+            CameraCaptureSession.StateCallback stateCallback = new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    Log.d(TAG, "CameraCaptureSession onConfigured():" + cameraCaptureSession);
+                    // The camera is already closed
+                    if (null == mCameraDevice) {
+                        return;
+                    }
+                    // When the session is ready, we start displaying the preview.
+                    mCaptureSession = cameraCaptureSession;
+                    if  (mIsRecordingVideo && mIsHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120)) {
+                        mHighSpeedCaptureSession = (CameraConstrainedHighSpeedCaptureSession) cameraCaptureSession;
+                    }
+                    try {
+                        // Auto focus should be continuous for camera preview.
+                        //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                        // Flash is automatically enabled when necessary.
+                        resetPreviewAEMode();
+                        Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
+                        VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
+                        // Finally, we start displaying the camera preview.
+                        boolean combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview;
+                        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                            combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview || (PhotonCamera.getSettings().videoFramrate == 60);
+                        }
+                        if (!combinedFpsResult60) {
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
+                        } else {
+                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
                         }
 
-                        @Override
-                        public void onConfigureFailed(
-                                @NonNull CameraCaptureSession cameraCaptureSession) {
-                            showToast(activity.getString(R.string.session_on_configure_failed));
+                        setAdvancedParameters(mPreviewRequestBuilder, true);
+                        activateLut();
+
+                        List<CaptureRequest> highSpeedRequests = null;
+                        if (mIsRecordingVideo && mIsHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120)) {
+                            highSpeedRequests = mHighSpeedCaptureSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
                         }
-                    };
+                        mPreviewInputRequest = mPreviewRequestBuilder.build();
+                        if (isBurstSession && isDualSession) {
+                            switch (CameraFragment.mSelectedMode) {
+                                case NIGHT:
+                                case PHOTO:
+                                case MOTION:
+                                    mCaptureSession.captureBurst(captures, CaptureCallback, mBackgroundHandler);
+                                    break;
+                                case UNLIMITED:
+                                case RAWVIDEO:
+                                    mCaptureSession.setRepeatingBurst(captures, CaptureCallback, mBackgroundHandler);
+                                    break;
+                            }
+                        } else {
+                            //if(mSelectedMode != CameraMode.VIDEO)
+                            if (mIsRecordingVideo && (PhotonCamera.getSettings().videoFramrate >= 120) && mIsHighSpeedSupported && (highSpeedRequests != null)) {
+                                mHighSpeedCaptureSession.setRepeatingBurst(highSpeedRequests, mCaptureCallback, mBackgroundHandler);
+                            }
+                            else {
+                                mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
+                            }
+                            unlockFocus();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, Log.getStackTraceString(e));
+                    }
+                    if (mIsRecordingVideo)
+                        activity.runOnUiThread(() -> {
+                            // Start recording
+                            if (PhotonCamera.getSettings().videoNewRec) {
+                                //mMediaMuxer.start();
+                            }
+                            else {
+                                if (mMediaRecorder != null) {
+                                    mMediaRecorder.start();
+                                }
+                            }
+                        });
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    showToast(activity.getString(R.string.session_on_configure_failed));
+                    Log.e(TAG, "CameraCaptureSession ON CONFIGURE FAILED!");
+                }
+            };
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                int SessionType =  PhotonCamera.getSpecific().specificSetting.sessionType; //SessionConfiguration.SESSION_REGULAR;
-                if ((PhotonCamera.getSettings().videoFramrate >= 120) && mIsRecordingVideo) {
-                    SessionType =  SessionConfiguration.SESSION_HIGH_SPEED;
-                }
                 SessionConfiguration configuration = new SessionConfiguration(
                         SessionType,
                         outputConfigurations,
@@ -2191,24 +2216,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     @NotNull
     private List<Surface> configureSurfaces(boolean isBurstSession) {
-        Surface videoRecordingSurface = null;
         List<Surface> surfaces = Arrays.asList(surface);
         if (mIsRecordingVideo) {
             if (PhotonCamera.getSettings().videoNewRec) {
                 if (setUpMediaRecorderNew()) {
-                    videoRecordingSurface = mMediaCodecSurface;
+                    mVideoRecordingSurface = mMediaCodecSurface;
                 } else {
                     mIsRecordingVideo = false;
                 }
             } else {
                 if (setUpMediaRecorder()) {
-                    videoRecordingSurface = mMediaRecorder.getSurface();
+                    mVideoRecordingSurface = mMediaRecorder.getSurface();
                 } else {
                     mIsRecordingVideo = false;
                 }
             }
-            surfaces = Arrays.asList(surface, videoRecordingSurface);
-            mPreviewRequestBuilder.addTarget(videoRecordingSurface);
+            surfaces = Arrays.asList(surface, mVideoRecordingSurface);
+            mPreviewRequestBuilder.addTarget(mVideoRecordingSurface);
             return surfaces;
         }
 
@@ -4133,7 +4157,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     }
 
-    static class EncoderInfoUtil {
+    static public class EncoderInfoUtil {
         List<String> mimeTypes = new ArrayList<String>();;
         final Map<String, Size> maxResolutions = new HashMap<>();
         final Map<String, Integer> maxBitrates = new HashMap<>();
@@ -4191,7 +4215,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         public Boolean getHwSupportForMimeType(String mimeType) {
-            return hwSupports.get(mimeType);
+            var hwSupport = hwSupports.get(mimeType);
+            if (hwSupport == null) {
+                return false;
+            }
+            else {
+                return hwSupport;
+            }
         }
     }
 

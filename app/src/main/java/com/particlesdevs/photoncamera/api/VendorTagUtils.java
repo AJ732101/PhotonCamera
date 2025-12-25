@@ -29,15 +29,20 @@ public class VendorTagUtils {
 
     @SuppressLint({"NewApi", "LocalSuppress"})
     public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
-        boolean isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
-        boolean isGoogle = Build.BRAND.equalsIgnoreCase("google");
-        boolean isZte = Build.BRAND.equalsIgnoreCase("zte");
-        boolean isMotorola = Build.BRAND.equalsIgnoreCase("motorola");
-        boolean isXiaomi = Build.BRAND.equalsIgnoreCase("xiaomi");
+        PhotonCamera.isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
+        PhotonCamera.isGoogle = Build.BRAND.equalsIgnoreCase("google");
+        PhotonCamera.isZte = Build.BRAND.equalsIgnoreCase("zte");
+        PhotonCamera.isMotorola = Build.BRAND.equalsIgnoreCase("motorola");
+        PhotonCamera.isXiaomi = Build.BRAND.equalsIgnoreCase("xiaomi");
+        PhotonCamera.isOppo = Build.BRAND.equalsIgnoreCase("oppo");
+        PhotonCamera.isVivo = Build.BRAND.equalsIgnoreCase("vivo");
+        PhotonCamera.isOnePlus = Build.BRAND.equalsIgnoreCase("oneplus");
+        PhotonCamera.isHonor = Build.BRAND.equalsIgnoreCase("honor");
+        PhotonCamera.isHuawei = Build.BRAND.equalsIgnoreCase("huawei");
 
         try {
             byte enable = 1;
-            if (isXiaomi) {
+            if (PhotonCamera.isXiaomi) {
                 var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
                 if (isSupported(builder, clientName)) {
                     builder.set(clientName, "com.android.camera");
@@ -73,16 +78,19 @@ public class VendorTagUtils {
 
             var enableInSensorZoomKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableInsensorZoom", Integer.class);
             if (isSupported(builder, enableInSensorZoomKey)) {
+                PhotonCamera.hasIszKey = true;
                 builder.set(enableInSensorZoomKey, PhotonCamera.getSettings().socQualcommUseIsz ? 1 : 0);
             }
 
             var useSaturation = new CaptureRequest.Key<>("org.codeaurora.qcamera3.saturation.use_saturation", Integer.class);
             if (isSupported(builder, useSaturation)) {
+                PhotonCamera.hasSaturationKey = true;
                 builder.set(useSaturation, (int) PhotonCamera.getSettings().socQualcommSaturation);
             }
 
             var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
             if (isSupported(builder, eisMode)) {
+                PhotonCamera.hasEisModeKey = true;
                 builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
             }
 
@@ -93,6 +101,7 @@ public class VendorTagUtils {
 
             var useMfnr = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableMFNR", Integer.class);
             if (isSupported(builder, useMfnr)) {
+                PhotonCamera.hasMfnrKey = true;
                 builder.set(useMfnr, PhotonCamera.getSettings().socQualcommUseMfnr ? 1 : 0);
             }
 
@@ -103,12 +112,14 @@ public class VendorTagUtils {
 
             var sharpnessStrength = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sharpness.strength", Integer.class);
             if (isSupported(builder, sharpnessStrength)) {
+                PhotonCamera.hasSharpnessKey = true;
                 builder.set(sharpnessStrength, (int) PhotonCamera.getSettings().socQualcommSharpness);
             }
 
 
             var aiMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.AICameraMode", Integer.class);
             if (isSupported(builder, aiMode)) {
+                PhotonCamera.hasAiModeKey = true;
                 builder.set(aiMode, (int) PhotonCamera.getSettings().socQualcommAiMode);
             }
 
@@ -149,7 +160,7 @@ public class VendorTagUtils {
             }
 
             // ZTE specific
-            if (isZte) {
+            if (PhotonCamera.isZte) {
                 /*var enableWatermark = new CaptureRequest.Key<>("com.zte.chi.watermark.enable", Integer.class);
                 if (isSupported(builder, enableWatermark)) {
                     builder.set(enableWatermark, (int) 1);
@@ -167,7 +178,7 @@ public class VendorTagUtils {
             }
 
             // Samsung specific
-            if (isSamsung) {
+            if (PhotonCamera.isSamsung) {
                 var enableAIDenoiser = new CaptureRequest.Key<>("samsung.android.control.enableAIDenoiser", Integer.class);
                 if (isSupported(builder, enableAIDenoiser)) {
                     builder.set(enableAIDenoiser, (int) 1);

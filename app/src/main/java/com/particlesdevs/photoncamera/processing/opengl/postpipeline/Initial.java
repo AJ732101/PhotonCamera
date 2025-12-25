@@ -187,6 +187,9 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         glProg.setDefine("EPS", eps);
 
         File postlut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
+        if (!postlut.exists()){
+            postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
+        }
         if (postlut.exists()){
             lutbm = new GLImage(postlut);
             postLut = new GLTexture(lutbm,GL_LINEAR,GL_CLAMP_TO_EDGE,0);
@@ -195,18 +198,6 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
             Log.d(Name,"LutBase:"+lutBase);
             glProg.setDefine("POSTLUTSIZETILES", (float) lutBase);
             glProg.setDefine("POSTLUTSIZE", (float) (lutBase*lutBase));
-        }
-        else {
-            postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
-            if (postlut.exists()) {
-                lutbm = new GLImage(postlut);
-                postLut = new GLTexture(lutbm, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
-                glProg.setDefine("POSTLUT", true);
-                int lutBase = (int) (0.1f + Math.pow(lutbm.size.x, 1.0 / 3.0));
-                Log.d(Name, "LutBase:" + lutBase);
-                glProg.setDefine("POSTLUTSIZETILES", (float) lutBase);
-                glProg.setDefine("POSTLUTSIZE", (float) (lutBase * lutBase));
-            }
         }
 
         glProg.setDefine("FUSIONGAIN",((PostPipeline)(basePipeline)).fusionGain);

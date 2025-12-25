@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
@@ -65,6 +66,23 @@ public class PhotonCamera extends Application {
     private AssetLoader mAssetLoader;
     private ObjectLoader objectLoader;
     private Debugger mDebugger;
+
+    public static boolean isSamsung = false;
+    public static boolean isGoogle = false;
+    public static boolean isZte = false;
+    public static boolean isMotorola = false;
+    public static boolean isXiaomi = false;
+    public static boolean isOppo = false;
+    public static boolean isVivo = false;
+    public static boolean isOnePlus = false;
+    public static boolean isHonor = false;
+    public static boolean isHuawei = false;
+    public static boolean hasIszKey = false;
+    public static boolean hasSaturationKey = false;
+    public static boolean hasSharpnessKey = false;
+    public static boolean hasEisModeKey = false;
+    public static boolean hasAiModeKey = false;
+    public static boolean hasMfnrKey = false;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

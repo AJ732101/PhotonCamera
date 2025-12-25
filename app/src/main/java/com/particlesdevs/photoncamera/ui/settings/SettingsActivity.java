@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.app.base.BaseActivity;
+import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.pro.SupportedDevice;
 import com.particlesdevs.photoncamera.settings.BackupRestoreUtil;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
@@ -70,6 +73,42 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.soc_preferences, rootKey);
+
+            String sharpnessKey = getString(R.string.pref_soc_qualcomm_sharpness_key);
+            Preference sharpnessPreference = findPreference(sharpnessKey);
+            if (sharpnessPreference != null) {
+                sharpnessPreference.setEnabled(PhotonCamera.hasSharpnessKey);
+            }
+
+            String saturationKey = getString(R.string.pref_soc_qualcomm_saturation_key);
+            Preference saturationPreference = findPreference(saturationKey);
+            if (saturationPreference != null) {
+                saturationPreference.setEnabled(PhotonCamera.hasSaturationKey);
+            }
+
+            String eisKey = getString(R.string.pref_soc_qualcomm_eis_mode_key);
+            Preference eisPreference = findPreference(eisKey);
+            if (eisPreference != null) {
+                eisPreference.setEnabled(PhotonCamera.hasEisModeKey);
+            }
+
+            String aiKey = getString(R.string.pref_soc_qualcomm_ai_mode_key);
+            Preference aiPreference = findPreference(aiKey);
+            if (aiPreference != null) {
+                aiPreference.setEnabled(PhotonCamera.hasAiModeKey);
+            }
+
+            String mfnrKey = getString(R.string.pref_soc_qualcomm_mfnr_key);
+            Preference mfnrPreference = findPreference(mfnrKey);
+            if (mfnrPreference != null) {
+                mfnrPreference.setEnabled(PhotonCamera.hasMfnrKey);
+            }
+
+            String iszKey = getString(R.string.pref_soc_qualcomm_isz_key);
+            Preference iszPreference = findPreference(iszKey);
+            if (iszPreference != null) {
+                iszPreference.setEnabled(PhotonCamera.hasIszKey);
+            }
         }
     }
 
@@ -77,6 +116,108 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.video_preferences, rootKey);
+
+            ListPreference codecPreference = findPreference(getString(R.string.pref_codec_key));
+            if (codecPreference == null) {
+                return;
+            }
+
+            String currentValue = codecPreference.getValue();
+
+            CaptureController.EncoderInfoUtil encoderInfo = new CaptureController.EncoderInfoUtil();
+            encoderInfo.getEncoderInfos();
+
+            List<CharSequence> entries = new ArrayList<>();
+            List<CharSequence> entryValues = new ArrayList<>();
+
+            Size maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_AVC);
+            boolean hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_AVC);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("AVC/H.264 (HW)");
+                }
+                else {
+                    entries.add("AVC/H.264 (SW)");
+                }
+                entryValues.add("AVC");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("HEVC/H.265 (HW)");
+                }
+                else {
+                    entries.add("HEVC/H.265 (SW)");
+                }
+                entryValues.add("HEVC");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("Dolby Vision (HW)");
+                }
+                else {
+                    entries.add("Dolby Vision (SW)");
+                }
+                entryValues.add("DOLBY_VISION");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_AV1);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_AV1);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("AV1 (HW)");
+                }
+                else {
+                    entries.add("AV1 (SW)");
+                }
+                entryValues.add("AV1");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_APV);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_APV);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("APV (HW)");
+                }
+                else {
+                    entries.add("APV (SW)");
+                }
+                entryValues.add("APV");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_VP8);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_VP8);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("VP8 (HW)");
+                }
+                else {
+                    entries.add("VP8 (SW)");
+                }
+                entryValues.add("VP8");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_VP9);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_VP9);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("VP9 (HW)");
+                }
+                else {
+                    entries.add("VP9 (SW)");
+                }
+                entryValues.add("VP9");
+            }
+
+            codecPreference.setEntries(entries.toArray(new CharSequence[0]));
+            codecPreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+
+            if (!entryValues.contains(currentValue)) {
+                if (entryValues.contains("HEV")) {
+                    codecPreference.setValue("HEVC");
+                } else if (!entryValues.isEmpty()) {
+                    codecPreference.setValue(entryValues.get(0).toString());
+                }
+            }
         }
     }
 
@@ -192,7 +333,6 @@ public class SettingsActivity extends BaseActivity implements
         fragment.setArguments(pref.getExtras());
         fragment.setTargetFragment(caller, 0);
 
-        // Ersetze das aktuelle Fragment durch das neue.
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.settings_container, fragment)
                 .addToBackStack(null)

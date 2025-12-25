@@ -157,6 +157,7 @@
         <item>48</item>
         <item>50</item>
         <item>60</item>
+        <item>120 Do not Use</item>
     </string-array>
 
     <string-array name="video_framerate_entryValues">
@@ -170,6 +171,7 @@
         <item>48</item>
         <item>50</item>
         <item>60</item>
+        <item>120</item>
     </string-array>
 
     <string-array name="noise_processing_entries">
