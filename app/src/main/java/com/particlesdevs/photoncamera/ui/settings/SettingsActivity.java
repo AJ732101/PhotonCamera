@@ -66,6 +66,53 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.general_preferences, rootKey);
+
+            ListPreference codecPreference = findPreference(getString(R.string.pref_preview_format_key));
+            if (codecPreference == null) {
+                return;
+            }
+            String currentValue = codecPreference.getValue();
+
+            List<CharSequence> entries = new ArrayList<>();
+            List<CharSequence> entryValues = new ArrayList<>();
+
+            entries.add("JPEG");
+            entryValues.add("256");
+            if (PhotonCamera.mHeicIsSupported) {
+                entries.add("HEIC");
+                entryValues.add("1212500294");
+            }
+            if (PhotonCamera.mJpegRIsSupported) {
+                entries.add("JPEG_R");
+                entryValues.add("4101");
+            }
+            if (PhotonCamera.mHeicUltraHdrIsSupported) {
+                entries.add("HEIC_ULTRA");
+                entryValues.add("4102");
+            }
+            entries.add("AVIF (SW)");
+            entryValues.add("999999999");
+            entries.add("HEIC/HEIF (SW)");
+            entryValues.add("999999991");
+            entries.add("JPEG LUT (SW)");
+            entryValues.add("999999992");
+            entries.add("JPEG/RAW Stacking");
+            entryValues.add("0");
+            entries.add("Video Codec 8 Bit");
+            entryValues.add("35");
+            entries.add("Video Codec 10 Bit");
+            entryValues.add("54");
+
+            codecPreference.setEntries(entries.toArray(new CharSequence[0]));
+            codecPreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+
+            if (!entryValues.contains(currentValue)) {
+                if (entryValues.equals("JPEG")) {
+                    codecPreference.setValue("JPEG");
+                } else if (!entryValues.isEmpty()) {
+                    codecPreference.setValue(entryValues.get(0).toString());
+                }
+            }
         }
     }
 
@@ -116,6 +163,30 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.video_preferences, rootKey);
+
+            String hdrKey = getString(R.string.pref_hdr_video_key);
+            Preference hdrPreference = findPreference(hdrKey);
+            if (hdrPreference != null) {
+                hdrPreference.setEnabled(PhotonCamera.hasHdr);
+            }
+
+            String tenBitKey = getString(R.string.pref_10bit_video_key);
+            Preference tenBitPreference = findPreference(tenBitKey);
+            if (tenBitPreference != null) {
+                tenBitPreference.setEnabled(PhotonCamera.hasTenBit);
+            }
+
+            String hdrModeKey = getString(R.string.pref_hdr_mode_key);
+            Preference hdrModePreference = findPreference(hdrModeKey);
+            if (hdrPreference != null) {
+                hdrModePreference.setEnabled(PhotonCamera.hasHdr);
+            }
+
+            String transfereModeKey = getString(R.string.pref_transfer_function_key);
+            Preference transferePreference = findPreference(transfereModeKey);
+            if (transferePreference != null) {
+                transferePreference.setEnabled(PhotonCamera.hasHdr);
+            }
 
             ListPreference codecPreference = findPreference(getString(R.string.pref_codec_key));
             if (codecPreference == null) {

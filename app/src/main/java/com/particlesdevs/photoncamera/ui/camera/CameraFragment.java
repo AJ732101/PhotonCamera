@@ -1001,7 +1001,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     };
 
                     if (sleep) {
-                        logD("Waiting 3 seconds before scanning " + finalFilePath);
+                        logD("Waiting 100ms before scanning " + finalFilePath);
                         new Handler(Looper.getMainLooper()).postDelayed(scanRunnable, 100);
                     } else {
                         scanRunnable.run();
@@ -1188,6 +1188,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 currentShutterTextView.setText("1/100s");
                 tenBitIndicatorTextView.setVisibility(View.GONE);
                 hdrIndicatorTextView.setVisibility(View.GONE);
+
+                if (mVidFile != null) {
+                    triggerMediaScanner(Uri.fromFile(mVidFile));
+                    cameraFragmentViewModel.updateGalleryThumb(Uri.fromFile(mVidFile));
+                }
             });
         }
     }

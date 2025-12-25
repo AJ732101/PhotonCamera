@@ -254,14 +254,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isDualSession = false;
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
     public boolean mFormatsDetectionDone = false;
-    public boolean mHeicIsSupported = false;
-    public boolean mHeicUltraHdrIsSupported = false;
-    public boolean mJpegRIsSupported = false;
-    public boolean mYuv10IsSupported = false;
-    public boolean mRaw10IsSupported = false;
-    public boolean mRaw12IsSupported = false;
-    public boolean mRawSensorIsSupported = false;
-    public boolean mRawPrivateIsSupported = false;
     public boolean mIsViewFinderMagnified = false;
     private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
     private final AtomicBoolean mIsProcessingImage = new AtomicBoolean(false);
@@ -1350,85 +1342,85 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         int[] outputFormats = map.getOutputFormats();
-        mHeicIsSupported = false;
-        mHeicUltraHdrIsSupported = false;
-        mJpegRIsSupported = false;
-        mRaw10IsSupported = false;
-        mRaw12IsSupported = false;
-        mRawPrivateIsSupported = false;
-        mRawSensorIsSupported = false;
-        mYuv10IsSupported = false;
+        PhotonCamera.mHeicIsSupported = false;
+        PhotonCamera.mHeicUltraHdrIsSupported = false;
+        PhotonCamera.mJpegRIsSupported = false;
+        PhotonCamera.mRaw10IsSupported = false;
+        PhotonCamera.mRaw12IsSupported = false;
+        PhotonCamera.mRawPrivateIsSupported = false;
+        PhotonCamera.mRawSensorIsSupported = false;
+        PhotonCamera.mYuv10IsSupported = false;
 
         for (int format : outputFormats) {
             if (format == ImageFormat.HEIC) {
-                mHeicIsSupported = true;
+                PhotonCamera.mHeicIsSupported = true;
             }
             if (format == ImageFormat.HEIC_ULTRAHDR) {
-                mHeicUltraHdrIsSupported = true;
+                PhotonCamera.mHeicUltraHdrIsSupported = true;
             }
             if (format == ImageFormat.JPEG_R) {
-                mJpegRIsSupported = true;
+                PhotonCamera.mJpegRIsSupported = true;
             }
             if (format == ImageFormat.RAW10) {
-                mRaw10IsSupported = true;
+                PhotonCamera.mRaw10IsSupported = true;
             }
             if (format == ImageFormat.RAW12) {
-                mRaw12IsSupported = true;
+                PhotonCamera.mRaw12IsSupported = true;
             }
             if (format == ImageFormat.RAW_PRIVATE) {
-                mRawPrivateIsSupported = true;
+                PhotonCamera.mRawPrivateIsSupported = true;
             }
             if (format == ImageFormat.RAW_SENSOR) {
-                mRawSensorIsSupported = true;
+                PhotonCamera.mRawSensorIsSupported = true;
             }
             if (format == ImageFormat.YCBCR_P010) {
-                mYuv10IsSupported = true;
+                PhotonCamera.mYuv10IsSupported = true;
             }
         }
 
-        if (mHeicIsSupported) {
+        if (PhotonCamera.mHeicIsSupported) {
             Log.d(TAG, "HEIC is supported");
         }
         else {
             Log.d(TAG, "HEIC is NOT supported");
         }
-        if (mHeicUltraHdrIsSupported) {
+        if (PhotonCamera.mHeicUltraHdrIsSupported) {
             Log.d(TAG, "HEIC_ULTRAHDR is supported");
         }
         else {
             Log.d(TAG, "HEIC_ULTRAHDR is NOT supported");
         }
-        if (mJpegRIsSupported) {
+        if (PhotonCamera.mJpegRIsSupported) {
             Log.d(TAG, "JPEG_R is supported");
         }
         else {
             Log.d(TAG, "JPEG_R is NOT supported");
         }
-        if (mRaw10IsSupported) {
+        if (PhotonCamera.mRaw10IsSupported) {
             Log.d(TAG, "RAW10 is supported");
         }
         else {
             Log.d(TAG, "RAW10 is NOT supported");
         }
-        if (mRaw12IsSupported) {
+        if (PhotonCamera.mRaw12IsSupported) {
             Log.d(TAG, "RAW12 is supported");
         }
         else {
             Log.d(TAG, "RAW12 is NOT supported");
         }
-        if (mRawPrivateIsSupported) {
+        if (PhotonCamera.mRawPrivateIsSupported) {
             Log.d(TAG, "RAW_PRIVATE is supported");
         }
         else {
             Log.d(TAG, "RAW_PRIVATE is NOT supported");
         }
-        if (mRawSensorIsSupported) {
+        if (PhotonCamera.mRawSensorIsSupported) {
             Log.d(TAG, "RAW_SENSOR is supported");
         }
         else {
             Log.d(TAG, "RAW_SENSOR is NOT supported");
         }
-        if (mYuv10IsSupported) {
+        if (PhotonCamera.mYuv10IsSupported) {
             Log.d(TAG, "YCBCR_P010 is supported");
         }
         else {
@@ -1504,30 +1496,30 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void applyFormatFallback() {
         // RAW formats first
-        if ((mTargetFormat == ImageFormat.RAW10) && !mRaw10IsSupported) {
+        if ((mTargetFormat == ImageFormat.RAW10) && !PhotonCamera.mRaw10IsSupported) {
             mTargetFormat = ImageFormat.RAW_SENSOR;
             Log.w(TAG, "Requested RAW10 but not supported -> fallback to RAW_SENSOR");
         }
-        if ((mTargetFormat == ImageFormat.RAW12) && !mRaw12IsSupported) {
+        if ((mTargetFormat == ImageFormat.RAW12) && !PhotonCamera.mRaw12IsSupported) {
             mTargetFormat = ImageFormat.RAW_SENSOR;
             Log.w(TAG, "Requested RAW12 but not supported -> fallback to RAW_SENSOR");
         }
         // Bitmap formats
-        if ((mTargetFormat == ImageFormat.HEIC) && !mHeicIsSupported) {
+        if ((mTargetFormat == ImageFormat.HEIC) && !PhotonCamera.mHeicIsSupported) {
             mTargetFormat = ImageFormat.JPEG;
             Log.w(TAG, "Requested HEIC but not supported -> fallback to JPEG");
         }
-        if ((mTargetFormat == ImageFormat.HEIC_ULTRAHDR) && !mHeicUltraHdrIsSupported) {
+        if ((mTargetFormat == ImageFormat.HEIC_ULTRAHDR) && !PhotonCamera.mHeicUltraHdrIsSupported) {
             mTargetFormat = ImageFormat.JPEG;
             Log.w(TAG, "Requested HEIC_ULTRAHDR but not supported -> fallback to JPEG");
         }
-        if ((mTargetFormat == ImageFormat.JPEG_R) && !mJpegRIsSupported) {
+        if ((mTargetFormat == ImageFormat.JPEG_R) && !PhotonCamera.mJpegRIsSupported) {
             mTargetFormat = ImageFormat.JPEG;
             Log.w(TAG, "Requested JPEG_R but not supported -> fallback to JPEG");
         }
 
         // YUV formats
-        if ((mTargetFormat == ImageFormat.YCBCR_P010) && !mYuv10IsSupported) {
+        if ((mTargetFormat == ImageFormat.YCBCR_P010) && !PhotonCamera.mYuv10IsSupported) {
             mTargetFormat = ImageFormat.YUV_420_888;
             Log.w(TAG, "Requested YCBCR_P010 but not supported -> fallback to YUV_420_888");
         }
@@ -4126,8 +4118,70 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mTextureView = null;
         super.finalize();
     }
+
+    public void checkTenBitAndHdr() {
+        PhotonCamera.hasHdr = false;
+        PhotonCamera.hasTenBit = false;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Log.d(TAG, "10-bit and HDR checks require API 33+");
+            return;
+        }
+
+        boolean cameraSupports10BitOutput = false;
+        try {
+            if (mCameraCharacteristics != null) {
+                DynamicRangeProfiles profiles = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES);
+                if (profiles != null) {
+                    if (profiles.getSupportedProfiles().contains(DynamicRangeProfiles.HLG10)) {
+                        cameraSupports10BitOutput = true;
+                        Log.d(TAG, "Camera " + physicalID + " supports 10-bit output (HLG10).");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking camera dynamic range profiles", e);
+        }
+
+        if (!cameraSupports10BitOutput) {
+            Log.d(TAG, "Camera does not support 10-bit output. Disabling 10-bit/HDR options.");
+            return;
+        }
+
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        for (MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
+            if (!codecInfo.isEncoder()) {
+                continue;
+            }
+
+            for (String type : codecInfo.getSupportedTypes()) {
+                if (!type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC) && !type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
+                    continue;
+                }
+
+                MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(type);
+                for (MediaCodecInfo.CodecProfileLevel profileLevel : caps.profileLevels) {
+                    if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10 ||
+                            profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10) {
+                        PhotonCamera.hasTenBit = true;
+                    }
+
+                    if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10 ||
+                            profileLevel.profile == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus ||
+                            profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10HDR10 ||
+                            profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10HDR10Plus) {
+                        PhotonCamera.hasHdr = true;
+                    }
+                }
+            }
+        }
+
+        Log.d(TAG, "Device Support Check - Has 10-Bit: " + PhotonCamera.hasTenBit + ", Has HDR: " + PhotonCamera.hasHdr);
+    }
+
     public void resumeCamera() {
         encoderInfo.getEncoderInfos();
+        checkTenBitAndHdr();
         setPreviewFormat();
 
         processExecutor.execute(() -> {

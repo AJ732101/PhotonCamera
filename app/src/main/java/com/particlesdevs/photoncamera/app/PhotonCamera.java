@@ -83,6 +83,16 @@ public class PhotonCamera extends Application {
     public static boolean hasEisModeKey = false;
     public static boolean hasAiModeKey = false;
     public static boolean hasMfnrKey = false;
+    public static boolean hasHdr = false;
+    public static boolean hasTenBit = false;
+    public static boolean mHeicIsSupported = false;
+    public static boolean mHeicUltraHdrIsSupported = false;
+    public static boolean mJpegRIsSupported = false;
+    public static boolean mYuv10IsSupported = false;
+    public static boolean mRaw10IsSupported = false;
+    public static boolean mRaw12IsSupported = false;
+    public static boolean mRawSensorIsSupported = false;
+    public static boolean mRawPrivateIsSupported = false;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {
