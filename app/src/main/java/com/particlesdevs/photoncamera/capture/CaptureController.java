@@ -1725,6 +1725,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.d(TAG, "Exception: " + e.getMessage());
         }
 
+        captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
+
         if (PhotonCamera.getSpecific().specificSetting.colorTemperature != 99) {
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) && supportsColorTemperature) {
                 captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
@@ -4146,46 +4148,39 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void checkTenBitAndHdr() {
+        // Werte zurücksetzen
         PhotonCamera.hasHdr = false;
         PhotonCamera.hasTenBit = false;
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            Log.d(TAG, "10-bit and HDR checks require API 33+");
-            return;
-        }
-
-        boolean cameraSupports10BitOutput = false;
-        try {
-            if (mCameraCharacteristics != null) {
-                DynamicRangeProfiles profiles = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES);
-                if (profiles != null) {
-                    if (profiles.getSupportedProfiles().contains(DynamicRangeProfiles.HLG10)) {
-                        cameraSupports10BitOutput = true;
-                        Log.d(TAG, "Camera " + physicalID + " supports 10-bit output (HLG10).");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking camera dynamic range profiles", e);
-        }
-
-        if (!cameraSupports10BitOutput) {
-            Log.d(TAG, "Camera does not support 10-bit output. Disabling 10-bit/HDR options.");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            Log.d(TAG, "10-bit and HDR checks require API 30+");
             return;
         }
 
         MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
         for (MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
-            if (!codecInfo.isEncoder()) {
+            if (!codecInfo.isEncoder() || !codecInfo.isHardwareAccelerated()) {
                 continue;
             }
 
             for (String type : codecInfo.getSupportedTypes()) {
-                if (!type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC) && !type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
+                if (!type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC) &&
+                        !type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
                     continue;
                 }
 
-                MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(type);
+                MediaCodecInfo.CodecCapabilities caps;
+                try {
+                    caps = codecInfo.getCapabilitiesForType(type);
+                } catch (IllegalArgumentException e) {
+
+                    continue;
+                }
+
+                if (caps == null || caps.profileLevels == null) {
+                    continue;
+                }
+
                 for (MediaCodecInfo.CodecProfileLevel profileLevel : caps.profileLevels) {
                     if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10 ||
                             profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10) {
@@ -4202,7 +4197,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
-        Log.d(TAG, "Device Support Check - Has 10-Bit: " + PhotonCamera.hasTenBit + ", Has HDR: " + PhotonCamera.hasHdr);
+        Log.i(TAG, "Device Support Check - Has 10-Bit: " + PhotonCamera.hasTenBit + ", Has HDR: " + PhotonCamera.hasHdr);
     }
 
     public void resumeCamera() {
