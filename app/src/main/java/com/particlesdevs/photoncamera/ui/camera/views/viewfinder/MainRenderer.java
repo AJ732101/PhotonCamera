@@ -198,7 +198,19 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
         mSTexture = new SurfaceTexture(hTex[0]);
         mSTexture.setOnFrameAvailableListener(this);
-        String vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
+
+        String vss_default = "";
+        File prevVs = new File(sPHOTON_TUNING_DIR, "main_vs.glsl");
+        if (prevVs.exists()) {
+            try {
+                vss_default = new String(Files.readAllBytes(prevVs.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
+            }
+        }
+        else {
+            vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
+        }
         String fss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_fs.glsl");
         String fss_magnify = PhotonCamera.getAssetLoader().getString("shaders/preview/main_magnification_fs.glsl");
         String fss_lut = "";
