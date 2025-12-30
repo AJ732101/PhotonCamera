@@ -116,7 +116,6 @@ public class VendorTagUtils {
                 builder.set(sharpnessStrength, (int) PhotonCamera.getSettings().socQualcommSharpness);
             }
 
-
             var aiMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.AICameraMode", Integer.class);
             if (isSupported(builder, aiMode)) {
                 PhotonCamera.hasAiModeKey = true;

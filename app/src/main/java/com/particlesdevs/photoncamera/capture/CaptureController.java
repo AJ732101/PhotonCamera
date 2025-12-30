@@ -259,7 +259,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
     private final AtomicBoolean mIsProcessingImage = new AtomicBoolean(false);
     private final ParamController paramController;
-    public static EncoderInfoUtil encoderInfo = new EncoderInfoUtil();
+    public static EncoderInfoUtil mEncoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
 
     public final boolean mFlashEnabled = false;
@@ -763,12 +763,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean isSingleShotSwEncoder() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-            //((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991) || (PhotonCamera.getSettings().previewFormat == 999999992)) &&
-            (PhotonCamera.getSettings().previewFormat == 999999992) &&
-            (PhotonCamera.getSettings().rawSaver != 2) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                //((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991) || (PhotonCamera.getSettings().previewFormat == 999999992)) &&
+                (PhotonCamera.getSettings().previewFormat == 999999992) &&
+                (PhotonCamera.getSettings().rawSaver != 2) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
         return false;
@@ -776,18 +776,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean isSingleShotJpegOrAvifOrHeic() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-            (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-            (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-            (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
-            (PhotonCamera.getSettings().rawSaver != 2) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                        (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
+                        (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
+                        (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
+                (PhotonCamera.getSettings().rawSaver != 2) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
         return false;
@@ -1766,10 +1766,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         // look for keywords
         if (!PhotonCamera.getSettings().contrastCurve.contains("slog") &&
-            !PhotonCamera.getSettings().contrastCurve.equals("high") &&
-            !PhotonCamera.getSettings().contrastCurve.equals("linear") &&
-            !PhotonCamera.getSettings().contrastCurve.equals("low") &&
-            !PhotonCamera.getSettings().contrastCurve.contains("style")) {
+                !PhotonCamera.getSettings().contrastCurve.equals("high") &&
+                !PhotonCamera.getSettings().contrastCurve.equals("linear") &&
+                !PhotonCamera.getSettings().contrastCurve.equals("low") &&
+                !PhotonCamera.getSettings().contrastCurve.contains("style")) {
             return;
         }
 
@@ -2060,7 +2060,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     // When the session is ready, we start displaying the preview.
                     mCaptureSession = cameraCaptureSession;
                     if  (mIsRecordingVideo && mIsHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120)) {
-                       mHighSpeedCaptureSession = (CameraConstrainedHighSpeedCaptureSession) cameraCaptureSession;
+                        mHighSpeedCaptureSession = (CameraConstrainedHighSpeedCaptureSession) cameraCaptureSession;
                     }
                     try {
                         // Auto focus should be continuous for camera preview.
@@ -3464,7 +3464,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // get max encoder resolution
-        Size maxRes = encoderInfo.getMaxResForMimeType(mimeVid);
+        Size maxRes = mEncoderInfo.getMaxResForMimeType(mimeVid);
         if (maxRes == null) {
             Log.d(TAG, "encoder getMaxResForMimeType failed");
             return null;
@@ -3603,9 +3603,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
                 break;
         }
-        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > encoderInfo.getMaxBitrateForMimeType(mimeVid)) {
+        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > mEncoderInfo.getMaxBitrateForMimeType(mimeVid)) {
             Log.w(TAG, "selected video bitrate (" + Integer.toString(PhotonCamera.getSettings().videoBitrate) + "MBit/s)exceeds the maximum supported by the encoder (" +
-                    encoderInfo.getMaxBitrateForMimeType(mimeVid)/(1024*1024) + "MBit/s)");
+                    mEncoderInfo.getMaxBitrateForMimeType(mimeVid)/(1024*1024) + "MBit/s)");
         }
         format.setInteger(MediaFormat.KEY_BIT_RATE, PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, PhotonCamera.getSettings().videoFramrate);
@@ -3919,7 +3919,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // check max encoder resolution
-        Size maxEncRes = encoderInfo.getMaxResForMimeType(mimeType);
+        Size maxEncRes = mEncoderInfo.getMaxResForMimeType(mimeType);
         if (maxEncRes == null) {
             return false;
         }
@@ -4054,9 +4054,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxEncRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxEncRes.getHeight())));
             mMediaRecorder.setVideoSize(Math.min(vidWidth, maxEncRes.getWidth()), Math.min(vidHeight, maxEncRes.getHeight()));
         }
-        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > encoderInfo.getMaxBitrateForMimeType(mimeType)) {
+        if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > mEncoderInfo.getMaxBitrateForMimeType(mimeType)) {
             Log.w(TAG, "selected video bitrate (" + Integer.toString(PhotonCamera.getSettings().videoBitrate) + "MBit/s)exceeds the maximum supported by the encoder (" +
-                    encoderInfo.getMaxBitrateForMimeType(mimeType)/(1024*1024) + "MBit/s)");
+                    mEncoderInfo.getMaxBitrateForMimeType(mimeType)/(1024*1024) + "MBit/s)");
         }
         mMediaRecorder.setVideoEncodingBitRate(PhotonCamera.getSettings().videoBitrate * 1024 * 1024);
 
@@ -4258,7 +4258,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void resumeCamera() {
-        encoderInfo.getEncoderInfos();
+        mEncoderInfo.getEncoderInfos();
         checkTenBitAndHdr();
         setPreviewFormat();
 
@@ -4306,69 +4306,52 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mimeTypes.add(MediaFormat.MIMETYPE_VIDEO_APV);
         }
 
-        public void getEncoderInfos() {
-            maxResolutions.clear();
+        public void getEncoderInfos() {maxResolutions.clear();
             maxBitrates.clear();
             hwSupports.clear();
             encoderNames.clear();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
-                for (MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
+            MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+            MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+
+            for (String mimeType : mimeTypes) {
+                MediaCodecInfo bestCodec = null;
+                boolean bestIsHardware = false;
+
+                for (MediaCodecInfo codecInfo : codecInfos) {
                     if (!codecInfo.isEncoder()) {
                         continue;
                     }
-                    for (String type : codecInfo.getSupportedTypes()) {
-                        if (!mimeTypes.contains(type)) {
-                            continue;
-                        }
-                        try {
-                            MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(type);
-                            if (caps == null) continue;
-                            MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
-                            if (videoCaps == null) continue;
 
-                            Size maxSize = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
-                            boolean isHardware = codecInfo.isHardwareAccelerated();
+                    try {
+                        codecInfo.getCapabilitiesForType(mimeType);
+                    } catch (IllegalArgumentException e) {
+                        continue;
+                    }
 
-                            maxResolutions.put(type, maxSize);
-                            maxBitrates.put(type, videoCaps.getBitrateRange().getUpper());
-                            hwSupports.put(type, isHardware);
-                            encoderNames.put(type, codecInfo.getName());
+                    boolean isHardware = codecInfo.isHardwareAccelerated();
 
-                        } catch (Exception e) {
-                        }
+                    if (bestCodec == null || (isHardware && !bestIsHardware)) {
+                        bestCodec = codecInfo;
+                        bestIsHardware = isHardware;
                     }
                 }
-            } else {
-                int numCodecs = MediaCodecList.getCodecCount();
-                for (int i = 0; i < numCodecs; i++) {
-                    MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-                    if (!codecInfo.isEncoder()) {
-                        continue;
-                    }
 
-                    String[] types = codecInfo.getSupportedTypes();
-                    for (String type : types) {
-                        if (!mimeTypes.contains(type)) {
-                            continue;
-                        }
-
-                        try {
-                            MediaCodecInfo.CodecCapabilities caps = codecInfo.getCapabilitiesForType(type);
-                            if (caps == null) continue;
+                if (bestCodec != null) {
+                    try {
+                        MediaCodecInfo.CodecCapabilities caps = bestCodec.getCapabilitiesForType(mimeType);
+                        if (caps != null && caps.getVideoCapabilities() != null) {
                             MediaCodecInfo.VideoCapabilities videoCaps = caps.getVideoCapabilities();
-                            if (videoCaps == null) continue;
 
                             Size maxSize = new Size(videoCaps.getSupportedWidths().getUpper(), videoCaps.getSupportedHeights().getUpper());
-                            boolean isHardware = !codecInfo.getName().toLowerCase(Locale.US).startsWith("omx.google.");
 
-                            maxResolutions.put(type, maxSize);
-                            maxBitrates.put(type, videoCaps.getBitrateRange().getUpper());
-                            hwSupports.put(type, isHardware);
-                            encoderNames.put(type, codecInfo.getName());
-                        } catch (Exception e) {
+                            maxResolutions.put(mimeType, maxSize);
+                            maxBitrates.put(mimeType, videoCaps.getBitrateRange().getUpper());
+                            hwSupports.put(mimeType, bestIsHardware);
+                            encoderNames.put(mimeType, bestCodec.getName());
                         }
+                    } catch (Exception e) {
+
                     }
                 }
             }
