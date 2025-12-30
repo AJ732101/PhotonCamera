@@ -2658,10 +2658,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (PhotonCamera.getSettings().zoom2X) {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
+                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
             }
             else {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
             }
         }
     }
@@ -4251,7 +4251,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         public void getEncoderInfos() {
             MediaCodec encoder = null;
-             for (String mimeVid : mimeTypes) {
+            for (String mimeVid : mimeTypes) {
                 try {
                     Size maxSize = null;
                     encoder = MediaCodec.createEncoderByType(mimeVid);
