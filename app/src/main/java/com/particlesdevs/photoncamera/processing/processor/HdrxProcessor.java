@@ -315,7 +315,7 @@ public class HdrxProcessor extends ProcessorBase {
         catch (Exception e){
             Log.d(TAG,"Error in processingEventsListener.onProcessingFinished:"+Log.getStackTraceString(e));
         }
-        imageFile = Paths.get(imageFile.toAbsolutePath() + ".jpg");
+        imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
         //Saves the final bitmap
         boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
 
