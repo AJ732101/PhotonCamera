@@ -12,6 +12,12 @@ import android.os.Build;
 import java.util.Arrays;
 
 public class VendorTagUtils {
+    public static CaptureRequest.Key<Integer> SELECT_PRIORITY = new CaptureRequest.Key<>("org.codeaurora.qcamera3.iso_exp_priority.select_priority", Integer.class);
+    public static CaptureRequest.Key<Integer> USE_ISO_VALUE = new CaptureRequest.Key<>("org.codeaurora.qcamera3.iso_exp_priority.use_iso_value", Integer.class);
+    public static CaptureRequest.Key<Long> ISO_EXP = new CaptureRequest.Key<>("org.codeaurora.qcamera3.iso_exp_priority.use_iso_exp_priority", Long.class);
+    public static CameraCharacteristics.Key<int[]> ISO_AVAILABLE_MODES = new CameraCharacteristics.Key<>("org.codeaurora.qcamera3.iso_exp_priority.iso_available_modes", int[].class);
+    public static CameraCharacteristics.Key<long[]> EXPOSURE_RANGE = new CameraCharacteristics.Key<>("org.codeaurora.qcamera3.iso_exp_priority.exposure_time_range", long[].class);
+    public static CameraCharacteristics.Key<Integer> support_insensor_zoom = new CameraCharacteristics.Key<>("org.quic.camera.swcapabilities.inSensorZoomCapability", Integer.class);
     private static final String TAG = "VendorTagUtils";
     public static boolean isSupported(CaptureRequest.Builder builder, CaptureRequest.Key<?> key) {
         boolean supported = true;
@@ -25,6 +31,38 @@ public class VendorTagUtils {
             Log.d(TAG,key.getName() + " is supported");
         }
         return supported;
+    }
+
+    public static void setIsoExpPrioritySelectPriority(CaptureRequest.Builder builder, Integer value) {
+        if ( isIsoExpPrioritySelectPrioritySupported(builder) ) {
+            builder.set(SELECT_PRIORITY, value);
+        }
+    }
+    private static boolean isIsoExpPrioritySelectPrioritySupported(CaptureRequest.Builder builder) {
+        return VendorTagUtils.isSupported(builder, SELECT_PRIORITY);
+    }
+
+    public static void setIsoExpPriority(CaptureRequest.Builder builder, Long value) {
+        if ( isIsoExpPrioritySupported(builder) ) {
+            builder.set(ISO_EXP, value);
+        }
+    }
+    public static void setUseIsoValues(CaptureRequest.Builder builder, int value) {
+        if ( isUseIsoValueSupported(builder) ) {
+            builder.set(USE_ISO_VALUE, value);
+        }
+    }
+    private static boolean isIsoExpPrioritySupported(CaptureRequest.Builder builder) {
+        return VendorTagUtils.isSupported(builder, ISO_EXP);
+    }
+
+    private static boolean isUseIsoValueSupported(CaptureRequest.Builder builder) {
+        return VendorTagUtils.isSupported(builder, USE_ISO_VALUE);
+    }
+
+    @SuppressLint({"NewApi", "LocalSuppress"})
+    public static void builderSessionApply2(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
+
     }
 
     @SuppressLint({"NewApi", "LocalSuppress"})
@@ -122,6 +160,11 @@ public class VendorTagUtils {
                 builder.set(aiMode, (int) PhotonCamera.getSettings().socQualcommAiMode);
             }
 
+            var enableHdrDcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableHDRDCGMode", Integer.class);
+            if (isSupported(builder, enableHdrDcgMode)) {
+                //builder.set(enableHdrDcgMode, (int) 2564);
+            }
+
             if (!PhotonCamera.getSpecific().specificSetting.codeAuroraHdrMode.equals("default")) {
                 CaptureRequest.Key hdrMode = null;
                 switch (PhotonCamera.getSpecific().specificSetting.codeAuroraHdrMode) {
@@ -208,6 +251,58 @@ public class VendorTagUtils {
                     builder.set(flipMode, (int)1);
                 }*/
             }
+
+            /*if (PhotonCamera.isVivo) {
+                var vivoForceSensorMode = new CaptureRequest.Key<>("vivo.control.forceSensorMode", Integer.class);
+                if (isSupported(builder, vivoForceSensorMode)) {
+                    builder.set(vivoForceSensorMode, (int) 0);
+                }
+
+                var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", Integer.class);
+                if (isSupported(builder, vivoAiGcOn)) {
+                    //builder.set(vivoAiGcOn, (int) 1);
+                }
+
+                var vivoEngineer = new CaptureRequest.Key<>("vivo.control.engineer", Integer.class);
+                if (isSupported(builder, vivoEngineer)) {
+                    builder.set(vivoEngineer, (int) 1);
+                }
+
+                var vivoProRaw = new CaptureRequest.Key<>("vivo.control.is_ProRaw_on", Integer.class);
+                if (isSupported(builder, vivoProRaw)) {
+                    builder.set(vivoProRaw, (int) 1);
+                }
+
+                var vivo3dHdr = new CaptureRequest.Key<>("vivo.control.3dhdr_enable", Integer.class);
+                if (isSupported(builder, vivo3dHdr)) {
+                    builder.set(vivo3dHdr, (int) 1);
+                }
+
+                var vivoDcgHdr = new CaptureRequest.Key<>("vivo.control.EnableDCGHDR", Integer.class);
+                if (isSupported(builder, vivoDcgHdr)) {
+                    builder.set(vivoDcgHdr, (int) 2564);
+                }
+
+                var vivoUltraHighRes = new CaptureRequest.Key<>("vivo.control.ultra_highresolution", Integer.class);
+                if (isSupported(builder, vivoUltraHighRes)) {
+                    builder.set(vivoUltraHighRes, (int) 1);
+                }
+
+                var vivoEisEnhance = new CaptureRequest.Key<>("vivo.control.eis.enhance", Integer.class);
+                if (isSupported(builder, vivoEisEnhance)) {
+                    builder.set(vivoEisEnhance, (int) 1);
+                }
+
+                var vivoEnableQcomSolution = new CaptureRequest.Key<>("vivo.control.enableQcomSolution", Integer.class);
+                if (isSupported(builder, vivoEnableQcomSolution)) {
+                    //builder.set(vivoEnableQcomSolution, (int) 1);
+                }
+
+                var vivoEngineerRemosaicMode = new CaptureRequest.Key<>("vivo.control.EngineerRemosaicMode", Integer.class);
+                if (isSupported(builder, vivoEngineerRemosaicMode)) {
+                    //builder.set(vivoEngineerRemosaicMode, (int) 1);
+                }
+            }*/
 
             if (burst) {
                 var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);

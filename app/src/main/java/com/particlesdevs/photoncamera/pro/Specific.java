@@ -119,6 +119,14 @@ public class Specific {
                     specificSetting.sessionType = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "priorityShutterSpeed": {
+                    specificSetting.priorityShutterSpeed = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "priorityIsoValue": {
+                    specificSetting.priorityIsoValue = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;

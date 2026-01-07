@@ -22,6 +22,8 @@ public class SpecificSetting {
     public float toneMapGamma = 99;
     public int colorTemperature = 99;
     public int sessionType = 0;
+    public int priorityShutterSpeed = 0;
+    public int priorityIsoValue = 0;
     public float colorTint = 99.0f;
     public String newRecColorRange = "full";
     public String recPrefix = "";

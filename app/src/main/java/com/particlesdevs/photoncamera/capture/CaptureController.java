@@ -1702,6 +1702,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.TONEMAP_GAMMA, 1/PhotonCamera.getSpecific().specificSetting.toneMapGamma);
         }
 
+        // test priority modes
+        if (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0) {
+            setIsoPriorityMode(captureBuilder, PhotonCamera.getSpecific().specificSetting.priorityIsoValue);
+        }
+        else if (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0) {
+            long ONE_SECOND_IN_NANOS = 1_000_000_000L;
+            long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
+            setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
+        }
+
         // check if CaptureRequest.COLOR_CORRECTION_MODE_CCT is supported
         boolean supportsColorTemperature = false;
         try {
@@ -1749,7 +1759,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    private boolean isAePriorityModeSupported(CameraCharacteristics characteristics, int priorityMode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            int[] availableModes = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_PRIORITY_MODES);
+
+            if (availableModes != null) {
+                for (int mode : availableModes) {
+                    if (mode == priorityMode) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private void setIsoPriorityMode(CaptureRequest.Builder reqBuilder, int desiredIso) {
+        if (!isAePriorityModeSupported(mCameraCharacteristics, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY)) {
+            VendorTagUtils.setIsoExpPrioritySelectPriority(reqBuilder, 0);
+            VendorTagUtils.setUseIsoValues(reqBuilder, desiredIso);
+            VendorTagUtils.setIsoExpPriority(reqBuilder, 1_000_000_000L/10);
+            return;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             reqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
             reqBuilder.set(CaptureRequest.CONTROL_AE_PRIORITY_MODE, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY);
@@ -1758,6 +1790,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void setShutterPriorityMode(CaptureRequest.Builder reqBuilder, long desiredShutterSpeed) {
+        if (!isAePriorityModeSupported(mCameraCharacteristics, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY)) {
+            VendorTagUtils.setIsoExpPrioritySelectPriority(reqBuilder, 1);
+            VendorTagUtils.setIsoExpPriority(reqBuilder, desiredShutterSpeed);
+            return;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             reqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
             reqBuilder.set(CaptureRequest.CONTROL_AE_PRIORITY_MODE, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY);
