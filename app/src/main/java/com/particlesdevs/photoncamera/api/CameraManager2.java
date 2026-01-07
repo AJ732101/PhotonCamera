@@ -54,41 +54,49 @@ public final class CameraManager2 {
         this.mSettingsManager = settingsManager;
 
         //Spinlock waiting for specific manager
-        for(int i =0; i<100; i++){
-            if(PhotonCamera.getSpecific().isLoaded) break;
+        for(int i = 0; i < 100; i++){
+            if (PhotonCamera.getSpecific().isLoaded) break;
             try {
                 Thread.sleep(1);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+
+            }
         }
 
         SpecificSetting sp = PhotonCamera.getSpecific().specificSetting;
         String[] ids = sp.cameraIDS;
         Log.d("CameraManager2", "Loaded ids:"+ Arrays.toString(ids));
-            if (!isLoaded()) {
-                if(ids == null)
-                    scanAllCameras(cameraManager);
-                else {
-                    for (String id : ids) {
-                        try {
-                            String physicalID = id;
-                            if(id.contains("-")){
-                                physicalID = id.split("-")[1];
-                            }
-                            CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(physicalID);
-                            CameraLensData cameraLensData = createNewCameraLensData(id, cameraCharacteristics);
-                            mAllCameraIDsSet.add(id);
-                            mCameraLensDataMap.put(id, cameraLensData);
-                        } catch (Exception ignored) {
+        boolean isLoaded = isLoaded();
+        if (!isLoaded) {
+            if(ids == null)
+                scanAllCameras(cameraManager);
+            else {
+                for (String id : ids) {
+                    try {
+                        String physicalID = id;
+                        if(id.contains("-")){
+                            physicalID = id.split("-")[1];
                         }
+                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(physicalID);
+                        CameraLensData cameraLensData = createNewCameraLensData(id, cameraCharacteristics);
+                        mAllCameraIDsSet.add(id);
+                        mCameraLensDataMap.put(id, cameraLensData);
+                    } catch (Exception ignored) {
                     }
-                    findLensZoomFactor(mCameraLensDataMap);
                 }
-                //Override ID detection
-                save();
-            } else {
-                loadFromSave(cameraManager,ids);
+                findLensZoomFactor(mCameraLensDataMap);
             }
+            if (!mAllCameraIDsSet.isEmpty() && !mAllCameraIDsSet.contains(PhotonCamera.getSettings().mCameraID)) {
+                String newCameraId = mAllCameraIDsSet.iterator().next();
+                PhotonCamera.getSettings().mCameraID = newCameraId;
+            }
+            //Override ID detection
+            save();
+        } else {
+            loadFromSave(cameraManager,ids);
+        }
     }
+
     private void initExt(CameraManager cameraManager, String[] ids) {
         for (String id : ids) {
             try {
@@ -118,7 +126,11 @@ public final class CameraManager2 {
             mCameraLensDataMap.put(cameraLensData.getCameraId(), cameraLensData);
         });
         if(ids != null && mCameraLensDataJSONSet.size() < ids.length){
-            initExt(cameraManager,ids);
+            initExt(cameraManager, ids);
+            if (!mAllCameraIDsSet.isEmpty() && !mAllCameraIDsSet.contains(PhotonCamera.getSettings().mCameraID)) {
+                String newCameraId = mAllCameraIDsSet.iterator().next();
+                PhotonCamera.getSettings().mCameraID = newCameraId;
+            }
             save();
         }
     }
@@ -247,6 +259,12 @@ public final class CameraManager2 {
     }
 
     private void save() {
+        String storedCamId = PhotonCamera.getSettings().mCameraID;
+        if (!mAllCameraIDsSet.isEmpty() && !mAllCameraIDsSet.contains(storedCamId)) {
+            String newCameraId = mAllCameraIDsSet.iterator().next();
+            PhotonCamera.getSettings().mCameraID = newCameraId;
+        }
+
         mSettingsManager.set(_CAMERAS, CAMERA_COUNT_KEY, mAllCameraIDsSet.size());
         mSettingsManager.set(_CAMERAS, ALL_CAMERA_IDS_KEY, mAllCameraIDsSet);
 
