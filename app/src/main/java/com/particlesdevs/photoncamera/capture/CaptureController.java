@@ -251,6 +251,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public static CaptureResult mPreviewCaptureResult;
     public static CaptureRequest mPreviewCaptureRequest;
     public static int mPreviewTargetFormat = ImageFormat.JPEG;
+    public static float mDigitalZoom = 1.0f;
     public boolean isDualSession = false;
     public boolean mIsCaptureInProgress = false;
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
@@ -690,7 +691,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 for (String id : mCameraCharacteristicsMap.keySet()) {
                     Log.d(TAG, "Available camera ID: " + id);
                 }
-                Size optimal = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristicsMap.get(physicalID), PhotonCamera.getSettings().selectedMode);
+                var display = mTextureView.getDisplay();
+                var characteristic = mCameraCharacteristicsMap.get(physicalID);
+
+                Size optimal = getPreviewOutputSize(display, characteristic, PhotonCamera.getSettings().selectedMode);
                 openCamera(optimal.getWidth(), optimal.getHeight());
             } catch (Exception e){
                 Log.e(TAG,Log.getStackTraceString(e));
@@ -716,49 +720,32 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     };
 
-    /**
-     * Function to request a Gain Map (Ultra HDR) within the CaptureRequest.
-     * @param captureBuilder The CaptureRequest.Builder for the still image capture.
-     * @param characteristics The CameraCharacteristics of the device being used.
-     * @return true if Gain Map (Ultra HDR) was successfully requested, false otherwise.
-     */
-    public boolean requestGainMap(CaptureRequest.Builder captureBuilder, CameraCharacteristics characteristics)
+    public boolean checkHdrSupport(CameraCharacteristics characteristics)
     {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            return false;
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            java.util.Set<Long> supportedProfiles = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES).getSupportedProfiles();
+            Log.d(TAG, "Supported profiles: " + supportedProfiles.toString());
 
-        int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-        boolean ultraHdrSupported = false;
-        final int ULTRA_HDR_CAPABILITY_RAW_VALUE = 20;
-        final int COLOR_SPACE_BT2020_HLG_ID = 14;
-
-        if (capabilities != null) {
-            for (int capability : capabilities) {
-                // The specific capability flag indicating Ultra HDR support.
-                if (capability == ULTRA_HDR_CAPABILITY_RAW_VALUE) {
-                    ultraHdrSupported = true;
-                    break;
-                }
+            String dynRangeProf = "Supported dynamic range profile: ";
+            Log.d(TAG, "Supported dynamic range profile: HDR10+");
+            if (supportedProfiles.contains(DynamicRangeProfiles.HDR10_PLUS)) {
+                dynRangeProf += "HDR10+";
+                PhotonCamera.mHdrTenPlusIsSupported = true;
             }
-        }
-
-        if (!ultraHdrSupported) {
-            return false;
-        }
-
-        CaptureRequest.Key<Integer> requestOutputColorSpaceKey = new CaptureRequest.Key<>("android.request.outputColorSpace", Integer.class);
-        if (VendorTagUtils.isSupported(captureBuilder, requestOutputColorSpaceKey)) {
-            captureBuilder.set(requestOutputColorSpaceKey, COLOR_SPACE_BT2020_HLG_ID);
+            else if (supportedProfiles.contains(DynamicRangeProfiles.HDR10)) {
+                dynRangeProf += " - HDR10";
+                PhotonCamera.mHdrTenIsSupported = true;
+            }
+            else if (supportedProfiles.contains(DynamicRangeProfiles.HLG10)) {
+                dynRangeProf += " - HLG10";
+                PhotonCamera.mHlgIsSupported = true;
+            }
+            Log.d(TAG, dynRangeProf);
+            return true;
         }
         else {
             return false;
         }
-
-        // Optional: Additional control settings, often recommended for quality.
-        //captureBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
-
-        return true;
     }
 
     public boolean isSingleShotSwEncoder() {
@@ -1145,8 +1132,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void rebuildPreviewBuilder() {
         if(burst) return;
         try {
-//            mCaptureSession.stopRepeating();
-            mCaptureSession.setRepeatingRequest(mPreviewInputRequest = mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+//          mCaptureSession.stopRepeating();
+            mPreviewInputRequest = mPreviewRequestBuilder.build();
+            mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
         } catch (IllegalStateException | IllegalArgumentException | NullPointerException e) {
             Logger.warnShort(TAG, "Cannot rebuildPreviewBuilder()!", e);
         } catch (CameraAccessException e) {
@@ -1155,9 +1143,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void rebuildPreviewBuilderOneShot() {
-        if(burst) return;
+        if (burst) {
+            return;
+        }
         try {
             Log.d(TAG, "rebuildPreviewBuilderOneShot: " + mCaptureSession + " " + mPreviewRequestBuilder + " " + mCaptureCallback + " " + mBackgroundHandler);
+            var captureSession = mCaptureSession;
+            var previewRequestBuilder = mPreviewRequestBuilder;
+            var captureCallback = mCaptureCallback;
+            var backgroundHandler = mBackgroundHandler;
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
         } catch (IllegalStateException | IllegalArgumentException | NullPointerException e) {
             Logger.warnShort(TAG, "Cannot rebuildPreviewBuilderOneShot()!", e);
@@ -1190,16 +1184,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private ArrayList<Size> getAllTargets(){
         CameraCharacteristics characteristics =  this.mCameraCharacteristicsMap.get(physicalID);
         StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
         checkStillImageFormatsSupport(map);
-
         HashSet<Size> uniqueTargets = new HashSet<>();
 
         setTargetFormat();
 
         Size[] targetSizes = map.getOutputSizes(mTargetFormat);
-        if(targetSizes != null)
+        if(targetSizes != null) {
             uniqueTargets.addAll(Arrays.asList(targetSizes));
+        }
 
         if(PhotonCamera.getSettings().QuadBayer) {
             useMaximumResolutionKey = false;
@@ -1216,7 +1209,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
                 }
             }
-            if(!useMaximumResolutionKey) {
+            if (!useMaximumResolutionKey) {
                 Size[] highResSizes = map.getHighResolutionOutputSizes(mTargetFormat);
                 if (highResSizes != null && highResSizes.length > 0) {
                     uniqueTargets.addAll(Arrays.asList(highResSizes));
@@ -1233,10 +1226,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                     int format = vals[i];
                                     int width = vals[i + 1];
                                     int height = vals[i + 2];
-                                    //if (format == mTargetFormat) {
-                                    if (width > 6000) {
-                                        uniqueTargets.add(new Size(width, height));
-                                        Log.d(TAG, "Added custom resolution(" + key.getName() + "):" + width + " " + height);
+                                    if ((width > 6000) || (height > 6000)) {
+                                        if (uniqueTargets.add(new Size(width, height))) {
+                                            Log.d(TAG, "Added custom resolution(" + key.getName() + "):" + width + " " + height);
+                                        }
                                     }
                                 }
                             }
@@ -1247,9 +1240,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
-        // ZULETZT: Konvertiere das Set zurück in eine ArrayList.
-        // Die Reihenfolge der Elemente ist nicht garantiert, was aber für eine Liste
-        // von unterstützten Auflösungen in der Regel keine Rolle spielt.
         return new ArrayList<>(uniqueTargets);
     }
 
@@ -1439,7 +1429,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
         else if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            maxImagerReaderImages = 1;
+            maxImagerReaderImages = 2;
         }
 
         PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(cameraId));
@@ -1456,13 +1446,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         ArrayList<Size> allTargets = getAllTargets();
         Size preview = getCameraOutputSize(map.getOutputSizes(mPreviewTargetFormat));
+        //Log.d(TAG, "preview ImageReader before check" + preview.getWidth() + "x" + preview.getHeight() + " - orientation: " + mSensorOrientation);
         Size aspect = getAspect(PhotonCamera.getSettings().selectedMode);
-        if(preview.getWidth() > preview.getHeight()) {
+        if (preview.getWidth() > preview.getHeight()) {
             preview = new Size(preview.getWidth(), preview.getWidth() * aspect.getWidth() / aspect.getHeight());
         }
         else {
             preview = new Size(preview.getHeight() * aspect.getWidth() / aspect.getHeight(), preview.getHeight());
         }
+        //Log.d(TAG, "preview ImageReader after check" + preview.getWidth() + "x" + preview.getHeight() + " - orientation: " + mSensorOrientation);
         target = getCameraOutputSize(allTargets.toArray(new Size[0]), preview);
 
         if (mImageReaderPreview != null) {
@@ -1484,11 +1476,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 Size newSize = customRawResForCamId(physicalID);
                 mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
-                if (PhotonCamera.getSettings().QuadBayer) {
+                if (target.getHeight() > target.getWidth()) {
+                    mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImagerReaderImages);
+                }
+                else {
+                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
+                }
+                //Log.d(TAG, "create ImageReader " + target.getWidth() + "x" + target.getHeight() + " - orientation: " + mSensorOrientation);
+                /*if (PhotonCamera.getSettings().QuadBayer) {
                     mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImagerReaderImages);
                 } else {
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
-                }
+                }*/
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
@@ -1591,7 +1590,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * Lock the focus as the first step for a still image capture.
      */
     private void lockFocus() {
-        if(burst) return;
+        if (burst) {
+            return;
+        }
         startTimerLocked();
         // This is how to tell the camera to lock focus.
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -1753,6 +1754,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             reqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
             reqBuilder.set(CaptureRequest.CONTROL_AE_PRIORITY_MODE, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY);
             reqBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, desiredIso);
+        }
+    }
+
+    private void setShutterPriorityMode(CaptureRequest.Builder reqBuilder, long desiredShutterSpeed) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            reqBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+            reqBuilder.set(CaptureRequest.CONTROL_AE_PRIORITY_MODE, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY);
+            reqBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, desiredShutterSpeed);
         }
     }
 
@@ -1999,8 +2008,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             texture.setDefaultBufferSize(mBufferSize.getHeight(), mBufferSize.getWidth());
 
             // This is the output Surface we need to start preview.
-            if(surface == null)
+            if (surface != null) {
+                //surface.release();
+            }
+            else {
                 surface = new Surface(texture);
+            }
             // We set up a CaptureRequest.Builder with the output Surface.
             setCaptureRequestBuilder();
 
@@ -2032,19 +2045,36 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
                 // activating HDR path
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    boolean gainMapRequested = checkHdrSupport(mCameraCharacteristics);
+                    long hdrProfile = DynamicRangeProfiles.HLG10;
+                    if (PhotonCamera.mHdrTenPlusIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10+")) {
+                        hdrProfile = DynamicRangeProfiles.HDR10_PLUS;
+                    }
+                    else if (PhotonCamera.mHdrTenIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10")) {
+                        hdrProfile = DynamicRangeProfiles.HDR10;
+                    }
                     // video
                     if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
-                        config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
+                        config.setDynamicRangeProfile(hdrProfile);
                     }
                     // Ultra HDR or 10 Bit surface as target (for encoding after image capture)
                     if ((mTargetFormat == ImageFormat.JPEG_R) || (mTargetFormat == ImageFormat.YCBCR_P010)) {
-                        if (mImageReaderRaw.getSurface() == surfacei) {
-                            config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
+                        if ((mImageReaderRaw.getSurface() == surfacei) || (mImageReaderPreview.getSurface() == surfacei)) {
+                            config.setDynamicRangeProfile(hdrProfile);
                         }
                     }
                     else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
-                        config.setDynamicRangeProfile(DynamicRangeProfiles.HLG10);
+                        config.setDynamicRangeProfile(hdrProfile);
                     }
+                    /*if (mImageReaderRaw.getSurface() == surfacei) {
+                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
+                    }
+                    else if (mVideoRecordingSurface == surfacei) {
+                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD);
+                    }
+                    else {
+                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW);
+                    }*/
                 }
                 outputConfigurations.add(config);
             }
@@ -2149,15 +2179,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         configuration.setColorSpace(ColorSpace.Named.SRGB);
                     }
                 }*/
-
-                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && mIsRecordingVideo) {
-                    mCameraDevice.createCaptureSession(configuration);
-                    //createCustomCaptureSession(mCameraDevice, configuration, 61448);
-                    //createCustomCaptureSession(mCameraDevice, configuration, 0);
-                }
-                else {
-                    mCameraDevice.createCaptureSession(configuration);
-                }
+                mCameraDevice.createCaptureSession(configuration);
             } else {
                 mCameraDevice.createCaptureSession(surfaces, stateCallback, mBackgroundHandler);
             }
@@ -2208,10 +2230,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     @NotNull
     private List<Surface> configureSurfaces(boolean isBurstSession) {
-        // 1. Eine veränderbare Liste erstellen
         List<Surface> surfaces = new ArrayList<>();
-
-        // 2. High-Speed-Bedingungen im Voraus prüfen
         boolean isHighSpeedSupported = false;
         int[] capabilities = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         if (capabilities != null) {
@@ -2224,7 +2243,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         boolean isHighSpeedSessionRequested = mIsRecordingVideo && isHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120);
 
-        // 3. Logik für Videoaufnahme
         if (mIsRecordingVideo) {
             Surface videoRecordingSurface = null;
             if (PhotonCamera.getSettings().videoNewRec) {
@@ -2241,9 +2259,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
             }
 
-            // 4. Oberflächen basierend auf dem High-Speed-Fall hinzufügen
             if (isHighSpeedSessionRequested) {
-                // Im High-Speed-Fall NUR die Aufnahme-Surface hinzufügen
                 if (videoRecordingSurface != null && videoRecordingSurface.isValid()) {
                     surfaces.add(videoRecordingSurface);
                     if (mPreviewRequestBuilder != null) {
@@ -2252,7 +2268,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Log.i(TAG, "Configuring surfaces for HIGH-SPEED session. Using ONLY video surface.");
                 }
             } else {
-                // Im normalen Video-Fall die Vorschau- UND die Aufnahme-Surface hinzufügen
                 if (surface != null && surface.isValid()) {
                     surfaces.add(surface);
                 }
@@ -2267,23 +2282,50 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return surfaces;
         }
 
-        // 5. Logik für Foto-Modi (unverändert, aber jetzt mit sicherer ArrayList)
         if (surface != null && surface.isValid()) {
             surfaces.add(surface);
         }
 
         if (isDualSession && isBurstSession) {
-            if (mImageReaderPreview != null && mImageReaderPreview.getSurface() != null)
+            if (mImageReaderPreview != null && mImageReaderPreview.getSurface() != null) {
                 surfaces.add(mImageReaderPreview.getSurface());
-            if (mImageReaderRaw != null && mImageReaderRaw.getSurface() != null)
+            }
+            if (mImageReaderRaw != null && mImageReaderRaw.getSurface() != null) {
                 surfaces.add(mImageReaderRaw.getSurface());
+            }
         } else {
-            if (mImageReaderRaw != null && mImageReaderRaw.getSurface() != null)
+            if (mImageReaderRaw != null && mImageReaderRaw.getSurface() != null) {
                 surfaces.add(mImageReaderRaw.getSurface());
+            }
         }
 
         Log.d(TAG, "Final number of surfaces: " + surfaces.size());
         return surfaces;
+
+        /*List<Surface> surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
+        if (isDualSession) {
+            if (isBurstSession) {
+                surfaces = Arrays.asList(mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
+            }
+            if (mTargetFormat == mPreviewTargetFormat) {
+                surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
+            }
+        } else {
+            if(Build.BRAND.equalsIgnoreCase("samsung")){
+                surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
+            } else {
+                surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
+            }
+            if(PhotonCamera.getSettings().previewFormat == 0) {
+                surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
+            }
+        }
+        if (mIsRecordingVideo) {
+            setUpMediaRecorder();
+            surfaces = Arrays.asList(surface, mMediaRecorder.getSurface());
+            mPreviewRequestBuilder.addTarget(mMediaRecorder.getSurface());
+        }
+        return surfaces;*/
     }
 
 
@@ -2495,6 +2537,24 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public void zoomSliderChanged(float newZoomValue) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!PhotonCamera.getSettings().zoom2X) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, newZoomValue);
+                try {
+                    if (mCaptureSession != null) {
+                        mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                        mDigitalZoom = newZoomValue;
+                    }
+                } catch (CameraAccessException e) {
+                    Log.e(TAG, "Failed to update zoom for preview.", e);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Failed to update zoom, camera session is not available.", e);
+                }
+            }
+        }
+    }
+
     public void magnifyViewfinder () {
         if (mIsViewFinderMagnified) {
             if (PhotonCamera.getSettings().zoom2X) {
@@ -2555,12 +2615,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         try {
             if (mPreviewRequestBuilder != null) {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-                rebuildPreviewBuilderOneShot();
                 reset3Aparams();
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-                rebuildPreviewBuilderOneShot();
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-                rebuildPreviewBuilderOneShot();
                 paramController.setupPreview();
                 mState = STATE_PREVIEW;
                 rebuildPreviewBuilder();
@@ -2663,7 +2720,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         while(mImageSaver.implementation.IMAGE_BUFFER.size() > PhotonCamera.getSettings().frameCount/2) {
                             try {
                                 Thread.sleep(1);
-                            } catch (InterruptedException ignored) {}
+                            } catch (InterruptedException ignored) {
+                                Log.d(TAG, "Interrupted Exception");
+                            }
                         }
                         cameraEventsListener.onCaptureSequenceCompleted(null);
                     }, 100);
@@ -2707,7 +2766,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
             }
             else {
-                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
+                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, mDigitalZoom);
             }
         }
     }
@@ -2774,7 +2833,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.w(TAG, "processImageWithLutAndSave is already running, skipping this frame.");
             try (Image image = reader.acquireLatestImage()) {
 
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                Log.d(TAG, "Could not acquire image for LUT processing.");
+            }
             return;
         }
 
@@ -3109,6 +3170,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 try {
                                     Thread.sleep(1);
                                 } catch (InterruptedException ignored) {
+                                    Log.d(TAG, "Interrupted Exception");
                                 }
                                 cnt++;
                             }
@@ -3974,9 +4036,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     case "HEVC":
                     case "H265":
                         if (PhotonCamera.getSettings().videoHDR)
-                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
+                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
                         else
-                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
+                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
                         break;
                 }
             }
@@ -4230,7 +4292,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 try {
                     caps = codecInfo.getCapabilitiesForType(type);
                 } catch (IllegalArgumentException e) {
-
                     continue;
                 }
 
@@ -4354,6 +4415,22 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                     }
                 }
+            }
+
+            for (String mimeType : encoderNames.keySet()) {
+                String name = encoderNames.get(mimeType);
+                Size resolution = maxResolutions.get(mimeType);
+                Integer bitrate = maxBitrates.get(mimeType);
+                Boolean hwSupport = hwSupports.get(mimeType);
+
+                // Baue den Log-String zusammen
+                String logMessage = "VideoEncoderName: " + name +
+                        " - mimeType: " + mimeType +
+                        " - max encoder resolution: " + (resolution != null ? resolution.toString() : "N/A") +
+                        " - max bitrate: " + (bitrate != null ? (bitrate / (1024 * 1024)) + "MBit/s" : "N/A") +
+                        " - HW supported: " + (hwSupport != null ? hwSupport.toString() : "N/A");
+
+                Log.d(TAG, logMessage);
             }
         }
 
