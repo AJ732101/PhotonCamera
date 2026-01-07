@@ -21,6 +21,7 @@ public class ImageSaverSelector {
     public static SaverImplementation getImageSaver(int format, SaverImplementation saverImplementation) {
         switch (format) {
             case ImageFormat.JPEG:
+            case ImageFormat.JPEG_R:
                 saverImplementation = JPEGSaver;
                 break;
             case ImageFormat.HEIC:
