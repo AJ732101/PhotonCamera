@@ -10,6 +10,9 @@
         <variable
             name="auxmodel"
             type="com.particlesdevs.photoncamera.ui.camera.model.AuxButtonsModel" />
+        <variable
+            name="zoom_slider_visible"
+            type="boolean"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -77,7 +80,7 @@
                 android:paddingStart="12dp"
                 android:paddingTop="6dp"
                 android:paddingEnd="12dp"
-                android:paddingBottom="6dp"
+                android:paddingBottom="10dp"
                 android:text="10Bit"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="10sp"
@@ -195,6 +198,49 @@
                 app:layout_constraintBottom_toBottomOf="@+id/aux_buttons_container"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/aux_buttons_container" />
+
+            <FrameLayout
+                android:id="@+id/zoom_value_container"
+                android:layout_width="wrap_content"
+                android:layout_height="330dp"
+                android:layout_marginBottom="18dp"
+                android:visibility="@{zoom_slider_visible ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@+id/aux_buttons_container"
+                app:layout_constraintEnd_toEndOf="@+id/aux_buttons_container"
+                app:layout_constraintStart_toStartOf="@+id/aux_buttons_container">
+
+                <TextView
+                    android:id="@+id/zoom_value_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|top"
+                    android:layout_marginTop="18dp"
+                    android:background="@drawable/aux_container_background"
+                    android:elevation="10dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:text="@{String.format(java.util.Locale.US, `%.1fx`, uimodel.zoomLevel)}"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:bindRotate="@{uimodel}"
+                    tools:text="1.00x" />
+
+                <SeekBar
+                    android:id="@+id/zoom_value"
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:max="100"
+                    android:progress="38"
+                    android:min="5"
+                    android:rotation="270"
+                    android:onSeekBarChangeListener="@{uimodel.zoomChangeListener}"
+                    android:thumb="@drawable/seekbar_thumb_large" />
+
+            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/dummy_reference_view"

@@ -196,8 +196,20 @@ final class CameraUIController implements CameraUIEventsListener,
 
             case R.id.zoom_toggle_button:
                 PreferenceKeys.setSetZoomOn(!PreferenceKeys.isZoomOn());
-                cameraFragment.showSnackBar(cameraFragment.getString(R.string.zoom_toggle_text) + ':' + onOff(PreferenceKeys.isZoomOn()));
+                //cameraFragment.showSnackBar(cameraFragment.getString(R.string.zoom_toggle_text) + ':' + onOff(PreferenceKeys.isZoomOn()));
                 cameraFragment.updateSettingsBar();
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                        () -> {
+                            if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
+                                if (PhotonCamera.getSpecific().specificSetting.showZoomSlider) {
+                                    cameraFragment.cameraFragmentBinding.setZoomSliderVisible(!PreferenceKeys.isZoomOn());
+                                }
+                                else {
+                                    cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
+                                }
+                            }
+                        }, 500
+                );
                 this.restartCamera();
                 break;
 

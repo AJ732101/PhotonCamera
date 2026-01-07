@@ -9,6 +9,7 @@ import com.particlesdevs.photoncamera.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -29,7 +30,6 @@ public class CameraFragmentViewModel extends AndroidViewModel {
     private final CameraFragmentModel cameraFragmentModel;
     //listen to device orientation changes
     private CustomOrientationEventListener mCustomOrientationEventListener;
-
 
     public CameraFragmentViewModel(@NonNull Application application) {
         super(application);
@@ -73,12 +73,11 @@ public class CameraFragmentViewModel extends AndroidViewModel {
                         rot = 180;
                         break;
                 }
-                Log.d(TAG, "onSimpleOrientationChanged" + rot);
+                if (cameraFragmentModel.getOrientation() != rot) {
+                    Log.d(TAG, "onSimpleOrientationChanged" + rot);
+                }
                 cameraFragmentModel.setDuration(RotationDur);
                 cameraFragmentModel.setOrientation(rot);
-
-                //mCameraUIView.rotateViews(rot, RotationDur);
-                //PhotonCamera.getManualMode().rotate(rot, RotationDur);
             }
         };
     }

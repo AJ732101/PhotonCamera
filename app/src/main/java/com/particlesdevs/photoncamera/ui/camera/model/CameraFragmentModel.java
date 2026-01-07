@@ -1,14 +1,17 @@
 package com.particlesdevs.photoncamera.ui.camera.model;
 
 import android.graphics.Bitmap;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+import androidx.lifecycle.MutableLiveData;
 
 import com.particlesdevs.photoncamera.BR;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
+import com.particlesdevs.photoncamera.util.Log;
 
 /**
  * Class that holds the ui state, for now the orientation
@@ -21,6 +24,7 @@ public class CameraFragmentModel extends BaseObservable {
     private boolean viewfinderMaginified = false;
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
+    public final MutableLiveData<Float> zoomLevel = new MutableLiveData<>(1.0f);
 
     public void onMagnifyViewfinderClicked() {
         if (PhotonCamera.getCaptureController() != null) {
@@ -28,6 +32,55 @@ public class CameraFragmentModel extends BaseObservable {
             viewfinderMaginified = !viewfinderMaginified;
         }
     }
+
+    public final SeekBar.OnSeekBarChangeListener zoomChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                //onZoomProgressChanged(progress, fromUser);
+                float linear_fraction = (float) (progress - 5) / 95.0f;
+                float curved_fraction = (float) Math.pow(linear_fraction, 2.5);
+                float newZoom = 0.5f + (9.5f * curved_fraction);
+                PhotonCamera.getCaptureController().zoomSliderChanged(newZoom);
+                zoomLevel.setValue(newZoom);
+                notifyPropertyChanged(BR.zoomLevel);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            onZoomStartTracking();
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            onZoomChanged(seekBar.getProgress());
+        }
+    };
+
+    @Bindable
+    public Float getZoomLevel() {
+        return zoomLevel.getValue() != null ? zoomLevel.getValue() : 1.0f;
+    }
+
+    public void onZoomChanged(int progress) {
+        /*if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().zoomSliderChanged((float)(progress / 10.0f));
+        }*/
+    }
+
+    public void onZoomStartTracking() {
+
+    }
+
+    public void onZoomProgressChanged(int progress, boolean fromUser) {
+        if (fromUser) {
+            if (PhotonCamera.getCaptureController() != null) {
+                PhotonCamera.getCaptureController().zoomSliderChanged((float)(progress / 10.0f));
+            }
+        }
+    }
+
     @Bindable
     public boolean isViewfinderMagnified() {
         return viewfinderMaginified;
