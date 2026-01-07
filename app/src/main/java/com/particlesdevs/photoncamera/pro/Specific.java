@@ -95,6 +95,10 @@ public class Specific {
                     specificSetting.modeShowRawVideo = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "showZoomSlider": {
+                    specificSetting.showZoomSlider = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -137,6 +141,10 @@ public class Specific {
                 }
                 case "codeAuroraHdrMode": {
                     specificSetting.codeAuroraHdrMode = caseS[1];
+                    break;
+                }
+                case "hdrMode": {
+                    specificSetting.hdrMode = caseS[1];
                     break;
                 }
             }
