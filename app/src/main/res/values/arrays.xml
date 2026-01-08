@@ -83,6 +83,16 @@
         <item>38</item>
     </string-array>
 
+    <string-array name="function_one_entries">
+        <item>ISO Priority</item>
+        <item>Shutter Priority</item>
+    </string-array>
+
+    <string-array name="function_one_entryValues">
+        <item>ISO Priority</item>
+        <item>Shutter Priority</item>
+    </string-array>
+
     <string-array name="location_geotag_entryValues">
         <item>Off</item>
         <item>High Accuracy</item>
