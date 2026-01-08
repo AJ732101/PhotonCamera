@@ -57,6 +57,16 @@
             android:entryValues="@array/raw_format_entryValues"
             android:defaultValue="@string/pref_raw_format_default"/>
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_function_one_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/function_button_one"
+            android:icon="@drawable/action_key_24px"
+            android:entries="@array/function_one_entries"
+            android:entryValues="@array/function_one_entryValues"
+            android:defaultValue="@string/pref_function_one_default"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_dng_compression_key"

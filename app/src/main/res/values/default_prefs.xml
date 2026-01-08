@@ -78,6 +78,7 @@
     <string name="pref_preview_format_default" translatable="false">256</string>
     <string name="pref_real_preview_format_default" translatable="false">35</string>
     <string name="pref_raw_format_default" translatable="false">32</string>
+    <string name="pref_function_one_default" translatable="false">ISO Priority</string>
     <string name="pref_cfa_default_value" translatable="false">-1</string>
     <string name="pref_theme_default_value" translatable="false">-1</string>
     <string name="pref_theme_accent_default_value" translatable="false">orange</string>

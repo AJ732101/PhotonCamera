@@ -50,7 +50,7 @@
             android:key="@string/pref_2x_zoom_key"
             android:title="@string/zoom"
             android:summary=""
-            android:icon="@drawable/speed_2x_24px"
+            android:icon="@drawable/zoom_in_24px"
             android:defaultValue="@bool/pref_2x_zoom_def_value"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference

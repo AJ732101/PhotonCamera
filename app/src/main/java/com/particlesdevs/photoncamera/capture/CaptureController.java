@@ -1704,10 +1704,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // test priority modes
+        VendorTagUtils.getSupportedIso(mCameraCharacteristics);
         if (mIsFunctionOneOn) {
-            if (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0) {
+            if (PhotonCamera.getSettings().functionOne.equals("ISO Priority") && (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0)) {
                 setIsoPriorityMode(captureBuilder, PhotonCamera.getSpecific().specificSetting.priorityIsoValue);
-            } else if (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0) {
+            }
+
+            if (PhotonCamera.getSettings().functionOne.equals("Shutter Priority") && (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0)) {
                 long ONE_SECOND_IN_NANOS = 1_000_000_000L;
                 long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
                 setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
