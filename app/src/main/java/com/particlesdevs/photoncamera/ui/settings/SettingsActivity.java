@@ -67,6 +67,65 @@ public class SettingsActivity extends BaseActivity implements
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.general_preferences, rootKey);
 
+            // RAW format list building
+            ListPreference rawPreference = findPreference(getString(R.string.pref_raw_format_key));
+            if (rawPreference == null) {
+                return;
+            }
+            String currentRawValue = rawPreference.getValue();
+
+            List<CharSequence> entriesRaw = new ArrayList<>();
+            List<CharSequence> entryRawValues = new ArrayList<>();
+
+            entriesRaw.add("RAW_SENSOR");
+            entryRawValues.add("32");
+            entriesRaw.add("RAW10");
+            entryRawValues.add("37");
+            if (PhotonCamera.mRaw12IsSupported) {
+                entriesRaw.add("RAW12");
+                entryRawValues.add("38");
+            }
+
+            rawPreference.setEntries(entriesRaw.toArray(new CharSequence[0]));
+            rawPreference.setEntryValues(entryRawValues.toArray(new CharSequence[0]));
+
+            if (!entryRawValues.contains(currentRawValue)) {
+                if (entryRawValues.equals("RAW_SENSOR")) {
+                    rawPreference.setValue("RAW_SENSOR");
+                } else if (!entryRawValues.isEmpty()) {
+                    rawPreference.setValue(entryRawValues.get(0).toString());
+                }
+            }
+
+            // preview format list building
+            ListPreference prevPreference = findPreference(getString(R.string.pref_real_preview_format_key));
+            if (prevPreference == null) {
+                return;
+            }
+            String currentPrevValue = prevPreference.getValue();
+
+            List<CharSequence> entriesPrev = new ArrayList<>();
+            List<CharSequence> entryPrevValues = new ArrayList<>();
+
+            entriesPrev.add("YUV_420_888");
+            entryPrevValues.add("35");
+            if (PhotonCamera.mYuv10IsSupported) {
+                entriesPrev.add("YCBCR_P010");
+                entryPrevValues.add("54");
+            }
+
+            prevPreference.setEntries(entriesPrev.toArray(new CharSequence[0]));
+            prevPreference.setEntryValues(entryPrevValues.toArray(new CharSequence[0]));
+
+            if (!entryPrevValues.contains(currentPrevValue)) {
+                if (entryPrevValues.equals("YUV_420_888")) {
+                    prevPreference.setValue("YUV_420_888");
+                } else if (!entryPrevValues.isEmpty()) {
+                    prevPreference.setValue(entryPrevValues.get(0).toString());
+                }
+            }
+
+            // still image format list building
             ListPreference codecPreference = findPreference(getString(R.string.pref_preview_format_key));
             if (codecPreference == null) {
                 return;
