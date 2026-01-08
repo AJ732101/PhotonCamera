@@ -127,6 +127,10 @@ public class Specific {
                     specificSetting.priorityIsoValue = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "priorityMode": {
+                    specificSetting.priorityMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;

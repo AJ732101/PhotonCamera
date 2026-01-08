@@ -199,6 +199,21 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/aux_buttons_container" />
 
+            <ToggleButton
+                android:id="@+id/buttonFunctionOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/aux_container_background"
+                android:checked="@{uimodel.isFunctionOneOn}"
+                android:textOn="Fn1 ON"
+                android:textOff="Fn1 OFF"
+                app:bindRotate="@{uimodel}"
+                android:onClick="@{() -> uimodel.onFunctionOneClicked()}"
+                android:layout_marginBottom="35dp"
+                app:layout_constraintStart_toStartOf="@+id/buttonMagnifyViewfinder"
+                app:layout_constraintEnd_toEndOf="@+id/buttonMagnifyViewfinder"
+                app:layout_constraintBottom_toTopOf="@+id/buttonMagnifyViewfinder" />
+
             <FrameLayout
                 android:id="@+id/zoom_value_container"
                 android:layout_width="wrap_content"

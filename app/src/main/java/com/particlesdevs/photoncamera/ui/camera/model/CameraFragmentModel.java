@@ -22,6 +22,7 @@ public class CameraFragmentModel extends BaseObservable {
     private Bitmap bitmap;
     private boolean settingsBarVisibility;
     private boolean viewfinderMaginified = false;
+    private boolean functionOneOn = false;
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
     public final MutableLiveData<Float> zoomLevel = new MutableLiveData<>(1.0f);
@@ -30,6 +31,13 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.getCaptureController() != null) {
             PhotonCamera.getCaptureController().magnifyViewfinder();
             viewfinderMaginified = !viewfinderMaginified;
+        }
+    }
+
+    public void onFunctionOneClicked() {
+        if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().functionOne();
+            functionOneOn = !functionOneOn;
         }
     }
 
@@ -84,6 +92,10 @@ public class CameraFragmentModel extends BaseObservable {
     @Bindable
     public boolean isViewfinderMagnified() {
         return viewfinderMaginified;
+    }
+
+    public boolean isFunctionOneOn() {
+        return functionOneOn;
     }
 
     @Bindable

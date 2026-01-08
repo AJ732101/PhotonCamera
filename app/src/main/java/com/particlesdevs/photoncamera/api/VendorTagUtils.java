@@ -18,6 +18,8 @@ public class VendorTagUtils {
     public static CameraCharacteristics.Key<int[]> ISO_AVAILABLE_MODES = new CameraCharacteristics.Key<>("org.codeaurora.qcamera3.iso_exp_priority.iso_available_modes", int[].class);
     public static CameraCharacteristics.Key<long[]> EXPOSURE_RANGE = new CameraCharacteristics.Key<>("org.codeaurora.qcamera3.iso_exp_priority.exposure_time_range", long[].class);
     public static CameraCharacteristics.Key<Integer> support_insensor_zoom = new CameraCharacteristics.Key<>("org.quic.camera.swcapabilities.inSensorZoomCapability", Integer.class);
+    private static CaptureRequest.Key<Float> TONE_MAPPING_DARK_BOOST = new CaptureRequest.Key<>("org.codeaurora.qcamera3.tmcusercontrol.dark_boost_offset", Float.class);
+    private static CaptureRequest.Key<Integer> USE_ISO_VALUE_MT = new CaptureRequest.Key<>("com.mediatek.3afeature.aeIsoSpeed", Integer.class);
     private static final String TAG = "VendorTagUtils";
     public static boolean isSupported(CaptureRequest.Builder builder, CaptureRequest.Key<?> key) {
         boolean supported = true;
@@ -34,30 +36,44 @@ public class VendorTagUtils {
     }
 
     public static void setIsoExpPrioritySelectPriority(CaptureRequest.Builder builder, Integer value) {
-        if ( isIsoExpPrioritySelectPrioritySupported(builder) ) {
+        if (isIsoExpPrioritySelectPrioritySupported(builder)) {
             builder.set(SELECT_PRIORITY, value);
         }
     }
+
     private static boolean isIsoExpPrioritySelectPrioritySupported(CaptureRequest.Builder builder) {
-        return VendorTagUtils.isSupported(builder, SELECT_PRIORITY);
+        return isSupported(builder, SELECT_PRIORITY);
     }
 
     public static void setIsoExpPriority(CaptureRequest.Builder builder, Long value) {
-        if ( isIsoExpPrioritySupported(builder) ) {
+        if (isIsoExpPrioritySupported(builder)) {
             builder.set(ISO_EXP, value);
         }
     }
+
     public static void setUseIsoValues(CaptureRequest.Builder builder, int value) {
-        if ( isUseIsoValueSupported(builder) ) {
+        if (isUseIsoValueSupported(builder)) {
             builder.set(USE_ISO_VALUE, value);
         }
+        else {
+            if (isSupported(builder, USE_ISO_VALUE_MT)) {
+                builder.set(USE_ISO_VALUE_MT, value);
+            }
+        }
     }
+
     private static boolean isIsoExpPrioritySupported(CaptureRequest.Builder builder) {
-        return VendorTagUtils.isSupported(builder, ISO_EXP);
+        return isSupported(builder, ISO_EXP);
     }
 
     private static boolean isUseIsoValueSupported(CaptureRequest.Builder builder) {
-        return VendorTagUtils.isSupported(builder, USE_ISO_VALUE);
+        return isSupported(builder, USE_ISO_VALUE);
+    }
+
+    public static void setToneMappingDarkBoostValue(CaptureRequest.Builder builder, float value) {
+        if (isSupported(builder, TONE_MAPPING_DARK_BOOST)) {
+            builder.set(TONE_MAPPING_DARK_BOOST, value);
+        }
     }
 
     @SuppressLint({"NewApi", "LocalSuppress"})

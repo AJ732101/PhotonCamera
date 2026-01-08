@@ -257,6 +257,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private static int mTargetFormat = ImageFormat.RAW_SENSOR;
     public boolean mFormatsDetectionDone = false;
     public boolean mIsViewFinderMagnified = false;
+    public boolean mIsFunctionOneOn = false;
     private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
     private final AtomicBoolean mIsProcessingImage = new AtomicBoolean(false);
     private final ParamController paramController;
@@ -1703,14 +1704,27 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // test priority modes
-        if (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0) {
-            setIsoPriorityMode(captureBuilder, PhotonCamera.getSpecific().specificSetting.priorityIsoValue);
+        if (mIsFunctionOneOn) {
+            if (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0) {
+                setIsoPriorityMode(captureBuilder, PhotonCamera.getSpecific().specificSetting.priorityIsoValue);
+            } else if (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0) {
+                long ONE_SECOND_IN_NANOS = 1_000_000_000L;
+                long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
+                setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
+            }
         }
-        else if (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0) {
-            long ONE_SECOND_IN_NANOS = 1_000_000_000L;
-            long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
-            setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
+
+        // tone map modes check
+        if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
+            //captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_HIGH_QUALITY);
         }
+
+        /*if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_PRESET_CURVE)) {
+            captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_PRESET_CURVE);
+            captureBuilder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CameraMetadata.TONEMAP_PRESET_CURVE_SRGB);
+        }*/
+
+        //VendorTagUtils.setToneMappingDarkBoostValue(captureBuilder, -1.0f);
 
         // check if CaptureRequest.COLOR_CORRECTION_MODE_CCT is supported
         boolean supportsColorTemperature = false;
@@ -1759,6 +1773,37 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    private boolean checkToneMappingModes(int modeToMatch) {
+        int[] availableToneMapModes = mCameraCharacteristics.get(CameraCharacteristics.TONEMAP_AVAILABLE_TONE_MAP_MODES);
+        boolean isSupported = false;
+        if (availableToneMapModes != null) {
+            Log.d(TAG, "Supported tone map modes:");
+            for (int mode : availableToneMapModes) {
+                if (mode == modeToMatch) {
+                    isSupported = true;
+                }
+                switch (mode) {
+                    case CameraMetadata.TONEMAP_MODE_CONTRAST_CURVE:
+                        Log.d(TAG, "    TONEMAP_MODE_CONTRAST_CURVE");
+                        break;
+                    case CameraMetadata.TONEMAP_MODE_FAST:
+                        Log.d(TAG, "    TONEMAP_MODE_FAST");
+                        break;
+                    case CameraMetadata.TONEMAP_MODE_HIGH_QUALITY:
+                        Log.d(TAG, "    TONEMAP_MODE_HIGH_QUALITY");
+                        break;
+                    case CameraMetadata.TONEMAP_MODE_GAMMA_VALUE:
+                        Log.d(TAG, "    TONEMAP_MODE_GAMMA_VALUE");
+                        break;
+                    case CameraMetadata.TONEMAP_MODE_PRESET_CURVE:
+                        Log.d(TAG, "    TONEMAP_MODE_PRESET_CURVE");
+                        break;
+                }
+            }
+        }
+        return isSupported;
+    }
+
     private boolean isAePriorityModeSupported(CameraCharacteristics characteristics, int priorityMode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             int[] availableModes = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_PRIORITY_MODES);
@@ -1776,7 +1821,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void setIsoPriorityMode(CaptureRequest.Builder reqBuilder, int desiredIso) {
         if (!isAePriorityModeSupported(mCameraCharacteristics, CameraMetadata.CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY)) {
-            VendorTagUtils.setIsoExpPrioritySelectPriority(reqBuilder, 0);
+            VendorTagUtils.setIsoExpPrioritySelectPriority(reqBuilder, PhotonCamera.getSpecific().specificSetting.priorityMode);
             VendorTagUtils.setUseIsoValues(reqBuilder, desiredIso);
             VendorTagUtils.setIsoExpPriority(reqBuilder, 1_000_000_000L/10);
             return;
@@ -2593,7 +2638,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
-    public void magnifyViewfinder () {
+    public void functionOne() {
+        mIsFunctionOneOn = !mIsFunctionOneOn;
+        restartCamera();
+    }
+
+    public void magnifyViewfinder() {
         if (mIsViewFinderMagnified) {
             if (PhotonCamera.getSettings().zoom2X) {
                 if (PhotonCamera.getSettings().useAlternateLoupe) {
