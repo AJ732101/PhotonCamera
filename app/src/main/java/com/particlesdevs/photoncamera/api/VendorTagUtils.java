@@ -9,7 +9,10 @@ import com.particlesdevs.photoncamera.util.Log;
 import android.hardware.camera2.CameraCharacteristics;
 import android.os.Build;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class VendorTagUtils {
     public static CaptureRequest.Key<Integer> SELECT_PRIORITY = new CaptureRequest.Key<>("org.codeaurora.qcamera3.iso_exp_priority.select_priority", Integer.class);
@@ -21,6 +24,8 @@ public class VendorTagUtils {
     private static CaptureRequest.Key<Float> TONE_MAPPING_DARK_BOOST = new CaptureRequest.Key<>("org.codeaurora.qcamera3.tmcusercontrol.dark_boost_offset", Float.class);
     private static CaptureRequest.Key<Integer> USE_ISO_VALUE_MT = new CaptureRequest.Key<>("com.mediatek.3afeature.aeIsoSpeed", Integer.class);
     private static final String TAG = "VendorTagUtils";
+    public static final HashMap<String, Integer> KEY_ISO_INDEX = new HashMap<String, Integer>();
+
     public static boolean isSupported(CaptureRequest.Builder builder, CaptureRequest.Key<?> key) {
         boolean supported = true;
         try {
@@ -33,6 +38,39 @@ public class VendorTagUtils {
             Log.d(TAG,key.getName() + " is supported");
         }
         return supported;
+    }
+
+    public static List<String> getSupportedIso(CameraCharacteristics cameraCharacteristics) {
+        KEY_ISO_INDEX.clear();
+        KEY_ISO_INDEX.put("auto", 0);
+        KEY_ISO_INDEX.put("deblur", 1);
+        KEY_ISO_INDEX.put("100", 2);
+        KEY_ISO_INDEX.put("200", 3);
+        KEY_ISO_INDEX.put("400", 4);
+        KEY_ISO_INDEX.put("800", 5);
+        KEY_ISO_INDEX.put("1600", 6);
+        KEY_ISO_INDEX.put("3200", 7);
+        List<String> supportedIso = new ArrayList<>();
+        try {
+            int[] range = cameraCharacteristics.get(ISO_AVAILABLE_MODES);
+
+            if (range != null) {
+                for (int iso : range) {
+                    for (String key : KEY_ISO_INDEX.keySet()) {
+                        if (KEY_ISO_INDEX.get(key).equals(iso)) {
+                            supportedIso.add(key);
+                        }
+                    }
+                }
+            } else {
+                Log.w(TAG, "Supported ISO priority modes is null.");
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "IllegalArgumentException Supported ISO_AVAILABLE_MODES is wrong.");
+        }
+
+        Log.d(TAG, "Supported ISO priority modes: " + supportedIso.toString());
+        return supportedIso;
     }
 
     public static void setIsoExpPrioritySelectPriority(CaptureRequest.Builder builder, Integer value) {
