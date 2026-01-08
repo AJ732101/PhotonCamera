@@ -19,6 +19,7 @@ package com.particlesdevs.photoncamera.manual;
 
 import android.hardware.camera2.CaptureRequest;
 
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -127,6 +128,9 @@ public class ParamController implements Observer {
             if (object.equals(ManualParamModel.ID_ISO)) {
                 ISO = (int) model.getCurrentISOValue();
                 setISO((int) model.getCurrentISOValue(), model.getCurrentExposureValue());
+                if (ISO != 0) {
+                    PhotonCamera.getSpecific().specificSetting.priorityIsoValue = ISO;
+                }
             }
             if (object.equals(ManualParamModel.ID_EV)) {
                 EV = (int) model.getCurrentEvValue();
@@ -135,6 +139,9 @@ public class ParamController implements Observer {
             if (object.equals(ManualParamModel.ID_SHUTTER)) {
                 SHUTTER = (long) model.getCurrentExposureValue();
                 setShutter((long) model.getCurrentExposureValue(), (int) model.getCurrentISOValue());
+                if (SHUTTER != 0) {
+                    PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed = (int) (1_000_000_000L / SHUTTER);
+                }
             }
             if (object.equals(ManualParamModel.ID_FOCUS)) {
                 FOCUS = (float) model.getCurrentFocusValue();
