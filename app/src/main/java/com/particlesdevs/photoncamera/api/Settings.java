@@ -109,6 +109,7 @@ public class Settings {
     public int transferFunction = 7;
     public String videoEncoderName = "Device Default";
     public String lutName = "None";
+    public int exposureCompensation2 = 0;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -178,6 +179,7 @@ public class Settings {
         hdrMode = PreferenceKeys.getHdrMode();
         transferFunction = PreferenceKeys.getTransferFunction();
         videoEncoderName = PreferenceKeys.getVideoEncoderName();
+        exposureCompensation2 = PreferenceKeys.getExposureCompensation();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();

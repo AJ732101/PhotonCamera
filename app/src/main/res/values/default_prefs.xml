@@ -131,6 +131,7 @@
     <bool name="pref_2x_zoom_def_value">false</bool>
     <string name="pref_contrast_curve_default_value" translatable="false">off</string>
     <string name="pref_effect_mode_default_value" translatable="false">0</string>
+    <string name="pref_exposure_compensation_default" translatable="false">0</string>
 
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_default" translatable="false">1</string>

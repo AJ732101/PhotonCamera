@@ -63,10 +63,6 @@ public class Specific {
         for (String str : noGuiYetStr) {
             String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
             switch (caseS[0]) {
-                case "exposureCompensation": {
-                    specificSetting.exposureCompensation = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "statisticsHotPixelMapMode": {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
                     break;

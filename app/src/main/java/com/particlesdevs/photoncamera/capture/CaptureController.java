@@ -1681,8 +1681,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
         // QualityDoesMatter
         captureBuilder.set(CaptureRequest.STATISTICS_HOT_PIXEL_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsHotPixelMapMode);
-        if ((PhotonCamera.getSpecific().specificSetting.exposureCompensation != 99) && !isPreview)
-            captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSpecific().specificSetting.exposureCompensation);
+        if (PhotonCamera.getSettings().exposureCompensation2 != 0)
+            captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSettings().exposureCompensation2);
         if (PhotonCamera.getSettings().hotPixelMode != 99)
             captureBuilder.set(CaptureRequest.HOT_PIXEL_MODE, PhotonCamera.getSettings().hotPixelMode);
         if (PhotonCamera.getSettings().colorCorrectionAberrationMode != 99)

@@ -8,7 +8,6 @@ public class SpecificSetting {
     public String[] cameraIDS;
     public float[] apertureList;
     // QualityDoesMatter
-    public int exposureCompensation = 99;
     public boolean statisticsHotPixelMapMode = true;
     public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
