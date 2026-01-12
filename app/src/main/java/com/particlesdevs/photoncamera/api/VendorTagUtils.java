@@ -142,13 +142,23 @@ public class VendorTagUtils {
 
                 float apertureToUse = PhotonCamera.getSettings().apertureToUse;
                 if (apertureToUse < 16) {
+                    boolean isSupportedGoogle = false;
+                    boolean isSupportedXiaomi = false;
+
                     var apertureMode = new CaptureRequest.Key<>("com.xiaomi.lens.apertureMode", Integer.class);
                     if (isSupported(builder, apertureMode)) {
                         builder.set(apertureMode, 1); // 1 = enable, 0 = disable
                     }
 
+                    var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                    if (isSupported(builder, lensApertureXiaomi)) {
+                        isSupportedXiaomi = true;
+                    }
+                    var lensApertureAndroid = new CaptureRequest.Key<>("android.lens.aperture", Float.class);
+                    if (isSupported(builder, lensApertureAndroid)) {
+                        isSupportedGoogle = true;
+                    }
                     var lensAperture = new CaptureRequest.Key<>("com.xiaomi.sessionparams.initAperture", Float.class);
-                    //var lensApertureAndroid = new CaptureRequest.Key<>("android.lens.aperture", Float.class);
                     if (isSupported(builder, lensAperture)) {
                         CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
                         Float[] apert = cameraCharacteristics.get(vendorKey);
@@ -156,8 +166,13 @@ public class VendorTagUtils {
                             Log.d(TAG, "Available apertures: " + Arrays.toString(apert));
                             if (Arrays.asList(apert).contains(apertureToUse)) {
                                 Log.d(TAG, "Change aperture to: " + apertureToUse);
-                                //builder.set(CaptureRequest.LENS_APERTURE, apertureToUse);
                                 builder.set(lensAperture, apertureToUse);
+                                if (isSupportedGoogle) {
+                                    builder.set(CaptureRequest.LENS_APERTURE, apertureToUse);
+                                }
+                                if (isSupportedXiaomi) {
+                                    builder.set(lensApertureXiaomi, apertureToUse);
+                                }
                             } else {
                                 Log.w(TAG, "Requested aperture " + apertureToUse + " is not supported, available: " + Arrays.toString(apert));
                             }
