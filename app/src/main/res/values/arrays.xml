@@ -86,11 +86,19 @@
     <string-array name="function_one_entries">
         <item>ISO Priority</item>
         <item>Shutter Priority</item>
+        <item>Debug Info</item>
+        <item>Histogram</item>
+        <item>Closed Aperture</item>
+        <item>Open Aperture</item>
     </string-array>
 
     <string-array name="function_one_entryValues">
         <item>ISO Priority</item>
         <item>Shutter Priority</item>
+        <item>Debug Info</item>
+        <item>Histogram</item>
+        <item>Closed Aperture</item>
+        <item>Open Aperture</item>
     </string-array>
 
     <string-array name="location_geotag_entryValues">

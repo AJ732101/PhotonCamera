@@ -122,7 +122,7 @@ public class Settings {
         energySaving = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
         useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);
-        DebugData = PreferenceKeys.isAfDataOn();
+        //DebugData = PreferenceKeys.isAfDataOn();
         roundEdge = PreferenceKeys.isRoundEdgeOn();
         sharpness = PreferenceKeys.getSharpnessValue();
         contrastMpy = PreferenceKeys.getContrastValue();//TODO recheck

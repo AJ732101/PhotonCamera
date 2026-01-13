@@ -29,8 +29,13 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureResult;
@@ -47,6 +52,7 @@ import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.HorizonIndicato
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -198,6 +204,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private TextView hdrIndicatorTextView;
     private TextView currentIsoTextView;
     private TextView currentShutterTextView;
+    private int[] histogramData = new int[8 * 1024];
+    private int mBucketSize = 0;
+    private int mStatsType = 0;
+    private int mMaxCountNr = 0;
 
 
     private final Runnable timerRunnableVideoRec = new Runnable() {
@@ -464,7 +474,108 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         Log.d(TAG, "onDestroy() finished");
     }
 
+    private void paintDummyHistogram() {
+        android.graphics.drawable.ColorDrawable transparentDrawable = new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT);
+        surfaceView.setBackground(transparentDrawable);
+    }
+
+    private void paintHistogram(int orientation) {
+        if (histogramData == null || mBucketSize <= 0 || histogramData.length == 0) return;
+
+        int totalElements = histogramData.length;
+        int viewW = 256;
+        int viewH = 100;
+
+        int channels;
+        int bucketsPerChannel;
+
+        if (mStatsType == 7 && totalElements == mBucketSize) {
+            channels = 4;
+            bucketsPerChannel = mBucketSize / 4;
+        } else if (mStatsType == 4 || mStatsType == 6) {
+            bucketsPerChannel = mBucketSize;
+            channels = totalElements / mBucketSize;
+            if (channels == 0) channels = 1;
+        } else {
+            bucketsPerChannel = mBucketSize;
+            channels = totalElements / mBucketSize;
+            if (channels == 0) channels = 1;
+        }
+
+        int maxVal = 0;
+        for (int val : histogramData) if (val > maxVal) maxVal = val;
+        if (maxVal <= 0) maxVal = 1;
+
+        Bitmap bitmap = Bitmap.createBitmap(viewW, viewH, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        canvas.drawColor(android.graphics.Color.argb(160, 30, 30, 30));
+
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(android.graphics.Paint.Style.STROKE);
+        paint.setStrokeWidth(1.2f);
+
+        float scaleY = (float) viewH / (float) maxVal;
+
+        int[] colors = {
+                android.graphics.Color.rgb(255, 60, 60),   // Rot
+                android.graphics.Color.rgb(60, 255, 60),   // Grün
+                android.graphics.Color.rgb(60, 140, 255),  // Blau
+                android.graphics.Color.rgb(255, 255, 255)  // Weiß (Luma)
+        };
+
+        for (int c = 0; c < channels; c++) {
+            int colorIndex = (channels == 1) ? 3 : (c % 4);
+            paint.setColor(colors[colorIndex]);
+
+            android.graphics.Path path = new android.graphics.Path();
+            boolean first = true;
+
+            for (int i = 0; i < bucketsPerChannel; i++) {
+                int index = (c * bucketsPerChannel) + i;
+                if (index >= totalElements) break;
+
+                float val = (float) histogramData[index];
+                double normX = (double) i / bucketsPerChannel;
+
+                float x;
+                if (mStatsType == 7) {
+                    x = (float) (Math.log10(1 + 9 * normX) * viewW);
+                } else {
+                    x = (float) (normX * viewW);
+                }
+
+                float y = (float) (viewH - (val * scaleY));
+
+                if (first) {
+                    path.moveTo(x, y);
+                    first = false;
+                } else {
+                    path.lineTo(x, y);
+                }
+            }
+            canvas.drawPath(path, paint);
+        }
+
+        android.graphics.Paint textPaint = new android.graphics.Paint();
+        textPaint.setColor(android.graphics.Color.WHITE);
+        textPaint.setTextSize(18f);
+        textPaint.setAntiAlias(true);
+        textPaint.setTextAlign(android.graphics.Paint.Align.RIGHT);
+        canvas.drawText("Type: " + mStatsType, viewW - 5, 20, textPaint);
+        canvas.drawText("BucketSize: " + mBucketSize, viewW - 5, 40, textPaint);
+
+        android.graphics.Matrix matrix = new android.graphics.Matrix();
+        matrix.postRotate(orientation);
+        Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, viewW, viewH, matrix, true);
+
+        android.graphics.drawable.BitmapDrawable drawable = new android.graphics.drawable.BitmapDrawable(getResources(), rotated);
+        drawable.setGravity(android.view.Gravity.TOP | android.view.Gravity.LEFT);
+        surfaceView.setBackground(new android.graphics.drawable.InsetDrawable(drawable, 24, 24, 0, 0));
+    }
+
     @SuppressLint("DefaultLocale")
+
     private void updateScreenLog(CaptureResult result) {
         if (captureController == null) {
             return;
@@ -479,6 +590,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         }
 
         surfaceView.post(() -> {
+            if (PhotonCamera.getSettings().functionOne.equals("Histogram") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) {
+                paintHistogram(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
+            } else {
+                paintDummyHistogram();
+            }
             captureController.videoRotation = getCameraFragmentViewModel().getCameraFragmentModel().getOrientation();
             mTouchFocus.setState(result.get(CaptureResult.CONTROL_AF_STATE));
             if (result.getFrameNumber() % 5 == 0) {
@@ -496,7 +612,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 }
                 //captureController.cameraEventsListener.mCurrentShutterSpeed = String.valueOf(result.get(CaptureResult.SENSOR_EXPOSURE_TIME) / 1000000000);
             }
-            if (PreferenceKeys.isAfDataOn()) {
+            if (PreferenceKeys.isAfDataOn() || (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn())) {
                 //stringMap.put("ISO", String.valueOf(expoPair.iso));
                 String camID = result.getCameraId();
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
@@ -1173,6 +1289,18 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 currentShutterTextView.setVisibility(View.VISIBLE);
 
                 timerHandlerAlways.post(timerRunnableAlways);
+            });
+        }
+
+        @Override
+        public void onHistogramDataReceived(int[] histogram, int bucketSize, int statsType, int maxCountNr) {
+            requireActivity().runOnUiThread(() -> {
+                if (histogram != null) {
+                    histogramData = histogram.clone();
+                    mBucketSize = bucketSize;
+                    mStatsType = statsType;
+                    mMaxCountNr = maxCountNr;
+                }
             });
         }
 

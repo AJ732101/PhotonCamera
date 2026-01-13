@@ -7,6 +7,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureResult;
 import android.os.Build;
 
 import java.util.ArrayList;
@@ -23,6 +24,14 @@ public class VendorTagUtils {
     public static CameraCharacteristics.Key<Integer> support_insensor_zoom = new CameraCharacteristics.Key<>("org.quic.camera.swcapabilities.inSensorZoomCapability", Integer.class);
     private static CaptureRequest.Key<Float> TONE_MAPPING_DARK_BOOST = new CaptureRequest.Key<>("org.codeaurora.qcamera3.tmcusercontrol.dark_boost_offset", Float.class);
     private static CaptureRequest.Key<Integer> USE_ISO_VALUE_MT = new CaptureRequest.Key<>("com.mediatek.3afeature.aeIsoSpeed", Integer.class);
+    public static final CaptureRequest.Key<Byte> histMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.enable", byte.class);
+    public static final CaptureRequest.Key<Byte> bgStatsMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_grid.enable", byte.class);
+    public static final CaptureRequest.Key<Byte> beStatsMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_exposure.enable", byte.class);
+    public static CaptureResult.Key<Integer> buckets = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.buckets", Integer.class);
+    public static CaptureResult.Key<Integer> maxCount = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.max_count", Integer.class);
+    public static CaptureResult.Key<Integer> stats_type = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.stats_type",Integer.class);
+    public static CaptureResult.Key<int[]> histogramStats = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.stats", int[].class);
+
     private static final String TAG = "VendorTagUtils";
     public static final HashMap<String, Integer> KEY_ISO_INDEX = new HashMap<String, Integer>();
 
@@ -227,6 +236,21 @@ public class VendorTagUtils {
             if (isSupported(builder, aiMode)) {
                 PhotonCamera.hasAiModeKey = true;
                 builder.set(aiMode, (int) PhotonCamera.getSettings().socQualcommAiMode);
+            }
+
+            var histMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.enable", byte.class);
+            if (isSupported(builder, histMode)) {
+                builder.set(histMode, (byte) 1);
+            }
+
+            var gridMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_grid.enable", byte.class);
+            if (isSupported(builder, gridMode)) {
+                builder.set(gridMode, (byte) 0);
+            }
+
+            var bayerStatsMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_exposure.enable", byte.class);
+            if (isSupported(builder, bayerStatsMode)) {
+                builder.set(bayerStatsMode, (byte) 0);
             }
 
             var enableHdrDcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableHDRDCGMode", Integer.class);

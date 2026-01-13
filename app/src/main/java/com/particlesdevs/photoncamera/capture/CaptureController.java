@@ -116,8 +116,10 @@ import org.chickenhook.restrictionbypass.RestrictionBypass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -406,6 +408,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private File vid = null;
     public int mMeasuredFrameCnt;
     public static boolean isProcessing;
+    public static int wasLogged = 0;
     /**
      * An {@link AutoFitPreviewView} for camera preview.
      */
@@ -552,6 +555,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
+            processHistogram(result);
             if (mIsRecordingVideo && // Use your actual state variable for recording
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                     PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus) {
@@ -2643,7 +2647,49 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void functionOne() {
         mIsFunctionOneOn = !mIsFunctionOneOn;
-        restartCamera();
+        PhotonCamera.isFunctionOneOn = mIsFunctionOneOn;
+
+        if (PhotonCamera.getSettings().functionOne.equals("Closed Aperture")) {
+            if (mIsFunctionOneOn) {
+                if (PhotonCamera.getSettings().functionOne.contains("Closed Aperture")) {
+                    var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                    if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                        mPreviewRequestBuilder.set(lensApertureXiaomi, 4.0f);
+                    }
+                }
+
+                if (PhotonCamera.getSettings().functionOne.equals("Opened Aperture")) {
+                    float minAperture = 4.0f;
+                    CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
+                    Float[] apert = mCameraCharacteristics.get(vendorKey);
+                    if (apert != null && apert.length > 0) {
+                        minAperture = apert[0];
+                    }
+                    var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                    if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                        mPreviewRequestBuilder.set(lensApertureXiaomi, minAperture);
+                    }
+                }
+            } else {
+                var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                    mPreviewRequestBuilder.set(lensApertureXiaomi, PhotonCamera.getSettings().apertureToUse);
+                }
+            }
+            try {
+                if (mCaptureSession != null) {
+                    mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                }
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Aperture change failed", e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "No camera session", e);
+            }
+        }
+
+        if (PhotonCamera.getSettings().functionOne.contains("Priority")) {
+            restartCamera();
+        }
     }
 
     public void magnifyViewfinder() {
@@ -2974,6 +3020,79 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public String getSoCVendor() {
+        try {
+            Process process = Runtime.getRuntime().exec("getprop ro.board.platform");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            reader.close();
+
+            if (line != null) {
+                line = line.toLowerCase();
+                if (line.contains("msm") || line.contains("sdm") || line.contains("qcom")) {
+                    return "Qualcomm Snapdragon";
+                } else if (line.contains("mt") || line.contains("mediatek")) {
+                    return "MediaTek";
+                } else if (line.contains("exynos") || line.contains("s5e")) {
+                    return "Samsung Exynos";
+                } else if (line.contains("kirin") || line.contains("hi")) {
+                    return "HiSilicon Kirin";
+                } else if (line.contains("tensor")) {
+                    return "Google Tensor";
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Unknown";
+    }
+
+    private void processHistogram(@NonNull TotalCaptureResult result) {
+        if (!getSoCVendor().equals("Qualcomm Snapdragon")) {
+            return;
+        }
+
+        int bucketSize = 0;
+        int maxCountNr = 0;
+        int statsSize = 0;
+        int statsType = 0;
+        int[] histDataArray = null;
+
+        try {
+            Object histData = result.get(VendorTagUtils.buckets);
+            if (histData != null) {
+                bucketSize = (int) histData;
+            }
+            histData = result.get(VendorTagUtils.stats_type);
+            if (histData != null) {
+                statsType = (int) histData;
+            }
+            histData = result.get(VendorTagUtils.maxCount);
+            if (histData != null) {
+                maxCountNr = (int) histData;
+            }
+            histData = result.get(VendorTagUtils.histogramStats);
+            if (histData != null) {
+                histDataArray = (int[]) histData;
+                statsSize = histDataArray.length;
+            }
+
+            if (wasLogged < 50) {
+                Log.d(TAG, "Histogram data received: type=" + statsType + " bucket size=" + bucketSize + " max count=" + maxCountNr);
+                wasLogged++;
+            }
+
+            if ((bucketSize != 0) && (maxCountNr != 0) && (statsSize != 0) && (statsType != 0)) {
+                if (cameraEventsListener != null) {
+                    cameraEventsListener.onHistogramDataReceived(histDataArray, bucketSize, statsType, maxCountNr);
+                }
+            }
+        }
+        catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+    }
+
     private void captureSingleStillPicture() {
         try {
             if (null == mCameraDevice) {
@@ -3205,7 +3324,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-
+                    processHistogram(result);
                     mCaptureResult = result;
                     int frameCount = (int) (result.getFrameNumber() - baseFrameNumber[0]);
                     Log.v("BurstCounter", "CaptureCompleted! FrameCount:" + frameCount);

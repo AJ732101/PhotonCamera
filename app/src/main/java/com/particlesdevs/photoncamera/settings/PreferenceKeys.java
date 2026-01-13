@@ -277,7 +277,9 @@ public class PreferenceKeys {
      * Helper functions for some keys defined in PreferenceFragment.
      */
     public static boolean isAfDataOn() {
-        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA);
+        boolean isAfOn = preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA);
+        boolean isOverride = PhotonCamera.getSettings().functionOne.equals("Debug Info") && PhotonCamera.isFunctionOneOn;
+        return isAfOn || isOverride;
     }
 
      public static boolean isRemosaicOn() {

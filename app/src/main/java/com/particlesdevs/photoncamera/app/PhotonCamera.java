@@ -96,6 +96,7 @@ public class PhotonCamera extends Application {
     public static boolean mHlgIsSupported = false;
     public static boolean mHdrTenIsSupported = false;
     public static boolean mHdrTenPlusIsSupported = false;
+    public static boolean isFunctionOneOn = false;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {
