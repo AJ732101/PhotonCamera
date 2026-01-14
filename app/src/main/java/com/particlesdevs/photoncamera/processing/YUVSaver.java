@@ -43,7 +43,7 @@ public class YUVSaver extends DefaultSaver{
             Path storagePath = null;
             File heicFile = null;
 
-            // YCBCR_P010 RAW
+            // YCBCR_P010 or YUV_420_888 RAW
             if (usedTargetFormat == 888888888) {
                 storagePath = ImagePath.newYCBCR_P010FilePath();
                 heicFile = new File(storagePath.toString());
@@ -57,7 +57,7 @@ public class YUVSaver extends DefaultSaver{
                     //saveYuv420Raw(image, heicFile);
                     saveP010RawWithStride(image, heicFile);
                 }
-                saveMetaInfo(image, metaFile, orientation);
+                saveMetaInfo(image, metaFile, orientation, metadata);
                 processingEventsListener.onProcessingFinished("YCBCR_P010 saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
@@ -555,7 +555,7 @@ public class YUVSaver extends DefaultSaver{
         }
     }
 
-    private void saveMetaInfo(Image image, File file, int orientation) {
+    private void saveMetaInfo(Image image, File file, int orientation, Bundle metadata) {
         try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
             boolean isP010 = (image.getFormat() == ImageFormat.YCBCR_P010);
             String formatName = isP010 ? "p010le" : "nv12";
@@ -574,6 +574,24 @@ public class YUVSaver extends DefaultSaver{
             sb.append("Resolution: ").append(widthHeight).append("\n");
             sb.append("Orientation: ").append(orientation).append(" degrees\n");
             sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
+
+            if (metadata != null) {
+                if (metadata.containsKey("iso")) {
+                    sb.append("ISO: ").append(metadata.get("iso")).append("\n");
+                }
+                if (metadata.containsKey("exposureTime")) {
+                    long expTime = metadata.getLong("exposureTime");
+                    double shutter = expTime / 1_000_000_000.0;
+                    if (shutter >= 1.0) {
+                        sb.append("Exposure Time: ").append(String.format("%.1f", shutter)).append("s\n");
+                    } else {
+                        sb.append("Exposure Time: 1/").append(Math.round(1.0 / shutter)).append("s\n");
+                    }
+                }
+                if (metadata.containsKey("focalLength")) {
+                    sb.append("Focal Length: ").append(metadata.get("focalLength")).append(" mm\n");
+                }
+            }
 
             sb.append("\n[1. VIEWING]\n");
             sb.append("ffplay -f rawvideo -pixel_format ").append(formatName)
