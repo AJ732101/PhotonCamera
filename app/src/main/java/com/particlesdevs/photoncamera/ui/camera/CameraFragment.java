@@ -44,6 +44,7 @@ import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
@@ -614,8 +615,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             }
             if (PreferenceKeys.isAfDataOn() || (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn())) {
                 //stringMap.put("ISO", String.valueOf(expoPair.iso));
-                String camID = result.getCameraId();
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
+                String camID = physCamId;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    camID = result.getCameraId();
+                }
                 LinkedHashMap<String, String> stringMap = new LinkedHashMap<>();
                 if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                    (PhotonCamera.getSettings().frameCount == 1) &&
@@ -679,7 +683,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 float len35mm = 0;
                 if (physCamId == null) {
                     var lensData = mCameraLensDataMap.get(camID);
-                    len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                    if (lensData != null) {
+                        len35mm = (float) Math.ceil(lensData.getCamera35mmFocalLength());
+                    }
                 }
                 else {
                     var lensData = mCameraLensDataMap.get(camID + "-" + physCamId);

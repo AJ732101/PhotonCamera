@@ -265,6 +265,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private final ParamController paramController;
     public static EncoderInfoUtil mEncoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
+    public String mSocVendor = "";
 
     public final boolean mFlashEnabled = false;
     public CameraEventsListener cameraEventsListener;
@@ -1251,6 +1252,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     @SuppressLint("MissingPermission")
     public void restartCamera() {
+        mSocVendor = getSoCVendor();
         CameraFragment.mSelectedMode = PhotonCamera.getSettings().selectedMode;
         try {
             mCameraOpenCloseLock.acquire();
@@ -1329,7 +1331,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void createImageReaders(String cameraId) {
         createImageReaderPreview(cameraId);
-        createImageReaderRaw();
+        if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            createImageReaderRaw();
+        }
     }
 
     private void checkStillImageFormatsSupport(StreamConfigurationMap map) {
@@ -2263,9 +2267,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         processExecutor,
                         stateCallback
                 );
-
-                /*if (checkColorSpaceProfilesSupport(mCameraManager)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    if (checkColorSpaceProfilesSupport(mCameraManager)) {
                         configuration.setColorSpace(ColorSpace.Named.SRGB);
                     }
                 }*/
@@ -2384,7 +2387,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 surfaces.add(mImageReaderRaw.getSurface());
             }
         } else {
-            if (mImageReaderRaw != null && mImageReaderRaw.getSurface() != null) {
+            if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (mImageReaderRaw != null) && (mImageReaderRaw.getSurface() != null)) {
                 surfaces.add(mImageReaderRaw.getSurface());
             }
         }
@@ -2839,8 +2842,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                     Object time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
                     if(time != null) frametime = (long)time;
-                    cameraEventsListener.onFrameCaptureCompleted(
-                            new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
+                    cameraEventsListener.onFrameCaptureCompleted(new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
                     mCaptureResult = result;
                 }
 
@@ -3023,8 +3025,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public String getSoCVendor() {
         try {
             Process process = Runtime.getRuntime().exec("getprop ro.board.platform");
+            if (process == null) {
+                return "Unknown";
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            if (reader == null) {
+                return "Unknown";
+            }
             String line = reader.readLine();
+            if (line == null) {
+                reader.close();
+                return "Unknown";
+            }
             reader.close();
 
             if (line != null) {
@@ -3048,7 +3060,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private void processHistogram(@NonNull TotalCaptureResult result) {
-        if (!getSoCVendor().equals("Qualcomm Snapdragon")) {
+        if (!mSocVendor.equals("Qualcomm Snapdragon")) {
             return;
         }
 
@@ -3097,6 +3109,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         try {
             if (null == mCameraDevice) {
                 Log.e(TAG, "CameraDevice is null, cannot start single shot capture.");
+                cameraEventsListener.onProcessingError("CameraDevice is null, cannot start single shot capture.");
+                return;
+            }
+
+            if (null == mImageReaderRaw) {
+                Log.e(TAG, "ImageReader is null, cannot start single shot capture.");
+                cameraEventsListener.onProcessingError("ImageReader is null, cannot start single shot capture.");
                 return;
             }
 
@@ -3151,6 +3170,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void captureStillPicture() {
         try {
             if (null == mCameraDevice) {
+                Log.e(TAG, "CameraDevice is null, cannot start still image capture.");
+                cameraEventsListener.onProcessingError("CameraDevice is null, cannot start still image capture.");
+                return;
+            }
+
+            if (null == mImageReaderRaw) {
+                Log.e(TAG, "ImageReader is null, cannot start still image capture.");
+                cameraEventsListener.onProcessingError("ImageReader is null, cannot start still image capture.");
                 return;
             }
 
@@ -3341,8 +3368,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         double exposureTime = ExposureIndex.time2sec((long) timeKey);
                         mExposures.put((long) time, exposureTime * iso);
                     }
-                    cameraEventsListener.onFrameCaptureCompleted(
-                            new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
+                    cameraEventsListener.onFrameCaptureCompleted(new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
 
                     if (onUnlimited && !unlimitedStarted) {
                         mImageSaver.processStart(mCameraCharacteristics, result, request, cameraRotation);
@@ -4529,6 +4555,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void resumeCamera() {
+        mSocVendor = getSoCVendor();
         mEncoderInfo.getEncoderInfos();
         checkTenBitAndHdr();
         setPreviewFormat();
