@@ -37,9 +37,7 @@ public class ImagePath {
         return getNewImageFilePath("heif");
     }
 
-    public static Path newPNGFilePath() {
-        return getNewImageFilePath("png");
-    }
+    public static Path newPNGFilePath() { return getNewImageFilePath("png"); }
 
     public static Path newAudioFilePath() {
         return getNewImageFilePath("m4a");
@@ -51,6 +49,9 @@ public class ImagePath {
 
     public static Path newAPVFilePath() {
         return getNewImageFilePath("apv");
+    }
+    public static Path newYCBCR_P010FilePath() {
+        return getNewImageFilePath("raw");
     }
 
     public static Path newImageFilePath() {
@@ -73,6 +74,9 @@ public class ImagePath {
         }
         else if (extension.equalsIgnoreCase("png")) {
             dir = FileManager.sPHOTON_PNG_DIR;
+        }
+        else if (extension.equalsIgnoreCase("raw")) {
+            dir = FileManager.sPHOTON_YCBCR_P010_DIR;
         }
         else if (extension.equalsIgnoreCase("m4a")) {
             dir = FileManager.sPHOTON_M4A_DIR;

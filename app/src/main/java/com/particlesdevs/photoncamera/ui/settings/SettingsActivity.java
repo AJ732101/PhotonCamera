@@ -155,6 +155,10 @@ public class SettingsActivity extends BaseActivity implements
             entryValues.add("999999991");
             entries.add("JPEG LUT (SW)");
             entryValues.add("999999992");
+            if (PhotonCamera.mYuv10IsSupported) {
+                entries.add("YCBCR_P010 RAW");
+                entryValues.add("888888888");
+            }
             entries.add("JPEG/RAW Stacking");
             entryValues.add("0");
             entries.add("Video Codec 8 Bit");

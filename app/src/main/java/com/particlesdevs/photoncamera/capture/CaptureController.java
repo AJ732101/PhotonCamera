@@ -776,7 +776,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
                         (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
                         (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                        (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
+                        (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
+                        (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
@@ -801,7 +802,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
-            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT
+            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992) || (targetFromUi == 888888888)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT, YCBCR_P010 RAW
                 mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
             }
             else {

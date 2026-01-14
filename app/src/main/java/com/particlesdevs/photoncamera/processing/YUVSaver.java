@@ -38,10 +38,29 @@ public class YUVSaver extends DefaultSaver{
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSettings().tenBitSurfaceTarget;
             int usedTargetFormat = PhotonCamera.getSettings().previewFormat;
-            Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec");
+            Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec or YCBCR_P010 RAW");
 
             Path storagePath = null;
             File heicFile = null;
+
+            // YCBCR_P010 RAW
+            if (usedTargetFormat == 888888888) {
+                storagePath = ImagePath.newYCBCR_P010FilePath();
+                heicFile = new File(storagePath.toString());
+                String rawPath = heicFile.getAbsolutePath();
+                String metaPath = rawPath.substring(0, rawPath.lastIndexOf('.')) + ".txt";
+                File metaFile = new File(metaPath);
+                if (image.getFormat() == ImageFormat.YCBCR_P010) {
+                    saveP010RawWithStride(image, heicFile);
+                }
+                else {
+                    //saveYuv420Raw(image, heicFile);
+                    saveP010RawWithStride(image, heicFile);
+                }
+                saveMetaInfo(image, metaFile, orientation);
+                processingEventsListener.onProcessingFinished("YCBCR_P010 saved: " + storagePath.toAbsolutePath().toString());
+                return;
+            }
 
             // SW based PNG encoder solution
             if (usedTargetFormat == 999999993) {
@@ -66,6 +85,7 @@ public class YUVSaver extends DefaultSaver{
 
                 image.close();
                 processingEventsListener.onProcessingFinished("PNG saved: " + storagePath.toAbsolutePath().toString());
+                return;
             }
 
             // SW based AVIF encoder solution
@@ -472,21 +492,115 @@ public class YUVSaver extends DefaultSaver{
         return true;
     }
 
-    public void saveP010Raw(Image image, File file) {
+    public void saveP010RawWithStride(Image image, File file) {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
+            yBuffer.rewind();
             byte[] yBytes = new byte[yBuffer.remaining()];
             yBuffer.get(yBytes);
             fos.write(yBytes);
 
             ByteBuffer uvBuffer = image.getPlanes()[1].getBuffer();
+            uvBuffer.rewind();
             byte[] uvBytes = new byte[uvBuffer.remaining()];
             uvBuffer.get(uvBytes);
             fos.write(uvBytes);
 
-            Log.d(TAG, "P010 successfully saved");
+            long expectedSize = (long) (image.getWidth() * image.getHeight() * (image.getFormat() == ImageFormat.YCBCR_P010 ? 3.0 : 1.5));
+            long currentSize = file.length();
+
+            if (currentSize < expectedSize) {
+                fos.write(0);
+                Log.d(TAG, "Padding added to reach expected size");
+            }
+
+            Log.d(TAG, "RAW successfully saved. Size: " + file.length());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public void saveP010Raw(Image image, File file) {
+        int size = image.getWidth() * image.getHeight() * 3;
+        ByteBuffer cleanBuffer = ByteBuffer.allocateDirect(size);
+
+        copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), cleanBuffer);
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            cleanBuffer.flip();
+            byte[] content = new byte[cleanBuffer.remaining()];
+            cleanBuffer.get(content);
+            fos.write(content);
+            Log.d(TAG, "P010 still image stored in compact form (without strides).");
+        } catch (IOException e) {
+            Log.e(TAG, "P010 still image creation failed.", e);
+        }
+    }
+
+    public void saveYuv420Raw(Image image, File file) {
+        int size = (int) (image.getWidth() * image.getHeight() * 1.5f);
+        ByteBuffer cleanBuffer = ByteBuffer.allocateDirect(size);
+
+        copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), cleanBuffer);
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            cleanBuffer.flip();
+            byte[] content = new byte[cleanBuffer.remaining()];
+            cleanBuffer.get(content);
+            fos.write(content);
+            Log.d(TAG, "YUV_420_888 stored in compact form (8-bit, no strides).");
+        } catch (IOException e) {
+            Log.e(TAG, "YUV_420_888 saving failed.", e);
+        }
+    }
+
+    private void saveMetaInfo(Image image, File file, int orientation) {
+        try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
+            boolean isP010 = (image.getFormat() == ImageFormat.YCBCR_P010);
+            String formatName = isP010 ? "p010le" : "nv12";
+            String widthHeight = image.getWidth() + "x" + image.getHeight();
+            String rawFileName = file.getName().replace(".txt", ".raw");
+            String transposeFilter = "";
+            switch (orientation) {
+                case 90:  transposeFilter = ",transpose=1"; break;
+                case 180: transposeFilter = ",transpose=2,transpose=2"; break;
+                case 270: transposeFilter = ",transpose=2"; break;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("FFmpeg Metadata & Hints:\n");
+            sb.append("========================\n");
+            sb.append("Resolution: ").append(widthHeight).append("\n");
+            sb.append("Orientation: ").append(orientation).append(" degrees\n");
+            sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
+
+            sb.append("\n[1. VIEWING]\n");
+            sb.append("ffplay -f rawvideo -pixel_format ").append(formatName)
+                    .append(" -video_size ").append(widthHeight)
+                    .append(" -vf \"setdar=4/3").append(transposeFilter).append(",scale=1440:-1\" \"")
+                    .append(rawFileName).append("\"\n");
+
+            sb.append("\n[2. ENCODING AVIF]\n");
+            if (isP010) {
+                // 10-bit HDR path
+                sb.append("ffmpeg -f rawvideo -pixel_format p010le -video_size ").append(widthHeight)
+                        .append(" -i \"").append(rawFileName).append("\" -c:v libaom-av1 -still-picture 1 ")
+                        .append("-pix_fmt yuv420p10le -color_primaries bt2020 -color_trc smpte2084 -colorspace bt2020_ncl ")
+                        .append("-vf \"setdar=4/3").append(transposeFilter).append("\" ")
+                        .append("-crf 20 -cpu-used 6 \"").append(rawFileName.replace(".raw", "_hdr.avif")).append("\"\n");
+            } else {
+                // 8-bit SDR path
+                sb.append("ffmpeg -f rawvideo -pixel_format nv12 -video_size ").append(widthHeight)
+                        .append(" -i \"").append(rawFileName).append("\" -c:v libaom-av1 -still-picture 1 ")
+                        .append("-pix_fmt yuv420p -vf \"setdar=4/3").append(transposeFilter).append("\" ")
+                        .append("-crf 20 -cpu-used 8 \"").append(rawFileName.replace(".raw", "_8bit.avif")).append("\"\n");
+            }
+
+            writer.write(sb.toString());
+            Log.d(TAG, "Meta-Info with orientation " + orientation + " saved to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to save meta info", e);
         }
     }
 }

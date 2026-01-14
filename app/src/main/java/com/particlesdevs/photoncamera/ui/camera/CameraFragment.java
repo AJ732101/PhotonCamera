@@ -629,8 +629,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                     (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
                     (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-                    (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                    (PhotonCamera.getSettings().previewFormat == 999999992)) && // SW JPEG LUT
+                    (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW HEIC/HEIF
+                    (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
                     (PhotonCamera.getSettings().rawSaver != 2)) {
                     stringMap.put("Mode", "SINGLE SHOT");
                     switch (PhotonCamera.getSettings().effectMode ) {
