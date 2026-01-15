@@ -26,6 +26,8 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 
+import com.particlesdevs.photoncamera.BuildConfig;
+
 public class YUVSaver extends DefaultSaver{
     private static final String TAG = "YUVSaver";
     public YUVSaver(ProcessingEventsListener processingEventsListener) {
@@ -571,26 +573,41 @@ public class YUVSaver extends DefaultSaver{
             StringBuilder sb = new StringBuilder();
             sb.append("FFmpeg Metadata & Hints:\n");
             sb.append("========================\n");
+            sb.append("PhotonCamera Version: ").append(BuildConfig.VERSION_NAME).append(".").append(BuildConfig.VERSION_BUILD).append("\n");
             sb.append("Resolution: ").append(widthHeight).append("\n");
             sb.append("Orientation: ").append(orientation).append(" degrees\n");
             sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
 
             if (metadata != null) {
+                if (metadata.containsKey("aperture")) {
+                    sb.append("Aperture: F").append(metadata.getFloat("aperture")).append("\n");
+                }
                 if (metadata.containsKey("iso")) {
                     sb.append("ISO: ").append(metadata.get("iso")).append("\n");
                 }
-                if (metadata.containsKey("exposureTime")) {
-                    long expTime = metadata.getLong("exposureTime");
-                    double shutter = expTime / 1_000_000_000.0;
-                    if (shutter >= 1.0) {
-                        sb.append("Exposure Time: ").append(String.format("%.1f", shutter)).append("s\n");
-                    } else {
-                        sb.append("Exposure Time: 1/").append(Math.round(1.0 / shutter)).append("s\n");
-                    }
+                if (metadata.containsKey("exposureTimeStr")) {
+                    sb.append("Exposure Time: ").append(metadata.getString("exposureTimeStr")).append("\n");
                 }
                 if (metadata.containsKey("focalLength")) {
                     sb.append("Focal Length: ").append(metadata.get("focalLength")).append(" mm\n");
                 }
+                if (metadata.containsKey("focal35mm")) {
+                    sb.append("Focal Length 35mm: ").append(metadata.get("focal35mm")).append(" mm\n");
+                }
+                if (metadata.containsKey("physCamID")) {
+                    sb.append("Physical Camera ID: ").append(metadata.getString("physCamID")).append("\n");
+                }
+                if (metadata.containsKey("logiCamID")) {
+                    sb.append("Logical Camera ID: ").append(metadata.getString("logiCamID")).append("\n");
+                }
+                sb.append("Noise Reduction: ").append((PhotonCamera.getSettings().noiseProcessing > 0) ? "Enabled" : "Disabled").append("\n");
+                sb.append("Edge Processing: ").append((PhotonCamera.getSettings().edgeProcessing > 0) ? "Enabled" : "Disabled").append("\n");
+                sb.append("Brand: ").append(Build.BRAND).append("\n");
+                //sb.append("Manufacturer: ").append(Build.MANUFACTURER).append("\n");
+                sb.append("Device: ").append(Build.DEVICE).append("\n");
+                sb.append("Model: ").append(Build.MODEL).append("\n");
+                sb.append("SoC: ").append(Build.SOC_MODEL).append("\n");
+                sb.append("Contrast Curve: ").append(PhotonCamera.getSettings().contrastCurve).append("\n");
             }
 
             sb.append("\n[1. VIEWING]\n");

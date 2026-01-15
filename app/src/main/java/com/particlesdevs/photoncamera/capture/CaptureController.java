@@ -375,6 +375,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         mMetaData.putFloat("aperture", aperture);
                     }
 
+                    if (PhotonCamera.getParameters().current35mmFocalLength != 0) {
+                        mMetaData.putInt("focal35mm", PhotonCamera.getParameters().current35mmFocalLength);
+                    }
+
+                    mMetaData.putString("physCamID", physicalID);
+                    mMetaData.putString("logiCamID", logicalID);
+
                     // Add more metadata as needed...
                     // e.g., metadata.putString("make", Build.MANUFACTURER);
                 }
