@@ -573,7 +573,7 @@ public class YUVSaver extends DefaultSaver{
             StringBuilder sb = new StringBuilder();
             sb.append("FFmpeg Metadata & Hints:\n");
             sb.append("========================\n");
-            sb.append("PhotonCamera Version: ").append(BuildConfig.VERSION_NAME).append(".").append(BuildConfig.VERSION_BUILD).append("\n");
+            sb.append("PhotonVidCam Version: ").append(BuildConfig.VERSION_NAME).append(".").append(BuildConfig.VERSION_BUILD).append("\n");
             sb.append("Resolution: ").append(widthHeight).append("\n");
             sb.append("Orientation: ").append(orientation).append(" degrees\n");
             sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
