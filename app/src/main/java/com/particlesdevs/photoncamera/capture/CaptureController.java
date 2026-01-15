@@ -371,7 +371,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
 
                     Float aperture = mCaptureResult.get(CaptureResult.LENS_APERTURE);
-                    if (focalLength != null) {
+                    if (aperture != null) {
                         mMetaData.putFloat("aperture", aperture);
                     }
 
@@ -380,15 +380,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
 
                     mMetaData.putString("physCamID", physicalID);
-                    mMetaData.putString("logiCamID", logicalID);
-
-                    // Add more metadata as needed...
-                    // e.g., metadata.putString("make", Build.MANUFACTURER);
+                    if (physicalID != logicalID) {
+                        mMetaData.putString("logiCamID", logicalID);
+                    }
                 }
 
-                if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) &&
-                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
-                        !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
                     mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);

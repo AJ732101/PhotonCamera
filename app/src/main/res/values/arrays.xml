@@ -495,9 +495,9 @@
         <item>Linear</item>
         <item>High</item>
         <item>Low</item>
-        <item>Slog2</item>
-        <item>SlogA</item>
-        <item>SlogB</item>
+        <item>S-Log2</item>
+        <item>S_LogA</item>
+        <item>S-LogB</item>
         <item>Style1</item>
         <item>Style2</item>
     </string-array>
