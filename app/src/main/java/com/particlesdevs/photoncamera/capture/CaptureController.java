@@ -3038,6 +3038,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public String getSoCVendor() {
         try {
+            String hardware = android.os.Build.HARDWARE.toLowerCase();
+            if (hardware.contains("msm") || hardware.contains("sdm") || hardware.contains("qcom") || hardware.contains("qcom")) {
+                return "Qualcomm Snapdragon";
+            }
+
             Process process = Runtime.getRuntime().exec("getprop ro.board.platform");
             if (process == null) {
                 return "Unknown";
@@ -3055,7 +3060,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             if (line != null) {
                 line = line.toLowerCase();
-                if (line.contains("msm") || line.contains("sdm") || line.contains("qcom")) {
+                if (line.contains("msm") || line.contains("sdm") || line.contains("qcom") || line.contains("kalama") || line.contains("taro") || line.contains("lahaina")) {
                     return "Qualcomm Snapdragon";
                 } else if (line.contains("mt") || line.contains("mediatek")) {
                     return "MediaTek";
