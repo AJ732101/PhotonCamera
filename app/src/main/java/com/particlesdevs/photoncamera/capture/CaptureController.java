@@ -732,28 +732,37 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean checkHdrSupport(CameraCharacteristics characteristics)
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            java.util.Set<Long> supportedProfiles = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES).getSupportedProfiles();
-            Log.d(TAG, "Supported profiles: " + supportedProfiles.toString());
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                java.util.Set<Long> supportedProfiles = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES).getSupportedProfiles();
+                if (supportedProfiles == null) {
+                    Log.d(TAG, "DynamicRangeProfiles not available on this camera sensor.");
+                    return false;
+                }
+                Log.d(TAG, "Supported profiles: " + supportedProfiles.toString());
 
-            String dynRangeProf = "Supported dynamic range profile: ";
-            Log.d(TAG, "Supported dynamic range profile: HDR10+");
-            if (supportedProfiles.contains(DynamicRangeProfiles.HDR10_PLUS)) {
-                dynRangeProf += "HDR10+";
-                PhotonCamera.mHdrTenPlusIsSupported = true;
+                String dynRangeProf = "Supported dynamic range profile: ";
+                Log.d(TAG, "Supported dynamic range profile: HDR10+");
+                if (supportedProfiles.contains(DynamicRangeProfiles.HDR10_PLUS)) {
+                    dynRangeProf += "HDR10+";
+                    PhotonCamera.mHdrTenPlusIsSupported = true;
+                }
+                if (supportedProfiles.contains(DynamicRangeProfiles.HDR10)) {
+                    dynRangeProf += " - HDR10";
+                    PhotonCamera.mHdrTenIsSupported = true;
+                }
+                if (supportedProfiles.contains(DynamicRangeProfiles.HLG10)) {
+                    dynRangeProf += " - HLG10";
+                    PhotonCamera.mHlgIsSupported = true;
+                }
+                Log.d(TAG, dynRangeProf);
+                return true;
+            } else {
+                Log.d(TAG, "DynamicRangeProfiles not available for this Android version.");
+                return false;
             }
-            else if (supportedProfiles.contains(DynamicRangeProfiles.HDR10)) {
-                dynRangeProf += " - HDR10";
-                PhotonCamera.mHdrTenIsSupported = true;
-            }
-            else if (supportedProfiles.contains(DynamicRangeProfiles.HLG10)) {
-                dynRangeProf += " - HLG10";
-                PhotonCamera.mHlgIsSupported = true;
-            }
-            Log.d(TAG, dynRangeProf);
-            return true;
-        }
-        else {
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking HDR support: " + e.getMessage());
             return false;
         }
     }
@@ -1765,7 +1774,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
         catch (Exception e) {
-            Log.d(TAG, "Exception: " + e.getMessage());
+            Log.e(TAG, "Exception: " + e.getMessage());
         }
 
         captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
@@ -1783,7 +1792,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
                     captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
                 } catch (Exception e) {
-                    Log.d(TAG, "setCaptureRequestBuilder:" + e);
+                    Log.e(TAG, "setCaptureRequestBuilder:" + e);
                 }
             }
         }
@@ -2978,7 +2987,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             try (Image image = reader.acquireLatestImage()) {
 
             } catch (Exception ignored) {
-                Log.d(TAG, "Could not acquire image for LUT processing.");
+                Log.e(TAG, "Could not acquire image for LUT processing.");
             }
             return;
         }
@@ -4382,7 +4391,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         } catch (Exception e) {
             mIsRecordingVideo = false;
-            Log.d(TAG, "video record failed");
+            Log.e(TAG, "video record failed");
             Toast.makeText(activity.getApplicationContext(), "Failed to start recording", Toast.LENGTH_SHORT).show();
             if (vid != null) {
                 if (vid.exists()) {
@@ -4453,7 +4462,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             try {
                 mMediaRecorder.stop();
             } catch (Exception stopFailure) {
-                Log.d(TAG, "Failed to stop recording " + Log.getStackTraceString(stopFailure));
+                Log.e(TAG, "Failed to stop recording " + Log.getStackTraceString(stopFailure));
                 Toast.makeText(activity.getApplicationContext(), "Failed to stop recording", Toast.LENGTH_SHORT).show();
                 if (vid != null) {
                     if (vid.exists()) {
