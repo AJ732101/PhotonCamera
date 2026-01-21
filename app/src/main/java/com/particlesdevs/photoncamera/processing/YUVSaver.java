@@ -51,7 +51,9 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 String rawPath = heicFile.getAbsolutePath();
                 String metaPath = rawPath.substring(0, rawPath.lastIndexOf('.')) + ".txt";
+                String metaCatureResultPath = rawPath.substring(0, rawPath.lastIndexOf('.')) + "_CaptureResult.txt";
                 File metaFile = new File(metaPath);
+                File metaCaptureResultFile = new File(metaCatureResultPath);
                 if (image.getFormat() == ImageFormat.YCBCR_P010) {
                     saveP010RawWithStride(image, heicFile);
                 }
@@ -60,6 +62,7 @@ public class YUVSaver extends DefaultSaver{
                     saveP010RawWithStride(image, heicFile);
                 }
                 saveMetaInfo(image, metaFile, orientation, metadata);
+                saveMetaCaptureResult(metaCaptureResultFile, metadata);
                 processingEventsListener.onProcessingFinished("YCBCR_P010 saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
@@ -554,6 +557,16 @@ public class YUVSaver extends DefaultSaver{
             Log.d(TAG, "YUV_420_888 stored in compact form (8-bit, no strides).");
         } catch (IOException e) {
             Log.e(TAG, "YUV_420_888 saving failed.", e);
+        }
+    }
+
+    private void saveMetaCaptureResult(File file, Bundle metadata) {
+        try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
+            if (metadata.containsKey("completeCaptureResult")) {
+                writer.write(metadata.get("completeCaptureResult").toString());
+            }
+        } catch (IOException e) {
+           Log.e(TAG, "Failed to save meta info", e);
         }
     }
 
