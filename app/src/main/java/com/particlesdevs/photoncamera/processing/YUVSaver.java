@@ -55,7 +55,8 @@ public class YUVSaver extends DefaultSaver{
                 File metaFile = new File(metaPath);
                 File metaCaptureResultFile = new File(metaCatureResultPath);
                 if (image.getFormat() == ImageFormat.YCBCR_P010) {
-                    saveP010RawWithStride(image, heicFile);
+                    //saveP010RawWithStride(image, heicFile);
+                    saveP010Raw(image, heicFile);
                 }
                 else {
                     //saveYuv420Raw(image, heicFile);
