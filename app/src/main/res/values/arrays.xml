@@ -92,6 +92,8 @@
         <item>Histogram</item>
         <item>Closed Aperture</item>
         <item>Open Aperture</item>
+        <item>Lock Video Params 1</item>
+        <item>Lock Video Params 2</item>
     </string-array>
 
     <string-array name="function_one_entryValues">
@@ -101,6 +103,8 @@
         <item>Histogram</item>
         <item>Closed Aperture</item>
         <item>Open Aperture</item>
+        <item>Lock Video Params 1</item>
+        <item>Lock Video Params 2</item>
     </string-array>
 
     <string-array name="location_geotag_entryValues">
@@ -500,6 +504,7 @@
         <item>S-LogB</item>
         <item>Style1</item>
         <item>Style2</item>
+        <item>Custom</item>
     </string-array>
 
     <string-array name="contrast_curve_entryValues">
@@ -512,6 +517,7 @@
         <item>slogB</item>
         <item>style1</item>
         <item>style2</item>
+        <item>custom</item>
     </string-array>
 
     <string-array name="effect_mode_entries">

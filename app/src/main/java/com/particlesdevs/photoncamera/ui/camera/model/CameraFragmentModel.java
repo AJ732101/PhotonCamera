@@ -31,6 +31,7 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.getCaptureController() != null) {
             PhotonCamera.getCaptureController().magnifyViewfinder();
             viewfinderMaginified = !viewfinderMaginified;
+            notifyChange();
         }
     }
 
@@ -38,6 +39,7 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.getCaptureController() != null) {
             PhotonCamera.getCaptureController().functionOne();
             functionOneOn = !functionOneOn;
+            notifyChange();
         }
     }
 

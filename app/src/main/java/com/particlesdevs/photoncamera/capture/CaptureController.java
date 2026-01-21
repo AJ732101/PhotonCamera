@@ -61,6 +61,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemClock;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
@@ -118,6 +120,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
@@ -129,11 +132,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -295,6 +300,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     /*{@link CaptureRequest.Builder} for the camera preview*/
     public CaptureRequest.Builder mPreviewRequestBuilder;
     public CaptureRequest mPreviewInputRequest;
+    public String mLastCaptureResult = "";
     /**
      * The current state of camera state for taking pictures.
      */
@@ -383,6 +389,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     if (physicalID != logicalID) {
                         mMetaData.putString("logiCamID", logicalID);
                     }
+
+                    // all the capture meta data
+                    mMetaData.putString("completeCaptureResult", mLastCaptureResult);
                 }
 
                 if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
@@ -1873,6 +1882,70 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public TonemapCurve loadCustomCurve() {
+        File customContrastCurve = new File(FileManager.sPHOTON_TUNING_DIR, "CustomContrastCurve.curve");
+
+        if (!customContrastCurve.exists()) {
+            Log.e(TAG, "Custom curve file not found at: " + customContrastCurve.getAbsolutePath());
+            return null;
+        }
+
+        List<Float> redList = new ArrayList<>();
+        List<Float> greenList = new ArrayList<>();
+        List<Float> blueList = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(customContrastCurve)))) {
+            String line;
+            List<Float> currentList = null;
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                if (line.contains("CUSTOM_R")) { currentList = redList; continue; }
+                if (line.contains("CUSTOM_G")) { currentList = greenList; continue; }
+                if (line.contains("CUSTOM_B")) { currentList = blueList; continue; }
+
+                if (currentList != null && line.matches("^[0-9.-].*")) {
+                    String[] parts = line.replace("f", "").split("[,\\s]+");
+                    for (String part : parts) {
+                        if (!part.isEmpty()) {
+                            try {
+                                currentList.add(Float.parseFloat(part));
+                            } catch (NumberFormatException nfe) {
+                                Log.e(TAG, "Invalid number format: " + part);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error reading custom curve: " + e.getMessage());
+            return null;
+        }
+
+        if (redList.isEmpty() || greenList.isEmpty() || blueList.isEmpty()) {
+            return null;
+        }
+
+        return new TonemapCurve(
+                listToArray(redList),
+                listToArray(greenList),
+                listToArray(blueList)
+        );
+    }
+
+    /**
+     * Hilfsmethode zur Konvertierung einer Liste in ein float-Array
+     */
+    private float[] listToArray(List<Float> list) {
+        float[] array = new float[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
+    }
+
     public void setContrastCurve(CaptureRequest.Builder captureBuilder) {
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
         if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
@@ -1883,9 +1956,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         // look for keywords
         if (!PhotonCamera.getSettings().contrastCurve.contains("slog") &&
+                !PhotonCamera.getSettings().contrastCurve.contains("logc3") &&
                 !PhotonCamera.getSettings().contrastCurve.equals("high") &&
                 !PhotonCamera.getSettings().contrastCurve.equals("linear") &&
                 !PhotonCamera.getSettings().contrastCurve.equals("low") &&
+                !PhotonCamera.getSettings().contrastCurve.equals("custom") &&
                 !PhotonCamera.getSettings().contrastCurve.contains("style")) {
             return;
         }
@@ -1943,6 +2018,79 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         else if (PhotonCamera.getSettings().contrastCurve.equals("style2")) {
             customCurve = new TonemapCurve(CurvePresets.RED_CURVE_STYLE_1, CurvePresets.BLUE_CURVE_STYLE_1, CurvePresets.GREEN_CURVE_STYLE_1);
+        }
+        else if (PhotonCamera.getSettings().contrastCurve.equals("custom")) {
+            customCurve = loadCustomCurve();
+        }
+        else if (PhotonCamera.getSettings().contrastCurve.equals("logc3_ei800")) {
+            int points = 64;
+            float[] red = new float[points * 2];
+            float[] green = new float[points * 2];
+            float[] blue = new float[points * 2];
+
+            final float a  = 3.0f;
+            final float b  = 0.015f;
+            final float c  = 0.150f;
+            final float d  = 6.00f;
+            final float e  = 0.310f;
+            final float xc = 0.018f;
+
+            for (int i = 0; i < points; i++) {
+                float x = i / (float)(points - 1);
+
+                float y;
+                if (x <= xc) {
+                    y = a * x + b;
+                } else {
+                    y = c * (float)Math.log10(d * x + 1.0f) + e;
+                }
+
+                y = Math.min(1.0f, Math.max(0.0f, y));
+
+                red[i * 2] = x;
+                red[i * 2 + 1] = y;
+                green[i * 2] = x;
+                green[i * 2 + 1] = y;
+                blue[i * 2] = x;
+                blue[i * 2 + 1] = y;
+            }
+
+            customCurve = new TonemapCurve(red, green, blue);
+        }
+        else if (PhotonCamera.getSettings().contrastCurve.equals("logc3_ei400")) {
+            int points = 64;
+            float[] red = new float[points * 2];
+            float[] green = new float[points * 2];
+            float[] blue = new float[points * 2];
+
+            final float a  = 3.0f;
+            final float b  = 0.015f;
+            final float c  = 0.165f;
+            final float d  = 6.50f;
+            final float e  = 0.290f;
+            final float xc = 0.018f;
+
+            for (int i = 0; i < points; i++) {
+                float x = i / (float)(points - 1);
+
+                float y;
+                if (x <= xc) {
+                    y = a * x + b;
+                } else {
+                    y = c * (float)Math.log10(d * x + 1.0f) + e;
+                }
+
+                y = Math.min(1.0f, Math.max(0.0f, y));
+
+                red[i * 2] = x;
+                red[i * 2 + 1] = y;
+                green[i * 2] = x;
+                green[i * 2 + 1] = y;
+                blue[i * 2] = x;
+                blue[i * 2 + 1] = y;
+            }
+
+            customCurve = new TonemapCurve(red, green, blue);
         }
 
         if (customCurve != null) {
@@ -2204,7 +2352,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         // Auto focus should be continuous for camera preview.
                         //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                         // Flash is automatically enabled when necessary.
-                        resetPreviewAEMode();
+                        if (PhotonCamera.getSettings().functionOne.contains("Lock Video Params") && mIsRecordingVideo) {
+                            suspendAutomatics(mPreviewRequestBuilder);
+                        }
+                        else {
+                            resetPreviewAEMode();
+                        }
                         Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
                         VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
                         // Finally, we start displaying the camera preview.
@@ -3036,6 +3189,55 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public void suspendAutomatics(CaptureRequest.Builder captureBuilder) {
+        if (!mIsFunctionOneOn) {
+            return;
+        }
+        if (PhotonCamera.getSettings().functionOne.equals("Lock Video Params 1") && mIsRecordingVideo) {
+            captureBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+            captureBuilder.set(CaptureRequest.CONTROL_AWB_LOCK, true);
+        }
+        if (PhotonCamera.getSettings().functionOne.equals("Lock Video Params 2") && mIsRecordingVideo) {
+            if (mPreviewCaptureResult == null) {
+                return;
+            }
+
+            Integer lastIso = mPreviewCaptureResult.get(CaptureResult.SENSOR_SENSITIVITY);
+            Long lastShutterNs = mPreviewCaptureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+            Integer postRawBoost = mPreviewCaptureResult.get(CaptureResult.CONTROL_POST_RAW_SENSITIVITY_BOOST);
+
+            if ((lastIso == null) || (lastShutterNs == null)) {
+                return;
+            }
+
+            String humanReadableShutter = "";
+            double seconds = lastShutterNs / 1_000_000_000.0;
+            if (seconds >= 1.0) {
+                humanReadableShutter.format("%.1fs", seconds);
+            } else {
+                int denominator = (int) Math.round(1.0 / seconds);
+                humanReadableShutter = "1/" + denominator + "s";
+            }
+
+            Log.i(TAG, "Lock video params, last ISO=" + lastIso + " - last shutter speed=" + humanReadableShutter + " - last post RAW boost=" + postRawBoost);
+
+            captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
+            captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+            captureBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, lastIso);
+            captureBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, lastShutterNs);
+            captureBuilder.set(CaptureRequest.CONTROL_POST_RAW_SENSITIVITY_BOOST, postRawBoost);
+        }
+    }
+
+    public void resumeAutomatics(CaptureRequest.Builder captureBuilder) {
+        if (PhotonCamera.getSettings().functionOne.equals("Lock Video Params")) {
+            captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+            //captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+            setAEMode(mPreviewRequestBuilder, PreferenceKeys.getAeMode());
+            //rebuildPreviewBuilder();
+        }
+    }
+
     public String getSoCVendor() {
         try {
             String hardware = android.os.Build.HARDWARE.toLowerCase();
@@ -3089,6 +3291,48 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         int statsType = 0;
         int[] histDataArray = null;
 
+        if (wasLogged == 100) {
+            List<CaptureResult.Key<?>> keys = result.getKeys();
+
+            int maxKeyLength = 0;
+            int maxTypeLength = 0;
+
+            for (CaptureResult.Key<?> key : keys) {
+                maxKeyLength = Math.max(maxKeyLength, key.getName().length());
+                Object val = result.get(key);
+                if (val != null) {
+                    maxTypeLength = Math.max(maxTypeLength, val.getClass().getSimpleName().length());
+                }
+            }
+
+            final int keyPadding = Math.min(maxKeyLength, 150);
+            final int typePadding = Math.min(maxTypeLength, 30);
+            String formatTemplate = "Key: %-" + keyPadding + "s | Type: %-" + typePadding + "s | Size/Len: %s";
+
+            Log.d(TAG, "--- Start of TotalCaptureResult Keys (Count: " + keys.size() + ") ---");
+
+            for (CaptureResult.Key<?> key : keys) {
+                Object value = result.get(key);
+                String type = "null";
+                String size = "0";
+
+                if (value != null) {
+                    type = value.getClass().getSimpleName();
+                    if (value.getClass().isArray()) {
+                        size = String.valueOf(java.lang.reflect.Array.getLength(value));
+                    } else if (value instanceof Collection) {
+                        size = String.valueOf(((Collection<?>) value).size());
+                    } else {
+                        size = "1";
+                    }
+                }
+
+                Log.d(TAG, String.format(formatTemplate, key.getName(), type, size));
+            }
+            Log.d(TAG, "--- End of TotalCaptureResult Keys ---");
+        }
+        wasLogged++;
+
         try {
             Object histData = result.get(VendorTagUtils.buckets);
             if (histData != null) {
@@ -3108,9 +3352,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 statsSize = histDataArray.length;
             }
 
-            if (wasLogged < 50) {
+            if (wasLogged == 100) {
                 Log.d(TAG, "Histogram data received: type=" + statsType + " bucket size=" + bucketSize + " max count=" + maxCountNr);
-                wasLogged++;
             }
 
             if ((bucketSize != 0) && (maxCountNr != 0) && (statsSize != 0) && (statsType != 0)) {
@@ -3122,6 +3365,56 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
+    }
+
+    public String serializeCaptureResult(TotalCaptureResult result) {
+        Map<String, Object> metadataMap = new LinkedHashMap<>();
+        for (CaptureResult.Key<?> key : result.getKeys()) {
+            String keyName = key.getName();
+
+            if (keyName.equals("xiaomi.fd.mifdbeautyparam") ||
+                    keyName.equals("com.qti.stats.af.AFSelectionMapTag") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_grid.r_stats") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_grid.g_stats") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_grid.b_stats") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_exposure.r_stats") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_exposure.g_stats") ||
+                    keyName.equals("org.codeaurora.qcamera3.bayer_exposure.b_stats") ||
+                    keyName.equals("com.qti.stats.af.ConfidenceMapTag") ||
+                    keyName.equals("com.qti.stats.af.DistanceMapTag") ||
+                    keyName.equals("com.qti.stats.af.AFSelectionMapTag") ||
+                    keyName.equals("com.qti.stats.af.DefocusMapTag") ||
+                    keyName.equals("xiaomi.exifInfo.info") ||
+                    keyName.equals("org.codeaurora.qcamera3.histogram.stats")) {
+                continue;
+            }
+
+            try {
+                Object value = result.get(key);
+                if (value != null) {
+                    if (value.getClass().isArray()) {
+                        int length = java.lang.reflect.Array.getLength(value);
+                        StringBuilder arrayContent = new StringBuilder("[");
+                        for (int i = 0; i < length; i++) {
+                            arrayContent.append(java.lang.reflect.Array.get(value, i));
+                            if (i < length - 1) arrayContent.append(", ");
+                        }
+                        arrayContent.append("]");
+                        metadataMap.put(keyName, arrayContent.toString());
+                    } else {
+                        metadataMap.put(keyName, value.toString());
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .serializeSpecialFloatingPointValues()
+                .create()
+                .toJson(metadataMap);
     }
 
     private void captureSingleStillPicture() {
@@ -3164,6 +3457,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                                @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
                     mCaptureResult = result;
+                    mLastCaptureResult = serializeCaptureResult(result);
                     Log.d(TAG, "Single shot capture completed.");
                 }
 
@@ -3511,6 +3805,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      * @param aeMode         possible values = 0, 1, 2, 3
      */
     private void setAEMode(CaptureRequest.Builder requestBuilder, int aeMode) {
+        if (PhotonCamera.getSettings().functionOne.equals("Lock Video Params") && mIsRecordingVideo) {
+            return;
+        }
+
         if (aeMode == CONTROL_AE_MODE_ON) {
             Log.d(TAG, "Requested AE Mode: ON");
         }

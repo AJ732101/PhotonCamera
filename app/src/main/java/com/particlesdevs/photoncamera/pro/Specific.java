@@ -95,6 +95,10 @@ public class Specific {
                     specificSetting.showZoomSlider = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "enableQLL": {
+                    specificSetting.enableQLL = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
