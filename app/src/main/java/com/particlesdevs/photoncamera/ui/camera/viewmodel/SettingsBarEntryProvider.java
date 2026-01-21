@@ -147,14 +147,19 @@ public class SettingsBarEntryProvider extends ViewModel {
     private void createNoiseEntry() {
         noiseEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.noise_off_button, R.drawable.noise_off, R.string.off, 0, noiseEntry),
-                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 1, noiseEntry)
+                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 1, noiseEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 2, noiseEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 3, noiseEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.noise_on_button, R.drawable.noise_on, R.string.on, 4, noiseEntry)
         );
     }
 
     private void createEdgeEntry() {
         edgeEntry.addSettingsBarButtonModels(
                 SettingsBarButtonModel.newButtonModel(R.id.edge_off_button, R.drawable.edge_off, R.string.off, 0, edgeEntry),
-                SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 1, edgeEntry)
+                SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 1, edgeEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 2, edgeEntry),
+                SettingsBarButtonModel.newButtonModel(R.id.edge_on_button, R.drawable.edge_on, R.string.on, 3, edgeEntry)
         );
     }
 
