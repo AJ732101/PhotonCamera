@@ -10,8 +10,7 @@ android {
 
     defaultConfig {
         minSdk 29
-        targetSdk 36
-//Waiting for api 32 sources
+        //Waiting for api 32 sources
         //noinspection OldTargetApi
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,6 +30,12 @@ android {
     namespace 'com.particlesdevs.photoncamera.circularbarlib'
     buildFeatures {
         viewBinding false
+    }
+    lint {
+        targetSdk 36
+    }
+    testOptions {
+        targetSdk 36
     }
 }
 
