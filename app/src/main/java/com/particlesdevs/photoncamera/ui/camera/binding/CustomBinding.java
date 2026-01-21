@@ -146,4 +146,12 @@ public class CustomBinding {
             }
         }
     }
+
+    @BindingAdapter("android:onLongClick")
+    public static void setOnLongClick(View view, Runnable runnable) {
+        view.setOnLongClickListener(v -> {
+            runnable.run();
+            return true;
+        });
+    }
 }

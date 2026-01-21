@@ -1,16 +1,21 @@
 package com.particlesdevs.photoncamera.ui.camera.model;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
 
 import com.particlesdevs.photoncamera.BR;
+import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
+import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.util.Log;
 
 /**
@@ -41,6 +46,39 @@ public class CameraFragmentModel extends BaseObservable {
             functionOneOn = !functionOneOn;
             notifyChange();
         }
+    }
+
+    public void onFunctionOneLongClicked(View view) {
+        Context context = view.getContext();
+
+        String[] entries = context.getResources().getStringArray(R.array.function_one_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.function_one_entryValues);
+
+        String currentVal = PreferenceKeys.getFunctionOneValue();
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.length; i++) {
+            if (entryValues[i].equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.function_button_one)
+                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValues[which];
+                    PhotonCamera.getSettings().functionOne = selectedValue;
+                    PreferenceKeys.setFunctionOneValue(selectedValue);
+
+                    notifyChange();
+
+                    Toast.makeText(context, entries[which], Toast.LENGTH_SHORT).show();
+
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public final SeekBar.OnSeekBarChangeListener zoomChangeListener = new SeekBar.OnSeekBarChangeListener() {

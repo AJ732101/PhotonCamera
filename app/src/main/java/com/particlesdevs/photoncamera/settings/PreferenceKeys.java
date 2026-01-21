@@ -423,6 +423,9 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_FUNCTION_ONE);
     }
 
+    public static void setFunctionOneValue(String value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_FUNCTION_ONE, value);
+    }
 
     public static int getCFAValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_CFA);
