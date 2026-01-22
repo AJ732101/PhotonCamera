@@ -6,17 +6,17 @@
 
     <data>
         <variable
-                name="bottom_bar_click_listener"
-                type="android.view.View.OnClickListener"/>
-
+            name="bottom_bar_click_listener"
+            type="android.view.View.OnClickListener"/>
         <variable
-                name="uimodel"
-                type="com.particlesdevs.photoncamera.ui.camera.model.CameraFragmentModel"/>
-
+            name="uimodel"
+            type="com.particlesdevs.photoncamera.ui.camera.model.CameraFragmentModel"/>
         <variable
-                name="timermodel"
-                type="com.particlesdevs.photoncamera.ui.camera.model.TimerFrameCountModel"/>
-
+            name="timermodel"
+            type="com.particlesdevs.photoncamera.ui.camera.model.TimerFrameCountModel"/>
+        <variable
+            name="uicontroller"
+            type="com.particlesdevs.photoncamera.ui.camera.CameraUIController"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -127,6 +127,7 @@
                     app:civ_border_overlay="true"
                     app:civ_border_width="3dp"
                     android:onClick="@{bottom_bar_click_listener}"
+                    android:onLongClick="@{() -> uimodel.onGalleryLongClicked(galleryImageButton, uicontroller)}"
                     imageFromBitmap="@{uimodel.bitmap}"
                     bindRotate="@{uimodel}" />
         </FrameLayout>

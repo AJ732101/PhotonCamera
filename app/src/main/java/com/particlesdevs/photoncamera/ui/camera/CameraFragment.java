@@ -298,6 +298,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     public void onViewCreated(@NonNull final View view, Bundle savedInstanceState) {
         this.mCameraUIView = new CameraUIViewImpl(this);
         this.mCameraUIEventsListener = new CameraUIController(this);
+        cameraFragmentBinding.layoutTopbar.setUicontroller(this.mCameraUIEventsListener);
+        cameraFragmentBinding.layoutBottombar.bottomButtons.setUicontroller(this.mCameraUIEventsListener);
         this.mCameraUIView.setCameraUIEventsListener(mCameraUIEventsListener);
         this.captureController = new CaptureController(activity, processExecutorService, new CameraEventsListenerImpl());
         this.manualModeConsole.addParamObserver(captureController.getParamController());

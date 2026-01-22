@@ -42,7 +42,7 @@ import android.widget.Toast;
  * <p>
  * Responsible for converting user inputs into actions
  */
-final class CameraUIController implements CameraUIEventsListener,
+final public class CameraUIController implements CameraUIEventsListener,
         Observer<TopBarSettingsData<?, ?>>, AuxButtonsLayout.AuxButtonListener {
     private static final String TAG = "CameraUIController";
     private final CameraFragment cameraFragment;
@@ -215,10 +215,10 @@ final class CameraUIController implements CameraUIEventsListener,
 
             case R.id.noise_toggle_button:
                 if (PreferenceKeys.getNoiseProcessing() == 0) {
-                    PreferenceKeys.setSetNoiseProcessing(1);
+                    PreferenceKeys.setNoiseProcessing(1);
                 }
                 else {
-                    PreferenceKeys.setSetNoiseProcessing(0);
+                    PreferenceKeys.setNoiseProcessing(0);
                 }
                 cameraFragment.showSnackBar(cameraFragment.getString(R.string.noise_toggle_text) + ':' + onOff(PreferenceKeys.isNoiseProcessingOn()));
                 cameraFragment.updateSettingsBar();
@@ -227,10 +227,10 @@ final class CameraUIController implements CameraUIEventsListener,
 
             case R.id.edge_toggle_button:
                 if (PreferenceKeys.getEdgeProcessing() == 0) {
-                    PreferenceKeys.setSetEdgeProcessing(1);
+                    PreferenceKeys.setEdgeProcessing(1);
                 }
                 else {
-                    PreferenceKeys.setSetEdgeProcessing(0);
+                    PreferenceKeys.setEdgeProcessing(0);
                 }
                 cameraFragment.showSnackBar(cameraFragment.getString(R.string.edge_toggle_text) + ':' + onOff(PreferenceKeys.isEdgeProcessingOn()));
                 cameraFragment.updateSettingsBar();
@@ -295,6 +295,13 @@ final class CameraUIController implements CameraUIEventsListener,
     private void resetTimer() {
         if (this.countdownTimer != null) this.countdownTimer.cancel();
         if (this.shutterButton != null) this.shutterButton.setHovered(false);
+    }
+
+    public void refreshCameraUI(boolean restart) {
+        cameraFragment.updateSettingsBar();
+        if (restart) {
+            this.restartCamera();
+        }
     }
 
     @Override
@@ -400,10 +407,10 @@ final class CameraUIController implements CameraUIEventsListener,
                         break;
                     case NOISE:
                         if (PreferenceKeys.getNoiseProcessing() != 0) {
-                            PreferenceKeys.setSetNoiseProcessing(0);
+                            PreferenceKeys.setNoiseProcessing(0);
                         }
                         else {
-                            PreferenceKeys.setSetNoiseProcessing(1);
+                            PreferenceKeys.setNoiseProcessing(1);
                         }
                         this.restartCamera();
                         break;

@@ -792,14 +792,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isSingleShotJpegOrAvifOrHeic() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
                 ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                        (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-                        (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                        (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
-                        (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
+                (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
+                (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
+                (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
@@ -2277,6 +2277,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             List<Surface> surfaces = configureSurfaces(isBurstSession);
             // check high speed request
             int SessionType = PhotonCamera.getSpecific().specificSetting.sessionType;
+            if (mTargetFormat == ImageFormat.HEIC)
+            {
+                SessionType = 0;
+            }
             int[] capabilities = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
             if (capabilities != null) {
                 for (int capability : capabilities) {

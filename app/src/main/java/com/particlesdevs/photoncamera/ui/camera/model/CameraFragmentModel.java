@@ -2,6 +2,8 @@ package com.particlesdevs.photoncamera.ui.camera.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaFormat;
+import android.util.Size;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -13,10 +15,14 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.particlesdevs.photoncamera.BR;
 import com.particlesdevs.photoncamera.R;
+import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
-import com.particlesdevs.photoncamera.util.Log;
+import com.particlesdevs.photoncamera.ui.camera.CameraUIController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that holds the ui state, for now the orientation
@@ -48,12 +54,322 @@ public class CameraFragmentModel extends BaseObservable {
         }
     }
 
-    public void onFunctionOneLongClicked(View view) {
+    public void onSettingsLongClicked(View view, Object uiController) {
         Context context = view.getContext();
 
+        String[] entries = context.getResources().getStringArray(R.array.contrast_curve_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.contrast_curve_entryValues);
+
+        String currentVal = PreferenceKeys.getContrastCurve();
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.length; i++) {
+            if (entryValues[i].equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.contrast_curve)
+                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValues[which];
+                    PhotonCamera.getSettings().contrastCurve = selectedValue;
+                    PreferenceKeys.setContrastCurve(selectedValue);
+
+                    dialog.dismiss();
+                    if (uiController instanceof CameraUIController) {
+                        ((CameraUIController) uiController).refreshCameraUI(true);
+                    }
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void onEdgeProcessingLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+
+        String[] entries = context.getResources().getStringArray(R.array.edge_processing_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.edge_processing_entryValues);
+
+        String currentVal = String.valueOf(PreferenceKeys.getEdgeProcessing());
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.length; i++) {
+            if (entryValues[i].equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.edge_processing)
+                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValues[which];
+                    PhotonCamera.getSettings().edgeProcessing = Integer.valueOf(selectedValue);
+                    PreferenceKeys.setEdgeProcessing(PhotonCamera.getSettings().edgeProcessing);
+
+                    dialog.dismiss();
+                    if (uiController instanceof CameraUIController) {
+                        ((CameraUIController) uiController).refreshCameraUI(true);
+                    }
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void onNoiseReductionLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        String[] entries = context.getResources().getStringArray(R.array.noise_processing_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.noise_processing_entryValues);
+        String currentVal = String.valueOf(PreferenceKeys.getNoiseProcessing());
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.length; i++) {
+            if (entryValues[i].equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.noise_processing)
+                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValues[which];
+                    PhotonCamera.getSettings().noiseProcessing = Integer.valueOf(selectedValue);
+                    PreferenceKeys.setNoiseProcessing(PhotonCamera.getSettings().noiseProcessing);
+
+                    dialog.dismiss();
+                    if (uiController instanceof CameraUIController) {
+                        ((CameraUIController) uiController).refreshCameraUI(true);
+                    }
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void onGalleryLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        List<CharSequence> entries = new ArrayList<>();
+        List<CharSequence> entryValues = new ArrayList<>();
+
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            String currentVal = PreferenceKeys.getVideoCodec();
+            CaptureController.EncoderInfoUtil encoderInfo = new CaptureController.EncoderInfoUtil();
+            encoderInfo.getEncoderInfos();
+
+            Size maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_AVC);
+            boolean hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_AVC);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("AVC/H.264 (HW)");
+                }
+                else {
+                    entries.add("AVC/H.264 (SW)");
+                }
+                entryValues.add("AVC");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("HEVC/H.265 (HW)");
+                }
+                else {
+                    entries.add("HEVC/H.265 (SW)");
+                }
+                entryValues.add("HEVC");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("Dolby Vision (HW)");
+                }
+                else {
+                    entries.add("Dolby Vision (SW)");
+                }
+                entryValues.add("DOLBY_VISION");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_AV1);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_AV1);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("AV1 (HW)");
+                }
+                else {
+                    entries.add("AV1 (SW)");
+                }
+                entryValues.add("AV1");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_APV);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_APV);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("APV (HW)");
+                }
+                else {
+                    entries.add("APV (SW)");
+                }
+                entryValues.add("APV");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_VP8);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_VP8);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("VP8 (HW)");
+                }
+                else {
+                    entries.add("VP8 (SW)");
+                }
+                entryValues.add("VP8");
+            }
+            maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_VP9);
+            hasHwSupport = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_VP9);
+            if (maxRes != null) {
+                if (hasHwSupport) {
+                    entries.add("VP9 (HW)");
+                }
+                else {
+                    entries.add("VP9 (SW)");
+                }
+                entryValues.add("VP9");
+            }
+
+            int checkedItem = -1;
+            for (int i = 0; i < entryValues.size(); i++) {
+                if (entryValues.get(i).toString().equals(currentVal)) {
+                    checkedItem = i;
+                    break;
+                }
+            }
+
+            CharSequence[] entriesArray = entries.toArray(new CharSequence[0]);
+            CharSequence[] entryValuesArray = entryValues.toArray(new CharSequence[0]);
+
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.video_codec)
+                    .setSingleChoiceItems(entriesArray, checkedItem, (dialog, which) -> {
+                        String selectedValue = entryValuesArray[which].toString();
+                        PhotonCamera.getSettings().videoCodec = selectedValue;
+                        PreferenceKeys.setVideoCodec(selectedValue);
+
+                        dialog.dismiss();
+                        if (uiController instanceof CameraUIController) {
+                            ((CameraUIController) uiController).refreshCameraUI(true);
+                        }
+                        notifyChange();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+        else {
+            String currentVal = String.valueOf(PreferenceKeys.getPreviewFormatValue());
+
+            entries.add("JPEG");
+            entryValues.add("256");
+            if (PhotonCamera.mHeicIsSupported) {
+                entries.add("HEIC");
+                entryValues.add("1212500294");
+            }
+            if (PhotonCamera.mJpegRIsSupported) {
+                entries.add("JPEG_R");
+                entryValues.add("4101");
+            }
+            if (PhotonCamera.mHeicUltraHdrIsSupported) {
+                entries.add("HEIC_ULTRA");
+                entryValues.add("4102");
+            }
+            entries.add("AVIF (SW)");
+            entryValues.add("999999999");
+            entries.add("HEIC/HEIF (SW)");
+            entryValues.add("999999991");
+            entries.add("JPEG LUT (SW)");
+            entryValues.add("999999992");
+            if (PhotonCamera.mYuv10IsSupported) {
+                entries.add("YUV RAW");
+                entryValues.add("888888888");
+            }
+            entries.add("JPEG/RAW Stacking");
+            entryValues.add("0");
+            entries.add("Video Codec 8 Bit");
+            entryValues.add("35");
+            entries.add("Video Codec 10 Bit");
+            entryValues.add("54");
+
+            int checkedItem = -1;
+            for (int i = 0; i < entryValues.size(); i++) {
+                if (entryValues.get(i).toString().equals(currentVal)) {
+                    checkedItem = i;
+                    break;
+                }
+            }
+
+            CharSequence[] entriesArray = entries.toArray(new CharSequence[0]);
+            CharSequence[] entryValuesArray = entryValues.toArray(new CharSequence[0]);
+
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.preview_format)
+                    .setSingleChoiceItems(entriesArray, checkedItem, (dialog, which) -> {
+                        String selectedValue = entryValuesArray[which].toString();
+                        PhotonCamera.getSettings().previewFormat = Integer.valueOf(selectedValue);
+                        PreferenceKeys.setPreviewFormatValue(PhotonCamera.getSettings().previewFormat);
+
+                        dialog.dismiss();
+                        if (uiController instanceof CameraUIController) {
+                            ((CameraUIController) uiController).refreshCameraUI(true);
+                        }
+                        notifyChange();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+    }
+
+    public void onDigitalZoomLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        String[] entries = context.getResources().getStringArray(R.array.digital_zoom_factor_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.digital_zoom_factor_entryValues);
+        String currentVal = String.valueOf(PreferenceKeys.getDigitalZoomFactorValue()) + "f";
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.length; i++) {
+            if (entryValues[i].equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.digital_zoom_factor)
+                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValues[which];
+                    if (selectedValue.equals("1.0f")) {
+                        PreferenceKeys.setSetZoomOn(false);
+                    }
+                    else {
+                        PreferenceKeys.setSetZoomOn(true);
+                    }
+                    PhotonCamera.getSettings().digitalZoomFactor = Float.valueOf(selectedValue);
+                    PreferenceKeys.setDigitalZoomFactorValue(PhotonCamera.getSettings().digitalZoomFactor);
+
+                    dialog.dismiss();
+                    if (uiController instanceof CameraUIController) {
+                        ((CameraUIController) uiController).refreshCameraUI(true);
+                    }
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void onFunctionOneLongClicked(View view) {
+        Context context = view.getContext();
         String[] entries = context.getResources().getStringArray(R.array.function_one_entries);
         String[] entryValues = context.getResources().getStringArray(R.array.function_one_entryValues);
-
         String currentVal = PreferenceKeys.getFunctionOneValue();
 
         int checkedItem = -1;
@@ -71,11 +387,8 @@ public class CameraFragmentModel extends BaseObservable {
                     PhotonCamera.getSettings().functionOne = selectedValue;
                     PreferenceKeys.setFunctionOneValue(selectedValue);
 
-                    notifyChange();
-
-                    Toast.makeText(context, entries[which], Toast.LENGTH_SHORT).show();
-
                     dialog.dismiss();
+                    notifyChange();
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();

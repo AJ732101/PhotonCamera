@@ -112,6 +112,17 @@ public class SettingsManager {
     }
 
     /**
+     * Package private conversion method to turn floats into preferred
+     * String storage format.
+     *
+     * @param value int to be stored in Settings
+     * @return String which represents the float
+     */
+    static String convert(float value) {
+        return Float.toString(value);
+    }
+
+    /**
      * Package private conversion method to turn booleans into preferred
      * String storage format.
      *
@@ -485,6 +496,15 @@ public class SettingsManager {
     public void set(String scope, PreferenceKeys.Key key, int value) {
         set(scope, key, convert(value));
     }
+
+    /**
+     * Store a setting's value using an Float value.  Type conversion
+     * to String occurs before this value is stored in SharedPreferences.
+     */
+    public void set(String scope, PreferenceKeys.Key key, float value) {
+        set(scope, key, convert(value));
+    }
+
 
     public void setInitial(String scope, PreferenceKeys.Key key, int value) {
         if (!isSet(scope, key)) {

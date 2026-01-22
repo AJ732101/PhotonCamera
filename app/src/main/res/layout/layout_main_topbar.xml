@@ -36,6 +36,9 @@
         <variable
             name="uimodel"
             type="com.particlesdevs.photoncamera.ui.camera.model.CameraFragmentModel"/>
+        <variable
+            name="uicontroller"
+            type="com.particlesdevs.photoncamera.ui.camera.CameraUIController"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -102,8 +105,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:visibility="gone" />
 
-
-            <!-- Kette der sichtbaren Elemente -->
             <ToggleButton
                 android:id="@+id/eis_toggle_button"
                 android:layout_width="48dp"
@@ -176,6 +177,7 @@
                 android:background="@drawable/noise_button"
                 android:checked="@{PreferenceKeys.isNoiseProcessingOn()}"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onNoiseReductionLongClicked(noiseToggleButton, uicontroller)}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{noise_visible ? View.VISIBLE : View.GONE}"
@@ -192,6 +194,7 @@
                 android:background="@drawable/edge_button"
                 android:checked="@{PreferenceKeys.isEdgeProcessingOn()}"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onEdgeProcessingLongClicked(edgeToggleButton, uicontroller)}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{edge_visible ? View.VISIBLE : View.GONE}"
@@ -208,6 +211,7 @@
                 android:background="@drawable/zoom_button"
                 android:checked="@{PreferenceKeys.isZoomOn()}"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onDigitalZoomLongClicked(zoomToggleButton, uicontroller)}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{zoom_visible ? View.VISIBLE : View.GONE}"
@@ -223,6 +227,7 @@
                 android:layout_height="48dp"
                 android:background="@drawable/ic_settings"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onSettingsLongClicked(settingsButton, uicontroller)}"
                 android:src="@drawable/ic_settings"
                 android:scaleType="center"
                 android:visibility="visible"

@@ -161,6 +161,7 @@
 
     <!-- Video settings strings -->
     <string name="codec">Codec</string>
+    <string name="video_codec">Video Codec</string>
     <string name="video_resolution">Resolution</string>
     <string name="video_framerate">Framerate</string>
     <string name="video">Video</string>

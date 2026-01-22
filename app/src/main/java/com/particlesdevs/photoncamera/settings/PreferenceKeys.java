@@ -411,6 +411,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT);
     }
 
+    public static void setPreviewFormatValue(int value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, value);
+    }
+
     public static int getRealPreviewFormatValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_REAL_PREVIEW_FORMAT);
     }
@@ -570,6 +574,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC);
     }
 
+    public static void setVideoCodec(String value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, value);
+    }
+
     public static int getNoiseProcessing() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING);
     }
@@ -600,7 +608,7 @@ public class PreferenceKeys {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, value);
     }
 
-    public static void setSetNoiseProcessing(int value) {
+    public static void setNoiseProcessing(int value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, value);
     }
 
@@ -608,7 +616,7 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING);
     }
 
-    public static void setSetEdgeProcessing(int value) {
+    public static void setEdgeProcessing(int value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, value);
     }
 
@@ -724,6 +732,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR);
     }
 
+    public static void setDigitalZoomFactorValue(float value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR, value);
+    }
+
     public static boolean useExternalGallery() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_EXTERNAL_GALLERY);
     }
@@ -742,6 +754,10 @@ public class PreferenceKeys {
 
     public static String getContrastCurve() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
+    }
+
+    public static void setContrastCurve(String value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE, value);
     }
 
     public static int getExposureCompensation() {
