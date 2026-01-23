@@ -2866,6 +2866,33 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public void setAutoExposureCenter() {
+        Rect activeArray = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+        if (activeArray == null) return;
+
+        int fullWidth = activeArray.width();
+        int fullHeight = activeArray.height();
+
+        int rectWidth = (int) (fullWidth * 0.3f);
+        int rectHeight = (int) (fullHeight * 0.3f);
+
+        int left = (fullWidth - rectWidth) / 2;
+        int top = (fullHeight - rectHeight) / 2;
+
+        Rect rect = new Rect(left, top, left + rectWidth, top + rectHeight);
+        MeteringRectangle meteringRect = new MeteringRectangle(rect, MeteringRectangle.METERING_WEIGHT_MAX);
+
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{meteringRect});
+
+        try {
+            if (mCaptureSession != null) {
+                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+            }
+        } catch (CameraAccessException e) {
+            Log.e(TAG, "Failed to set AE region", e);
+        }
+    }
+
     public void magnifyViewfinder() {
         if (mIsViewFinderMagnified) {
             if (PhotonCamera.getSettings().zoom2X) {

@@ -787,6 +787,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_LUT_NAME);
     }
 
+    public static void setLutName(String value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_LUT_NAME, value);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),

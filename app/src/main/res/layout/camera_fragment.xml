@@ -195,6 +195,7 @@
                 android:textOff="4x VF"
                 app:bindRotate="@{uimodel}"
                 android:onClick="@{() -> uimodel.onMagnifyViewfinderClicked()}"
+                android:onLongClick="@{() -> uimodel.onMagnifierLongClicked(buttonMagnifyViewfinder)}"
                 android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/aux_buttons_container"
                 app:layout_constraintStart_toStartOf="parent"

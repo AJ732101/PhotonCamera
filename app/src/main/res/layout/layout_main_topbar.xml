@@ -129,6 +129,7 @@
                 android:background="@drawable/ic_timer"
                 android:backgroundTint="@android:color/white"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onCountdownTimerLongClicked(countdownTimerButton, uicontroller)}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{timer_visible ? View.VISIBLE : View.GONE}"

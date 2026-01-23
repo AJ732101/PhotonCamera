@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.ListPreference;
 
 import com.particlesdevs.photoncamera.BR;
 import com.particlesdevs.photoncamera.R;
@@ -20,8 +21,11 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.ui.camera.CameraUIController;
+import com.particlesdevs.photoncamera.util.FileManager;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -140,6 +144,73 @@ public class CameraFragmentModel extends BaseObservable {
                     String selectedValue = entryValues[which];
                     PhotonCamera.getSettings().noiseProcessing = Integer.valueOf(selectedValue);
                     PreferenceKeys.setNoiseProcessing(PhotonCamera.getSettings().noiseProcessing);
+
+                    dialog.dismiss();
+                    if (uiController instanceof CameraUIController) {
+                        ((CameraUIController) uiController).refreshCameraUI(true);
+                    }
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    public void onCountdownTimerLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        String currentValue = PreferenceKeys.getLutName();
+        List<CharSequence> entries = new ArrayList<>();
+        List<CharSequence> entryValues = new ArrayList<>();
+
+        entries.add("None");
+        entryValues.add("lut.png");
+
+        File tuningDir = FileManager.sPHOTON_TUNING_DIR;
+        if (tuningDir.exists() && tuningDir.isDirectory()) {
+            File[] files = tuningDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+
+            if (files != null) {
+                for (File file : files) {
+                    String fileName = file.getName();
+                    if (!entryValues.contains(fileName)) {
+                        entries.add(fileName);
+                        entryValues.add(fileName);
+                    }
+                }
+            }
+        }
+
+        File lutDir = FileManager.sPHOTON_LUT_DIR;
+        if (lutDir.exists() && lutDir.isDirectory()) {
+            File[] files = lutDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+
+            if (files != null) {
+                for (File file : files) {
+                    String fileName = file.getName();
+                    if (!entryValues.contains(fileName)) {
+                        entries.add(fileName);
+                        entryValues.add(fileName);
+                    }
+                }
+            }
+        }
+
+        int checkedItem = -1;
+        for (int i = 0; i < entryValues.size(); i++) {
+            if (entryValues.get(i).toString().equals(currentValue)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        CharSequence[] entriesArray = entries.toArray(new CharSequence[0]);
+        CharSequence[] entryValuesArray = entryValues.toArray(new CharSequence[0]);
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.color_lut)
+                .setSingleChoiceItems(entriesArray, checkedItem, (dialog, which) -> {
+                    String selectedValue = entryValuesArray[which].toString();
+                    PhotonCamera.getSettings().lutName = selectedValue;
+                    PreferenceKeys.setLutName(selectedValue);
 
                     dialog.dismiss();
                     if (uiController instanceof CameraUIController) {
@@ -392,6 +463,12 @@ public class CameraFragmentModel extends BaseObservable {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    public void onMagnifierLongClicked(View view) {
+        if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().setAutoExposureCenter();
+        }
     }
 
     public final SeekBar.OnSeekBarChangeListener zoomChangeListener = new SeekBar.OnSeekBarChangeListener() {
