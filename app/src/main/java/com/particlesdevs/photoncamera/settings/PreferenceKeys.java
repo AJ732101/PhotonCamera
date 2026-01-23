@@ -652,8 +652,16 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE);
     }
 
+    public static void setVideoFramerate(int value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, value);
+    }
+
     public static int getVideoHeight() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT);
+    }
+
+    public static void setVideoHeight(int value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_VIDEO_HEIGHT, value);
     }
 
     public static int isSystemNrOn() {

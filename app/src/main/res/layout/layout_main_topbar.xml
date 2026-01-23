@@ -112,6 +112,7 @@
                 android:background="@drawable/eis_button"
                 android:checked="@{PreferenceKeys.isEisPhotoOn()}"
                 android:onClick="@{top_bar_click_listener}"
+                android:onLongClick="@{() -> uimodel.onEisToggleLongClicked(countdownTimerButton, uicontroller)}"
                 android:textOff=""
                 android:textOn=""
                 android:visibility="@{eis_visible ? View.VISIBLE : View.GONE}"

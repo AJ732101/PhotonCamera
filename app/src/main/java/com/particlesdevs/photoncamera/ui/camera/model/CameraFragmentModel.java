@@ -58,6 +58,72 @@ public class CameraFragmentModel extends BaseObservable {
         }
     }
 
+    public void onEisToggleLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            String[] entries = context.getResources().getStringArray(R.array.video_framerate_entries);
+            String[] entryValues = context.getResources().getStringArray(R.array.video_framerate_entryValues);
+            int currentVal = PreferenceKeys.getVideoFramerate();
+
+            int checkedItem = -1;
+            for (int i = 0; i < entryValues.length; i++) {
+                if (Integer.valueOf(entryValues[i]) == currentVal) {
+                    checkedItem = i;
+                    break;
+                }
+            }
+
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.video_framerate)
+                    .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                        int selectedValue = Integer.valueOf(entryValues[which]);
+                        PhotonCamera.getSettings().videoFramrate = selectedValue;
+                        PreferenceKeys.setVideoFramerate(selectedValue);
+
+                        dialog.dismiss();
+                        if (uiController instanceof CameraUIController) {
+                            ((CameraUIController) uiController).refreshCameraUI(true);
+                        }
+                        notifyChange();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+    }
+
+    public void onFlipCameraLongClicked(View view, Object uiController) {
+        Context context = view.getContext();
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            String[] entries = context.getResources().getStringArray(R.array.video_resolution_entries);
+            String[] entryValues = context.getResources().getStringArray(R.array.video_resolution_entryValues);
+            int currentVal = PreferenceKeys.getVideoHeight();
+
+            int checkedItem = -1;
+            for (int i = 0; i < entryValues.length; i++) {
+                if (Integer.valueOf(entryValues[i]) == currentVal) {
+                    checkedItem = i;
+                    break;
+                }
+            }
+
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.resolution)
+                    .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
+                        int selectedValue = Integer.valueOf(entryValues[which]);
+                        PhotonCamera.getSettings().videoHeight = selectedValue;
+                        PreferenceKeys.setVideoHeight(selectedValue);
+
+                        dialog.dismiss();
+                        if (uiController instanceof CameraUIController) {
+                            ((CameraUIController) uiController).refreshCameraUI(true);
+                        }
+                        notifyChange();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+    }
+
     public void onSettingsLongClicked(View view, Object uiController) {
         Context context = view.getContext();
 
