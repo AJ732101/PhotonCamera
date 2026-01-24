@@ -637,7 +637,7 @@ public class YUVSaver extends DefaultSaver{
                         .append(" -i \"").append(rawFileName).append("\" -c:v libaom-av1 -still-picture 1 ")
                         .append("-pix_fmt yuv420p10le -color_primaries bt2020 -color_trc smpte2084 -colorspace bt2020_ncl ")
                         .append("-vf \"setdar=4/3").append(transposeFilter).append("\" ")
-                        .append("-crf 20 -cpu-used 6 \"").append(rawFileName.replace(".raw", "_hdr.avif")).append("\"\n");
+                        .append("-crf 0 -cpu-used 6 \"").append(rawFileName.replace(".raw", "_hdr.avif")).append("\"\n");
 
                 sb.append("\n[3. ENCODING JPEG-XL (10-bit HDR)]\n");
                 sb.append("ffmpeg -f rawvideo -pixel_format p010le -video_size ").append(widthHeight)
@@ -651,7 +651,7 @@ public class YUVSaver extends DefaultSaver{
                 sb.append("ffmpeg -f rawvideo -pixel_format nv12 -video_size ").append(widthHeight)
                         .append(" -i \"").append(rawFileName).append("\" -c:v libaom-av1 -still-picture 1 ")
                         .append("-pix_fmt yuv420p -vf \"setdar=4/3").append(transposeFilter).append("\" ")
-                        .append("-crf 20 -cpu-used 8 \"").append(rawFileName.replace(".raw", "_8bit.avif")).append("\"\n");
+                        .append("-crf 0 -cpu-used 6 \"").append(rawFileName.replace(".raw", "_8bit.avif")).append("\"\n");
 
                 sb.append("\n[3. ENCODING JPEG]\n");
                 sb.append("ffmpeg -f rawvideo -pixel_format nv12 -video_size ").append(widthHeight)
