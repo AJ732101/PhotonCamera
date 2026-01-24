@@ -28,7 +28,7 @@ public class RecordingUtils {
 
         @Override
         public void onInputBufferAvailable(MediaCodec codec, int index) {
-            Log.d("VideoEncoderCallback", "onInputBufferAvailable");
+            //Log.d("VideoEncoderCallback", "onInputBufferAvailable");
         }
 
         @Override
