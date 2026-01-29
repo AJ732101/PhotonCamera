@@ -1,12 +1,12 @@
 from __future__ import annotations
 import os
-import platform
 import subprocess
-from collections.abc import Callable, Iterable
 from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image
+import tifffile
+import struct
 
 from nodes.impl.dds.texconv import dds_to_png_texconv
 from nodes.impl.image_formats import (
@@ -19,10 +19,83 @@ from nodes.properties.outputs import DirectoryOutput, FileNameOutput, LargeImage
 from nodes.utils.utils import get_h_w_c, split_file_path
 from .. import io_group
 
-_Decoder = Callable[[Path], np.ndarray | None]
+def get_gainmaps_from_dng(dng_path):
+    try:
+        with tifffile.TiffFile(dng_path) as tif:
+            opcode_data = None
+            for page in tif.pages:
+                for tag_id in [51009, 51008, 51010]:
+                    if tag_id in page.tags:
+                        opcode_data = page.tags[tag_id].value
+                        break
+                if opcode_data: break
+            
+            if opcode_data is None: return None
+
+            found_channels = 0
+            search_pos = 0
+            gain_grids = []
+
+            while search_pos < len(opcode_data) - 40 and found_channels < 4:
+                vals = struct.unpack('>fff', opcode_data[search_pos:search_pos+12])
+                
+                if abs(vals[0] - 1.4166666) < 0.001 and abs(vals[2] - 1.375) < 0.001:
+                    rows = struct.unpack('>I', opcode_data[search_pos-8:search_pos-4])[0]
+                    cols = struct.unpack('>I', opcode_data[search_pos-4:search_pos])[0]
+                    
+                    if rows == 0 or cols == 0 or rows > 1000 or cols > 1000:
+                        search_pos += 4
+                        continue
+
+                    num_f = rows * cols
+                    check_pos = search_pos + 12
+                    found_start = -1
+                    
+                    while check_pos < len(opcode_data) - 4:
+                        val = struct.unpack('>f', opcode_data[check_pos:check_pos+4])[0]
+                        if val != 0.0:
+                            found_start = check_pos
+                            break
+                        check_pos += 4
+                    
+                    if found_start != -1:
+                        data_start = found_start + 4
+                        if data_start + (num_f * 4) <= len(opcode_data):
+                            raw_f = struct.unpack(f'>{num_f}f', opcode_data[data_start:data_start + num_f*4])
+                            grid = np.array(raw_f).reshape((rows, cols))
+                            gain_grids.append(grid)
+                            found_channels += 1
+                            search_pos = data_start + (num_f * 4)
+                            continue
+                
+                search_pos += 4
+
+            return gain_grids if len(gain_grids) == 4 else None
+    except:
+        return None
 
 def get_ext(path: Path | str) -> str:
     return split_file_path(path)[2].lower()
+
+def _get_gain_maps(img_path):
+    exe_name = 'DngOpcodeParser.exe'
+    temp_dir = "C:\\Temp"
+    try:
+        process = subprocess.run([exe_name, str(img_path)], check=True, capture_output=True, text=True)
+        print(process.stdout) 
+        
+        maps = []
+        for i in range(4):
+            csv_path = os.path.join(temp_dir, f"gm_{i}.csv")
+            if os.path.exists(csv_path):
+                data = np.genfromtxt(csv_path, delimiter=',')
+                if data.ndim == 2:
+                    maps.append(data.astype(np.float32))
+                os.remove(csv_path)
+        return maps
+    except Exception as e:
+        print(f"DEBUG: GainMap Extraction failed: {e}")
+        return []
 
 def _read_pvc_raw(path: Path) -> np.ndarray | None:
     if get_ext(path) != ".txt": return None
@@ -35,46 +108,74 @@ def _read_pvc_raw(path: Path) -> np.ndarray | None:
             if "Resolution:" in line:
                 res_part = line.split(":")[1].strip()
                 width, height = map(int, res_part.split("x"))
-            if "Format:" in line:
-                if "10-bit P010" in line: pix_fmt = "p010le"
-                elif "8-bit YUV420" in line: pix_fmt = "nv12"
+            elif "Format:" in line:
+                pix_fmt = line.split(":")[1].strip().lower()
         
-        cmd = ['ffmpeg', '-f', 'rawvideo', '-pixel_format', pix_fmt, '-video_size', f'{width}x{height}', '-i', str(raw_path), '-f', 'image2pipe', '-vcodec', 'rawvideo', '-pix_fmt', 'bgr24', '-']
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, _ = process.communicate()
-        if process.returncode != 0: return None
-        return np.frombuffer(out, dtype=np.uint8).reshape((height, width, 3)).astype(np.float32) / 255.0
-    except Exception: return None
+        with open(raw_path, "rb") as f:
+            raw_data = f.read()
+        
+        if pix_fmt == "nv12":
+            yuv = np.frombuffer(raw_data, dtype=np.uint8).reshape((height * 3 // 2, width))
+            return cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_NV12).astype(np.float32) / 255.0
+        return None
+    except: return None
 
 def _read_dng(path: Path) -> np.ndarray | None:
     if get_ext(path) != ".dng": return None
     try:
         import rawpy
         with rawpy.imread(str(path)) as raw:
-            rgb = raw.postprocess(use_camera_wb=True, no_auto_bright=True, bright=1.0, output_bps=8)
-            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-            return bgr.astype(np.float32) / 255.0
+            orient = getattr(raw.sizes, 'orientation', 0)
+
+            rgb = raw.postprocess(use_camera_wb=True, no_auto_bright=True, bright=1.0, output_bps=16)
+            img = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR).astype(np.float32) / 65535.0
+            
+            maps = get_gainmaps_from_dng(path)  
+            if len(maps) == 4:
+                h, w = img.shape[:2]
+                proc = []
+                for m in maps:
+                    if orient == 3: m = np.flip(m)
+                    elif orient == 6: m = np.rot90(m, k=-1)
+                    elif orient == 8: m = np.rot90(m, k=1)
+                    proc.append(m)
+                
+                b_map = cv2.resize(proc[3], (w, h), interpolation=cv2.INTER_CUBIC)
+                g_map = cv2.resize((proc[1] + proc[2]) / 2.0, (w, h), interpolation=cv2.INTER_CUBIC)
+                r_map = cv2.resize(proc[0], (w, h), interpolation=cv2.INTER_CUBIC)
+                
+                img[:, :, 0] *= b_map
+                img[:, :, 1] *= g_map
+                img[:, :, 2] *= r_map
+                img = np.clip(img, 0, 1)
+            return img
     except Exception as e:
+        print(f"DEBUG: DNG/rawpy Error: {e}")
         return None
 
 def _read_cv(path: Path) -> np.ndarray | None:
+    if get_ext(path) in [".dng", ".raw"]: return None
     if get_ext(path) not in get_opencv_formats(): return None
     try:
         img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-        return img if img is not None else cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if img is None: return None
+        denom = 255.0 if img.dtype == np.uint8 else 65535.0
+        return img.astype(np.float32) / denom
     except: return None
 
 def _read_pil(path: Path) -> np.ndarray | None:
     if get_ext(path) not in get_pil_formats(): return None
-    im = Image.open(path)
-    if im.mode == "P": im = im.convert(im.palette.mode)
-    img = np.array(im)
-    _, _, c = get_h_w_c(img)
-    if c == 3: img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    elif c == 4: img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA)
-    return img
+    try:
+        im = Image.open(path)
+        if im.mode == "P": im = im.convert(im.palette.mode)
+        img = np.array(im)
+        _, _, c = get_h_w_c(img)
+        if c == 3: img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        elif c == 4: img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGRA)
+        return img.astype(np.float32) / 255.0
+    except: return None
 
-_decoders: list[tuple[str, _Decoder]] = [
+_decoders = [
     ("pvc-raw", _read_pvc_raw),
     ("dng-raw", _read_dng),
     ("cv", _read_cv),
@@ -84,17 +185,24 @@ _decoders: list[tuple[str, _Decoder]] = [
 @io_group.register(
     schema_id="chainner:image:load",
     name="Load Image",
-    description="Load image (PVC/DNG support)",
+    description="Full Image Loader (PVC/DNG/GainMap C:\\Temp)",
     icon="BsFillImageFill",
     inputs=[ImageFileInput(primary_input=True)],
     outputs=[LargeImageOutput().suggest(), DirectoryOutput("Directory", of_input=0), FileNameOutput("Name", of_input=0)],
     side_effects=True,
 )
 def load_image_node(path: Path) -> tuple[np.ndarray, Path, str]:
-    dirname, basename, _ = split_file_path(path)
+    path_obj = Path(path)
+    dn, bn, _ = split_file_path(path_obj)
+    
+    if get_ext(path_obj) == ".dds":
+        path_obj = dds_to_png_texconv(path_obj)
+
     for _, decoder in _decoders:
         try:
-            img = decoder(Path(path))
-            if img is not None: return img, dirname, basename
+            img = decoder(path_obj)
+            if img is not None:
+                return img, Path(dn), bn
         except: continue
+        
     raise RuntimeError(f"Could not load image: {path}")

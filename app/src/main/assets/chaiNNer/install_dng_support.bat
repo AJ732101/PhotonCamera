@@ -15,11 +15,11 @@ echo 1. Protecting core dependencies (NumPy)...
 
 echo.
 echo 2. Installing DNG support (rawpy ^& imageio) without touching NumPy...
-"%PYTHON_EXE%" -m pip install rawpy imageio --no-deps
+"%PYTHON_EXE%" -m pip install rawpy tifffile imageio --no-deps
 
 echo.
 echo 3. Verifying installation...
-"%PYTHON_EXE%" -c "import numpy; import rawpy; import cv2; print('SUCCESS: NumPy ' + numpy.__version__ + ' and rawpy are working together!')"
+"%PYTHON_EXE%" -c "import numpy; import rawpy; import tifffile; import cv2; print('SUCCESS: NumPy ' + numpy.__version__ + ' and rawpy are working together!')"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
