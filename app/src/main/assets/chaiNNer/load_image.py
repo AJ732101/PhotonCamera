@@ -76,26 +76,26 @@ def get_gainmaps_from_dng(dng_path):
 
 def get_ext(path: Path | str) -> str:
     return split_file_path(path)[2].lower()
-
-def _get_gain_maps(img_path):
-    exe_name = 'DngOpcodeParser.exe'
-    temp_dir = "C:\\Temp"
+    
+def apply_gainmap_to_raw(raw, dng_path):
     try:
-        process = subprocess.run([exe_name, str(img_path)], check=True, capture_output=True, text=True)
-        print(process.stdout) 
-        
-        maps = []
-        for i in range(4):
-            csv_path = os.path.join(temp_dir, f"gm_{i}.csv")
-            if os.path.exists(csv_path):
-                data = np.genfromtxt(csv_path, delimiter=',')
-                if data.ndim == 2:
-                    maps.append(data.astype(np.float32))
-                os.remove(csv_path)
-        return maps
+        gm_list = get_gainmaps_from_dng(dng_path)
+        if not gm_list: return
+        gain = np.stack(gm_list, axis=-1)
+        raw_img = raw.raw_image_visible.astype(np.float32)
+        h_raw, w_raw = raw_img.shape
+        target_size = (w_raw // 2, h_raw // 2)
+        gain_full = cv2.resize(gain, target_size, interpolation=cv2.INTER_LINEAR)
+        black = raw.black_level_per_channel
+        for i, (ro, co) in enumerate([(0,0), (0,1), (1,0), (1,1)]):
+            b_lvl = black[i]
+            ch = raw_img[ro::2, co::2]
+            raw_img[ro::2, co::2] = ((ch - b_lvl) * gain_full[:, :, i]) + b_lvl
+            
+        raw.raw_image_visible[:] = np.clip(raw_img, 0, raw.white_level).astype(np.uint16)
+        print(f"DEBUG: GainMap applied (Shape: {gain.shape[1]}x{gain.shape[0]})")
     except Exception as e:
-        print(f"DEBUG: GainMap Extraction failed: {e}")
-        return []
+        print(f"DEBUG ERROR: {e}")
 
 def _read_pvc_raw(path: Path) -> np.ndarray | None:
     if get_ext(path) != ".txt": return None
@@ -125,29 +125,11 @@ def _read_dng(path: Path) -> np.ndarray | None:
     try:
         import rawpy
         with rawpy.imread(str(path)) as raw:
-            orient = getattr(raw.sizes, 'orientation', 0)
+            apply_gainmap_to_raw(raw, str(path)) 
 
-            rgb = raw.postprocess(use_camera_wb=True, no_auto_bright=True, bright=1.0, output_bps=16)
+            rgb = raw.postprocess(use_camera_wb=True, bright=1.0, output_bps=16)
+
             img = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR).astype(np.float32) / 65535.0
-            
-            maps = get_gainmaps_from_dng(path)  
-            if len(maps) == 4:
-                h, w = img.shape[:2]
-                proc = []
-                for m in maps:
-                    if orient == 3: m = np.flip(m)
-                    elif orient == 6: m = np.rot90(m, k=-1)
-                    elif orient == 8: m = np.rot90(m, k=1)
-                    proc.append(m)
-                
-                b_map = cv2.resize(proc[3], (w, h), interpolation=cv2.INTER_CUBIC)
-                g_map = cv2.resize((proc[1] + proc[2]) / 2.0, (w, h), interpolation=cv2.INTER_CUBIC)
-                r_map = cv2.resize(proc[0], (w, h), interpolation=cv2.INTER_CUBIC)
-                
-                img[:, :, 0] *= b_map
-                img[:, :, 1] *= g_map
-                img[:, :, 2] *= r_map
-                img = np.clip(img, 0, 1)
             return img
     except Exception as e:
         print(f"DEBUG: DNG/rawpy Error: {e}")
