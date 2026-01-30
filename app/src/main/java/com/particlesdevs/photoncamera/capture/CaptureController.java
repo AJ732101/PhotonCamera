@@ -1568,7 +1568,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
-        if ((targetMode == CameraMode.RAWVIDEO) || PhotonCamera.getSettings().aspect169) {
+        //if ((targetMode == CameraMode.RAWVIDEO) || PhotonCamera.getSettings().aspect169) {
+        if (PhotonCamera.getSettings().aspect169) {
             return new Size(9, 16);
         }
         else {
@@ -2304,7 +2305,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     config.setPhysicalCameraId(physicalID);
                 }
                 // activating HDR path
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     boolean gainMapRequested = checkHdrSupport(mCameraCharacteristics);
                     long hdrProfile = DynamicRangeProfiles.HLG10;
                     if (PhotonCamera.mHdrTenPlusIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10+")) {
@@ -2493,7 +2494,27 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     @NotNull
+    private List<Surface> configureSurfacesRawVideo(boolean isBurstSession) {
+        List<Surface> surfaces = new ArrayList<>();
+
+        if (mPreviewRequestBuilder != null) {
+            if (surface != null && surface.isValid()) {
+                surfaces.add(surface);
+            }
+            surfaces.add(mImageReaderPreview.getSurface());
+            surfaces.add(mImageReaderRaw.getSurface());
+
+        }
+        Log.d(TAG, "Final number of surfaces for RAW video mode: " + surfaces.size());
+        return surfaces;
+    }
+
+    @NotNull
     private List<Surface> configureSurfaces(boolean isBurstSession) {
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            return configureSurfacesRawVideo(isBurstSession);
+        }
+
         List<Surface> surfaces = new ArrayList<>();
         boolean isHighSpeedSupported = false;
         int[] capabilities = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);

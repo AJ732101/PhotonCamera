@@ -75,9 +75,11 @@ public class RawVideoProcessor extends ProcessorBase {
         if(!fillParams){
             Log.d(TAG, "videoCycle: " + this + " " + image + " " + startCounter);
             int width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
-            //int height = image.getHeight();
+            int height = image.getHeight();
             // Crop to 16:9
-            int height = width * 9 / 16;
+            if (PhotonCamera.getSettings().aspect169) {
+                height = width * 9 / 16;
+            }
             PhotonCamera.getParameters().rawSize = new Point(width, height);
             PhotonCamera.getParameters().FillConstParameters(characteristics, PhotonCamera.getParameters().rawSize);
             PhotonCamera.getParameters().FillDynamicParameters(captureResult, captureRequest, 100);
