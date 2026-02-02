@@ -454,6 +454,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      */
     public boolean mIsRecordingVideo;
     Surface mVideoRecordingSurface = null;
+    Surface mTextureSurface = null;
     private Size target;
     private float mFocus;
     public int mPreviewAFMode;
@@ -1667,8 +1668,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //Open camera in non ui thread
         processExecutor.execute(()->{
             CameraFragment.mSelectedMode = PhotonCamera.getSettings().selectedMode;
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 //requestCameraPermission();
                 return;
             }
@@ -2249,7 +2249,88 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
-    Surface surface;
+    boolean isUseCaseSupported(CameraCharacteristics chars, int useCase) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return false;
+        }
+
+        long[] availableUseCases = chars.get(CameraCharacteristics.SCALER_AVAILABLE_STREAM_USE_CASES);
+
+        if (availableUseCases == null) {
+            return false;
+        }
+
+        for (long caseItem : availableUseCases) {
+            if (caseItem == useCase) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<OutputConfiguration> setOutputConfiguration(List<Surface> surfaces) {
+        ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
+        for (Surface surfacei : surfaces) {
+            var config = new OutputConfiguration(surfacei);
+            if (!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                config.setPhysicalCameraId(physicalID);
+            }
+            // activating HDR path and setting stream use case
+            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                boolean gainMapRequested = checkHdrSupport(mCameraCharacteristics);
+                long hdrProfile = DynamicRangeProfiles.HLG10;
+                if (PhotonCamera.mHdrTenPlusIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10+")) {
+                    hdrProfile = DynamicRangeProfiles.HDR10_PLUS;
+                }
+                else if (PhotonCamera.mHdrTenIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10")) {
+                    hdrProfile = DynamicRangeProfiles.HDR10;
+                }
+                // video
+                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
+                    config.setDynamicRangeProfile(hdrProfile);
+                }
+                // Ultra HDR or 10 Bit surface as target (for encoding after image capture)
+                if ((mTargetFormat == ImageFormat.JPEG_R) || (mTargetFormat == ImageFormat.YCBCR_P010)) {
+                    if ((mImageReaderRaw.getSurface() == surfacei) || (mImageReaderPreview.getSurface() == surfacei)) {
+                        config.setDynamicRangeProfile(hdrProfile);
+                    }
+                }
+                else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
+                    config.setDynamicRangeProfile(hdrProfile);
+                }
+
+                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    if (mIsRecordingVideo) {
+                        if (mImageReaderPreview.getSurface() == surfacei) {
+                            if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW)) {
+                                config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW);
+                            }
+                        }
+
+                        if (mVideoRecordingSurface == surfacei) {
+                            if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD)) {
+                                config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD);
+                                Log.i(TAG, "Using stream use case SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD");
+                            }
+                            if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
+                                config.setDynamicRangeProfile(hdrProfile);
+                            }
+                        }
+                    }
+                }
+                else if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO)) {
+                    if (mImageReaderRaw.getSurface() == surfacei) {
+                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
+                    }
+                }
+            }
+
+            outputConfigurations.add(config);
+        }
+
+        return outputConfigurations;
+    }
+
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -2265,12 +2346,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             texture.setDefaultBufferSize(mBufferSize.getHeight(), mBufferSize.getWidth());
 
             // This is the output Surface we need to start preview.
-            if (surface != null) {
-                //surface.release();
+            if (mTextureSurface != null) {
+                mTextureSurface.release();
             }
-            else {
-                surface = new Surface(texture);
-            }
+            mTextureSurface = new Surface(texture);
+
             // We set up a CaptureRequest.Builder with the output Surface.
             setCaptureRequestBuilder();
 
@@ -2298,47 +2378,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             Log.d(TAG, "createCameraPreviewSession() surfaces:" + Arrays.toString(surfaces.toArray()));
-            ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
-            for (Surface surfacei : surfaces) {
-                var config = new OutputConfiguration(surfacei);
-                if (!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    config.setPhysicalCameraId(physicalID);
-                }
-                // activating HDR path
-                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
-                    boolean gainMapRequested = checkHdrSupport(mCameraCharacteristics);
-                    long hdrProfile = DynamicRangeProfiles.HLG10;
-                    if (PhotonCamera.mHdrTenPlusIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10+")) {
-                        hdrProfile = DynamicRangeProfiles.HDR10_PLUS;
-                    }
-                    else if (PhotonCamera.mHdrTenIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10")) {
-                        hdrProfile = DynamicRangeProfiles.HDR10;
-                    }
-                    // video
-                    if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
-                        config.setDynamicRangeProfile(hdrProfile);
-                    }
-                    // Ultra HDR or 10 Bit surface as target (for encoding after image capture)
-                    if ((mTargetFormat == ImageFormat.JPEG_R) || (mTargetFormat == ImageFormat.YCBCR_P010)) {
-                        if ((mImageReaderRaw.getSurface() == surfacei) || (mImageReaderPreview.getSurface() == surfacei)) {
-                            config.setDynamicRangeProfile(hdrProfile);
-                        }
-                    }
-                    else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
-                        config.setDynamicRangeProfile(hdrProfile);
-                    }
-                    /*if (mImageReaderRaw.getSurface() == surfacei) {
-                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
-                    }
-                    else if (mVideoRecordingSurface == surfacei) {
-                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD);
-                    }
-                    else {
-                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW);
-                    }*/
-                }
-                outputConfigurations.add(config);
-            }
+            ArrayList<OutputConfiguration> outputConfigurations = setOutputConfiguration(surfaces);
 
             CameraCaptureSession.StateCallback stateCallback = new CameraCaptureSession.StateCallback() {
                 @Override
@@ -2498,8 +2538,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         List<Surface> surfaces = new ArrayList<>();
 
         if (mPreviewRequestBuilder != null) {
-            if (surface != null && surface.isValid()) {
-                surfaces.add(surface);
+            if (mTextureSurface != null && mTextureSurface.isValid()) {
+                surfaces.add(mTextureSurface);
             }
             surfaces.add(mImageReaderPreview.getSurface());
             surfaces.add(mImageReaderRaw.getSurface());
@@ -2529,37 +2569,36 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         boolean isHighSpeedSessionRequested = mIsRecordingVideo && isHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120);
 
         if (mIsRecordingVideo) {
-            Surface videoRecordingSurface = null;
             if (PhotonCamera.getSettings().videoNewRec) {
                 if (setUpMediaRecorderNew()) {
-                    videoRecordingSurface = mMediaCodecSurface;
+                    mVideoRecordingSurface = mMediaCodecSurface;
                 } else {
                     mIsRecordingVideo = false;
                 }
             } else {
                 if (setUpMediaRecorder()) {
-                    videoRecordingSurface = mMediaRecorder.getSurface();
+                    mVideoRecordingSurface = mMediaRecorder.getSurface();
                 } else {
                     mIsRecordingVideo = false;
                 }
             }
 
             if (isHighSpeedSessionRequested) {
-                if (videoRecordingSurface != null && videoRecordingSurface.isValid()) {
-                    surfaces.add(videoRecordingSurface);
+                if (mVideoRecordingSurface != null && mVideoRecordingSurface.isValid()) {
+                    surfaces.add(mVideoRecordingSurface);
                     if (mPreviewRequestBuilder != null) {
-                        mPreviewRequestBuilder.addTarget(videoRecordingSurface);
+                        mPreviewRequestBuilder.addTarget(mVideoRecordingSurface);
                     }
                     Log.i(TAG, "Configuring surfaces for HIGH-SPEED session. Using ONLY video surface.");
                 }
             } else {
-                if (surface != null && surface.isValid()) {
-                    surfaces.add(surface);
+                if (mTextureSurface != null && mTextureSurface.isValid()) {
+                    surfaces.add(mTextureSurface);
                 }
-                if (videoRecordingSurface != null && videoRecordingSurface.isValid()) {
-                    surfaces.add(videoRecordingSurface);
+                if (mVideoRecordingSurface != null && mVideoRecordingSurface.isValid()) {
+                    surfaces.add(mVideoRecordingSurface);
                     if (mPreviewRequestBuilder != null) {
-                        mPreviewRequestBuilder.addTarget(videoRecordingSurface);
+                        mPreviewRequestBuilder.addTarget(mVideoRecordingSurface);
                     }
                 }
                 Log.i(TAG, "Configuring surfaces for REGULAR video session.");
@@ -2567,8 +2606,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return surfaces;
         }
 
-        if (surface != null && surface.isValid()) {
-            surfaces.add(surface);
+        if (mTextureSurface != null && mTextureSurface.isValid()) {
+            surfaces.add(mTextureSurface);
         }
 
         if (isDualSession && isBurstSession) {
@@ -2633,7 +2672,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
-        mPreviewRequestBuilder.addTarget(surface);
+        mPreviewRequestBuilder.addTarget(mTextureSurface);
         mPreviewMeteringAF = mPreviewRequestBuilder.get(CONTROL_AF_REGIONS);
         mPreviewAFMode = PreferenceKeys.getAfMode();
 
@@ -3594,7 +3633,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.addTarget(mImageReaderRaw.getSurface());
                 CameraMode selectedMode = PhotonCamera.getSettings().selectedMode;
                 if(frametime > 0.06 && !isDualSession || selectedMode == CameraMode.RAWVIDEO || selectedMode == CameraMode.UNLIMITED || (!IsoExpoSelector.HDR)) {
-                    captureBuilder.addTarget(surface);
+                    captureBuilder.addTarget(mTextureSurface);
                 }
             }
 
@@ -3656,7 +3695,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     IsoExpoSelector.setExpo(captureBuilder, i, this);
                     times[i] = IsoExpoSelector.lastSelectedExposure;
                     if (i >= 1) {
-                        captureBuilder.removeTarget(surface);
+                        captureBuilder.removeTarget(mTextureSurface);
                         captureBuilder.removeTarget(mImageReaderPreview.getSurface());
                         captureBuilder.addTarget(mImageReaderRaw.getSurface());
                     }
