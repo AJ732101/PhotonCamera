@@ -600,10 +600,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
             }
 
-            if (mIsRecordingVideo || isSingleShotJpegOrAvifOrHeic()) {
-                return;
-            }
-
             Object exposure = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
             Object iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
             Object focus = result.get(CaptureResult.LENS_FOCUS_DISTANCE);
@@ -624,6 +620,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mPreviewCaptureRequest = request;
             process(result);
             cameraEventsListener.onPreviewCaptureCompleted(result);
+
+            if (mIsRecordingVideo || isSingleShotJpegOrAvifOrHeic()) {
+                return;
+            }
+
             if(PreferenceKeys.getAfMode() == CaptureRequest.CONTROL_AF_MODE_AUTO && !burst && !mTouchFocus.isTouchFocus) {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
                 rebuildPreviewBuilderOneShot();
