@@ -13,6 +13,7 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Build;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -110,6 +111,14 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         pTexCoord.put(ttmp);
         pTexCoord.position(0);
         setOrientation(180);
+    }
+
+    public void setVideoRecordingSurface(Surface surface, int width, int height) {
+
+    }
+
+    public void setFrameTimestamp(long timestamp) {
+
     }
 
     @Override
