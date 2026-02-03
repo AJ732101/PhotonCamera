@@ -64,7 +64,6 @@ import android.os.SystemClock;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.particlesdevs.photoncamera.processing.ImagePath;
-import com.particlesdevs.photoncamera.processing.opengl.preview.MainRenderer;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
@@ -271,6 +270,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public static EncoderInfoUtil mEncoderInfo = new EncoderInfoUtil();
     public TouchFocus mTouchFocus;
     public String mSocVendor = "";
+    private int mVidWidth = 1280;
+    private int mVidHeight = 720;
 
     public final boolean mFlashEnabled = false;
     public CameraEventsListener cameraEventsListener;
@@ -571,6 +572,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
             processHistogram(result);
+            if (mIsRecordingVideo) {
+                Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
+                if (timestamp != null && mMainRenderer != null) {
+                    mMainRenderer.setFrameTimestamp(timestamp);
+                }
+            }
             if (mIsRecordingVideo && // Use your actual state variable for recording
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
                     PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus) {
@@ -591,6 +598,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         mVideoCodec.setParameters(params);
                     }
                 }
+            }
+
+            if (mIsRecordingVideo || isSingleShotJpegOrAvifOrHeic()) {
+                return;
             }
 
             Object exposure = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
@@ -623,7 +634,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         @Override
         public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
             super.onCaptureStarted(session, request, timestamp, frameNumber);
-            boolean combinedFpsResult = PhotonCamera.getSettings().fpsPreview;
+            /*boolean combinedFpsResult = PhotonCamera.getSettings().fpsPreview;
             if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                 combinedFpsResult = PhotonCamera.getSettings().fpsPreview || (PhotonCamera.getSettings().videoFramrate == 60);
             }
@@ -654,7 +665,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         is30Fps = false;
                     }
                 }
-            }
+            }*/
         }
     };
 
@@ -2231,6 +2242,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         boolean test4 = PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO);
         int test5 = PhotonCamera.getSettings().rawSaver;
 
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().lutName.equals("None") && PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
+            File previewLut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
+            if (!previewLut.exists()) {
+                previewLut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
+            }
+            mMainRenderer.setLut(previewLut);
+            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
+            return true;
+        }
+
         if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
@@ -2268,7 +2289,22 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return false;
     }
 
+    public ArrayList<OutputConfiguration> setOutputConfigurationLutVideo(List<Surface> surfaces) {
+        ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
+        for (Surface surfacei : surfaces) {
+            var config = new OutputConfiguration(surfacei);
+            outputConfigurations.add(config);
+        }
+        return outputConfigurations;
+    }
+
     public ArrayList<OutputConfiguration> setOutputConfiguration(List<Surface> surfaces) {
+        // special handling for LUT video
+        if (PhotonCamera.getSpecific().specificSetting.enableVideoLut && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && mIsRecordingVideo) {
+            return setOutputConfigurationLutVideo(surfaces);
+        }
+
+        // other
         ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
         for (Surface surfacei : surfaces) {
             var config = new OutputConfiguration(surfacei);
@@ -2299,28 +2335,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     config.setDynamicRangeProfile(hdrProfile);
                 }
 
-                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    if (mIsRecordingVideo) {
-                        if (mImageReaderPreview.getSurface() == surfacei) {
-                            if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW)) {
-                                config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW);
+                if (PhotonCamera.getSpecific().specificSetting.enableStreamUseCases) {
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                        if (mIsRecordingVideo) {
+                            if (mImageReaderPreview.getSurface() == surfacei) {
+                                if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW)) {
+                                    config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW);
+                                }
                             }
-                        }
 
-                        if (mVideoRecordingSurface == surfacei) {
-                            if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD)) {
-                                config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD);
-                                Log.i(TAG, "Using stream use case SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD");
-                            }
-                            if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
-                                config.setDynamicRangeProfile(hdrProfile);
+                            if (mVideoRecordingSurface == surfacei) {
+                                if (isUseCaseSupported(mCameraCharacteristics, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD)) {
+                                    config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD);
+                                    Log.i(TAG, "Using stream use case SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD");
+                                }
+                                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
+                                    config.setDynamicRangeProfile(hdrProfile);
+                                }
                             }
                         }
-                    }
-                }
-                else if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO)) {
-                    if (mImageReaderRaw.getSurface() == surfacei) {
-                        config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
+                    } else if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO)) {
+                        if (mImageReaderRaw.getSurface() == surfacei) {
+                            config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
+                        }
                     }
                 }
             }
@@ -2549,10 +2586,45 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return surfaces;
     }
 
+    private List<Surface> configureSurfacesLutVideo(boolean isBurstSession) {
+        List<Surface> surfaces = new ArrayList<>();
+
+        if (mPreviewRequestBuilder != null) {
+            if (mTextureSurface != null && mTextureSurface.isValid()) {
+                surfaces.add(mTextureSurface);
+            }
+            surfaces.add(mImageReaderPreview.getSurface());
+        }
+        if (PhotonCamera.getSettings().videoNewRec) {
+            if (setUpMediaRecorderNew()) {
+                mVideoRecordingSurface = mMediaCodecSurface;
+            } else {
+                mIsRecordingVideo = false;
+            }
+        } else {
+            if (setUpMediaRecorder()) {
+                mVideoRecordingSurface = mMediaRecorder.getSurface();
+            } else {
+                mIsRecordingVideo = false;
+            }
+        }
+        if (mVidHeight < mVidWidth) {
+            mMainRenderer.setVideoRecordingSurface(mVideoRecordingSurface, mVidWidth, mVidHeight);
+        }
+        else {
+            mMainRenderer.setVideoRecordingSurface(mVideoRecordingSurface, mVidHeight, mVidWidth);
+        }
+        Log.d(TAG, "Final number of surfaces for LUT video mode: " + surfaces.size());
+        return surfaces;
+    }
+
     @NotNull
     private List<Surface> configureSurfaces(boolean isBurstSession) {
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return configureSurfacesRawVideo(isBurstSession);
+        }
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && mIsRecordingVideo && PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
+            return configureSurfacesLutVideo(isBurstSession);
         }
 
         List<Surface> surfaces = new ArrayList<>();
@@ -2625,31 +2697,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         Log.d(TAG, "Final number of surfaces: " + surfaces.size());
         return surfaces;
-
-        /*List<Surface> surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
-        if (isDualSession) {
-            if (isBurstSession) {
-                surfaces = Arrays.asList(mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
-            }
-            if (mTargetFormat == mPreviewTargetFormat) {
-                surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface());
-            }
-        } else {
-            if(Build.BRAND.equalsIgnoreCase("samsung")){
-                surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
-            } else {
-                surfaces = Arrays.asList(surface, mImageReaderPreview.getSurface(), mImageReaderRaw.getSurface());
-            }
-            if(PhotonCamera.getSettings().previewFormat == 0) {
-                surfaces = Arrays.asList(surface, mImageReaderRaw.getSurface());
-            }
-        }
-        if (mIsRecordingVideo) {
-            setUpMediaRecorder();
-            surfaces = Arrays.asList(surface, mMediaRecorder.getSurface());
-            mPreviewRequestBuilder.addTarget(mMediaRecorder.getSurface());
-        }
-        return surfaces;*/
     }
 
 
@@ -4636,8 +4683,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         Log.d(TAG, "setUpMediaRecorder start");
-        int vidWidth = 1280;
-        int vidHeight = 720;
+        mVidWidth = 1280;
+        mVidHeight = 720;
         mMediaRecorder.reset();
         if (PhotonCamera.getSettings().audioCodec != 0) {
             mMediaRecorder.setAudioSource(PhotonCamera.getSettings().audioProcessing);
@@ -4701,33 +4748,39 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         // resolution
-        if (PhotonCamera.getSettings().videoHeight == 4 * 1080) {
-            vidWidth = 4 * 1920;
-            vidHeight = 4 * 1080;
+        if (PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
+            //mVidWidth = mPreviewSize.getHeight();
+            //mVidHeight = mPreviewSize.getWidth();
+            mVidWidth = 1080;
+            mVidHeight = 1080;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 4 * 1080) {
+            mVidWidth = 4 * 1920;
+            mVidHeight = 4 * 1080;
         }
         else if (PhotonCamera.getSettings().videoHeight == 2 * 1080) {
-            vidWidth = 2 * 1920;
-            vidHeight = 2 * 1080;
+            mVidWidth = 2 * 1920;
+            mVidHeight = 2 * 1080;
         }
         else if (PhotonCamera.getSettings().videoHeight == 1080) {
-            vidWidth = 1920;
-            vidHeight = 1080;
+            mVidWidth = 1920;
+            mVidHeight = 1080;
         }
         else if (PhotonCamera.getSettings().videoHeight == 9999) {
-            vidWidth = maxSensorRes.getWidth();
-            vidHeight = maxSensorRes.getHeight();
+            mVidWidth = maxSensorRes.getWidth();
+            mVidHeight = maxSensorRes.getHeight();
         }
         else if (PhotonCamera.getSettings().videoHeight == 8888) {
-            vidWidth = 6016;
-            vidHeight = 4512;
+            mVidWidth = 6016;
+            mVidHeight = 4512;
         }
         else if (PhotonCamera.getSettings().videoHeight == 7777) {
-            vidWidth = 7680;
-            vidHeight = 5760;
+            mVidWidth = 7680;
+            mVidHeight = 5760;
         }
         else if (PhotonCamera.getSettings().videoHeight == 6666) {
-            vidWidth = 8192;
-            vidHeight = 6144;
+            mVidWidth = 8192;
+            mVidHeight = 6144;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);
@@ -4752,13 +4805,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.e(TAG, "Failed to set keyframe interval via RestrictionBypass.", e);
         }
 
-        if (Math.min(vidWidth, maxEncRes.getWidth()) == 2048) {
+        if (Math.min(mVidWidth, maxEncRes.getWidth()) == 2048) {
             mMediaRecorder.setVideoSize(1920, 1920);
             Log.d(TAG, "using recording resolution: 1920x1920 -> fallback from 2024x2024");
         }
         else {
-            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxEncRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxEncRes.getHeight())));
-            mMediaRecorder.setVideoSize(Math.min(vidWidth, maxEncRes.getWidth()), Math.min(vidHeight, maxEncRes.getHeight()));
+            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(mVidWidth, maxEncRes.getWidth())) + "x" + Integer.toString(Math.min(mVidHeight, maxEncRes.getHeight())));
+            mMediaRecorder.setVideoSize(Math.min(mVidWidth, maxEncRes.getWidth()), Math.min(mVidHeight, maxEncRes.getHeight()));
         }
         if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > mEncoderInfo.getMaxBitrateForMimeType(mimeType)) {
             Log.w(TAG, "selected video bitrate (" + Integer.toString(PhotonCamera.getSettings().videoBitrate) + "MBit/s)exceeds the maximum supported by the encoder (" +
@@ -4846,6 +4899,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void stopRecordingVideo() {
         Log.d(TAG, "stop video recording");
         mIsRecordingVideo = false;
+        mMainRenderer.setVideoRecordingSurface(null, 0, 0);
 
         releaseAudioRecorder();
 
