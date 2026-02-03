@@ -2355,7 +2355,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 }
                             }
                         }
-                    } else if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO)) {
+                    } else if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO) && isSingleShotJpegOrAvifOrHeic()) {
                         if (mImageReaderRaw.getSurface() == surfacei) {
                             config.setStreamUseCase(CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE);
                         }
