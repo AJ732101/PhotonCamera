@@ -17,6 +17,8 @@ public class SpecificSetting {
     public boolean modeShowRawVideo = true;
     public boolean showZoomSlider = false;
     public boolean enableQLL = false;
+    public boolean enableVideoLut = false;
+    public boolean enableStreamUseCases = true;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
