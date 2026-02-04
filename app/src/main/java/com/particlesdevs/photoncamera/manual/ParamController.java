@@ -67,7 +67,10 @@ public class ParamController implements Observer {
             builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, Math.min(shutterNs, ExposureIndex.sec / 5));
             builder.set(CaptureRequest.SENSOR_SENSITIVITY, captureController.mPreviewIso);
         }
-        captureController.rebuildPreviewBuilder();
+
+        if (captureController != null) {
+            captureController.rebuildPreviewBuilder();
+        }
     }
 
     public void setISO(int isoVal, double currentExposure) {
@@ -86,7 +89,9 @@ public class ParamController implements Observer {
             builder.set(CaptureRequest.SENSOR_SENSITIVITY, isoVal);
             builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, captureController.mPreviewExposureTime);
         }
-        captureController.rebuildPreviewBuilder();
+        if (captureController != null) {
+            captureController.rebuildPreviewBuilder();
+        }
     }
 
     public void setFocus(float focusDist) {
@@ -101,7 +106,9 @@ public class ParamController implements Observer {
             builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
             builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focusDist);
         }
-        captureController.rebuildPreviewBuilder();
+        if (captureController != null) {
+            captureController.rebuildPreviewBuilder();
+        }
     }
 
     public void setEV(int ev) {
@@ -111,7 +118,9 @@ public class ParamController implements Observer {
             return;
         }
         builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, ev);
-        captureController.rebuildPreviewBuilder();
+        if (captureController != null) {
+            captureController.rebuildPreviewBuilder();
+        }
     }
 
     public boolean isManualMode() {
@@ -153,7 +162,9 @@ public class ParamController implements Observer {
                 EV = 0;
                 SHUTTER = -1;
                 FOCUS = -1;
-                captureController.unlockFocus();
+                if (captureController != null) {
+                    captureController.unlockFocus();
+                }
             }
         }
     }

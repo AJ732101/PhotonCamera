@@ -133,7 +133,9 @@ public class Swipe {
         if (manualModeConsole.isPanelVisible()) {
             ocManual.animate().rotation(0).setDuration(250).start();
             cameraFragment.getTouchFocus().resetFocusCircle();
-            captureController.reset3Aparams();
+            if (captureController != null) {
+                captureController.reset3Aparams();
+            }
             manualModeConsole.setPanelVisibility(false);
             manualModeConsole.retractAllKnobs();
         } else {

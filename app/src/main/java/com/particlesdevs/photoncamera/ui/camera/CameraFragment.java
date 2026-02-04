@@ -1058,9 +1058,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         @Override
         public void onProcessingStarted(String processName) {
             logD("onProcessingStarted: " + processName + " Processing Started");
-            mCameraUIView.setProcessingProgressBarIndeterminate(true);
-            mCameraUIView.activateShutterButton(true);
-            showNotification(processName);
+            activity.runOnUiThread(() -> {
+                mCameraUIView.setProcessingProgressBarIndeterminate(true);
+                mCameraUIView.activateShutterButton(true);
+                showNotification(processName);
+            });
         }
 
         @Override
@@ -1070,10 +1072,12 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         @Override
         public void onProcessingFinished(Object obj) {
             logD("onProcessingFinished: " + obj);
-            mCameraUIView.setProcessingProgressBarIndeterminate(false);
-            mCameraUIView.activateShutterButton(true);
-            mCameraUIView.lockUIForBurst(false);
-            stopNotification();
+            activity.runOnUiThread(() -> {
+                mCameraUIView.setProcessingProgressBarIndeterminate(false);
+                mCameraUIView.activateShutterButton(true);
+                mCameraUIView.lockUIForBurst(false);
+                stopNotification();
+            });
             boolean sleep = false;
 
             if (obj instanceof String) {
@@ -1164,13 +1168,17 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
          */
         @Override
         public void onFrameCountSet(int frameCount) {
-            mCameraUIView.setCaptureProgressMax(frameCount);
+            activity.runOnUiThread(() -> {
+                mCameraUIView.setCaptureProgressMax(frameCount);
+            });
         }
 
         @Override
         public void onCaptureStillPictureStarted(Object o) {
-            mCameraUIView.setCaptureProgressBarOpacity(1.0f);
-            mCameraUIView.lockUIForBurst(true);
+            activity.runOnUiThread(() -> {
+                mCameraUIView.setCaptureProgressBarOpacity(1.0f);
+                mCameraUIView.lockUIForBurst(true);
+            });
             //textureView.post(() -> textureView.setAlpha(0.8f));
         }
 
@@ -1193,12 +1201,16 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
         @Override
         public void onFrameCaptureCompleted(Object o) {
-            mCameraUIView.incrementCaptureProgressBar(1);
-            if (PreferenceKeys.isCameraSoundsOn()) {
-                burstPlayer.start();
-            }
-            if (o instanceof TimerFrameCountViewModel.FrameCntTime) {
-                timerFrameCountViewModel.setFrameTimeCnt((TimerFrameCountViewModel.FrameCntTime) o);
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    mCameraUIView.incrementCaptureProgressBar(1);
+                    if (PreferenceKeys.isCameraSoundsOn()) {
+                        burstPlayer.start();
+                    }
+                    if (o instanceof TimerFrameCountViewModel.FrameCntTime) {
+                        timerFrameCountViewModel.setFrameTimeCnt((TimerFrameCountViewModel.FrameCntTime) o);
+                    }
+                });
             }
         }
 
@@ -1215,7 +1227,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
         @Override
         public void onPreviewCaptureCompleted(CaptureResult captureResult) {
-            updateScreenLog(captureResult);
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    updateScreenLog(captureResult);
+                });
+            }
         }
 
         /**
@@ -1230,8 +1246,10 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
         @Override
         public void onCameraRestarted() {
-            mCameraUIView.refresh(CaptureController.isProcessing);
-            mTouchFocus.resetFocusCircle();
+            activity.runOnUiThread(() -> {
+                mCameraUIView.refresh(CaptureController.isProcessing);
+                mTouchFocus.resetFocusCircle();
+            });
         }
 
         @Override
