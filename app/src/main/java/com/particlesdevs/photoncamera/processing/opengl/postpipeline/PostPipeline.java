@@ -123,7 +123,12 @@ public class PostPipeline extends GLBasePipeline {
     private void BuildDefaultPipeline() {
         boolean nightMode = PhotonCamera.getSettings().selectedMode == CameraMode.NIGHT;
         add(new Bayer2Float());
-        add(new ExposureFusionBayer3());
+        if (PhotonCamera.getSettings().useExposureFusionMethod2) {
+            add(new ExposureFusionBayer2());
+        }
+        else {
+            add(new ExposureFusionBayer3());
+        }
         switch (PhotonCamera.getSettings().cfaPattern) {
             case -2: {
                 add(new DemosaicQUAD());

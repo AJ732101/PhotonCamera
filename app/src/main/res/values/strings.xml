@@ -43,6 +43,7 @@
     <string name="telegram">Telegram Group ↗</string>
     <string name="hdrxNR">Noise Reduction</string>
     <string name="turn_on_watermark">Watermark</string>
+    <string name="exposure_fusion_method">Exposure Fusion Method 2 (not 3)</string>
     <string name="sure_delete">Are you sure to delete this image?</string>
     <string name="sure_delete_multiple">Are you sure to delete %1$s image(s)? %2$s will be cleared.</string>
     <string name="cancel">Cancel</string>
@@ -193,6 +194,7 @@
     <string name="contrast_curve">Contrast Curve</string>
     <string name="effect_mode">Effect Mode</string>
     <string name="zsl">Zero Shutter Lag</string>
+    <string name="use_stream_usecase">Use Stream Usecase</string>
 
     <!-- Bracketing mode strings -->
     <string name="exposure_bracketing">Exposure Bracketing</string>

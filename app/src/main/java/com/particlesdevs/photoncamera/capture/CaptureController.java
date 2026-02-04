@@ -2336,7 +2336,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     config.setDynamicRangeProfile(hdrProfile);
                 }
 
-                if (PhotonCamera.getSpecific().specificSetting.enableStreamUseCases) {
+                if (PhotonCamera.getSettings().useStreamUseCases) {
                     if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                         if (mIsRecordingVideo) {
                             if (mImageReaderPreview.getSurface() == surfacei) {

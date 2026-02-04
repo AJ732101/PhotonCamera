@@ -77,6 +77,14 @@
             android:icon="@drawable/high_quality_24px"
             android:defaultValue="@bool/pref_lossless_sw_encoding_def_value"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_use_stream_usecase_key"
+            android:title="@string/use_stream_usecase"
+            android:summary=""
+            android:icon="@drawable/high_quality_24px"
+            android:defaultValue="@bool/pref_use_stream_usecase_def_value"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_digital_zoom_factor_key"

@@ -37,6 +37,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_THEME.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_GRID.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_WATERMARK.mValue);
+        COMMON_KEYS.add(Key.KEY_EXPOSURE_FUSION_METHOD.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_ROUND_EDGE.mValue);
         COMMON_KEYS.add(Key.KEY_CAMERA_SOUNDS.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_GRADIENT.mValue);
@@ -93,6 +94,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
         COMMON_KEYS.add(Key.KEY_LOSSLESS_SW_ENCODING.mValue);
+        COMMON_KEYS.add(Key.KEY_USE_STREAM_USECASE.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
@@ -127,6 +129,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REMOSAIC, resources.getBoolean(R.bool.pref_remosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FPS_PREVIEW, resources.getBoolean(R.bool.pref_fps_preview_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
@@ -182,6 +185,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING, resources.getBoolean(R.bool.pref_lossless_sw_encoding_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_STREAM_USECASE, resources.getBoolean(R.bool.pref_use_stream_usecase_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
@@ -292,6 +296,10 @@ public class PreferenceKeys {
 
     public static boolean isShowWatermarkOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_WATERMARK);
+    }
+
+    public static boolean isExposureFusionMethod2() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD);
     }
 
     public static boolean isPerLensSettingsOn() {
@@ -712,6 +720,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING);
     }
 
+    public static boolean useStreamUsecase() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_STREAM_USECASE);
+    }
+
     public static int getHotPixelMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE);
     }
@@ -805,6 +817,7 @@ public class PreferenceKeys {
         KEY_SAVE_PER_LENS_SETTINGS(R.string.pref_save_per_lens_settings),
         KEY_DISABLE_ALIGNINIG(R.string.pref_disable_aligning_key),
         KEY_SHOW_WATERMARK(R.string.pref_show_watermark_key),
+        KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
@@ -903,6 +916,7 @@ public class PreferenceKeys {
         KEY_USE_SCENE_AND_EFFECT_MODE(R.string.pref_scene_and_effect_mode_key),
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
         KEY_LOSSLESS_SW_ENCODING(R.string.pref_lossless_sw_encoding_key),
+        KEY_USE_STREAM_USECASE(R.string.pref_use_stream_usecase_key),
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),

@@ -95,6 +95,7 @@ public class Settings {
     public int distortionCorrectionMode = 99;
     public int shadingMode = 99;
     public boolean useAlternatePreviewTemplate = false;
+    public boolean useStreamUseCases = false;
     public String tenBitSurfaceTarget = "HEVC";
     public float digitalZoomFactor = 2;
     public boolean useExternalGallery = true;
@@ -102,6 +103,7 @@ public class Settings {
     public boolean useVirtualHorizon = true;
     public boolean useVirtualHorizonText = false;
     public boolean useLosslessSwEncoding = false;
+    public boolean useExposureFusionMethod2 = true;
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
@@ -122,6 +124,7 @@ public class Settings {
         energySaving = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
         useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);
+        useExposureFusionMethod2 = PreferenceKeys.isExposureFusionMethod2();
         //DebugData = PreferenceKeys.isAfDataOn();
         roundEdge = PreferenceKeys.isRoundEdgeOn();
         sharpness = PreferenceKeys.getSharpnessValue();
@@ -213,6 +216,7 @@ public class Settings {
         contrastCurve = PreferenceKeys.getContrastCurve();
         effectMode = PreferenceKeys.getEffectMode();
         useLosslessSwEncoding = PreferenceKeys.isLosslessSwEncodingOn();
+        useStreamUseCases = PreferenceKeys.useStreamUsecase();
     }
 
     public void saveID() {

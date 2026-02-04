@@ -103,10 +103,6 @@ public class Specific {
                     specificSetting.enableVideoLut = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
-                case "enableStreamUseCases": {
-                    specificSetting.enableStreamUseCases = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
