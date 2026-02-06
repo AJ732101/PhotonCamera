@@ -197,10 +197,10 @@ public class Parameters {
             boolean isHuawei = Build.BRAND.equals("Huawei");
 
             float[] dynbl = result.get(CaptureResult.SENSOR_DYNAMIC_BLACK_LEVEL);
-            /*if (dynbl != null) {
+            if (dynbl != null) {
                 System.arraycopy(dynbl, 0, blackLevel, 0, 4);
                 usedDynamic = true;
-            }*/
+            }
             Object white = result.get(CaptureResult.SENSOR_DYNAMIC_WHITE_LEVEL);
             if (white != null) {
                 whiteLevel = (int) white;

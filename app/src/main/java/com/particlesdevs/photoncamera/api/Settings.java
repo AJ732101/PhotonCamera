@@ -102,6 +102,7 @@ public class Settings {
     public boolean useAlternateLoupe = true;
     public boolean useVirtualHorizon = true;
     public boolean useVirtualHorizonText = false;
+    public boolean allowNetworkSync = false;
     public boolean useLosslessSwEncoding = false;
     public boolean useExposureFusionMethod2 = true;
     public String contrastCurve = "off";
@@ -169,6 +170,7 @@ public class Settings {
         useAlternateLoupe = PreferenceKeys.useAlternateLupe();
         useVirtualHorizon = PreferenceKeys.useVirtualHorizon();
         useVirtualHorizonText = PreferenceKeys.useVirtualHorizonText();
+        allowNetworkSync = PreferenceKeys.allowNetworkSync();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();

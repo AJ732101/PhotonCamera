@@ -55,7 +55,7 @@ public class ImageSaver {
         this.implementation.frameCount = desiredFrameCount;
     }
 
-    public int bufferSize(){
+    public int bufferSize() {
         return SaverImplementation.IMAGE_BUFFER.size();
     }
 
@@ -215,7 +215,7 @@ public class ImageSaver {
     }
 
     public void processStart(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
-        implementation = ImageSaverSelector.getImageSaver(ImageFormat.RAW_SENSOR, implementation);
+        implementation = ImageSaverSelector.getImageSaver(PhotonCamera.getSettings().rawFormat, implementation);
         implementation.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
     }
 

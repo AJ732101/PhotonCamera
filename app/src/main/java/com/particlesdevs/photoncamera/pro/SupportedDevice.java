@@ -32,18 +32,31 @@ public class SupportedDevice {
         specific = new Specific(mSettingsManager);
     }
     public void loadCheck() {
-        specific.loadSpecific();
-        new Thread(() -> {
-            /*try {
-                if (checkedCount < 1) {
-                    loadSupportedDevicesList();
-                    isSupported();
-                    specific.loadSpecific();
-                }
-            } catch (IOException e) {
+        Boolean allowNetworkSync = null;
+        try {
+            allowNetworkSync = PhotonCamera.getSettings().allowNetworkSync;
+            if (PhotonCamera.getSettings().allowNetworkSync) {
                 specific.loadSpecific();
-                e.printStackTrace();
-            }*/
+            }
+        } catch (Exception e) {
+            allowNetworkSync = false;
+            specific.loadSpecific();
+        }
+
+        final Boolean finalAllowNetworkSync = allowNetworkSync;
+        new Thread(() -> {
+            if (finalAllowNetworkSync) {
+                try {
+                    if (checkedCount < 1) {
+                        loadSupportedDevicesList();
+                        isSupported();
+                        specific.loadSpecific();
+                    }
+                } catch (IOException e) {
+                    specific.loadSpecific();
+                    e.printStackTrace();
+                }
+            }
             if (!loaded && mSettingsManager.isSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY))
                 mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
         }).start();
@@ -71,7 +84,7 @@ public class SupportedDevice {
     }
 
     private void loadSupportedDevicesList() throws IOException {
-        BufferedReader in = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt",250);
+        BufferedReader in = HttpLoader.readURL(PhotonCamera.getSpecific().specificSetting.networkSyncBaseUrl + "SupportedList.txt", 200);
         String str;
         while ((str = in.readLine()) != null) {
             mSupportedDevicesSet.add(str);

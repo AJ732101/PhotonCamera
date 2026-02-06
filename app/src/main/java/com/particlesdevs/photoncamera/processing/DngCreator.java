@@ -2,6 +2,8 @@ package com.particlesdevs.photoncamera.processing;
 
 import android.media.Image;
 import android.os.Build;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.processing.render.Parameters;
@@ -317,8 +319,7 @@ public class DngCreator {
             throw new IllegalArgumentException("DateTime must be in format \"YYYY:MM:DD HH:MM:SS\" (19 characters)");
         }
         // Basic format validation
-        if (datetime.charAt(4) != ':' || datetime.charAt(7) != ':' || datetime.charAt(10) != ' ' ||
-                datetime.charAt(13) != ':' || datetime.charAt(16) != ':') {
+        if (datetime.charAt(4) != ':' || datetime.charAt(7) != ':' || datetime.charAt(10) != ' ' || datetime.charAt(13) != ':' || datetime.charAt(16) != ':') {
             throw new IllegalArgumentException("DateTime format invalid. Expected \"YYYY:MM:DD HH:MM:SS\"");
         }
         setDateTime(nativePtr, datetime);
@@ -421,7 +422,13 @@ public class DngCreator {
     public void setParameters(Parameters parameters) {
         short[] blackLevel = new short[4];
         for (int i = 0; i < 4; i++) {
-            blackLevel[i] = (short) parameters.blackLevel[i];
+            if (PhotonCamera.getSpecific().specificSetting.blackLevelValue > 0) {
+                blackLevel[i] = (short) PhotonCamera.getSpecific().specificSetting.blackLevelValue;
+            } else if (parameters.whiteLevel <= parameters.blackLevel[i]) {
+                blackLevel[i] = 64;
+            } else {
+                blackLevel[i] = (short) parameters.blackLevel[i];
+            }
         }
         setDescription(parameters.toString());
         setSoftware("PhotonVidCam v0.97");

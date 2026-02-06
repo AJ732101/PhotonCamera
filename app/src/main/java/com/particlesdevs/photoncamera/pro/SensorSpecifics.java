@@ -2,6 +2,8 @@ package com.particlesdevs.photoncamera.pro;
 
 import android.os.AsyncTask;
 import android.os.Build;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.processing.render.SpecificSettingSensor;
@@ -23,7 +25,7 @@ public class SensorSpecifics {
     public SpecificSettingSensor selectedSensorSpecifics = new SpecificSettingSensor();
     ArrayList<String> loadNetwork(String device) throws IOException {
         ArrayList<String> inputStr = new ArrayList<String>();
-        BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/specific/sensors/" + device + ".txt", 150);
+        BufferedReader indevice = HttpLoader.readURL(PhotonCamera.getSpecific().specificSetting.networkSyncBaseUrl + "specific/sensors/" + device + ".txt", 200);
         String str;
         while ((str = indevice.readLine()) != null) {
             Log.d("SensorSpecifics", "read:" + str);
@@ -50,10 +52,14 @@ public class SensorSpecifics {
         File init = new File(sPHOTON_TUNING_DIR, "SensorSpecifics.txt");
         try {
             try {
-                if(init.exists())
+                if(init.exists()) {
                     inputStr = loadLocal(init);
-                //else
-                //    inputStr = loadNetwork(device);
+                }
+                else {
+                    if (PhotonCamera.getSettings().allowNetworkSync) {
+                        inputStr = loadNetwork(device);
+                    }
+                }
                 count = 0;
                 for (String str : inputStr) {
                     Log.d("SensorSpecifics", "read:" + str);

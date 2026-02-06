@@ -98,6 +98,7 @@
     <bool name="pref_use_alternate_loupe_default">true</bool>
     <bool name="pref_virtual_horizon_default">true</bool>
     <bool name="pref_virtual_horizon_text_default">false</bool>
+    <bool name="pref_allow_network_sync_default">false</bool>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_default" translatable="false">60</string>

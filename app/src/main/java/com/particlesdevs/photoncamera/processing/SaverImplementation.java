@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -40,10 +41,10 @@ public class SaverImplementation {
         int capacity = image.getPlanes()[0].getBuffer().capacity();
         var imageFormat = image.getFormat();
         boolean noStride = false;
-        if ((imageFormat== 37) || (imageFormat== 36)) {
+        if ((imageFormat == ImageFormat.RAW10) || (imageFormat == ImageFormat.RAW12)) {
             width = image.getWidth();
             height = image.getHeight();
-            noStride = true;
+            //noStride = true;
         } else {
             var a = image.getPlanes()[0].getRowStride();
             var b = image.getPlanes()[0].getPixelStride();

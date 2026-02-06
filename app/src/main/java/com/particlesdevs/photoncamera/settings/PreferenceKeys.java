@@ -63,6 +63,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_USE_ALTERNATE_LOUPE.mValue);
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON.mValue);
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON_TEXT.mValue);
+        COMMON_KEYS.add(Key.KEY_ALLOW_NETWORK_SYNC.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -154,6 +155,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ALTERNATE_LOUPE, resources.getBoolean(R.bool.pref_use_alternate_loupe_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON, resources.getBoolean(R.bool.pref_virtual_horizon_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON_TEXT, resources.getBoolean(R.bool.pref_virtual_horizon_text_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC, resources.getBoolean(R.bool.pref_allow_network_sync_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -772,6 +774,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON_TEXT);
     }
 
+    public static boolean allowNetworkSync() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC);
+    }
+
     public static String getContrastCurve() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
     }
@@ -859,6 +865,7 @@ public class PreferenceKeys {
         KEY_USE_ALTERNATE_LOUPE(R.string.pref_alternate_loupe_key),
         KEY_VIRTUAL_HORIZON(R.string.pref_virtual_horizon_key),
         KEY_VIRTUAL_HORIZON_TEXT(R.string.pref_virtual_horizon_text_key),
+        KEY_ALLOW_NETWORK_SYNC(R.string.pref_allow_network_sync_key),
 
         /**
          * QualityDoesMatter - Video settings keys

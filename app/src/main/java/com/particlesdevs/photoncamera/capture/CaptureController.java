@@ -37,6 +37,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.BlackLevelPattern;
 import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.MeteringRectangle;
@@ -1525,6 +1526,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImagerReaderImages);
                 }
                 else {
+                    //mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
                     mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
                 }
                 //Log.d(TAG, "create ImageReader " + target.getWidth() + "x" + target.getHeight() + " - orientation: " + mSensorOrientation);
@@ -1746,6 +1748,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_GAMMA_VALUE);
             captureBuilder.set(CaptureRequest.TONEMAP_GAMMA, 1/PhotonCamera.getSpecific().specificSetting.toneMapGamma);
         }
+        else {
+            if (PhotonCamera.getSpecific().specificSetting.toneMappingMode.toLowerCase().contains("quality")) {
+                if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
+                    captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_HIGH_QUALITY);
+                }
+            }
+            if (PhotonCamera.getSpecific().specificSetting.toneMappingMode.toLowerCase().contains("fast")) {
+                if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
+                    captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_FAST);
+                }
+            }
+        }
 
         // test priority modes
         VendorTagUtils.getSupportedIso(mCameraCharacteristics);
@@ -1760,16 +1774,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
             }
         }
-
-        // tone map modes check
-        if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
-            //captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_HIGH_QUALITY);
-        }
-
-        /*if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_PRESET_CURVE)) {
-            captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_PRESET_CURVE);
-            captureBuilder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CameraMetadata.TONEMAP_PRESET_CURVE_SRGB);
-        }*/
 
         //VendorTagUtils.setToneMappingDarkBoostValue(captureBuilder, -1.0f);
 
@@ -3725,6 +3729,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
             }
 
+            //captureBuilder.set(CaptureRequest.CONTROL_ZOOM_METHOD, CaptureRequest.CONTROL_ZOOM_METHOD_ZOOM_RATIO);
+            //captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 2.0f);
+
             MeteringRectangle rectaf = new MeteringRectangle(0, 0, 0, 0, 0);
             IsoExpoSelector.useTripod = PhotonCamera.getGyro().getTripod();
             if (frameCount == -1) {
@@ -3820,6 +3827,24 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         double exposureTime = ExposureIndex.time2sec((long) timeKey);
                         mExposures.put((long) time, exposureTime * iso);
                     }
+
+                    Integer whiteLevel = result.get(CaptureResult.SENSOR_DYNAMIC_WHITE_LEVEL);
+                    if (whiteLevel != null) {
+                        Log.d(TAG, "Dynamic WhiteLevel: " + whiteLevel);
+                    } else {
+                        // Fallback auf statischen Wert aus den Characteristics
+                        Integer staticWhiteLevel = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL);
+                        Log.d(TAG, "Static WhiteLevel: " + staticWhiteLevel);
+                    }
+
+                    float[] blackLevels = result.get(CaptureResult.SENSOR_DYNAMIC_BLACK_LEVEL);
+                    if (blackLevels != null) {
+                        Log.d(TAG, "BlackLevel R: " + blackLevels[0] + " Gr: " + blackLevels[1] + " Gb: " + blackLevels[2] + " B: " + blackLevels[3]);
+                    } else {
+                        BlackLevelPattern staticBlackLevel = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_BLACK_LEVEL_PATTERN);
+                        Log.d(TAG, "Static BlackLevel: " + staticBlackLevel.toString());
+                    }
+
                     cameraEventsListener.onFrameCaptureCompleted(new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
 
                     if (onUnlimited && !unlimitedStarted) {

@@ -20,6 +20,7 @@ public class SpecificSetting {
     public boolean enableVideoLut = false;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
+    public int blackLevelValue = 0;
     public float toneMapGamma = 99;
     public int colorTemperature = 99;
     public int sessionType = 0;
@@ -33,6 +34,8 @@ public class SpecificSetting {
     public String customRawRes = "";
     public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
     public String hdrMode = "HLG10";
+    public String networkSyncBaseUrl = "https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/";
+    public String toneMappingMode = "quality";
     public SpecificSetting(){
     }
 }

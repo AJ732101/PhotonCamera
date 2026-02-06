@@ -1,6 +1,8 @@
 package com.particlesdevs.photoncamera.pro;
 
 import android.os.Build;
+
+import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
@@ -30,7 +32,7 @@ public class Specific {
     }
     ArrayList<String> loadNetwork(String device) throws IOException {
         ArrayList<String> inputStr = new ArrayList<String>();
-        BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/specific/" + device + "_specificsettings.txt", 100);
+        BufferedReader indevice = HttpLoader.readURL(PhotonCamera.getSpecific().specificSetting.networkSyncBaseUrl + "specific/" + device + "_specificsettings.txt", 200);
         String str;
         while ((str = indevice.readLine()) != null) {
             Log.d("Specific", "read:" + str);
@@ -111,6 +113,10 @@ public class Specific {
                     specificSetting.statisticsOisDataMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "blackLevelValue": {
+                    specificSetting.blackLevelValue = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "toneMapGamma": {
                     specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
                     break;
@@ -163,6 +169,14 @@ public class Specific {
                     specificSetting.hdrMode = caseS[1];
                     break;
                 }
+                case "networkSyncBaseUrl": {
+                    specificSetting.networkSyncBaseUrl = caseS[1];
+                    break;
+                }
+                case "toneMappingMode": {
+                    specificSetting.toneMappingMode = caseS[1];
+                    break;
+                }
             }
         }
 
@@ -173,53 +187,54 @@ public class Specific {
         if(exists) {
             if (!isLoaded) {
                 try {
-                    //Set<String> mSupportedDevicesSet = mSettingsManager.getStringSet(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, ALL_DEVICES_NAMES_KEY, null);
-                    //BufferedReader indevice = HttpLoader.readURL("https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/SupportedList.txt");
-                    //boolean specificExists = mSupportedDevicesSet.contains(SupportedDevice.THIS_DEVICE);
-                    //Log.d("Specific", "specificExists: "+specificExists);
-                    //mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_exists", specificExists);
-                    //if (!specificExists) return;
-                    ArrayList<String> inputStr;
+                    ArrayList<String> inputStr = null;
 
                     String device = Build.BRAND.toLowerCase() + "/" + Build.DEVICE.toLowerCase();
                     File deviceSpecific = new File(sPHOTON_TUNING_DIR, "DeviceSpecific.txt");
-                    if(deviceSpecific.exists())
+                    if(deviceSpecific.exists()) {
                         inputStr = loadLocal(deviceSpecific);
-                    else
-                        inputStr = loadNetwork(device);
-                    for (String str : inputStr) {
-                        String[] caseS = str.replace(" ","").replace("\n","").split("=");
-                        switch (caseS[0]) {
-                            case "isDualSessionSupported": {
-                                specificSetting.isDualSessionSupported = Boolean.parseBoolean(caseS[1]);
-                                break;
-                            }
-                            case "blackLevel": {
-                                String[] bl = caseS[1].split(",");
-                                blackLevel = new float[]{Float.parseFloat(bl[0]), Float.parseFloat(bl[1]), Float.parseFloat(bl[2]), Float.parseFloat(bl[3])};
-                                break;
-                            }
-                            case "rawColorCorrection": {
-                                specificSetting.isRawColorCorrection = Boolean.parseBoolean(caseS[1]);
-                                break;
-                            }
-                            case "cameraIDS": {
-                                Log.d("Specific", "Camera IDs Loaded: "+caseS[1]);
-                                String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                                specificSetting.cameraIDS = new String[ids.length];
-                                for(int i =0; i<specificSetting.cameraIDS.length;i++){
-                                    specificSetting.cameraIDS[i] = ids[i];
+                    }
+                    else {
+                        if (PhotonCamera.getSettings().allowNetworkSync) {
+                            inputStr = loadNetwork(device);
+                        }
+                    }
+
+                    if (inputStr != null) {
+                        for (String str : inputStr) {
+                            String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
+                            switch (caseS[0]) {
+                                case "isDualSessionSupported": {
+                                    specificSetting.isDualSessionSupported = Boolean.parseBoolean(caseS[1]);
+                                    break;
                                 }
-                                break;
-                            }
-                            case "apertureList": {
-                                Log.d("Specific", "apertures loaded: "+caseS[1]);
-                                String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                                specificSetting.apertureList = new float[ids.length];
-                                for(int i =0; i<specificSetting.apertureList.length;i++){
-                                    specificSetting.apertureList[i] = Float.valueOf(ids[i]);
+                                case "blackLevel": {
+                                    String[] bl = caseS[1].split(",");
+                                    blackLevel = new float[]{Float.parseFloat(bl[0]), Float.parseFloat(bl[1]), Float.parseFloat(bl[2]), Float.parseFloat(bl[3])};
+                                    break;
                                 }
-                                break;
+                                case "rawColorCorrection": {
+                                    specificSetting.isRawColorCorrection = Boolean.parseBoolean(caseS[1]);
+                                    break;
+                                }
+                                case "cameraIDS": {
+                                    Log.d("Specific", "Camera IDs Loaded: " + caseS[1]);
+                                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                                    specificSetting.cameraIDS = new String[ids.length];
+                                    for (int i = 0; i < specificSetting.cameraIDS.length; i++) {
+                                        specificSetting.cameraIDS[i] = ids[i];
+                                    }
+                                    break;
+                                }
+                                case "apertureList": {
+                                    Log.d("Specific", "apertures loaded: " + caseS[1]);
+                                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                                    specificSetting.apertureList = new float[ids.length];
+                                    for (int i = 0; i < specificSetting.apertureList.length; i++) {
+                                        specificSetting.apertureList[i] = Float.valueOf(ids[i]);
+                                    }
+                                    break;
+                                }
                             }
                         }
                     }
