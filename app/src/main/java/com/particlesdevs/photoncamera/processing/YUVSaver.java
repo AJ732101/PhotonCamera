@@ -64,6 +64,7 @@ public class YUVSaver extends DefaultSaver{
                 }
                 saveMetaInfo(image, metaFile, orientation, metadata);
                 saveMetaCaptureResult(metaCaptureResultFile, metadata);
+                image.close();
                 processingEventsListener.onProcessingFinished("YCBCR_P010 saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
