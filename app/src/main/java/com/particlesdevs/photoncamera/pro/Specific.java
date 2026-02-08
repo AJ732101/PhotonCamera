@@ -129,6 +129,10 @@ public class Specific {
                     specificSetting.sessionType = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "sessionTypeVideo": {
+                    specificSetting.sessionTypeVideo = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "priorityShutterSpeed": {
                     specificSetting.priorityShutterSpeed = Integer.parseInt(caseS[1]);
                     break;
