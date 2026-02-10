@@ -140,7 +140,7 @@ dependencies {
     //Google Material
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.core:core-ktx:1.17.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.0"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.10'
     //Leak Canary
     //Use this lib to detect memory leaks when debugging
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'

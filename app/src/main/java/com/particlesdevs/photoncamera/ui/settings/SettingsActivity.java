@@ -176,6 +176,85 @@ public class SettingsActivity extends BaseActivity implements
                     codecPreference.setValue(entryValues.get(0).toString());
                 }
             }
+
+            // function button population
+            ListPreference functionPreference = findPreference(getString(R.string.pref_function_one_key));
+            if (functionPreference == null) {
+                return;
+            }
+            String currentFunctionValue = functionPreference.getValue();
+
+            List<CharSequence> entriesFunction = new ArrayList<>();
+            List<CharSequence> entryValuesFunction = new ArrayList<>();
+
+            if (functionPreference.getEntries() != null && functionPreference.getEntryValues() != null) {
+                Collections.addAll(entriesFunction, functionPreference.getEntries());
+                Collections.addAll(entryValuesFunction, functionPreference.getEntryValues());
+            }
+
+            if (PhotonCamera.hasXiaomiNight) {
+                entriesFunction.add("Xiaomi Night Mode");
+                entryValuesFunction.add("Xiaomi Night Mode");
+            }
+            if (PhotonCamera.hasXiaomiSuperNight) {
+                entriesFunction.add("Xiaomi Super Night Mode");
+                entryValuesFunction.add("Xiaomi Super Night Mode");
+            }
+            if (PhotonCamera.hasXiaomiAiAutoSceneDetection) {
+                entriesFunction.add("Xiaomi AI Auto Scene Detection");
+                entryValuesFunction.add("Xiaomi AI Auto Scene Detection");
+            }
+            if (PhotonCamera.hasXiaomiProVideoLog) {
+                entriesFunction.add("Xiaomi Pro Video LOG");
+                entryValuesFunction.add("Xiaomi Pro Video LOG");
+            }
+            if (PhotonCamera.hasXiaomiReMosaic) {
+                entriesFunction.add("Xiaomi Re-Mosaic");
+                entryValuesFunction.add("Xiaomi Re-Mosaic");
+            }
+            if (PhotonCamera.hasXiaomiQuadCfa) {
+                entriesFunction.add("Xiaomi Quad CFA");
+                entryValuesFunction.add("Xiaomi Quad CFA");
+            }
+            if (PhotonCamera.hasXiaomiHdr) {
+                entriesFunction.add("Xiaomi HDR");
+                entryValuesFunction.add("Xiaomi HDR");
+            }
+            if (PhotonCamera.hasXiaomiSuperResolution) {
+                entriesFunction.add("Xiaomi Super Resolution");
+                entryValuesFunction.add("Xiaomi Super Resolution");
+            }
+            if (PhotonCamera.hasIdealRaw) {
+                entriesFunction.add("Ideal RAW");
+                entryValuesFunction.add("Ideal RAW");
+            }
+            if (PhotonCamera.hasEisLookAhead) {
+                entriesFunction.add("EIS Look Ahead");
+                entryValuesFunction.add("EIS Look Ahead");
+            }
+            if (PhotonCamera.hasEisV3) {
+                entriesFunction.add("EIS V3");
+                entryValuesFunction.add("EIS V3");
+            }
+            if (PhotonCamera.hasVivoZeissColor) {
+                entriesFunction.add("Vivo Zeiss Color");
+                entryValuesFunction.add("Vivo Zeiss Color");
+            }
+            if (PhotonCamera.hasVivoDistortionCorrection) {
+                entriesFunction.add("Vivo Distortion Correction");
+                entryValuesFunction.add("Vivo Distortion Correction");
+            }
+
+            functionPreference.setEntries(entriesFunction.toArray(new CharSequence[0]));
+            functionPreference.setEntryValues(entryValuesFunction.toArray(new CharSequence[0]));
+
+            if (!entryValuesFunction.contains(currentFunctionValue)) {
+                if (entryValuesFunction.equals("ISO Priority")) {
+                    functionPreference.setValue("ISO Priority");
+                } else if (!entryPrevValues.isEmpty()) {
+                    functionPreference.setValue(entryPrevValues.get(0).toString());
+                }
+            }
         }
     }
 

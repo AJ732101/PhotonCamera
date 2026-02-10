@@ -25,6 +25,7 @@ import com.particlesdevs.photoncamera.util.FileManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -509,9 +510,68 @@ public class CameraFragmentModel extends BaseObservable {
         String[] entryValues = context.getResources().getStringArray(R.array.function_one_entryValues);
         String currentVal = PreferenceKeys.getFunctionOneValue();
 
+        List<CharSequence> entriesFunction = new ArrayList<>(Arrays.asList(entries));
+        List<CharSequence> entryValuesFunction = new ArrayList<>(Arrays.asList(entryValues));
+
+        if (PhotonCamera.hasXiaomiNight) {
+            entriesFunction.add("Xiaomi Night Mode");
+            entryValuesFunction.add("Xiaomi Night Mode");
+        }
+        if (PhotonCamera.hasXiaomiSuperNight) {
+            entriesFunction.add("Xiaomi Super Night Mode");
+            entryValuesFunction.add("Xiaomi Super Night Mode");
+        }
+        if (PhotonCamera.hasXiaomiAiAutoSceneDetection) {
+            entriesFunction.add("Xiaomi AI Auto Scene Detection");
+            entryValuesFunction.add("Xiaomi AI Auto Scene Detection");
+        }
+        if (PhotonCamera.hasXiaomiProVideoLog) {
+            entriesFunction.add("Xiaomi Pro Video LOG");
+            entryValuesFunction.add("Xiaomi Pro Video LOG");
+        }
+        if (PhotonCamera.hasXiaomiReMosaic) {
+            entriesFunction.add("Xiaomi Re-Mosaic");
+            entryValuesFunction.add("Xiaomi Re-Mosaic");
+        }
+        if (PhotonCamera.hasXiaomiQuadCfa) {
+            entriesFunction.add("Xiaomi Quad CFA");
+            entryValuesFunction.add("Xiaomi Quad CFA");
+        }
+        if (PhotonCamera.hasXiaomiHdr) {
+            entriesFunction.add("Xiaomi HDR");
+            entryValuesFunction.add("Xiaomi HDR");
+        }
+        if (PhotonCamera.hasXiaomiSuperResolution) {
+            entriesFunction.add("Xiaomi Super Resolution");
+            entryValuesFunction.add("Xiaomi Super Resolution");
+        }
+        if (PhotonCamera.hasIdealRaw) {
+            entriesFunction.add("Ideal RAW");
+            entryValuesFunction.add("Ideal RAW");
+        }
+        if (PhotonCamera.hasEisLookAhead) {
+            entriesFunction.add("EIS Look Ahead");
+            entryValuesFunction.add("EIS Look Ahead");
+        }
+        if (PhotonCamera.hasEisV3) {
+            entriesFunction.add("EIS V3");
+            entryValuesFunction.add("EIS V3");
+        }
+        if (PhotonCamera.hasVivoZeissColor) {
+            entriesFunction.add("Vivo Zeiss Color");
+            entryValuesFunction.add("Vivo Zeiss Color");
+        }
+        if (PhotonCamera.hasVivoDistortionCorrection) {
+            entriesFunction.add("Vivo Distortion Correction");
+            entryValuesFunction.add("Vivo Distortion Correction");
+        }
+
+        CharSequence[] finalEntries = entriesFunction.toArray(new CharSequence[0]);
+        CharSequence[] finalValues = entryValuesFunction.toArray(new CharSequence[0]);
+
         int checkedItem = -1;
-        for (int i = 0; i < entryValues.length; i++) {
-            if (entryValues[i].equals(currentVal)) {
+        for (int i = 0; i < finalValues.length; i++) {
+            if (finalValues[i].toString().equals(currentVal)) {
                 checkedItem = i;
                 break;
             }
@@ -519,8 +579,8 @@ public class CameraFragmentModel extends BaseObservable {
 
         new AlertDialog.Builder(context)
                 .setTitle(R.string.function_button_one)
-                .setSingleChoiceItems(entries, checkedItem, (dialog, which) -> {
-                    String selectedValue = entryValues[which];
+                .setSingleChoiceItems(finalEntries, checkedItem, (dialog, which) -> {
+                    String selectedValue = finalValues[which].toString();
                     PhotonCamera.getSettings().functionOne = selectedValue;
                     PreferenceKeys.setFunctionOneValue(selectedValue);
 

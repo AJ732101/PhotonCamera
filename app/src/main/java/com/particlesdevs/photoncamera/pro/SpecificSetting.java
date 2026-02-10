@@ -28,6 +28,9 @@ public class SpecificSetting {
     public int priorityShutterSpeed = 0;
     public int priorityIsoValue = 0;
     public int priorityMode = 0;
+    public int mfnrFrames = 0;
+    public int xiaomiSupernightMode = 0;
+    public int codeAuroraTemporalNoiseProcessType = 0;
     public float colorTint = 99.0f;
     public String newRecColorRange = "full";
     public String recPrefix = "";

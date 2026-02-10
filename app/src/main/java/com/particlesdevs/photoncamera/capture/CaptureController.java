@@ -1357,7 +1357,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         createImageReaders(physicalID);
 
         try {
-            if (!mCameraOpenCloseLock.tryAcquire(1000, TimeUnit.MILLISECONDS)) {
+            if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
             this.mCameraManager.openCamera(logicalID, mStateCallback, mBackgroundHandler);
@@ -1821,20 +1821,22 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
 
-        if (PhotonCamera.getSpecific().specificSetting.colorTemperature != 99) {
+        if (PhotonCamera.getSpecific().specificSetting.colorTemperature > 1000) {
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) && supportsColorTemperature) {
                 captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
                 captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_CCT);
                 captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TEMPERATURE, PhotonCamera.getSpecific().specificSetting.colorTemperature);
                 captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TINT, (int) PhotonCamera.getSpecific().specificSetting.colorTint);
             } else {
-                try {
-                    captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
-                    captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
-                    android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
-                    captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
-                } catch (Exception e) {
-                    Log.e(TAG, "setCaptureRequestBuilder:" + e);
+                if (!Build.BRAND.equalsIgnoreCase("vivo")) {
+                    try {
+                        captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
+                        captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
+                        android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
+                        captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
+                    } catch (Exception e) {
+                        Log.e(TAG, "setCaptureRequestBuilder:" + e);
+                    }
                 }
             }
         }
@@ -2339,7 +2341,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 if (PhotonCamera.mHdrTenPlusIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10+")) {
                     hdrProfile = DynamicRangeProfiles.HDR10_PLUS;
                 }
-                else if (PhotonCamera.mHdrTenIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10")) {
+                if (PhotonCamera.mHdrTenIsSupported && PhotonCamera.getSpecific().specificSetting.hdrMode.equals("HDR10")) {
                     hdrProfile = DynamicRangeProfiles.HDR10;
                 }
                 // video
@@ -2972,7 +2974,59 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mIsFunctionOneOn = !mIsFunctionOneOn;
         PhotonCamera.isFunctionOneOn = mIsFunctionOneOn;
 
-        if (PhotonCamera.getSettings().functionOne.equals("Closed Aperture")) {
+        if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Super Night Mode")) {
+            PhotonCamera.isSuperNightModeOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Night Mode")) {
+            PhotonCamera.isNightModeOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Re-Mosaic")) {
+            PhotonCamera.isRemosaicOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi AI Auto Scene Detection")) {
+            PhotonCamera.isAiAutoSceneDetectionOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Pro Video LOG")) {
+            PhotonCamera.isProVideoLogOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi HDR")) {
+            PhotonCamera.isHdrOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Super Resolution")) {
+            PhotonCamera.isSuperResOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Quad CFA")) {
+            PhotonCamera.isQuadCfaOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Ideal RAW")) {
+            PhotonCamera.isIdealRawOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("EIS Look Ahead")) {
+            PhotonCamera.isEisLookAheadOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("EIS V3")) {
+            PhotonCamera.isEisV3On = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Zeiss Color")) {
+            PhotonCamera.isVivoZeissColorOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Distortion Correction")) {
+            PhotonCamera.isVivoDistortionCorrectionOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Closed Aperture")) {
             if (mIsFunctionOneOn) {
                 if (PhotonCamera.getSettings().functionOne.contains("Closed Aperture")) {
                     var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);

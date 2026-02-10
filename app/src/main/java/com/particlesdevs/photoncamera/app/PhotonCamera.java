@@ -85,6 +85,19 @@ public class PhotonCamera extends Application {
     public static boolean hasMfnrKey = false;
     public static boolean hasHdr = false;
     public static boolean hasTenBit = false;
+    public static boolean hasXiaomiNight = false;
+    public static boolean hasXiaomiSuperNight = false;
+    public static boolean hasXiaomiHdr = false;
+    public static boolean hasXiaomiAiAutoSceneDetection = false;
+    public static boolean hasXiaomiProVideoLog = false;
+    public static boolean hasXiaomiReMosaic = false;
+    public static boolean hasXiaomiQuadCfa = false;
+    public static boolean hasEisLookAhead = false;
+    public static boolean hasEisV3 = false;
+    public static boolean hasXiaomiSuperResolution = false;
+    public static boolean hasIdealRaw = false;
+    public static boolean hasVivoZeissColor = false;
+    public static boolean hasVivoDistortionCorrection = false;
     public static boolean mHeicIsSupported = false;
     public static boolean mHeicUltraHdrIsSupported = false;
     public static boolean mJpegRIsSupported = false;
@@ -97,6 +110,19 @@ public class PhotonCamera extends Application {
     public static boolean mHdrTenIsSupported = false;
     public static boolean mHdrTenPlusIsSupported = false;
     public static boolean isFunctionOneOn = false;
+    public static boolean isSuperNightModeOn = false;
+    public static boolean isNightModeOn = false;
+    public static boolean isRemosaicOn = false;
+    public static boolean isQuadCfaOn = false;
+    public static boolean isAiAutoSceneDetectionOn = false;
+    public static boolean isProVideoLogOn = false;
+    public static boolean isHdrOn = false;
+    public static boolean isSuperResOn = false;
+    public static boolean isIdealRawOn = false;
+    public static boolean isEisLookAheadOn = false;
+    public static boolean isEisV3On = false;
+    public static boolean isVivoZeissColorOn = false;
+    public static boolean isVivoDistortionCorrectionOn = false;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

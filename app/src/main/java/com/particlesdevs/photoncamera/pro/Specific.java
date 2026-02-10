@@ -145,6 +145,18 @@ public class Specific {
                     specificSetting.priorityMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "mfnrFrames": {
+                    specificSetting.mfnrFrames = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "xiaomiSupernightMode": {
+                    specificSetting.xiaomiSupernightMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraTemporalNoiseProcessType": {
+                    specificSetting.codeAuroraTemporalNoiseProcessType = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
