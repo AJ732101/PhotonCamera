@@ -62,7 +62,7 @@ public class SaverImplementation {
                 int offsetH = (image.getHeight() - height) / 2;
                 offsetH -= offsetH % 2;
                 if (image.getPlanes()[0].getRowStride() != 0) {
-                    offset = image.getWidth() * image.getPlanes()[0].getRowStride() * offsetH;
+                    offset = image.getPlanes()[0].getRowStride() * offsetH;
                     capacity = image.getPlanes()[0].getRowStride() * height;
                 }
             }

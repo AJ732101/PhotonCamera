@@ -90,6 +90,7 @@ public class PhotonCamera extends Application {
     public static boolean hasXiaomiHdr = false;
     public static boolean hasXiaomiAiAutoSceneDetection = false;
     public static boolean hasXiaomiProVideoLog = false;
+    public static boolean hasXiaomiProVideoMovie = false;
     public static boolean hasXiaomiReMosaic = false;
     public static boolean hasXiaomiQuadCfa = false;
     public static boolean hasEisLookAhead = false;
@@ -97,7 +98,9 @@ public class PhotonCamera extends Application {
     public static boolean hasXiaomiSuperResolution = false;
     public static boolean hasIdealRaw = false;
     public static boolean hasVivoZeissColor = false;
+    public static boolean hasVivoProMode = false;
     public static boolean hasVivoDistortionCorrection = false;
+    public static boolean hasQucommAdrcOff = false;
     public static boolean mHeicIsSupported = false;
     public static boolean mHeicUltraHdrIsSupported = false;
     public static boolean mJpegRIsSupported = false;
@@ -116,6 +119,7 @@ public class PhotonCamera extends Application {
     public static boolean isQuadCfaOn = false;
     public static boolean isAiAutoSceneDetectionOn = false;
     public static boolean isProVideoLogOn = false;
+    public static boolean isProVideoLogMovie = false;
     public static boolean isHdrOn = false;
     public static boolean isSuperResOn = false;
     public static boolean isIdealRawOn = false;
@@ -123,6 +127,9 @@ public class PhotonCamera extends Application {
     public static boolean isEisV3On = false;
     public static boolean isVivoZeissColorOn = false;
     public static boolean isVivoDistortionCorrectionOn = false;
+    public static boolean isVivoProModeOn = false;
+    public static boolean isQucommAdrcOff = false;
+    public static SensorManager mSensorManager = null;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {
@@ -269,11 +276,11 @@ public class PhotonCamera extends Application {
     }
     private void initModules() {
 
-        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mGravity = new Gravity(sensorManager);
-        mGyro = new Gyro(sensorManager);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mGravity = new Gravity(mSensorManager);
+        mGyro = new Gyro(mSensorManager);
         mVibration = new Vibration(this);
-        mHorizonAndGear = new HorizonAndGear(sensorManager);
+        mHorizonAndGear = new HorizonAndGear(mSensorManager);
 
         mSettingsManager = new SettingsManager(this);
         mSupportedDevice = new SupportedDevice(mSettingsManager);

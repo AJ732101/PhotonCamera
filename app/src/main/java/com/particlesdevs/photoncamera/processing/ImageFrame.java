@@ -29,7 +29,7 @@ public class ImageFrame {
 
     public ImageFrame(ByteBuffer in, int format, int width, int row_stride, int shift, int capacity) {
         ByteBuffer direct;
-        if(format == 0x25){
+        if ((format == ImageFormat.RAW10) || (format == ImageFormat.RAW12)) {
             direct = Allocator.allocateAndCopyConvert(capacity, in, width, row_stride, shift);
         } else {
             direct = Allocator.allocateAndCopy(capacity, in, shift);

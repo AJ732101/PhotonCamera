@@ -140,11 +140,14 @@ public class VendorTagUtils {
         PhotonCamera.hasXiaomiHdr = false;
         PhotonCamera.hasXiaomiAiAutoSceneDetection = false;
         PhotonCamera.hasXiaomiProVideoLog = false;
+        PhotonCamera.hasXiaomiProVideoMovie = false;
         PhotonCamera.hasXiaomiReMosaic = false;
         PhotonCamera.hasXiaomiQuadCfa = false;
         PhotonCamera.hasXiaomiSuperResolution = false;
         PhotonCamera.hasVivoZeissColor = false;
+        PhotonCamera.hasVivoProMode = false;
         PhotonCamera.hasVivoDistortionCorrection = false;
+        PhotonCamera.hasQucommAdrcOff = false;
     }
 
     @SuppressLint({"NewApi", "LocalSuppress"})
@@ -181,6 +184,14 @@ public class VendorTagUtils {
                         }
                     }
 
+                    var algoHdrMode = new CaptureRequest.Key<>("com.xiaomi.algo.hdrMode", byte.class);
+                    if (isSupported(builder, algoHdrMode)) {
+                        PhotonCamera.hasXiaomiHdr = true;
+                        if (PhotonCamera.isHdrOn) {
+                            builder.set(algoHdrMode, (byte) PhotonCamera.getSpecific().specificSetting.xiaomiHdrMode);
+                        }
+                    }
+
                     if (PhotonCamera.getSpecific().specificSetting.mfnrFrames > 0) {
                         var algoMfnrEnable = new CaptureRequest.Key<>("com.xiaomi.algo.mfnrEnable", byte.class);
                         if (isSupported(builder, algoMfnrEnable)) {
@@ -195,14 +206,6 @@ public class VendorTagUtils {
                         var mfnrFrameNum2 = new CaptureRequest.Key<>("com.xiaomi.customization.mfnr.frameNumber", Integer.class);
                         if (isSupported(builder, mfnrFrameNum2)) {
                             builder.set(mfnrFrameNum2, PhotonCamera.getSpecific().specificSetting.mfnrFrames);
-                        }
-                    }
-
-                    var xiaomiSuperRes = new CaptureRequest.Key<>("xiaomi.superResolution.enabled", byte.class);
-                    if (isSupported(builder, xiaomiSuperRes)) {
-                        PhotonCamera.hasXiaomiSuperResolution = true;
-                        if (PhotonCamera.isSuperResOn) {
-                            builder.set(xiaomiSuperRes, (byte) 1);
                         }
                     }
 
@@ -228,6 +231,20 @@ public class VendorTagUtils {
                         }
                     }
 
+                    var xiaomiHdrCheckerEnabled = new CaptureRequest.Key<>("xiaomi.hdr.hdrChecker.enabled", byte.class);
+                    if (isSupported(builder, xiaomiHdrCheckerEnabled)) {
+                        if (PhotonCamera.isHdrOn) {
+                            builder.set(xiaomiHdr, (byte) 1);
+                        }
+                    }
+
+                    var xiaomiHdrChecker = new CaptureRequest.Key<>("xiaomi.hdr.hdrChecker", byte.class);
+                    if (isSupported(builder, xiaomiHdrChecker)) {
+                        if (PhotonCamera.isHdrOn) {
+                            builder.set(xiaomiHdr, (byte) 1);
+                        }
+                    }
+
                     var xiaomiUiHdrLabel = new CaptureRequest.Key<>("xiaomi.hdr.isUIHDRLabelEnabled", byte.class);
                     if (isSupported(builder, xiaomiUiHdrLabel)) {
                         if (PhotonCamera.isHdrOn) {
@@ -242,9 +259,9 @@ public class VendorTagUtils {
                         }
                     }
 
-                    var xiaomirawHdr = new CaptureRequest.Key<>("xiaomi.hdr.raw.enabled", byte.class);
-                    if (isSupported(builder, xiaomirawHdr)) {
-                        //builder.set(xiaomirawHdr, PhotonCamera.isHdrOn ? (byte)1 : (byte)0);
+                    var xiaomiRawHdr = new CaptureRequest.Key<>("xiaomi.hdr.raw.enabled", byte.class);
+                    if (isSupported(builder, xiaomiRawHdr)) {
+                        //builder.set(xiaomiRawHdr, PhotonCamera.isHdrOn ? (byte)1 : (byte)0);
                     }
 
                     var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", byte.class);
@@ -263,6 +280,14 @@ public class VendorTagUtils {
                         }
                     }
 
+                    var xiaomiSuperRes = new CaptureRequest.Key<>("xiaomi.superResolution.enabled", byte.class);
+                    if (isSupported(builder, xiaomiSuperRes)) {
+                        PhotonCamera.hasXiaomiSuperResolution = true;
+                        if (PhotonCamera.isSuperResOn) {
+                            builder.set(xiaomiSuperRes, (byte) 1);
+                        }
+                    }
+
                     var proVideoLog = new CaptureRequest.Key<>("xiaomi.pro.video.log.enabled", byte.class);
                     if (isSupported(builder, proVideoLog)) {
                         PhotonCamera.hasXiaomiProVideoLog = true;
@@ -271,11 +296,34 @@ public class VendorTagUtils {
                         }
                     }
 
+                    var proVideoMovie = new CaptureRequest.Key<>("xiaomi.pro.video.movie.enabled", byte.class);
+                    if (isSupported(builder, proVideoMovie)) {
+                        PhotonCamera.hasXiaomiProVideoMovie = true;
+                        if (PhotonCamera.isProVideoLogMovie) {
+                            builder.set(proVideoMovie, (byte) 1);
+                        }
+                    }
+
                     var aiAutoSceneDetection = new CaptureRequest.Key<>("xiaomi.ai.asd.enabled", byte.class);
                     if (isSupported(builder, aiAutoSceneDetection)) {
                         PhotonCamera.hasXiaomiAiAutoSceneDetection = true;
                         if (PhotonCamera.isAiAutoSceneDetectionOn) {
                             builder.set(aiAutoSceneDetection, (byte) 1);
+                        }
+                    }
+
+                    var aiSceneDetection = new CaptureRequest.Key<>("xiaomi.ai.misd.enabled", byte.class);
+                    if (isSupported(builder, aiSceneDetection)) {
+                        PhotonCamera.hasXiaomiAiAutoSceneDetection = true;
+                        if (PhotonCamera.isAiAutoSceneDetectionOn) {
+                            builder.set(aiSceneDetection, (byte) 1);
+                        }
+                    }
+
+                    var aiUltraRaw = new CaptureRequest.Key<>("xiaomi.ai.asd.UltraRawChecker", byte.class);
+                    if (isSupported(builder, aiUltraRaw)) {
+                        if (PhotonCamera.isAiAutoSceneDetectionOn) {
+                            builder.set(aiUltraRaw, (byte) 1);
                         }
                     }
 
@@ -389,6 +437,16 @@ public class VendorTagUtils {
                     }
                 }
 
+                var quicIspCntrLtm = new CaptureRequest.Key<>("org.quic.camera.ispcontrol.DisableBLTMDC", byte.class);
+                if (isSupported(builder, quicIspCntrLtm)) {
+                    //builder.set(quicIspCntrLtm, (byte) 1);
+                }
+
+                var quicDcgMode = new CaptureRequest.Key<>("com.qti.stats_control.DCGMode", Integer.class);
+                if (isSupported(builder, quicDcgMode)) {
+                    builder.set(quicDcgMode, PhotonCamera.getSpecific().specificSetting.qtiDCGMode);
+                }
+
                 var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.enable", byte.class);
                 if (isSupported(builder, eislookahead)) {
                     PhotonCamera.hasEisLookAhead = true;
@@ -457,7 +515,12 @@ public class VendorTagUtils {
 
                 var enableHdrDcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableHDRDCGMode", Integer.class);
                 if (isSupported(builder, enableHdrDcgMode)) {
-                    //builder.set(enableHdrDcgMode, (int) 2564);
+                    builder.set(enableHdrDcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraEnableHDRDCGMode);
+                }
+
+                var dcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.DCGMode", Integer.class);
+                if (isSupported(builder, dcgMode)) {
+                    builder.set(dcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraDCGMode);
                 }
 
                 // Qualcomm LTM - local tone mapping deactivation
@@ -487,7 +550,7 @@ public class VendorTagUtils {
                 if (false) {
                     var hdrMode = new CaptureRequest.Key<>("org.quic.camera.hdr.hdrMode", Integer.class);
                     if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
+                        builder.set(hdrMode, (int) 2);
                     }
 
                     var hdrStrength = new CaptureRequest.Key<>("org.quic.camera.hdr.hdrStrength", Integer.class);
@@ -503,24 +566,29 @@ public class VendorTagUtils {
 
                 // Qualcomm AI‑Contrast / AI‑Scene / AI‑ToneMapping deactivation
                 if (false) {
-                    var asdEnable = new CaptureRequest.Key<>("org.quic.camera.ai.asdEnable", Integer.class);
-                    if (isSupported(builder, asdEnable)) {
-                        builder.set(asdEnable, (int) 0);
-                    }
-
-                    var sceneDetect = new CaptureRequest.Key<>("org.quic.camera.ai.sceneDetect", Integer.class);
-                    if (isSupported(builder, sceneDetect)) {
-                        builder.set(sceneDetect, (int) 0);
-                    }
-
-                    var toneMapEnable = new CaptureRequest.Key<>("org.quic.camera.ai.toneMapEnable", Integer.class);
-                    if (isSupported(builder, toneMapEnable)) {
-                        builder.set(toneMapEnable, (int) 0);
+                    var aISnapshot = new CaptureRequest.Key<>("org.quic.camera.AICamera.EnableAISnapshot", byte.class);
+                    if (isSupported(builder, aISnapshot)) {
+                        builder.set(aISnapshot, (byte) 1);
                     }
 
                     var aIStrength = new CaptureRequest.Key<>("org.quic.camera.AICamera.AIStrength", Integer.class);
                     if (isSupported(builder, aIStrength)) {
-                        builder.set(aIStrength, (int) 255);
+                        builder.set(aIStrength, (int) 100);
+                    }
+
+                    var asdEnable = new CaptureRequest.Key<>("org.quic.camera.ai.asdEnable", Integer.class);
+                    if (isSupported(builder, asdEnable)) {
+                        builder.set(asdEnable, (int) 1);
+                    }
+
+                    var sceneDetect = new CaptureRequest.Key<>("org.quic.camera.ai.sceneDetect", Integer.class);
+                    if (isSupported(builder, sceneDetect)) {
+                        builder.set(sceneDetect, (int) 1);
+                    }
+
+                    var toneMapEnable = new CaptureRequest.Key<>("org.quic.camera.ai.toneMapEnable", Integer.class);
+                    if (isSupported(builder, toneMapEnable)) {
+                        builder.set(toneMapEnable, (int) 1);
                     }
                 }
 
@@ -562,6 +630,10 @@ public class VendorTagUtils {
                             if (isSupported(builder, hdrMode)) {
                                 builder.set(hdrMode, (int) 1);
                             }
+                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
+                            if (isSupported(builder, hdrMode)) {
+                                builder.set(hdrMode, (int) 3);
+                            }
                             break;
                         case "QHDR":
                             hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
@@ -591,6 +663,21 @@ public class VendorTagUtils {
                                 builder.set(hdrMode, (int) 2);
                             }
                             break;
+                    }
+                }
+
+                CaptureRequest.Key perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
+                if (isSupported(builder, perfKey)) {
+                    PhotonCamera.hasQucommAdrcOff = true;
+                    if (PhotonCamera.isQucommAdrcOff) {
+                        builder.set(perfKey, (byte) 1);
+                    }
+                }
+
+                perfKey = new CaptureRequest.Key<>("org.quic.camera.pipelineControl.isDisableSinkNoBuffer", byte.class);
+                if (isSupported(builder, perfKey)) {
+                    if (PhotonCamera.isQucommAdrcOff) {
+                        builder.set(perfKey, (byte) 1);
                     }
                 }
 
@@ -675,6 +762,22 @@ public class VendorTagUtils {
 
                 // Vivo specific
                 if (PhotonCamera.isVivo) {
+                    var vivoIsProMode = new CaptureRequest.Key<>("vivo.control.is_pro_mode", Integer.class);
+                    PhotonCamera.hasVivoProMode = true;
+                    if (isSupported(builder, vivoIsProMode)) {
+                        if (PhotonCamera.isVivoProModeOn) {
+                            builder.set(vivoIsProMode, 1);
+                            var vivoProIsoMin = new CaptureRequest.Key<>("vivo.control.pro_isoMin", Integer.class);
+                            if (isSupported(builder, vivoProIsoMin)) {
+                                builder.set(vivoProIsoMin, 100);
+                            }
+                            var vivoProIsoMax = new CaptureRequest.Key<>("vivo.control.pro_isoMin", Integer.class);
+                            if (isSupported(builder, vivoProIsoMax)) {
+                                builder.set(vivoProIsoMax, 1600);
+                            }
+                        }
+                    }
+
                     var distortionCorrection = new CaptureRequest.Key<>("vivo.control.distortion_correction", Integer.class);
                     if (isSupported(builder, distortionCorrection)) {
                         PhotonCamera.hasVivoZeissColor = true;
@@ -703,6 +806,11 @@ public class VendorTagUtils {
                         if (PhotonCamera.getSpecific().specificSetting.colorTint > 0) {
                             builder.set(vivoColorHue, (int) PhotonCamera.getSpecific().specificSetting.colorTint);
                         }
+                    }
+
+                    var vivoIsRawNrMode = new CaptureRequest.Key<>("vivo.control.is_rawnr_mode", Integer.class);
+                    if (isSupported(builder, vivoIsRawNrMode)) {
+                        //builder.set(vivoIsRawNrMode, 0);
                     }
 
                     var vivoFilterMask = new CaptureRequest.Key<>("vivo.control.filterMask", Integer.class);
@@ -750,6 +858,16 @@ public class VendorTagUtils {
                         //builder.set(vivoEisConfig, 1);
                     }
 
+                    var vivoDisabeHdr = new CaptureRequest.Key<>("vivo.control.disableHDR", byte.class);
+                    if (isSupported(builder, vivoDisabeHdr)) {
+                        //builder.set(vivoDisabeHdr, (byte) 1);
+                    }
+
+                    var vivoWatermark = new CaptureRequest.Key<>("vivo.control.watermark", Integer.class);
+                    if (isSupported(builder, vivoWatermark)) {
+                        //builder.set(vivoWatermark, 1);
+                    }
+
                     var vivoSuperNight = new CaptureRequest.Key<>("vivo.control.superns_mode", Integer.class);
                     if (isSupported(builder, vivoSuperNight)) {
                         //builder.set(vivoSuperNight, 1);
@@ -780,6 +898,11 @@ public class VendorTagUtils {
                         //builder.set(vivoForceSensorMode, (int) 0);
                     }
 
+                    var vivoSensorMode = new CaptureRequest.Key<>("vivo.control.sensorMode", Integer.class);
+                    if (isSupported(builder, vivoSensorMode)) {
+                        //builder.set(vivoSensorMode, (int) 0);
+                    }
+
                     var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", Integer.class);
                     if (isSupported(builder, vivoAiGcOn)) {
                         //builder.set(vivoAiGcOn, (int) 1);
@@ -797,7 +920,7 @@ public class VendorTagUtils {
 
                     var vivo3dHdr = new CaptureRequest.Key<>("vivo.control.3dhdr_enable", Integer.class);
                     if (isSupported(builder, vivo3dHdr)) {
-                        //builder.set(vivo3dHdr, (int) 1);
+                        //builder.set(vivo3dHdr, 1);
                     }
 
                     var vivoDcgHdr = new CaptureRequest.Key<>("vivo.control.EnableDCGHDR", Integer.class);
@@ -818,6 +941,11 @@ public class VendorTagUtils {
                     var vivoEngineerRemosaicMode = new CaptureRequest.Key<>("vivo.control.EngineerRemosaicMode", Integer.class);
                     if (isSupported(builder, vivoEngineerRemosaicMode)) {
                         //builder.set(vivoEngineerRemosaicMode, (int) 1);
+                    }
+
+                    var vlogEffect = new CaptureRequest.Key<>("vivo.control.session.vlogEffect", Integer.class);
+                    if (isSupported(builder, vlogEffect)) {
+                        //builder.set(vlogEffect, 1);
                     }
                 }
 

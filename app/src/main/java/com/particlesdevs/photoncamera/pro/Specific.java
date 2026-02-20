@@ -157,6 +157,22 @@ public class Specific {
                     specificSetting.codeAuroraTemporalNoiseProcessType = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "codeAuroraDCGMode": {
+                    specificSetting.codeAuroraDCGMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "codeAuroraEnableHDRDCGMode": {
+                    specificSetting.codeAuroraEnableHDRDCGMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "qtiDCGMode": {
+                    specificSetting.qtiDCGMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "xiaomiHdrMode": {
+                    specificSetting.xiaomiHdrMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;

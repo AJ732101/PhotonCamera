@@ -284,11 +284,11 @@ public class ImageSaver {
             return saveSingleRaw(dngFilePath, image.buffer, parameters);
         }
 
-        public static boolean saveSingleRaw(Path dngFilePath,
-                                            ByteBuffer buffer, Parameters parameters) {
+        public static boolean saveSingleRaw(Path dngFilePath, ByteBuffer buffer, Parameters parameters) {
             DngCreator dngCreator = new DngCreator();
             dngCreator.setParameters(parameters);
             dngCreator.setCompression(PhotonCamera.getSettings().useDngCompression);
+            //dngCreator.setBitsPerSample(10);
             try {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);
                 dngCreator.writeBuffer(outputStream, buffer, parameters.rawSize.x, parameters.rawSize.y);

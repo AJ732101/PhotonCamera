@@ -208,6 +208,10 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunction.add("Xiaomi Pro Video LOG");
                 entryValuesFunction.add("Xiaomi Pro Video LOG");
             }
+            if (PhotonCamera.hasXiaomiProVideoMovie) {
+                entriesFunction.add("Xiaomi Pro Video Movie");
+                entryValuesFunction.add("Xiaomi Pro Video Movie");
+            }
             if (PhotonCamera.hasXiaomiReMosaic) {
                 entriesFunction.add("Xiaomi Re-Mosaic");
                 entryValuesFunction.add("Xiaomi Re-Mosaic");
@@ -236,9 +240,17 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunction.add("EIS V3");
                 entryValuesFunction.add("EIS V3");
             }
+            if (PhotonCamera.hasQucommAdrcOff) {
+                entriesFunction.add("Qualcomm ADRC Off");
+                entryValuesFunction.add("Qualcomm ADRC Off");
+            }
             if (PhotonCamera.hasVivoZeissColor) {
                 entriesFunction.add("Vivo Zeiss Color");
                 entryValuesFunction.add("Vivo Zeiss Color");
+            }
+            if (PhotonCamera.hasVivoProMode) {
+                entriesFunction.add("Vivo Pro Mode");
+                entryValuesFunction.add("Vivo Pro Mode");
             }
             if (PhotonCamera.hasVivoDistortionCorrection) {
                 entriesFunction.add("Vivo Distortion Correction");

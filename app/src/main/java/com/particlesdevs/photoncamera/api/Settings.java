@@ -108,7 +108,7 @@ public class Settings {
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
-    public int hdrMode = 4096;
+    public int hdrMode = 0;
     public int transferFunction = 7;
     public String videoEncoderName = "Device Default";
     public String lutName = "None";

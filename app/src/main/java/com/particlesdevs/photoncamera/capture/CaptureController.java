@@ -27,6 +27,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.hardware.DataSpace;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -121,6 +124,7 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
@@ -169,6 +173,7 @@ import static android.hardware.camera2.CaptureRequest.CONTROL_AF_REGIONS;
 import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureRequest.FLASH_MODE;
 import static android.hardware.camera2.CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE;
+import static androidx.core.content.ContextCompat.getSystemService;
 
 /**
  * Class responsible for image capture and sending images for subsequent processing
@@ -251,7 +256,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private Map<String, CameraCharacteristics> mCameraCharacteristicsMap = new HashMap<>();
     public static CameraCharacteristics mCameraCharacteristics;
-    public static int maxImagerReaderImages = 3;
+    public static int maxImageReaderImages = 3;
     public static CaptureResult mCaptureResult;
     public static CaptureRequest mCaptureRequest;
 
@@ -1296,7 +1301,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return new ArrayList<>(uniqueTargets);
     }
 
-
     @SuppressLint("MissingPermission")
     public void restartCamera() {
         mSocVendor = getSoCVendor();
@@ -1482,10 +1486,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
-            maxImagerReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
+            maxImageReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
         else if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            maxImagerReaderImages = 2;
+            maxImageReaderImages = 2;
         }
 
         PhotonCamera.getSpecificSensor().selectSpecifics(Integer.parseInt(cameraId));
@@ -1517,7 +1521,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mImageReaderPreview.close();
             mImageReaderPreview = null;
         }
-        mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImagerReaderImages);
+        mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImageReaderImages);
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
         mBufferSize = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristics, PhotonCamera.getSettings().selectedMode);
     }
@@ -1531,17 +1535,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
                 if (target.getHeight() > target.getWidth()) {
-                    mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                    mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 }
                 else {
-                    mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImagerReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                    mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
                 }
             } else {
                 if (target.getHeight() > target.getWidth()) {
-                    mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImagerReaderImages);
+                    mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImageReaderImages);
                 }
                 else {
-                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
+                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImageReaderImages);
                 }
                 //Log.d(TAG, "create ImageReader " + target.getWidth() + "x" + target.getHeight() + " - orientation: " + mSensorOrientation);
                 /*if (PhotonCamera.getSettings().QuadBayer) {
@@ -1591,7 +1595,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private Size getAspect(CameraMode targetMode) {
         if (targetMode == CameraMode.VIDEO) {
-            if ((PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777)){
+            if (PhotonCamera.isProVideoLogMovie) {
+                return new Size(9, 21);
+            }
+            else if ((PhotonCamera.getSettings().videoHeight != 9999) && (PhotonCamera.getSettings().videoHeight != 8888) && (PhotonCamera.getSettings().videoHeight != 7777)){
                 return new Size(9, 16);
             }
             else {
@@ -2994,6 +3001,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isProVideoLogOn = mIsFunctionOneOn;
             restartCamera();
             return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Pro Video Movie")) {
+            PhotonCamera.isProVideoLogMovie = mIsFunctionOneOn;
+            restartCamera();
+            return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi HDR")) {
             PhotonCamera.isHdrOn = mIsFunctionOneOn;
             restartCamera();
@@ -3010,6 +3021,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isIdealRawOn = mIsFunctionOneOn;
             restartCamera();
             return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Qualcomm ADRC Off")) {
+            PhotonCamera.isQucommAdrcOff = mIsFunctionOneOn;
+            restartCamera();
+            return;
         } else if (PhotonCamera.getSettings().functionOne.equals("EIS Look Ahead")) {
             PhotonCamera.isEisLookAheadOn = mIsFunctionOneOn;
             restartCamera();
@@ -3020,6 +3035,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Zeiss Color")) {
             PhotonCamera.isVivoZeissColorOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Pro Mode")) {
+            PhotonCamera.isVivoProModeOn = mIsFunctionOneOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Distortion Correction")) {
@@ -4350,6 +4369,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 2 * 1920;
         } else if (PhotonCamera.getSettings().videoHeight == 1080) {
             vidWidth = 1920;
+        } else if (PhotonCamera.getSettings().videoHeight == 800) {
+            vidWidth = 1920;
+        } else if (PhotonCamera.getSettings().videoHeight == 1600) {
+            vidWidth = 2 * 1920;
         }
         else if (PhotonCamera.getSettings().videoHeight == 9999) {
             Size maxSensorRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
@@ -4882,6 +4905,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 1080) {
             mVidWidth = 1920;
             mVidHeight = 1080;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 800) {
+            mVidWidth = 1920;
+            mVidHeight = 800;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2 *800) {
+            mVidWidth = 2 * 1920;
+            mVidHeight = 2 * 800;
         }
         else if (PhotonCamera.getSettings().videoHeight == 9999) {
             mVidWidth = maxSensorRes.getWidth();

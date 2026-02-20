@@ -31,6 +31,10 @@ public class SpecificSetting {
     public int mfnrFrames = 0;
     public int xiaomiSupernightMode = 0;
     public int codeAuroraTemporalNoiseProcessType = 0;
+    public int codeAuroraDCGMode = 0;
+    public int codeAuroraEnableHDRDCGMode = 0;
+    public int qtiDCGMode = 0;
+    public int xiaomiHdrMode = 1;
     public float colorTint = 99.0f;
     public String newRecColorRange = "full";
     public String recPrefix = "";

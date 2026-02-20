@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.processing.processor;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
@@ -32,7 +33,7 @@ public class RawVideoProcessor extends ProcessorBase {
     private final Object lock = new Object();
     private volatile boolean fillParams = false;
     private Path outputFolder;
-    private int writeBufferSize = 2;
+    private int writeBufferSize = 4;
     private int writeBufferCounter = 0;
     private int threadCounter = 0;
     private volatile ByteBuffer[] dngBuffers = null;
@@ -74,7 +75,13 @@ public class RawVideoProcessor extends ProcessorBase {
         int startCounter = videoCounter;
         if(!fillParams){
             Log.d(TAG, "videoCycle: " + this + " " + image + " " + startCounter);
-            int width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
+            int width = 0;
+            if (image.getPlanes()[0].getPixelStride() > 0) {
+                width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
+            } else {
+                width = image.getWidth();
+            }
+
             int height = image.getHeight();
             // Crop to 16:9
             if (PhotonCamera.getSettings().aspect169) {
@@ -89,7 +96,6 @@ public class RawVideoProcessor extends ProcessorBase {
             dngCreator = new DngCreator();
             dngCreator.setParameters(PhotonCamera.getParameters());
             dngCreator.setCompression(false);
-            dngCreator.setBitsPerSample(16);
             dngBuffers[0] = dngCreator.dngBuffer(image.getPlanes()[0].getBuffer(), PhotonCamera.getParameters().rawSize.x, PhotonCamera.getParameters().rawSize.y);
             for (int i = 1; i < writeBufferSize; i++) {
                 dngBuffers[i] = Allocator.allocateAndCopy(dngBuffers[0].capacity(), dngBuffers[0], 0);
