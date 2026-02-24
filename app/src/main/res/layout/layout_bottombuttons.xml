@@ -67,7 +67,7 @@
                     android:id="@+id/shutter_button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/roundbutton"
+                    android:background="@drawable/shutter_button_main"
                     android:clickable="true"
                     android:contentDescription="Shutter Button"
                     android:onClick="@{bottom_bar_click_listener}"
@@ -75,6 +75,7 @@
                     android:scaleY="0.75"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:visibility="visible"
+                    app:bindRotate="@{uimodel}"
                     tools:ignore="HardcodedText"
                     tools:text="Shot" />
 

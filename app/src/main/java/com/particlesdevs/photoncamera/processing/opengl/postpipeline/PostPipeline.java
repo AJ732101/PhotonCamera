@@ -157,13 +157,14 @@ public class PostPipeline extends GLBasePipeline {
 
                 }
 
-                if(mSettings.alignAlgorithm != 2) {
+                if (mSettings.alignAlgorithm != 2) {
                     //add(new HotPixelFilter());
-                    int selectedDemosaicing = getTuning("DemosaicingMethod", 1);
-                    //noinspection SwitchStatementWithTooFewBranches
-                    switch (selectedDemosaicing){
+                    switch (PhotonCamera.getSettings().demosaicMethod){
                         case 0:
                             add(new Demosaic());
+                            break;
+                        case 1:
+                            add(new Demosaic2());
                             break;
                         default:
                             add(new Demosaic3());

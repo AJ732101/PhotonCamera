@@ -54,6 +54,17 @@
             android:summary=""
             android:icon="@drawable/join_right_24px"/>
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_demosaic_key"
+            android:title="@string/demosaic"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/background_grid_small_24px"
+            android:summary=""
+            android:entries="@array/demosaic_entries"
+            android:entryValues="@array/demosaic_entryvalues"
+            android:defaultValue="@string/pref_demosaic_default"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_sharpness_seekbar_key"
             android:layout="@layout/preference_seekbar"

@@ -1076,6 +1076,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 mCameraUIView.setProcessingProgressBarIndeterminate(false);
                 mCameraUIView.activateShutterButton(true);
                 mCameraUIView.lockUIForBurst(false);
+                if (timerFrameCountViewModel != null) {
+                    timerFrameCountViewModel.clearFrameTimeCnt();
+                }
                 stopNotification();
             });
             boolean sleep = false;

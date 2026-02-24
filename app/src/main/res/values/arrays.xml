@@ -21,7 +21,13 @@
     </string-array>
 
     <string-array name="alignset_entries">
+        <item>PCam Old</item>
         <item>PCam New</item>
+    </string-array>
+
+    <string-array name="alignset_entryValues">
+        <item>0</item>
+        <item>1</item>
     </string-array>
 
     <string-array name="colorset_entries">
@@ -111,10 +117,6 @@
         <item>Off</item>
         <item>High Accuracy</item>
         <item>Network</item>
-    </string-array>
-
-    <string-array name="alignset_entryValues">
-        <item>1</item>
     </string-array>
 
     <string-array name="colorset_entryValues">
@@ -381,6 +383,16 @@
     <string-array name="raw_mode_entryvalues">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="demosaic_entries">
+        <item>Version 1</item>
+        <item>Version 3</item>
+    </string-array>
+
+    <string-array name="demosaic_entryvalues">
+        <item>0</item>
         <item>2</item>
     </string-array>
 

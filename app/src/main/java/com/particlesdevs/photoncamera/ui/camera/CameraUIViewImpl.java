@@ -321,7 +321,8 @@ class CameraUIViewImpl implements CameraUIView {
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
-            mShutterButton.setBackgroundResource(R.drawable.roundbutton);
+            //mShutterButton.setBackgroundResource(R.drawable.roundbutton);
+            mShutterButton.setBackgroundResource(R.drawable.shutter_button_main);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
             toggleConstraints(mode);
@@ -362,7 +363,8 @@ class CameraUIViewImpl implements CameraUIView {
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.noise_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.edge_entry_layout, View.GONE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.zoom_entry_layout, View.GONE);
-            mShutterButton.setBackgroundResource(R.drawable.roundbutton);
+            //mShutterButton.setBackgroundResource(R.drawable.roundbutton);
+            mShutterButton.setBackgroundResource(R.drawable.shutter_button);
             cameraFragment.cameraFragmentBinding.layoutBottombar.layoutBottombar.setBackground(null);
             cameraFragment.cameraFragmentBinding.getRoot().setBackground(Utilities.resolveDrawable(cameraFragment.requireActivity(), R.attr.cameraFragmentBackground));
             toggleConstraints(mode);

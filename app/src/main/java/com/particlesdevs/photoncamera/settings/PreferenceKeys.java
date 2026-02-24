@@ -45,6 +45,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AE_MODE.mValue);
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
+        COMMON_KEYS.add(Key.KEY_DEMOSAIC_METHOD.mValue);
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_REAL_PREVIEW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_RAW_FORMAT.mValue);
@@ -132,6 +133,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BRACKETING_MODE, 0); // Default to disable bracketing
@@ -318,6 +320,10 @@ public class PreferenceKeys {
 
     public static int isSaveRaw() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SAVE_RAW);
+    }
+
+    public static int getDemosaicMethod() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD);
     }
 
     public static boolean isBatterySaverOn(){
@@ -945,6 +951,7 @@ public class PreferenceKeys {
         KEY_PREVIEW_RESOLUTION(R.string.pref_preview_resolution_key),////TODO add preview resolution selector
         KEY_SHOW_AF_DATA(R.string.pref_show_afdata_key),
         KEY_SAVE_RAW(R.string.pref_save_raw_key),
+        KEY_DEMOSAIC_METHOD(R.string.pref_demosaic_key),
         KEY_CFA(R.string.pref_cfa_key),
         KEY_REMOSAIC(R.string.pref_remosaic_key),////TODO
 

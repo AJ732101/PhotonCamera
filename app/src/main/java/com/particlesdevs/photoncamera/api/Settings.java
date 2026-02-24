@@ -113,6 +113,7 @@ public class Settings {
     public String videoEncoderName = "Device Default";
     public String lutName = "None";
     public int exposureCompensation2 = 0;
+    public int demosaicMethod = 2;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -158,6 +159,7 @@ public class Settings {
         mCameraID = PreferenceKeys.getCameraID();
         theme = PreferenceKeys.getThemeValue();
         lutName = PreferenceKeys.getLutName();
+        demosaicMethod = PreferenceKeys.getDemosaicMethod();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();

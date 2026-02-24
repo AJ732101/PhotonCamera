@@ -64,6 +64,7 @@
     <string name="pref_chroma_seekbar_default" translatable="false">12</string>
     <string name="pref_luma_seekbar_default" translatable="false">12</string>
     <string name="pref_sharpness_seekbar_default" translatable="false">0.60</string>
+    <string name="pref_demosaic_default" translatable="false">2</string>
     <string name="pref_saturation_seekbar_default" translatable="false">1.0</string>
     <string name="pref_contrast_seekbar_default" translatable="false">0.0</string>
     <string name="pref_expocompensation_seekbar_default" translatable="false">0.0</string>
