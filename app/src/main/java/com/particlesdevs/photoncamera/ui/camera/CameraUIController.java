@@ -55,29 +55,29 @@ final public class CameraUIController implements CameraUIEventsListener,
 
     private String getMimeType(Context context, Uri uri) {
         String extension;
-        // Prüfen, ob die URI eine content:// URI ist
+
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(context.getContentResolver().getType(uri));
         } else {
-            // Fallback für file:// URIs
             extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new java.io.File(uri.getPath())).toString());
         }
 
         if (extension == null) {
-            // Manuelle Prüfung, wenn die Extension nicht ermittelt werden konnte
             String path = uri.getPath();
             if (path != null) {
                 if (path.toLowerCase().endsWith(".dng")) return "image/x-adobe-dng";
                 if (path.toLowerCase().endsWith(".heic")) return "image/heic";
                 if (path.toLowerCase().endsWith(".heif")) return "image/heic";
                 if (path.toLowerCase().endsWith(".avif")) return "image/avif";
+                if (path.toLowerCase().endsWith(".webp")) return "image/webp";
+                if (path.toLowerCase().endsWith(".png")) return "image/png";
             }
-            return "*/*"; // Generischer Fallback
+            return "*/*";
         }
 
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
 
-        // MimeTypeMap kennt HEIC/DNG oft nicht, also überschreiben wir es hier sicherheitshalber
+
         if ("dng".equalsIgnoreCase(extension)) {
             return "image/x-adobe-dng";
         }
@@ -86,6 +86,12 @@ final public class CameraUIController implements CameraUIEventsListener,
         }
         if ("heic".equalsIgnoreCase(extension) || "heif".equalsIgnoreCase(extension)) {
             return "image/heic";
+        }
+        if ("png".equalsIgnoreCase(extension)) {
+            return "image/png";
+        }
+        if ("webp".equalsIgnoreCase(extension)) {
+            return "image/webp";
         }
 
         return (mimeType != null) ? mimeType : "*/*";

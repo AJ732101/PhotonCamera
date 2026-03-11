@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -130,6 +131,7 @@ public class PhotonCamera extends Application {
     public static boolean isVivoProModeOn = false;
     public static boolean isQucommAdrcOff = false;
     public static SensorManager mSensorManager = null;
+    public static Location gpsLocation = null;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

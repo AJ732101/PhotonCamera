@@ -159,6 +159,12 @@ public class SettingsActivity extends BaseActivity implements
                 entries.add("YUV RAW");
                 entryValues.add("888888888");
             }
+            entries.add("PNG (SW)");
+            entryValues.add("999999993");
+            entries.add("WebP Lossy (SW)");
+            entryValues.add("777777777");
+            entries.add("WebP Lossless (SW)");
+            entryValues.add("666666666");
             entries.add("JPEG/RAW Stacking");
             entryValues.add("0");
             entries.add("Video Codec 8 Bit");

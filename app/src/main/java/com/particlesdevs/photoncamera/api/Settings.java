@@ -105,6 +105,7 @@ public class Settings {
     public boolean allowNetworkSync = false;
     public boolean useLosslessSwEncoding = false;
     public boolean useExposureFusionMethod2 = true;
+    public boolean gpsLocation = false;
     public String contrastCurve = "off";
     public int effectMode = 0;
     public int keyframeInterval = 10;
@@ -114,6 +115,7 @@ public class Settings {
     public String lutName = "None";
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
+    public String videoRange = "Full";
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -173,6 +175,7 @@ public class Settings {
         useVirtualHorizon = PreferenceKeys.useVirtualHorizon();
         useVirtualHorizonText = PreferenceKeys.useVirtualHorizonText();
         allowNetworkSync = PreferenceKeys.allowNetworkSync();
+        gpsLocation = PreferenceKeys.gpsLocation();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();
@@ -187,6 +190,7 @@ public class Settings {
         transferFunction = PreferenceKeys.getTransferFunction();
         videoEncoderName = PreferenceKeys.getVideoEncoderName();
         exposureCompensation2 = PreferenceKeys.getExposureCompensation();
+        videoRange = PreferenceKeys.getVideoRange();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();

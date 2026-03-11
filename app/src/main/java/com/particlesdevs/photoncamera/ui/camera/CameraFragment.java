@@ -20,12 +20,16 @@
 
 package com.particlesdevs.photoncamera.ui.camera;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -40,6 +44,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -66,8 +73,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -172,6 +181,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
     private ManualModeConsole manualModeConsole;
     public float displayAspectRatio;
     private HorizonIndicatorView mHorizonIndicatorView;
+    private Location mCurrentLocation;
 
     public CameraFragment() {
         Log.v(TAG, "fragment created");
@@ -265,6 +275,11 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         Log.d(TAG, "onCreateView: ");
         initMembers();
         setModelsToLayout();
+        if (PhotonCamera.getSettings().gpsLocation) {
+            if (ContextCompat.checkSelfPermission(ContextProvider.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+            }
+        }
         return cameraFragmentBinding.getRoot();
     }
     private void initMembers() {
@@ -368,6 +383,24 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
+
+    private void startLocationUpdates() {
+        if (PhotonCamera.getSettings().gpsLocation) {
+            LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                // Fordere Updates alle 5 Sekunden oder bei 10 Meter Bewegung an
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        5000, // Zeit in ms
+                        10,   // Distanz in Metern
+                        mLocationListener
+                );
+                // Optional: Auch Netzwerk-Standort (schneller, aber ungenauer)
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, mLocationListener);
+            }
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -388,6 +421,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         captureController.resumeCamera();
         initTouchFocus();
         manualModeConsole.onResume();
+
+        startLocationUpdates();
     }
 
     private void initTouchFocus() {
@@ -402,6 +437,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
     @Override
     public void onPause() {
+        LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+        locationManager.removeUpdates(mLocationListener);
+
         timerHandlerAlways.removeCallbacks(timerRunnableAlways);
         PhotonCamera.getGravity().unregister();
         PhotonCamera.getGyro().unregister();
@@ -577,6 +615,13 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         surfaceView.setBackground(new android.graphics.drawable.InsetDrawable(drawable, 24, 24, 0, 0));
     }
 
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            mCurrentLocation = location;
+        }
+    };
+
     @SuppressLint("DefaultLocale")
 
     private void updateScreenLog(CaptureResult result) {
@@ -589,6 +634,21 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             mHorizonIndicatorView.updateAngles(PhotonCamera.getHorizonAndGear().getRoll(), PhotonCamera.getHorizonAndGear().getPitch(), PhotonCamera.getHorizonAndGear().getYaw());
             if (getCameraFragmentViewModel() != null) {
                 mHorizonIndicatorView.setViewfinderMagnified(getCameraFragmentViewModel().getCameraFragmentModel().isViewfinderMagnified());
+            }
+        }
+
+        // GPS
+        if (PhotonCamera.getSettings().gpsLocation) {
+            Location location = mCurrentLocation;
+            if (location == null) {
+                LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
+            }
+
+            if (result.getFrameNumber() % 100 == 0) {
+                PhotonCamera.gpsLocation = location;
             }
         }
 
@@ -632,6 +692,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
                     (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
                     (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW HEIC/HEIF
+                    (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
+                    (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
+                    (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
                     (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
                     (PhotonCamera.getSettings().rawSaver != 2)) {
                     stringMap.put("Mode", "SINGLE SHOT");
@@ -711,6 +774,17 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 stringMap.put("Ext. ISO", String.valueOf(PhotonCamera.getSettings().useExtendIso));
                 stringMap.put("Ext. Expo", String.valueOf(PhotonCamera.getSettings().useExtendIso));
                 stringMap.put("DNG Compr", String.valueOf(PhotonCamera.getSettings().useDngCompression));
+                // GPS
+                if (PhotonCamera.getSettings().gpsLocation) {
+                    if (PhotonCamera.gpsLocation != null) {
+                        stringMap.put("Latitude", String.valueOf(PhotonCamera.gpsLocation.getLatitude()));
+                        stringMap.put("Longitude", String.valueOf(PhotonCamera.gpsLocation.getLongitude()));
+                        if (PhotonCamera.gpsLocation.hasAltitude()) {
+                            stringMap.put("Altitude", String.format(java.util.Locale.ROOT, "%.2f", PhotonCamera.gpsLocation.getAltitude()) + "m");
+                        }
+                    }
+                }
+
                 // QualityDoesMatter
                 if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                     stringMap.put("--VIDEO--", "--OPTS--");
@@ -1092,6 +1166,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 String heicPrefix = "HEIF saved: ";
                 String avifPrefix = "AVIF saved: ";
                 String pngPrefix = "PNG saved: ";
+                String webpPrefix = "WebP saved: ";
+                String undefinedPrefix = "HEIC/AVIF/APV saved: ";
 
                 if (message.startsWith(jpegPrefix)) {
                     filePath = message.substring(jpegPrefix.length());
@@ -1107,6 +1183,26 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 } else if (message.startsWith(pngPrefix)) {
                     filePath = message.substring(pngPrefix.length());
                     mimeType = "image/png";
+                    sleep = true;
+                } else if (message.startsWith(webpPrefix)) {
+                    filePath = message.substring(webpPrefix.length());
+                    mimeType = "image/webp";
+                    sleep = true;
+                } else if (message.startsWith(undefinedPrefix)) {
+                    filePath = message.substring(undefinedPrefix.length());
+                    if (PhotonCamera.getSettings().previewFormat == 999999999) {
+                        mimeType = "image/avif";
+                    }
+                    if (PhotonCamera.getSettings().previewFormat == 999999991) {
+                        mimeType = "image/heic";
+                    }
+                    if (PhotonCamera.getSettings().previewFormat == 999999993) {
+                        mimeType = "image/png";
+                    }
+                    if ((PhotonCamera.getSettings().previewFormat == 666666666) ||
+                        (PhotonCamera.getSettings().previewFormat == 777777777)) {
+                        mimeType = "image/webp";
+                    }
                     sleep = true;
                 }
 

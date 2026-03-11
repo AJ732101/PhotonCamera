@@ -129,7 +129,10 @@ public class TouchFocus {
             (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
             (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
             (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW HEIC/HEIF
-            (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
+            (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
+            (PhotonCamera.getSettings().previewFormat == 888888888) ||  // YCBCR_P010 RAW
+            (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
+            (PhotonCamera.getSettings().previewFormat == 666666666)) && // SW WebP lossless
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
            return true;

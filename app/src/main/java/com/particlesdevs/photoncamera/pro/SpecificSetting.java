@@ -34,9 +34,9 @@ public class SpecificSetting {
     public int codeAuroraDCGMode = 0;
     public int codeAuroraEnableHDRDCGMode = 0;
     public int qtiDCGMode = 0;
+    public int qtiImageStabilizationMode = 0;
     public int xiaomiHdrMode = 1;
     public float colorTint = 99.0f;
-    public String newRecColorRange = "full";
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";

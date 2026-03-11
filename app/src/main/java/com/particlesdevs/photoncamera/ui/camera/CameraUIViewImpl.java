@@ -300,6 +300,9 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
                 (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
                 (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
+                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
+                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
+                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
                 (PhotonCamera.getSettings().previewFormat == 888888888))) { // YCBCR_P010 RAW
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
@@ -341,6 +344,9 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
                 (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
                 (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
+                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
+                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
+                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
                 (PhotonCamera.getSettings().previewFormat == 888888888))) { // YCBCR_P010 RAW
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);

@@ -131,6 +131,14 @@
             android:summary=""
             android:icon="@drawable/network_manage_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_gps_key"
+            android:defaultValue="@bool/pref_gps_default"
+            android:title="@string/gps_location"
+            android:summary=""
+            android:icon="@drawable/add_location_alt_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

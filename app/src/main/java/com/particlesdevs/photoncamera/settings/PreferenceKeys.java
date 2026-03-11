@@ -65,6 +65,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON.mValue);
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON_TEXT.mValue);
         COMMON_KEYS.add(Key.KEY_ALLOW_NETWORK_SYNC.mValue);
+        COMMON_KEYS.add(Key.KEY_GPS_LOCATION.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -78,6 +79,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_HDR_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_TRANSFER_FUNCTION.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_ENCODER_NAME.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_RANGE.mValue);
         // QualityDoesMatter - Audio
         COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
@@ -158,6 +160,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON, resources.getBoolean(R.bool.pref_virtual_horizon_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON_TEXT, resources.getBoolean(R.bool.pref_virtual_horizon_text_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC, resources.getBoolean(R.bool.pref_allow_network_sync_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION, resources.getBoolean(R.bool.pref_gps_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -171,6 +174,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_MODE, resources.getString(R.string.pref_hdr_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME, resources.getString(R.string.pref_video_codec_name_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_RANGE, resources.getString(R.string.pref_video_range_default_value));
         // QualityDoesMatter - Audio
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
@@ -784,6 +788,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC);
     }
 
+    public static boolean gpsLocation() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION);
+    }
+
     public static String getContrastCurve() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
     }
@@ -813,6 +821,10 @@ public class PreferenceKeys {
 
     public static String getVideoEncoderName() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME);
+    }
+
+    public static String getVideoRange() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_RANGE);
     }
 
     public static String getLutName() {
@@ -872,6 +884,7 @@ public class PreferenceKeys {
         KEY_VIRTUAL_HORIZON(R.string.pref_virtual_horizon_key),
         KEY_VIRTUAL_HORIZON_TEXT(R.string.pref_virtual_horizon_text_key),
         KEY_ALLOW_NETWORK_SYNC(R.string.pref_allow_network_sync_key),
+        KEY_GPS_LOCATION(R.string.pref_gps_key),
 
         /**
          * QualityDoesMatter - Video settings keys
@@ -891,6 +904,7 @@ public class PreferenceKeys {
         KEY_HDR_MODE(R.string.pref_hdr_mode_key),
         KEY_TRANSFER_FUNCTION(R.string.pref_transfer_function_key),
         KEY_VIDEO_ENCODER_NAME(R.string.pref_video_encoder_name_key),
+        KEY_VIDEO_RANGE(R.string.pref_video_range_key),
 
         /**
          * QualityDoesMatter - Audio settings keys

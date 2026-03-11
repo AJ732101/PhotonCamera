@@ -124,6 +124,16 @@
                 android:entryValues="@array/transfer_function_entryValues"
                 android:defaultValue="@string/pref_transfer_function_default_value" />
 
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_video_range_key"
+                android:title="@string/video_range"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/arrow_range_24px"
+                android:entries="@array/video_range_entries"
+                android:entryValues="@array/video_range_entryValues"
+                android:defaultValue="@string/pref_video_range_default_value" />
+
         </PreferenceCategory>
 
         <Preference

@@ -67,6 +67,7 @@ import android.os.SystemClock;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
 import com.particlesdevs.photoncamera.util.FileManager;
@@ -83,6 +84,7 @@ import android.graphics.ColorSpace;
 import android.view.Gravity;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.particlesdevs.photoncamera.R;
@@ -395,6 +397,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     mMetaData.putString("physCamID", physicalID);
                     if (physicalID != logicalID) {
                         mMetaData.putString("logiCamID", logicalID);
+                    }
+
+                    if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                        mMetaData.putString("latitude", String.valueOf(PhotonCamera.gpsLocation.getLatitude()));
+                        mMetaData.putString("longitude", String.valueOf(PhotonCamera.gpsLocation.getLongitude()));
+                        if (PhotonCamera.gpsLocation.hasAltitude()) {
+                            mMetaData.putString("altitude", String.valueOf(PhotonCamera.gpsLocation.getAltitude()));
+                        }
                     }
 
                     // all the capture meta data
@@ -818,6 +828,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
                 (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
                 (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
+                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
+                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
+                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
                 (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
@@ -843,7 +856,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
-            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992) || (targetFromUi == 888888888)) { // SW AVIF, SW HEIC/HEIF, SW JPEG LUT, YCBCR_P010 RAW
+            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992) || (targetFromUi == 999999993) ||
+                    (targetFromUi == 888888888) || (targetFromUi == 777777777) || (targetFromUi == 666666666)) {
                 mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
             }
             else {
@@ -4554,7 +4568,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
         }
 
-        if (PhotonCamera.getSpecific().specificSetting.newRecColorRange.equals("full")) {
+        if (PhotonCamera.getSettings().videoRange.equals("Full")) {
             format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
         }
         else {

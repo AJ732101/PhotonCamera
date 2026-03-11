@@ -31,6 +31,15 @@ public class JPEGSaver extends DefaultSaver {
                 Path jpgPath = ImagePath.newJPGFilePath();
                 buffer.duplicate().get(bytes);
                 Files.write(jpgPath, bytes);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    ExifInterface exif = new ExifInterface(jpgPath.toString());
+                    exif.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        exif.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                    exif.saveAttributes();
+                }
                 IMAGE_BUFFER.clear();
             }
             if (PhotonCamera.getSettings().frameCount == 1) {
@@ -38,6 +47,15 @@ public class JPEGSaver extends DefaultSaver {
                 IMAGE_BUFFER.clear();
                 buffer.get(bytes);
                 Files.write(jpgPath, bytes);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    ExifInterface exif = new ExifInterface(jpgPath.toString());
+                    exif.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        exif.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                    exif.saveAttributes();
+                }
                 image.close();
                 processingEventsListener.onProcessingFinished("JPEG: Single Frame, Not Processed!");
                 processingEventsListener.notifyImageSavedStatus(true, jpgPath);

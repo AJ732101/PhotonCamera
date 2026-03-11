@@ -169,16 +169,16 @@ public class Specific {
                     specificSetting.qtiDCGMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "qtiImageStabilizationMode": {
+                    specificSetting.qtiImageStabilizationMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "xiaomiHdrMode": {
                     specificSetting.xiaomiHdrMode = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
-                    break;
-                }
-                case "newRecColorRange": {
-                    specificSetting.newRecColorRange = caseS[1];
                     break;
                 }
                 case "recPrefix": {

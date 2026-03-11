@@ -49,12 +49,8 @@ public class AvifEncoder {
                 originalBitmap = ImageUtils.yuv8BitToBitmap(image);
                 break;
             case ImageFormat.YCBCR_P010:
-                try {
-                    originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
-                    saveF16BitmapToPng(originalBitmap, outputFile);
-                } catch (ExecutionException | InterruptedException e) {
-                    throw new IOException("GL-based P010 conversion failed", e);
-                }
+                originalBitmap = ImageUtils.p010SdrToBitmap1010102(image);
+                //originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
             break;
         }
 
@@ -111,12 +107,25 @@ public class AvifEncoder {
         }
     }
 
-    public static void saveF16BitmapToPng(Bitmap f16Bitmap, File outputFile) {
+    public static void saveBitmapToPng(Bitmap bitmap, File outputFile, int quality) {
         try (FileOutputStream out = new FileOutputStream(outputFile)) {
-            f16Bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Log.d(TAG, "F16 PNG saved successful: " + outputFile.getPath());
+            bitmap.compress(Bitmap.CompressFormat.PNG, quality, out);
+            Log.d(TAG, "PNG saved successful: " + outputFile.getPath());
         } catch (IOException e) {
-            Log.e(TAG, "F16 PNG saved FAILED", e);
+            Log.e(TAG, "PNG saved FAILED", e);
+        }
+    }
+
+    public static void saveBitmapToWebP(Bitmap bitmap, File outputFile, int quality) {
+        try (FileOutputStream out = new FileOutputStream(outputFile)) {
+            if (quality > 0) {
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, out);
+            } else {
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, quality, out);
+            }
+            Log.d(TAG, "WebP saved successful: " + outputFile.getPath());
+        } catch (IOException e) {
+            Log.e(TAG, "WebP saved FAILED", e);
         }
     }
 }

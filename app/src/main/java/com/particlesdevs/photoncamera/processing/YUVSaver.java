@@ -21,6 +21,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 
+import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
@@ -75,14 +76,64 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
 
                 Bitmap originalBitmap = null;
-                Bitmap rotatedBitmap = null;
 
-                // 1. Convert the YUV Image to a high-precision Bitmap
                 switch (image.getFormat()) {
                     case ImageFormat.YCBCR_P010:
                         try {
                             originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
-                            AvifEncoder.saveF16BitmapToPng(originalBitmap, heicFile);
+                            }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                    case ImageFormat.YUV_420_888:
+                        try {
+                            originalBitmap = ImageUtils.yuv8BitToBitmap(image);
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                }
+                AvifEncoder.saveBitmapToPng(originalBitmap, heicFile, quality);
+                ExifInterface inter = ParseExif.setAllAttributes(heicFile, ImageSaver.exifDataFromMetadata(metadata, orientation));
+                try {
+                    if ((PhotonCamera.gpsLocation != null) && PhotonCamera.getSettings().gpsLocation) {
+                        inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+                        if (PhotonCamera.gpsLocation.hasAltitude()) {
+                            inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                        }
+                    }
+                    inter.saveAttributes();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                originalBitmap.recycle();
+                image.close();
+                processingEventsListener.onProcessingFinished("PNG saved: " + storagePath.toAbsolutePath().toString());
+                return;
+            }
+
+            // SW based WebP
+            if ((usedTargetFormat == 777777777) || (usedTargetFormat == 666666666)) {
+                storagePath = ImagePath.newWEBPFilePath();
+                heicFile = new File(storagePath.toString());
+
+                Bitmap originalBitmap = null;
+
+                switch (image.getFormat()) {
+                    case ImageFormat.YCBCR_P010:
+                        try {
+                            originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
+
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                    case ImageFormat.YUV_420_888:
+                        try {
+                            originalBitmap = ImageUtils.yuv8BitToBitmap(image);
                         }
                         catch (Exception e) {
                             Log.e(TAG, Log.getStackTraceString(e));
@@ -90,8 +141,26 @@ public class YUVSaver extends DefaultSaver{
                         break;
                 }
 
+                if (usedTargetFormat == 777777777) {
+                    AvifEncoder.saveBitmapToWebP(originalBitmap, heicFile, quality);
+                } else {
+                    AvifEncoder.saveBitmapToWebP(originalBitmap, heicFile, 0);
+                }
+                ExifInterface inter = ParseExif.setAllAttributes(heicFile, ImageSaver.exifDataFromMetadata(metadata, orientation));
+                try {
+                    if ((PhotonCamera.gpsLocation != null) && PhotonCamera.getSettings().gpsLocation) {
+                        inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+                        if (PhotonCamera.gpsLocation.hasAltitude()) {
+                            inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                        }
+                    }
+                    inter.saveAttributes();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                originalBitmap.recycle();
                 image.close();
-                processingEventsListener.onProcessingFinished("PNG saved: " + storagePath.toAbsolutePath().toString());
+                processingEventsListener.onProcessingFinished("WebP saved: " + storagePath.toAbsolutePath().toString());
                 return;
             }
 
@@ -294,7 +363,7 @@ public class YUVSaver extends DefaultSaver{
                 }
 
                 Log.d(TAG, "Successfully saved HEIC/AVIF/APV still image to: " + heicFile.getAbsolutePath());
-                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getName());
+                processingEventsListener.onProcessingFinished("HEIC/AVIF/APV saved: " + heicFile.getAbsolutePath());
             } catch (Exception e) {
                 Log.e(TAG, "Failed during HEIC/AVIF/APV encoding process", e);
                 processingEventsListener.onProcessingError("HEIC/AVIF/APV encoding failed: " + e.getMessage());
@@ -343,12 +412,37 @@ public class YUVSaver extends DefaultSaver{
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
-            //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
             format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
-            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+            if (PhotonCamera.mHdrTenPlusIsSupported == true) {
+                if (PhotonCamera.getSettings().videoHDR) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                } else {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
+                }
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus);
+            }
+            else if (PhotonCamera.mHdrTenIsSupported == true) {
+                if (PhotonCamera.getSettings().videoHDR) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                } else {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
+                }
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10);
+            }
+            else if (PhotonCamera.mHlgIsSupported == true) {
+                //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
+                //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                if (PhotonCamera.getSettings().videoHDR) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
+                } else {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                }
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+            }
+            else {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+            }
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
         }
         return format;

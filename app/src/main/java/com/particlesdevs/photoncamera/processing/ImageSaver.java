@@ -116,7 +116,7 @@ public class ImageSaver {
         implementation.addImage(mImage, orientation, targetFormat, quality, metadata, renderer);
     }
 
-    public String createProcessingString() {
+    public static String createProcessingString() {
         StringBuilder imageDescriptionBuilder = new StringBuilder();
         imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
         imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
@@ -154,15 +154,7 @@ public class ImageSaver {
         return imageDescriptionBuilder.toString();
     }
 
-    public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
-                                   Bundle metadata, CameraEventsListener processingEventsListener) {
-        Log.v(TAG, "directSaveImageLut() - Starting quick JPEG test");
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(imageData);
-        Path jpegFilePath;
-        jpegFilePath = ImagePath.newJPGFilePath();
-
+    public static ParseExif.ExifData exifDataFromMetadata(Bundle metadata, int orientation) {
         ParseExif.ExifData exifData = new ParseExif.ExifData();
         if(metadata != null) {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
@@ -183,20 +175,41 @@ public class ImageSaver {
 
             switch (orientation) {
                 case 0:
-                    exifData.ORIENTATION = "3";
-                    break;
-                case 180:
-                    exifData.ORIENTATION = "3";
+                    if (PhotonCamera.getSettings().previewFormat == 999999992) {
+                        exifData.ORIENTATION = "3";
+                    } else {
+                        exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_NORMAL); // "1"
+                    }
                     break;
                 case 90:
-                    exifData.ORIENTATION = "6";
+                    exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_90); // "6"
                     break;
-                case -90:
+                case 180:
+                    exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_180); // "3"
+                    break;
                 case 270:
-                    exifData.ORIENTATION = "8";
+                case -90:
+                    exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_270); // "8"
+                    break;
+                default:
+                    exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_UNDEFINED); // "0" oder "1"
                     break;
             }
         }
+
+        return exifData;
+    }
+
+    public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
+                                   Bundle metadata, CameraEventsListener processingEventsListener) {
+        Log.v(TAG, "directSaveImageLut() - Starting quick JPEG test");
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(imageData);
+        Path jpegFilePath;
+        jpegFilePath = ImagePath.newJPGFilePath();
+
+        ParseExif.ExifData exifData = exifDataFromMetadata(metadata, orientation);
 
         Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
         boolean success = Util.saveBitmapAsJPG(jpegFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
@@ -235,9 +248,6 @@ public class ImageSaver {
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
                 inter.saveAttributes();
-                /*MediaScannerConnection.scanFile(ContextProvider.getContext(),
-                        new String[]{fileToSave.toFile().getAbsolutePath()},
-                        new String[]{"image/jpeg"}, null);*/
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();

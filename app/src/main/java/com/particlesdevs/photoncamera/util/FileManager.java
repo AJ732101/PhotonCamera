@@ -15,7 +15,7 @@ import java.util.List;
 
 public class FileManager {
     private static final String TAG = "FileManager";
-    private static final List<String> ACCEPTED_FILES_EXTENSIONS = Arrays.asList("JPG", "JPEG", "DNG", "HEIC", "AVIF", "PNG", "RAW");
+    private static final List<String> ACCEPTED_FILES_EXTENSIONS = Arrays.asList("JPG", "JPEG", "DNG", "HEIC", "HEIF", "AVIF", "PNG", "RAW", "WEBP");
     private static final FilenameFilter FILENAME_FILTER = (dir, name) -> {
         int index = name.lastIndexOf(46);
         return ACCEPTED_FILES_EXTENSIONS.contains(-1 == index ? "" : name.substring(index + 1).toUpperCase()) && new File(dir, name).length() > 0;
@@ -27,6 +27,7 @@ public class FileManager {
     public static File sPHOTON_TEN_BIT_HEIC_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//HEIC_10_Bit//");
     public static File sPHOTON_APV_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//APV//");
     public static File sPHOTON_PNG_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//PNG//");
+    public static File sPHOTON_WEBP_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//WEBP//");
     public static File sPHOTON_YCBCR_P010_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//YCBCR_P010//");
     public static File sPHOTON_M4A_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//M4A//");
     public static File sPHOTON_AVIF_DIR = new File(sEXTERNAL_DIR + "//DCIM//PhotonVidCam//AVIF//");
@@ -44,6 +45,7 @@ public class FileManager {
         Log.d(TAG, "CreatedFolder : " + sPHOTON_AVIF_DIR + '=' + sPHOTON_AVIF_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_APV_DIR + '=' + sPHOTON_APV_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_PNG_DIR + '=' + sPHOTON_PNG_DIR.mkdirs());
+        Log.d(TAG, "CreatedFolder : " + sPHOTON_WEBP_DIR + '=' + sPHOTON_WEBP_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_M4A_DIR + '=' + sPHOTON_M4A_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_LUT_DIR + '=' + sPHOTON_LUT_DIR.mkdirs());
         Log.d(TAG, "CreatedFolder : " + sPHOTON_YCBCR_P010_DIR + '=' + sPHOTON_YCBCR_P010_DIR.mkdirs());
