@@ -75,6 +75,7 @@ import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
+import android.util.SizeF;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Surface;
@@ -348,7 +349,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         public void onImageAvailable(ImageReader reader) {
             Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
             if (lensDataMap != null) {
-                CameraLensData camLensData = lensDataMap.get(physicalID);
+                CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
                 if (camLensData != null) {
                     PhotonCamera.getParameters().current35mmFocalLength = (int) Math.ceil(camLensData.getCamera35mmFocalLength());
                 }
@@ -2352,9 +2353,28 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         ArrayList<OutputConfiguration> outputConfigurations = new ArrayList<>();
         for (Surface surfacei : surfaces) {
             var config = new OutputConfiguration(surfacei);
+            boolean isVideoSurface = (mVideoRecordingSurface == surfacei);
+            boolean isPreviewSurface = (mImageReaderPreview.getSurface() == surfacei);
+
             if (!Objects.equals(physicalID, logicalID) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                config.setPhysicalCameraId(physicalID);
+                if (PhotonCamera.getSettings().videoLogicalWorkaround && mIsRecordingVideo) {
+                    if (!isVideoSurface) {
+                        config.setPhysicalCameraId(physicalID);
+                    } else {
+                        Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+                        if (lensDataMap != null) {
+                            CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
+                            if (camLensData != null) {
+                                float test = camLensData.getZoomFactor();
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, camLensData.getZoomFactor());
+                            }
+                        }
+                    }
+                } else {
+                    config.setPhysicalCameraId(physicalID);
+                }
             }
+
             // activating HDR path and setting stream use case
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                 boolean gainMapRequested = checkHdrSupport(mCameraCharacteristics);
@@ -3339,7 +3359,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
             }
             else {
-                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, mDigitalZoom);
+                if (PhotonCamera.getSpecific().specificSetting.showZoomSlider) {
+                    captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, mDigitalZoom);
+                }
+                else {
+                    Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+                    if (lensDataMap != null) {
+                        CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
+                        if (camLensData != null) {
+                            float test = camLensData.getZoomFactor();
+                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, camLensData.getZoomFactor());
+                        }
+                    }
+                }
             }
         }
     }

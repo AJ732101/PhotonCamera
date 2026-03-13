@@ -114,8 +114,9 @@
     <bool name="pref_new_settings_global_def_value">false</bool>
     <bool name="pref_lossless_sw_encoding_def_value">false</bool>
     <bool name="pref_10bit_video_def_value">false</bool>
+    <bool name="pref_video_logical_workaround_def_value">false</bool>
     <bool name="pref_new_rec_video_def_value">false</bool>
-    <bool name="pref_use_stream_usecase_def_value">true</bool>
+    <bool name="pref_use_stream_usecase_def_value">false</bool>
     <string name="pref_keyframe_interval_default_value" translatable="false">10</string>
     <string name="pref_hdr_mode_default_value" translatable="false">4096</string>
     <string name="pref_transfer_function_default_value" translatable="false">7</string>

@@ -175,6 +175,7 @@
     <string name="eis_video">EIS in Preview</string>
     <string name="turn_on_10bit">Zero Shutter Lag</string>
     <string name="video_10bit">10 Bit Video</string>
+    <string name="video_logical_workaround">Logical/Physical Workaround</string>
     <string name="video_new_rec">New Recording Pipeline</string>
     <string name="keyframe_interval">Keyframe Interval</string>
     <string name="hdr_mode">HDR Mode</string>

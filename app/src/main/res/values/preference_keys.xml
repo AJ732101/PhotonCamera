@@ -111,6 +111,7 @@
     <string name="pref_video_framerate_key" translatable="false">pref_video_framerate_key</string>
     <string name="pref_aperture_key" translatable="false">pref_aperture_key</string>
     <string name="pref_10bit_video_key" translatable="false">pref_10bit_video_key</string>
+    <string name="pref_video_logical_workaround_key" translatable="false">pref_video_logical_workaround_key</string>
     <string name="pref_hdr_video_key" translatable="false">pref_hdr_video_key</string>
     <string name="pref_eis_video_key" translatable="false">pref_eis_video_key</string>
     <string name="pref_new_rec_video_key" translatable="false">pref_new_rec_video_key</string>

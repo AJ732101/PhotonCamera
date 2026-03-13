@@ -89,6 +89,16 @@ public class Parameters {
     public float[] ForwardTransform2 = new float[9];
     public int current35mmFocalLength = 0;
 
+    // GPS
+    public double gpsLatitudeDegree = 0.0;
+    public double gpsLatitudeMinutes = 0.0;
+    public double gpsLatitudeSeconds = 0.0;
+    public double gpsLongitudeDegree = 0.0;
+    public double gpsLongitudeMinutes = 0.0;
+    public double gpsLongitudeSeconds = 0.0;
+    public double gpsAltitude = 0.0;
+
+
     public void FillConstParameters(CameraCharacteristics characteristics, Point size) {
         rawSize = size;
         alignmentSize = new Point((size.x / (tile)) + 1, (size.y / (tile)) + 1);
@@ -258,7 +268,7 @@ public class Parameters {
             }
         }
         this.focalLength = focalLength;
-
+        current35mmFocalLength = PhotonCamera.getParameters().current35mmFocalLength;
     }
 
 

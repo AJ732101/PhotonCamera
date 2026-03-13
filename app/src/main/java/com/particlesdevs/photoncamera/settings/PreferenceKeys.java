@@ -70,6 +70,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_10BIT_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_VIDEO_LOGICAL_WORKAROUND.mValue);
         COMMON_KEYS.add(Key.KEY_NEW_REC_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_BITRATE_SEEKBAR.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_CODEC.mValue);
@@ -165,6 +166,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO, resources.getBoolean(R.bool.pref_10bit_video_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_LOGICAL_WORKAROUND, resources.getBoolean(R.bool.pref_video_logical_workaround_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO, resources.getBoolean(R.bool.pref_new_rec_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_CODEC, resources.getString(R.string.pref_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_FRAMERATE, resources.getString(R.string.pref_video_framerate_default_value));
@@ -363,6 +365,11 @@ public class PreferenceKeys {
     public static boolean is10bitVideoOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_10BIT_VIDEO);
     }
+
+    public static boolean isVideoLogicalWorkaroundOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_VIDEO_LOGICAL_WORKAROUND);
+    }
+
     public static boolean isNeRecVideoOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO);
     }
@@ -892,6 +899,7 @@ public class PreferenceKeys {
         KEY_HDR_VIDEO(R.string.pref_hdr_video_key),
         KEY_EIS_VIDEO(R.string.pref_eis_video_key),
         KEY_10BIT_VIDEO(R.string.pref_10bit_video_key),
+        KEY_VIDEO_LOGICAL_WORKAROUND(R.string.pref_video_logical_workaround_key),
         KEY_NEW_REC_VIDEO(R.string.pref_new_rec_video_key),
         KEY_VIDEO_HEIGHT(R.string.pref_video_resolution_key),
         KEY_VIDEO_BITRATE_SEEKBAR(R.string.pref_bitrate_key),

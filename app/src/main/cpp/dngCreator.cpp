@@ -301,6 +301,22 @@ public:
         dng_image0->SetGainMap(gainMaps);
     }
 
+    void setGpsLatitude(double degree, double minutes, double seconds, char ref) {
+        dng_image0->SetGpsLatitude(degree, minutes, seconds, ref);
+    }
+
+    void setGpsLongitude(double degree, double minutes, double seconds, char ref) {
+        dng_image0->SetGpsLongitude(degree, minutes, seconds, ref);
+    }
+
+    void setGpsAltitude(double altitude, char ref) {
+        dng_image0->SetGpsAltitude(altitude, ref);
+    }
+
+    void setFocalLength35mm(short focalLength) {
+        dng_image0->SetFocalLength35mm(focalLength);
+    }
+
     void* createDng(void* imageData, int width, int height, size_t &size) {
         metadata.width = width;
         metadata.height = height;
@@ -705,7 +721,35 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
     }
 }
 
-    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(JNIEnv *env, jobject obj, jlong creatorPtr) {
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLatitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
+    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+    if (creator) {
+        creator->setGpsLatitude(degree, minutes, seconds, ref);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLongitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
+    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+    if (creator) {
+        creator->setGpsLongitude(degree, minutes, seconds, ref);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsAltitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble altitude, jchar ref) {
+    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+    if (creator) {
+        creator->setGpsAltitude(altitude, ref);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFocalLength35mm(JNIEnv *env, jobject obj, jlong creatorPtr, jshort focalLength) {
+    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+    if (creator) {
+        creator->setFocalLength35mm(focalLength);
+    }
+}
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(JNIEnv *env, jobject obj, jlong creatorPtr) {
     DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
     if (creator) {
         LOGD("DngCreator destroyed at %p", creator);

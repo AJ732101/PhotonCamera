@@ -59,6 +59,10 @@ public class DngCreator {
     private native void setNoiseProfile(long nativePtr, double[] noiseProfile);
     private native void setCompression(long nativePtr, boolean useCompression);
     private native void setBitsPerSample(long nativePtr, int bps);
+    private native void setGpsLatitude(long nativePtr, double degree, double minute, double second, char ref);
+    private native void setGpsLongitude(long nativePtr, double degree, double minute, double second, char ref);
+    private native void setGpsAltitude(long nativePtr, double altitude, char ref);
+    private native void setFocalLength35mm(long nativePtr, short focalLength);
     private native void destroy(long nativePtr);
     private native void writeFile(long nativePtr, ByteBuffer dngBuffer, ByteBuffer raw, String path);
 
@@ -283,6 +287,10 @@ public class DngCreator {
         setFocalLength(nativePtr, focalLength);
     }
 
+    public void setFocalLength35mm(short focalLength) {
+        setFocalLength35mm(nativePtr, focalLength);
+    }
+
     /**
      * Set the camera manufacturer name
      * @param make Camera manufacturer name (e.g., "Canon", "Nikon", "Sony", etc.)
@@ -481,6 +489,32 @@ public class DngCreator {
                 parameters.sensorPix.right,
                 parameters.mapSize.x,
                 parameters.mapSize.y);
+        setFocalLength35mm((short)parameters.current35mmFocalLength);
+
+        /*if (PhotonCamera.getSettings().gpsLocation && PhotonCamera.gpsLocation != null) {
+            double lat = PhotonCamera.gpsLocation.getLatitude();
+            double lon = PhotonCamera.gpsLocation.getLongitude();
+
+            lat = Math.abs(lat);
+            char latRef = lat >= 0 ? 'N' : 'S';
+            double dLat = Math.floor(lat);
+            double mLat = Math.floor((lat - dLat) * 60.0);
+            double sLat = (lat - dLat - mLat / 60.0) * 3600.0;
+            setGpsLatitude(nativePtr, dLat, mLat, sLat, latRef);
+
+            char lonRef = lon >= 0 ? 'E' : 'W';
+            lon = Math.abs(lon);
+            double dLon = Math.floor(lon);
+            double mLon = Math.floor((lon - dLon) * 60.0);
+            double sLon = (lon - dLon - mLon / 60.0) * 3600.0;
+            setGpsLongitude(nativePtr, dLon, mLon, sLon, lonRef);
+
+            if (PhotonCamera.gpsLocation.hasAltitude()) {
+                double alt = PhotonCamera.gpsLocation.getAltitude();
+                char altRef = (char) (alt >= 0 ? 0 : 1);
+                setGpsAltitude(nativePtr, Math.abs(alt), altRef);
+            }
+        }*/
     }
 
     /**

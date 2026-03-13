@@ -70,6 +70,14 @@
             android:title="@string/video_10bit"
             android:summary=""
             android:icon="@drawable/high_quality_24px"
+            android:defaultValue="@bool/pref_video_logical_workaround_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_video_logical_workaround_key"
+            android:title="@string/video_logical_workaround"
+            android:summary="Activate if combinations like 0-2 fail in video recording"
+            android:icon="@drawable/change_circle_24px"
             android:defaultValue="@bool/pref_10bit_video_def_value"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference

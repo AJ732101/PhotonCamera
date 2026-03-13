@@ -156,7 +156,7 @@ public class ImageSaver {
 
     public static ParseExif.ExifData exifDataFromMetadata(Bundle metadata, int orientation) {
         ParseExif.ExifData exifData = new ParseExif.ExifData();
-        if(metadata != null) {
+        if (metadata != null) {
             exifData.PHOTOGRAPHIC_SENSITIVITY = String.valueOf(metadata.getInt("iso"));
             exifData.F_NUMBER = String.valueOf(metadata.getFloat("aperture"));
             exifData.EXPOSURE_TIME = metadata.getString("exposureTimeStr");
@@ -168,9 +168,12 @@ public class ImageSaver {
             if (focalLength > 0) {
                 exifData.FOCAL_LENGTH = (int) (focalLength * 100) + "/100";
             }
-            float focalLength35mm = metadata.getFloat("focalLength35mm");
+            int focalLength35mm = metadata.getInt("focalLength35mm");
             if (focalLength35mm > 0) {
                 exifData.EQUIVALENT_35MM = String.valueOf(Math.round(focalLength35mm));
+            } else {
+                int focal35mm = metadata.getInt("focal35mm");
+                exifData.EQUIVALENT_35MM = String.valueOf(Math.round(focal35mm));
             }
 
             switch (orientation) {
@@ -247,6 +250,13 @@ public class ImageSaver {
                 outputStream.close();
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                }
                 inter.saveAttributes();
                 return true;
             } catch (IOException e) {
@@ -303,6 +313,7 @@ public class ImageSaver {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);
                 dngCreator.writeBuffer(outputStream, buffer, parameters.rawSize.x, parameters.rawSize.y);
                 outputStream.close();
+
                 MediaScannerConnection.scanFile(ContextProvider.getContext(),
                         new String[]{dngFilePath.toFile().getAbsolutePath()},
                         new String[]{"image/dng"}, null);

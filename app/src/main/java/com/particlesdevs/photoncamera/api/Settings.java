@@ -22,6 +22,7 @@ public class Settings {
     public boolean align;
     public boolean hdrx;
     public boolean hdrxNR;
+    public boolean videoLogicalWorkaround = false;
     public double exposureCompensation;
     public double saturation;
     public double sharpness;
@@ -191,6 +192,7 @@ public class Settings {
         videoEncoderName = PreferenceKeys.getVideoEncoderName();
         exposureCompensation2 = PreferenceKeys.getExposureCompensation();
         videoRange = PreferenceKeys.getVideoRange();
+        videoLogicalWorkaround = PreferenceKeys.isVideoLogicalWorkaroundOn();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();
