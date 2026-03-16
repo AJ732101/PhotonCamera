@@ -132,6 +132,14 @@ public class PhotonCamera extends Application {
     public static boolean isQucommAdrcOff = false;
     public static SensorManager mSensorManager = null;
     public static Location gpsLocation = null;
+    public static long userFormatAvifSw = 999999999;
+    public static long userFormatHeifSw = 999999991;
+    public static long userFormatJpegLutSw = 999999992;
+    public static long userFormatYuvRaw = 888888888;
+    public static long userFormatPngSw = 999999993;
+    public static long userFormatWebpLossySw = 777777777;
+    public static long userFormatWebpLosslessSw = 666666666;
+    public static String rawVideoPath = "";
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

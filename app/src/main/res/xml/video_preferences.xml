@@ -134,6 +134,16 @@
 
             <ListPreference
                 android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_colorspace_key"
+                android:title="@string/photo_colorspace"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/palette_24px"
+                android:entries="@array/color_space_entries"
+                android:entryValues="@array/color_space_entryValues"
+                android:defaultValue="@string/pref_color_space_default_value" />
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
                 android:key="@string/pref_video_range_key"
                 android:title="@string/video_range"
                 app:useSimpleSummaryProvider="true"

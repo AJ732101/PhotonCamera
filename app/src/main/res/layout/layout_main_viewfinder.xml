@@ -12,6 +12,10 @@
         <variable
                 name="timermodel"
                 type="com.particlesdevs.photoncamera.ui.camera.model.TimerFrameCountModel"/>
+
+        <variable
+            name="uimodel"
+            type="com.particlesdevs.photoncamera.ui.camera.model.CameraFragmentModel" />
     </data>
 
     <FrameLayout
@@ -88,7 +92,7 @@
                 android:max="100"
                 android:progressDrawable="@drawable/circular_progress_bar"
                 android:layout_gravity="center"
-                />
+                android:visibility="gone" />
 
         <TextView
                 android:id="@+id/frameTimer"
@@ -100,7 +104,8 @@
                 android:textColor="@android:color/white"
                 android:textSize="36sp"
                 android:typeface="normal"
-                android:visibility="visible"
-                android:layout_gravity="center" />
+                android:visibility="gone"
+                android:layout_gravity="center"
+                app:bindRotate="@{uimodel}" />
     </FrameLayout>
 </layout>

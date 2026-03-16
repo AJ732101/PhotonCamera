@@ -79,6 +79,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_KEYFRAME_INTERVAL.mValue);
         COMMON_KEYS.add(Key.KEY_HDR_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_TRANSFER_FUNCTION.mValue);
+        COMMON_KEYS.add(Key.KEY_COLORSPACE.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_ENCODER_NAME.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_RANGE.mValue);
         // QualityDoesMatter - Audio
@@ -107,6 +108,9 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_CONTRAST_CURVE.mValue);
         COMMON_KEYS.add(Key.KEY_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_EXPOSURE_COMPENSATION.mValue);
+        COMMON_KEYS.add(Key.KEY_PHOTO_TRANSFER_FUNCTION.mValue);
+        COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
+        COMMON_KEYS.add(Key.KEY_PHOTO_RANGE.mValue);
         // QualityDoesMatter - Sensor Related (and more)
         COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
@@ -175,6 +179,10 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_KEYFRAME_INTERVAL, resources.getString(R.string.pref_keyframe_interval_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_MODE, resources.getString(R.string.pref_hdr_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLORSPACE, resources.getString(R.string.pref_color_space_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_RANGE, resources.getString(R.string.pref_video_range_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE, resources.getString(R.string.pref_color_space_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME, resources.getString(R.string.pref_video_codec_name_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_RANGE, resources.getString(R.string.pref_video_range_default_value));
         // QualityDoesMatter - Audio
@@ -826,6 +834,22 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION);
     }
 
+    public static int getColorspace() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_COLORSPACE);
+    }
+
+    public static int getPhotoTransferFunction() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PHOTO_TRANSFER_FUNCTION);
+    }
+
+    public static String getPhotoRange() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_PHOTO_RANGE);
+    }
+
+    public static int getPhotoColorSpace() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE);
+    }
+
     public static String getVideoEncoderName() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME);
     }
@@ -911,6 +935,7 @@ public class PreferenceKeys {
         KEY_KEYFRAME_INTERVAL(R.string.pref_keyframe_interval_key),
         KEY_HDR_MODE(R.string.pref_hdr_mode_key),
         KEY_TRANSFER_FUNCTION(R.string.pref_transfer_function_key),
+        KEY_COLORSPACE(R.string.pref_colorspace_key),
         KEY_VIDEO_ENCODER_NAME(R.string.pref_video_encoder_name_key),
         KEY_VIDEO_RANGE(R.string.pref_video_range_key),
 
@@ -956,6 +981,9 @@ public class PreferenceKeys {
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),
         KEY_EFFECT_MODE(R.string.pref_effect_mode_key),
+        KEY_PHOTO_TRANSFER_FUNCTION(R.string.pref_photo_transfer_function_key),
+        KEY_PHOTO_COLOR_SPACE(R.string.pref_photo_colorspace_key),
+        KEY_PHOTO_RANGE(R.string.pref_photo_range_key),
 
         /**
          * QualityDoesMatter - Sensor Related (and more)

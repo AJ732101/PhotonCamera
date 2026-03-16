@@ -590,6 +590,22 @@
         <item>6</item>
     </string-array>
 
+    <string-array name="color_space_entries">
+        <item>Standard</item>
+        <item>BT.709/REC.709</item>
+        <item>BT.601 PAL</item>
+        <item>BT.601 NTSC</item>
+        <item>BT.2020/REC.2020</item>
+    </string-array>
+
+    <string-array name="color_space_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+    </string-array>
+
     <string-array name="video_range_entries">
         <item>Full</item>
         <item>Limited</item>

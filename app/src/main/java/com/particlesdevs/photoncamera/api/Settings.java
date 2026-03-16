@@ -112,11 +112,15 @@ public class Settings {
     public int keyframeInterval = 10;
     public int hdrMode = 0;
     public int transferFunction = 7;
+    public int photoTransferFunction = 7;
+    public int photoColorSpace = 6;
+    public int colorspace = 6;
+    public String videoRange = "Full";
     public String videoEncoderName = "Device Default";
     public String lutName = "None";
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
-    public String videoRange = "Full";
+    public String photoRange = "Full";
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -193,6 +197,7 @@ public class Settings {
         exposureCompensation2 = PreferenceKeys.getExposureCompensation();
         videoRange = PreferenceKeys.getVideoRange();
         videoLogicalWorkaround = PreferenceKeys.isVideoLogicalWorkaroundOn();
+        colorspace = PreferenceKeys.getColorspace();
         // QualityDoesMatter - Audio
         audioProcessing = PreferenceKeys.getAudioProcessing();
         audioCodec = PreferenceKeys.getAudioCodec();
@@ -216,7 +221,6 @@ public class Settings {
         edgeProcessing = PreferenceKeys.getEdgeProcessing();
         zoom2X = PreferenceKeys.isZoomOn();
         digitalZoomFactor = PreferenceKeys.getDigitalZoomFactorValue();
-        // QualityDoesMatter - Single Shot & Video Related
         hotPixelMode = PreferenceKeys.getHotPixelMode();
         colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
         distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
@@ -227,6 +231,9 @@ public class Settings {
         effectMode = PreferenceKeys.getEffectMode();
         useLosslessSwEncoding = PreferenceKeys.isLosslessSwEncodingOn();
         useStreamUseCases = PreferenceKeys.useStreamUsecase();
+        photoTransferFunction = PreferenceKeys.getPhotoTransferFunction();
+        photoColorSpace = PreferenceKeys.getPhotoColorSpace();
+        photoRange = PreferenceKeys.getPhotoRange();
     }
 
     public void saveID() {

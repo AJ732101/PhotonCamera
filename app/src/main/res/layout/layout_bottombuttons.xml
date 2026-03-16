@@ -106,7 +106,8 @@
                     android:textAlignment="center"
                     android:typeface="normal"
                     android:visibility="visible"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    app:bindRotate="@{uimodel}" />
         </FrameLayout>
 
         <FrameLayout

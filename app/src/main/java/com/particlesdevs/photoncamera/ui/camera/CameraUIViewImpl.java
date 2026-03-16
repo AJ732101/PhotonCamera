@@ -161,6 +161,9 @@ class CameraUIViewImpl implements CameraUIView {
         this.resetCaptureProgressBar();
         if (!processing) {
             this.activateShutterButton(true);
+            if (cameraFragment.getTimerFrameCountViewModel() != null) {
+                cameraFragment.getTimerFrameCountViewModel().clearFrameTimeCnt();
+            }
             this.setProcessingProgressBarIndeterminate(false);
             this.lockUIForBurst(false);
         }
@@ -297,13 +300,13 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-                (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
-                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
-                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
-                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
-                (PhotonCamera.getSettings().previewFormat == 888888888))) { // YCBCR_P010 RAW
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw))) {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
@@ -341,13 +344,13 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-                (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
-                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
-                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
-                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
-                (PhotonCamera.getSettings().previewFormat == 888888888))) { // YCBCR_P010 RAW
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw))) {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);

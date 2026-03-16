@@ -161,6 +161,9 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFocalLength35mm(
         JNIEnv *env, jobject obj, jlong creatorPtr, jshort focalLength);
 
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFrameRate(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jdouble fps);
+
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(
 JNIEnv *env, jobject obj, jlong creatorPtr);
 

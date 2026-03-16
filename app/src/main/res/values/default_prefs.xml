@@ -120,6 +120,7 @@
     <string name="pref_keyframe_interval_default_value" translatable="false">10</string>
     <string name="pref_hdr_mode_default_value" translatable="false">4096</string>
     <string name="pref_transfer_function_default_value" translatable="false">7</string>
+    <string name="pref_color_space_default_value" translatable="false">6</string>
     <string name="pref_video_codec_name_default_value" translatable="false">Device Default</string>
     <string name="pref_video_range_default_value" translatable="false">Full</string>
 

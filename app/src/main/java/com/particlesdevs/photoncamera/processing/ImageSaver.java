@@ -66,7 +66,7 @@ public class ImageSaver {
 
     public void initProcess(ImageReader mReader) {
         Log.v(TAG, "initProcess()");
-        if((frameCounter < desiredFrameCount) || desiredFrameCount == -1) {
+        if ((frameCounter < desiredFrameCount) || desiredFrameCount == -1) {
             Log.v(TAG, "initProcess() : called from \"" + Thread.currentThread().getName() + "\" Thread");
             Image mImage;
             try {
@@ -118,8 +118,11 @@ public class ImageSaver {
 
     public static String createProcessingString() {
         StringBuilder imageDescriptionBuilder = new StringBuilder();
-        imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
-        imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
+        if ((PhotonCamera.getSettings().previewFormat == 999999992)) {
+            imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
+            imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
+        }
+        imageDescriptionBuilder.append("\n   Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
         imageDescriptionBuilder.append("\n   Noise Reduction: ").append((PhotonCamera.getSettings().noiseProcessing > 0) ? "Enabled" : "Disabled");
         imageDescriptionBuilder.append("\n   Edge Processing: ").append((PhotonCamera.getSettings().edgeProcessing > 0) ? "Enabled" : "Disabled");
         imageDescriptionBuilder.append("\n   Digital Zoom: ").append(PhotonCamera.getSettings().zoom2X ? "Enabled" : "Disabled");
@@ -148,6 +151,9 @@ public class ImageSaver {
         }
         else {
             imageDescriptionBuilder.append("\n   Vignette Correction: ").append(PhotonCamera.getSettings().shadingMode);
+        }
+        if (PhotonCamera.hasQucommAdrcOff) {
+            imageDescriptionBuilder.append("\n   Qucomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
         imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 

@@ -201,6 +201,8 @@
     <string name="effect_mode">Effect Mode</string>
     <string name="zsl">Zero Shutter Lag</string>
     <string name="use_stream_usecase">Use Stream Usecase</string>
+    <string name="photo_transfer_function">Transfer Function</string>
+    <string name="photo_colorspace">Color Space</string>
 
     <!-- Bracketing mode strings -->
     <string name="exposure_bracketing">Exposure Bracketing</string>
@@ -220,6 +222,7 @@
     <string name="sensor_settings_screen_title">Sensor Settings</string>
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
+    <string name="video_codec_based_photo_settings_title">Video Codec based Photo Settings</string>
 
     <string name="general_settings_screen_summary">No dedicated category</string>
     <string name="stacking_settings_screen_summary">Multiframe related settings (HDRX)</string>

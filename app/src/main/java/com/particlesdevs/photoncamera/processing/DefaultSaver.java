@@ -107,6 +107,7 @@ public class DefaultSaver extends SaverImplementation {
         super.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
         Path dngFile = ImagePath.newDNGFilePath();
         Path jpgFile = ImagePath.newImageFilePath();
+        Path rawVideoFile = ImagePath.getNewImageFolderPath();
         switch (PhotonCamera.getSettings().selectedMode) {
             case UNLIMITED:
                 mUnlimitedProcessor.configure(PhotonCamera.getSettings().rawSaver);
@@ -123,7 +124,7 @@ public class DefaultSaver extends SaverImplementation {
                 break;
             case RAWVIDEO:
                 mRawVideoProcessor.videoStart(
-                        ImagePath.getNewImageFolderPath(),
+                        rawVideoFile,
                         ParseExif.parse(captureResult, captureRequest),
                         characteristics,
                         captureResult,

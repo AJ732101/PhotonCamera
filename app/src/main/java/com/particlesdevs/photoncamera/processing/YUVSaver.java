@@ -47,7 +47,7 @@ public class YUVSaver extends DefaultSaver{
             File heicFile = null;
 
             // YCBCR_P010 or YUV_420_888 RAW
-            if (usedTargetFormat == 888888888) {
+            if (usedTargetFormat == PhotonCamera.userFormatYuvRaw) {
                 storagePath = ImagePath.newYCBCR_P010FilePath();
                 heicFile = new File(storagePath.toString());
                 String rawPath = heicFile.getAbsolutePath();
@@ -71,7 +71,7 @@ public class YUVSaver extends DefaultSaver{
             }
 
             // SW based PNG encoder solution
-            if (usedTargetFormat == 999999993) {
+            if (usedTargetFormat == PhotonCamera.userFormatPngSw) {
                 storagePath = ImagePath.newPNGFilePath();
                 heicFile = new File(storagePath.toString());
 
@@ -115,7 +115,7 @@ public class YUVSaver extends DefaultSaver{
             }
 
             // SW based WebP
-            if ((usedTargetFormat == 777777777) || (usedTargetFormat == 666666666)) {
+            if ((usedTargetFormat == PhotonCamera.userFormatWebpLossySw) || (usedTargetFormat == PhotonCamera.userFormatWebpLosslessSw)) {
                 storagePath = ImagePath.newWEBPFilePath();
                 heicFile = new File(storagePath.toString());
 
@@ -141,7 +141,7 @@ public class YUVSaver extends DefaultSaver{
                         break;
                 }
 
-                if (usedTargetFormat == 777777777) {
+                if (usedTargetFormat == PhotonCamera.userFormatWebpLossySw) {
                     AvifEncoder.saveBitmapToWebP(originalBitmap, heicFile, quality);
                 } else {
                     AvifEncoder.saveBitmapToWebP(originalBitmap, heicFile, 0);
@@ -165,7 +165,7 @@ public class YUVSaver extends DefaultSaver{
             }
 
             // SW based AVIF encoder solution
-            if (usedTargetFormat == 999999999) {
+            if (usedTargetFormat == PhotonCamera.userFormatAvifSw) {
                 storagePath = ImagePath.newAVIFFilePath();
                 heicFile = new File(storagePath.toString());
                 AvifEncoder avifEncoder = new AvifEncoder();
@@ -181,7 +181,7 @@ public class YUVSaver extends DefaultSaver{
             }
 
             // SW based HEIC/HEIF encoder solution
-            if (usedTargetFormat == 999999991) {
+            if (usedTargetFormat == PhotonCamera.userFormatHeifSw) {
                 storagePath = ImagePath.newHEIFFilePath();
                 heicFile = new File(storagePath.toString());
                 HeifEncoder heifEncoder = new HeifEncoder();
@@ -217,6 +217,9 @@ public class YUVSaver extends DefaultSaver{
             try {
                 // 1. Configure and create Muxer and Encoder
                 muxer = new MediaMuxer(heicFile.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_HEIF);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    muxer.setLocation((float)PhotonCamera.gpsLocation.getLatitude(), (float)PhotonCamera.gpsLocation.getLongitude());
+                }
 
                 switch (usedCodec) {
                     case "HEVC":
@@ -407,36 +410,23 @@ public class YUVSaver extends DefaultSaver{
         format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
-        //final int BUFFER_SIZE_HINT = width * height * 3 / 2;
-        //format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, BUFFER_SIZE_HINT * 3);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+            if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
+            }
             if (PhotonCamera.mHdrTenPlusIsSupported == true) {
-                if (PhotonCamera.getSettings().videoHDR) {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-                } else {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-                }
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus);
             }
             else if (PhotonCamera.mHdrTenIsSupported == true) {
-                if (PhotonCamera.getSettings().videoHDR) {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-                } else {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-                }
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10);
             }
             else if (PhotonCamera.mHlgIsSupported == true) {
-                //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
-                //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-                if (PhotonCamera.getSettings().videoHDR) {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-                } else {
-                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-                }
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
             }
             else {
@@ -459,11 +449,13 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-            //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+            if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
+            }
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
         }
@@ -482,11 +474,13 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-            //format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_LINEAR);
-            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+            if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
+            }
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.APVProfile422_10HDR10);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
         }
@@ -506,9 +500,13 @@ public class YUVSaver extends DefaultSaver{
         format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
-            format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+            if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
+            }
             //format.setInteger(MediaFormat.KEY_PROFILE, 0x6003);
             //format.setInteger(MediaFormat.KEY_LEVEL, 0x600C);
         }
@@ -686,6 +684,7 @@ public class YUVSaver extends DefaultSaver{
             sb.append("Resolution: ").append(widthHeight).append("\n");
             sb.append("Orientation: ").append(orientation).append(" degrees\n");
             sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
+            sb.append("Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
 
             if (metadata != null) {
                 if (metadata.containsKey("aperture")) {

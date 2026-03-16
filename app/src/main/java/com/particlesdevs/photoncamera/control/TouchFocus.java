@@ -126,13 +126,13 @@ public class TouchFocus {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-            (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-            (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-            (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW HEIC/HEIF
-            (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
-            (PhotonCamera.getSettings().previewFormat == 888888888) ||  // YCBCR_P010 RAW
-            (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
-            (PhotonCamera.getSettings().previewFormat == 666666666)) && // SW WebP lossless
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
             (PhotonCamera.getSettings().rawSaver != 2) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
            return true;

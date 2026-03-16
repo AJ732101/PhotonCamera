@@ -3,6 +3,7 @@ package com.particlesdevs.photoncamera.processing;
 import android.media.Image;
 import android.os.Build;
 
+import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -59,6 +60,7 @@ public class DngCreator {
     private native void setNoiseProfile(long nativePtr, double[] noiseProfile);
     private native void setCompression(long nativePtr, boolean useCompression);
     private native void setBitsPerSample(long nativePtr, int bps);
+    private native void setFrameRate(long nativePtr, double fps);
     private native void setGpsLatitude(long nativePtr, double degree, double minute, double second, char ref);
     private native void setGpsLongitude(long nativePtr, double degree, double minute, double second, char ref);
     private native void setGpsAltitude(long nativePtr, double altitude, char ref);
@@ -386,6 +388,10 @@ public class DngCreator {
         setGainMap(nativePtr, gainMap, xmin, ymin, xmax, ymax, width, height);
     }
 
+    public void setFrameRate(double fps) {
+        setFrameRate(nativePtr, fps);
+    }
+
     public void writeImage(OutputStream outputStream, Image image) {
         ByteBuffer rawImageData = image.getPlanes()[0].getBuffer();
         int width = image.getWidth();
@@ -438,7 +444,10 @@ public class DngCreator {
                 blackLevel[i] = (short) parameters.blackLevel[i];
             }
         }
-        setDescription(parameters.toString());
+
+        if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            setDescription(parameters.toString());
+        }
         setSoftware("PhotonVidCam v0.97");
 
         // Set current date and time
@@ -490,6 +499,10 @@ public class DngCreator {
                 parameters.mapSize.x,
                 parameters.mapSize.y);
         setFocalLength35mm((short)parameters.current35mmFocalLength);
+
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            setFrameRate((double)PhotonCamera.getSettings().videoFramrate);
+        }
 
         /*if (PhotonCamera.getSettings().gpsLocation && PhotonCamera.gpsLocation != null) {
             double lat = PhotonCamera.gpsLocation.getLatitude();

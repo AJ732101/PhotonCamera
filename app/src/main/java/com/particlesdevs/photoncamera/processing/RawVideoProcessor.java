@@ -8,6 +8,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
+import android.provider.ContactsContract;
 
 import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -33,7 +34,7 @@ public class RawVideoProcessor extends ProcessorBase {
     private final Object lock = new Object();
     private volatile boolean fillParams = false;
     private Path outputFolder;
-    private int writeBufferSize = 4;
+    private int writeBufferSize = 8;
     private int writeBufferCounter = 0;
     private int threadCounter = 0;
     private volatile ByteBuffer[] dngBuffers = null;
@@ -63,6 +64,8 @@ public class RawVideoProcessor extends ProcessorBase {
         // Create output folder if not exists
         try {
             Files.createDirectories(outputFolder);
+            Files.createDirectories(outputFolder.resolve(".dng"));
+            PhotonCamera.rawVideoPath = outputFolder.toAbsolutePath().toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,7 +117,10 @@ public class RawVideoProcessor extends ProcessorBase {
             Thread thread = new Thread(() -> {
                 if (fillParams) {
                     threadCounter++;
-                    dngCreator.writeFile(dngBuffers[writeBufferCounter%writeBufferSize], image.getPlanes()[0].getBuffer(), outputFolder.resolve(String.format("RAW_%05d.dng", startCounter)).toString());
+                    String dngFilePath = outputFolder.resolve(".dng")
+                            .resolve(String.format("RAW_%05d.dng", startCounter))
+                            .toString();
+                    dngCreator.writeFile(dngBuffers[writeBufferCounter % writeBufferSize], image.getPlanes()[0].getBuffer(), dngFilePath);
                     image.close();
                     threadCounter--;
                 }

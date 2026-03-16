@@ -124,6 +124,43 @@
             android:entryValues="@array/effect_mode_entryValues"
             android:defaultValue="@string/pref_effect_mode_default_value" />
 
+        <PreferenceCategory
+            android:layout="@layout/preference_category_layout"
+            app:key="video_codec_based_photo_settings_category"
+            app:title="@string/video_codec_based_photo_settings_title">
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_photo_transfer_function_key"
+                android:title="@string/photo_transfer_function"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/show_chart_24px"
+                android:entries="@array/transfer_function_entries"
+                android:entryValues="@array/transfer_function_entryValues"
+                android:defaultValue="@string/pref_transfer_function_default_value" />
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_photo_colorspace_key"
+                android:title="@string/photo_colorspace"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/palette_24px"
+                android:entries="@array/color_space_entries"
+                android:entryValues="@array/color_space_entryValues"
+                android:defaultValue="@string/pref_color_space_default_value" />
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_photo_range_key"
+                android:title="@string/video_range"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/arrow_range_24px"
+                android:entries="@array/video_range_entries"
+                android:entryValues="@array/video_range_entryValues"
+                android:defaultValue="@string/pref_video_range_default_value" />
+
+        </PreferenceCategory>
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

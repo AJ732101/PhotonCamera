@@ -808,7 +808,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean isSingleShotSwEncoder() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-                //((PhotonCamera.getSettings().previewFormat == 999999999) || (PhotonCamera.getSettings().previewFormat == 999999991) || (PhotonCamera.getSettings().previewFormat == 999999992)) &&
                 (PhotonCamera.getSettings().previewFormat == 999999992) &&
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
@@ -826,13 +825,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                (PhotonCamera.getSettings().previewFormat == 999999999) ||  // SW AVIF
-                (PhotonCamera.getSettings().previewFormat == 999999991) ||  // SW HEIC/HEIF
-                (PhotonCamera.getSettings().previewFormat == 999999992) ||  // SW JPEG LUT
-                (PhotonCamera.getSettings().previewFormat == 999999993) ||  // SW PNG
-                (PhotonCamera.getSettings().previewFormat == 777777777) ||  // SW WebP lossy
-                (PhotonCamera.getSettings().previewFormat == 666666666) ||  // SW WebP lossless
-                (PhotonCamera.getSettings().previewFormat == 888888888)) && // YCBCR_P010 RAW
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
@@ -857,8 +856,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
             var targetFromUi = PhotonCamera.getSettings().previewFormat;
-            if ((targetFromUi == 999999999) || (targetFromUi == 999999991) || (targetFromUi == 999999992) || (targetFromUi == 999999993) ||
-                    (targetFromUi == 888888888) || (targetFromUi == 777777777) || (targetFromUi == 666666666)) {
+            if ((targetFromUi == PhotonCamera.userFormatAvifSw) || (targetFromUi == PhotonCamera.userFormatHeifSw) ||
+                    (targetFromUi == PhotonCamera.userFormatJpegLutSw) || (targetFromUi == PhotonCamera.userFormatPngSw) ||
+                    (targetFromUi == PhotonCamera.userFormatYuvRaw) || (targetFromUi == PhotonCamera.userFormatWebpLossySw) || (targetFromUi == PhotonCamera.userFormatWebpLosslessSw)) {
                 mTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
             }
             else {
@@ -3011,6 +3011,71 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public void fillMetadataFromCaptureResult(CaptureResult captureResult) {
+        if (isSingleShotJpegOrAvifOrHeic()) {
+            if (mMetaData == null) {
+                mMetaData = new Bundle();
+            }
+            Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+            if (lensDataMap != null) {
+                CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
+                if (camLensData != null) {
+                    PhotonCamera.getParameters().current35mmFocalLength = (int) Math.ceil(camLensData.getCamera35mmFocalLength());
+                }
+            }
+            if (captureResult != null) {
+                Integer iso = captureResult.get(CaptureResult.SENSOR_SENSITIVITY);
+                if (iso != null) {
+                    mMetaData.putInt("iso", iso);
+                }
+
+                Long exposureTime = captureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+                String strExposureTime = "";
+                if (exposureTime != null && exposureTime > 0) {
+                    if (exposureTime >= 1_000_000_000L) {
+                        double seconds = exposureTime / 1_000_000_000.0;
+                        strExposureTime = String.format(Locale.getDefault(), "%.1fs", seconds);
+                    } else {
+                        long divisor = (long) (1_000_000_000.0 / exposureTime);
+                        strExposureTime = "1/" + divisor;
+                    }
+                }
+
+                if (exposureTime != null) {
+                    mMetaData.putLong("exposureTime", exposureTime);
+                    mMetaData.putString("exposureTimeStr", strExposureTime);
+                }
+
+                Float focalLength = captureResult.get(CaptureResult.LENS_FOCAL_LENGTH);
+                if (focalLength != null) {
+                    mMetaData.putFloat("focalLength", focalLength);
+                }
+
+                Float aperture = captureResult.get(CaptureResult.LENS_APERTURE);
+                if (aperture != null) {
+                    mMetaData.putFloat("aperture", aperture);
+                }
+
+                if (PhotonCamera.getParameters().current35mmFocalLength != 0) {
+                    mMetaData.putInt("focal35mm", PhotonCamera.getParameters().current35mmFocalLength);
+                }
+
+                mMetaData.putString("physCamID", physicalID);
+                if (physicalID != logicalID) {
+                    mMetaData.putString("logiCamID", logicalID);
+                }
+
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    mMetaData.putString("latitude", String.valueOf(PhotonCamera.gpsLocation.getLatitude()));
+                    mMetaData.putString("longitude", String.valueOf(PhotonCamera.gpsLocation.getLongitude()));
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        mMetaData.putString("altitude", String.valueOf(PhotonCamera.gpsLocation.getAltitude()));
+                    }
+                }
+            }
+        }
+    }
+
     public void functionOne() {
         mIsFunctionOneOn = !mIsFunctionOneOn;
         PhotonCamera.isFunctionOneOn = mIsFunctionOneOn;
@@ -4005,6 +4070,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                     if (onUnlimited && !unlimitedStarted) {
                         mImageSaver.processStart(mCameraCharacteristics, result, request, cameraRotation);
+                        setupAudioRecorder(PhotonCamera.rawVideoPath + "/audio_track.m4a");
                         unlimitedStarted = true;
                     }
                     if(frameCount == 0)
@@ -4229,9 +4295,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void callUnlimitedStart() {
         onUnlimited = true;
-        if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED)) {
-            setupAudioRecorder("");
-        }
         takePicture();
     }
 
@@ -4558,8 +4621,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             if (PhotonCamera.getSettings().video10bit && PhotonCamera.getSettings().videoHDR) {
                 format.setFeatureEnabled("hdr-editing", true);
-                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-                //format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_ST2084);
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().colorspace);
                 var test = PhotonCamera.getSettings().transferFunction;
                 format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().transferFunction);
 
@@ -4700,6 +4762,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         if (mediaMuxer != null) {
             mediaMuxer.setOrientationHint(getOrientation());
+            if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                mediaMuxer.setLocation((float)PhotonCamera.gpsLocation.getLatitude(), (float)PhotonCamera.gpsLocation.getLongitude());
+            }
         }
         Log.d(TAG, "createMediaMuxer done - " + mediaMuxer.toString());
 
@@ -4901,6 +4966,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         else {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        }
+
+        if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+            mMediaRecorder.setLocation((float)PhotonCamera.gpsLocation.getLatitude(), (float)PhotonCamera.gpsLocation.getLongitude());
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

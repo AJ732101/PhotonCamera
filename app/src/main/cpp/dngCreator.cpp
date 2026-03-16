@@ -173,6 +173,10 @@ public:
         dng_image0->SetModel(model);
     }
 
+    void setFrameRate(double fps) {
+        dng_image0->SetFrameRate(fps);
+    }
+
     void setTimeCode(const unsigned char* timecode) {
         unsigned char tc[8];
         for (int i = 0; i < 8; i++) {
@@ -333,7 +337,7 @@ public:
 
         // Set black level repeat dimensions
         dng_image0->SetBlackLevelRepeatDim(2, 2);
-        
+
         // Set black level
         dng_image0->SetBlackLevel(4, metadata.black_level);
 
@@ -359,7 +363,7 @@ public:
         if (metadata.has_forward_matrix2) {
             dng_image0->SetForwardMatrix2(3, metadata.forward_matrix2);
         }
-        
+
         // Set camera calibration matrices
         if (metadata.has_camera_calibration1) {
             dng_image0->SetCameraCalibration1(3, metadata.camera_calibration1);
@@ -427,7 +431,7 @@ public:
         if (!dngData) {
             return nullptr;
         }
-        
+
         // Create ByteBuffer to return
         jobject byteBuffer = env->NewDirectByteBuffer(dngData, size);
         return byteBuffer;
@@ -714,48 +718,48 @@ public:
         }
     }
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setBitsPerSample(JNIEnv *env, jobject obj, jlong creatorPtr, jint bps) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        creator->setBitsPerSample(bps);
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setBitsPerSample(JNIEnv *env, jobject obj, jlong creatorPtr, jint bps) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setBitsPerSample(bps);
+        }
     }
-}
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLatitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        creator->setGpsLatitude(degree, minutes, seconds, ref);
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLatitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setGpsLatitude(degree, minutes, seconds, ref);
+        }
     }
-}
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLongitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        creator->setGpsLongitude(degree, minutes, seconds, ref);
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLongitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minutes, jdouble seconds, jchar ref) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setGpsLongitude(degree, minutes, seconds, ref);
+        }
     }
-}
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsAltitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble altitude, jchar ref) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        creator->setGpsAltitude(altitude, ref);
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsAltitude(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble altitude, jchar ref) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setGpsAltitude(altitude, ref);
+        }
     }
-}
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFocalLength35mm(JNIEnv *env, jobject obj, jlong creatorPtr, jshort focalLength) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        creator->setFocalLength35mm(focalLength);
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFocalLength35mm(JNIEnv *env, jobject obj, jlong creatorPtr, jshort focalLength) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setFocalLength35mm(focalLength);
+        }
     }
-}
 
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(JNIEnv *env, jobject obj, jlong creatorPtr) {
-    DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
-    if (creator) {
-        LOGD("DngCreator destroyed at %p", creator);
-        delete creator;
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(JNIEnv *env, jobject obj, jlong creatorPtr) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            LOGD("DngCreator destroyed at %p", creator);
+            delete creator;
+        }
     }
-}
 
     JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_writeFile(JNIEnv *env, jobject obj, jlong creatorPtr, jobject dngData, jobject rawData, jstring path) {
         DngCreator *creator = reinterpret_cast<DngCreator *>(creatorPtr);
@@ -777,6 +781,13 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
                 }
                 env->ReleaseStringUTFChars(path, pathStr);
             }
+        }
+    }
+
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFrameRate(JNIEnv *env, jobject obj, jlong creatorPtr, jdouble fps) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setFrameRate(fps);
         }
     }
 }
