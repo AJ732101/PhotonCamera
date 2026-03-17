@@ -48,7 +48,9 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
@@ -56,6 +58,7 @@ import android.media.MediaCodecList;
 import android.media.MediaRecorder;
 import android.media.MediaCodecInfo;
 import android.media.AudioRecord;
+import android.media.MicrophoneDirection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -4243,6 +4246,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void setupAudioRecorder(String filePath) {
+        AudioManager audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+        AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS);
+        AudioDeviceInfo devicesBack = null;
+        AudioDeviceInfo devicesFront = null;
+
+        for (AudioDeviceInfo device : devices) {
+            if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_MIC) {
+                Log.d("MIC_CHECK", "Microfon ID: " + device.getId() + " | Typ: " + device.getProductName());
+                if (device.getAddress().contains("back")) {
+                    devicesBack = device;
+                }
+                if (device.getAddress().contains("bottom")) {
+                    devicesFront = device;
+                }
+            }
+        }
+
         if (mAudioRecorder == null) {
             mAudioRecorder = new MediaRecorder();
         }
@@ -4263,10 +4283,34 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mAudioRecorder.setAudioChannels(PhotonCamera.getSettings().audioChannels);
             mAudioRecorder.setOutputFile(filePath);
 
+            if ((devicesBack != null) && (devicesFront != null)) {
+                if (PhotonCamera.getSettings().audioDirection == MicrophoneDirection.MIC_DIRECTION_AWAY_FROM_USER) {
+                    mAudioRecorder.setPreferredDevice(devicesBack);
+                } else if (PhotonCamera.getSettings().audioDirection == MicrophoneDirection.MIC_DIRECTION_TOWARDS_USER) {
+                    mAudioRecorder.setPreferredDevice(devicesFront);
+                }
+                boolean retDirection = mAudioRecorder.setPreferredMicrophoneDirection(PhotonCamera.getSettings().audioDirection);
+                boolean retZoom = mAudioRecorder.setPreferredMicrophoneFieldDimension(PhotonCamera.getSettings().audioZoom);
+
+                Log.d(TAG, "Audio recording direction shaping request: " + retDirection + " - " + retZoom);
+            }
+
             // 3. Prepare and start recording
             mAudioRecorder.prepare();
             mAudioRecorder.start();
             Log.d(TAG, "Audio recording started, saving to: " + filePath);
+
+            if ((devicesBack != null) && (devicesFront != null)) {
+                if (PhotonCamera.getSettings().audioDirection == MicrophoneDirection.MIC_DIRECTION_AWAY_FROM_USER) {
+                    mAudioRecorder.setPreferredDevice(devicesBack);
+                } else if (PhotonCamera.getSettings().audioDirection == MicrophoneDirection.MIC_DIRECTION_TOWARDS_USER) {
+                    mAudioRecorder.setPreferredDevice(devicesFront);
+                }
+                boolean retDirection = mAudioRecorder.setPreferredMicrophoneDirection(PhotonCamera.getSettings().audioDirection);
+                boolean retZoom = mAudioRecorder.setPreferredMicrophoneFieldDimension(PhotonCamera.getSettings().audioZoom);
+
+                Log.d(TAG, "Audio recording direction shaping response: " + retDirection + " - " + retZoom);
+            }
 
         } catch (IOException e) {
             Log.e(TAG, "prepare() failed for audio recording", e);

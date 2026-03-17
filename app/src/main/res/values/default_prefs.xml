@@ -131,6 +131,8 @@
     <string name="pref_sps_default_value" translatable="false">49152</string>
     <string name="pref_audio_processing_default_value" translatable="false">9</string>
     <string name="pref_audio_bitrate_default" translatable="false">320</string>
+    <string name="pref_audio_direction_default_value" translatable="false">0</string>
+    <string name="pref_audio_zoom_default_value" translatable="false">0.0f</string>
 
     <!-- Single Shot and Video settings strings -->
     <string name="pref_noise_processing_default_value" translatable="false">0</string>

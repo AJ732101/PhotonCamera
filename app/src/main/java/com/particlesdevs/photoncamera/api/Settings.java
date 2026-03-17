@@ -121,6 +121,8 @@ public class Settings {
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
     public String photoRange = "Full";
+    public int audioDirection = 0;
+    public float audioZoom = 0.0f;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -206,6 +208,8 @@ public class Settings {
         audioSps = PreferenceKeys.getAudioSps();
         audioBitrate = PreferenceKeys.getAudioBitrate();
         audioChannels = PreferenceKeys.getAudioChannels();
+        audioDirection = PreferenceKeys.getAudioDirection();
+        audioZoom = PreferenceKeys.getAudioZoom();
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         socQualcommSharpness = PreferenceKeys.getSocQualcommSharpness();
         socQualcommSaturation = PreferenceKeys.getSocQualcommSaturation();

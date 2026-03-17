@@ -88,6 +88,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AUDIO_CHANNELS.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_BITRATE.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_SPS.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_DIRECTION.mValue);
+        COMMON_KEYS.add(Key.KEY_AUDIO_ZOOM.mValue);
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION.mValue);
@@ -190,7 +192,9 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CHANNELS, resources.getString(R.string.pref_audio_channels_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE, resources.getString(R.string.pref_audio_bitrate_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_ZOOM, resources.getString(R.string.pref_audio_zoom_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS, resources.getString(R.string.pref_sps_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_DIRECTION, resources.getString(R.string.pref_audio_direction_default_value));
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS, resources.getString(R.string.pref_soc_qualcomm_sharpness_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION, resources.getString(R.string.pref_soc_qualcomm_saturation_default));
@@ -679,8 +683,16 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_BITRATE);
     }
 
+    public static float getAudioZoom() {
+        return (float) preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_AUDIO_ZOOM) / 100.0f;
+    }
+
     public static int getAudioSps() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS);
+    }
+
+    public static int getAudioDirection() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_AUDIO_DIRECTION);
     }
 
     public static int getVideoFramerate() {
@@ -947,6 +959,8 @@ public class PreferenceKeys {
         KEY_AUDIO_CHANNELS(R.string.pref_audio_channels_key),
         KEY_AUDIO_BITRATE(R.string.pref_audio_bitrate_key),
         KEY_AUDIO_SPS(R.string.pref_sps_key),
+        KEY_AUDIO_DIRECTION(R.string.pref_audio_direction_key),
+        KEY_AUDIO_ZOOM(R.string.pref_audio_zoom_key),
 
         /**
          * QualityDoesMatter - SoC - Qualcomm/Snapdragon

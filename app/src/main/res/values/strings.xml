@@ -15,6 +15,7 @@
     <string name="single_frame_quality">Still Image Quality</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="audio_bitrate">Bitrate [kBit/s]</string>
+    <string name="audio_zoom">Audio Zoom</string>
     <string name="disable_aligning">Disable Aligning</string>
     <string name="chroma_nr_count">Chroma NR Count</string>
     <string name="enhanced_processing">Enhanced Processing</string>
@@ -188,6 +189,7 @@
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Channels</string>
     <string name="sps">SPS</string>
+    <string name="audio_direction">Audio Direction</string>
 
     <!-- Single Shot and Video settings strings -->
     <string name="scene_and_effect_mode">Scene and Effect Mode</string>
@@ -223,6 +225,7 @@
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
     <string name="video_codec_based_photo_settings_title">Video Codec based Photo Settings</string>
+    <string name="beam_forming_separator_title">Beam Forming</string>
 
     <string name="general_settings_screen_summary">No dedicated category</string>
     <string name="stacking_settings_screen_summary">Multiframe related settings (HDRX)</string>

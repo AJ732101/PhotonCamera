@@ -332,6 +332,18 @@
         <item>49152</item>
     </string-array>
 
+    <string-array name="audio_direction_entries">
+        <item>Towards User</item>
+        <item>Away from User</item>
+        <item>Neutral</item>
+    </string-array>
+
+    <string-array name="audio_direction_entryValues">
+        <item>1</item>
+        <item>2</item>
+        <item>0</item>
+    </string-array>
+
     <string-array name="theme_entries">
         <item>@string/theme_follow_system</item>
         <item>@string/theme_light</item>

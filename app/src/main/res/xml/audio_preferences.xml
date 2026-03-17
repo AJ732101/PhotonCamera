@@ -14,7 +14,7 @@
             android:layout="@layout/preference_seekbar"
             android:title="@string/audio_bitrate"
             android:defaultValue="@string/pref_audio_bitrate_default"
-            app:maxValue="320"
+            app:maxValue="510"
             app:minValue="32"
             android:icon="@drawable/speed_24px"/>
 
@@ -57,6 +57,32 @@
             android:entries="@array/sps_entries"
             android:entryValues="@array/sps_entryValues"
             android:defaultValue="@string/pref_sps_default_value" />
+
+        <PreferenceCategory
+            android:layout="@layout/preference_category_layout"
+            app:key="audio_settings_category"
+            app:title="@string/beam_forming_separator_title">
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_audio_direction_key"
+                android:title="@string/audio_direction"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/arrows_output_24px"
+                android:entries="@array/audio_direction_entries"
+                android:entryValues="@array/audio_direction_entryValues"
+                android:defaultValue="@string/pref_audio_direction_default_value" />
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+                android:key="@string/pref_audio_zoom_key"
+                android:layout="@layout/preference_seekbar"
+                android:title="@string/audio_zoom"
+                android:defaultValue="@string/pref_audio_zoom_default_value"
+                app:maxValue="100"
+                app:minValue="-100"
+                android:icon="@drawable/zoom_in_24px"/>
+
+        </PreferenceCategory>
 
         <Preference
             android:layout_height="56dp"
