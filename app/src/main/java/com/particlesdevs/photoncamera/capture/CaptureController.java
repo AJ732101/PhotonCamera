@@ -54,7 +54,9 @@ import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaActionSound;
 import android.media.MediaCodecList;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaCodecInfo;
 import android.media.AudioRecord;
@@ -3817,6 +3819,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
             applySingleShotSettings(captureBuilder);
 
+            boolean useFlash = (PreferenceKeys.getAeMode() == 2) || (PreferenceKeys.getAeMode() == 3);
+            if (useFlash) {
+                captureBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_SINGLE);
+                captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+            }
+
             CameraCaptureSession.CaptureCallback singleShotCaptureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
@@ -3825,6 +3833,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     super.onCaptureCompleted(session, request, result);
                     mCaptureResult = result;
                     mLastCaptureResult = serializeCaptureResult(result);
+                    if (PreferenceKeys.isCameraSoundsOn()) {
+                        final MediaActionSound mCameraSound = new MediaActionSound();
+                        if (PreferenceKeys.isCameraSoundsOn()) {
+                            mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                        }
+                    }
                     Log.d(TAG, "Single shot capture completed.");
                 }
 
@@ -3834,8 +3848,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Log.d(TAG, "Single shot sequence completed. Unlocking focus.");
                     unlockFocus();
                     mIsCaptureInProgress = false;
+                    if (useFlash) {
+                        try {
+                            mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
+                            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                        } catch (CameraAccessException e) { e.printStackTrace(); }
+                    }
                 }
             };
+
+            if (useFlash) {
+                captureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            }
 
             mCaptureSession.stopRepeating();
             //captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(7, 7));

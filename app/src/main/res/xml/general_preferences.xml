@@ -7,7 +7,9 @@
     android:key="general_settings_category"
     android:paddingBottom="56dp">
 
-    <PreferenceCategory app:key="general_settings_category" app:title="@string/general_settings_screen_title">
+    <PreferenceCategory
+        app:key="general_settings_category"
+        app:title="@string/general_settings_screen_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_frame_count_key"
