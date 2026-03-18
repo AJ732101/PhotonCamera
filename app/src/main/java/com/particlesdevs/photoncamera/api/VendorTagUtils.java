@@ -450,11 +450,26 @@ public class VendorTagUtils {
                 }
 
                 if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.enable", byte.class);
+                    var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.Enabled", byte.class);
+
                     if (isSupported(builder, eislookahead)) {
                         PhotonCamera.hasEisLookAhead = true;
+
+                        var MOFAlignment = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MOFAlignment", byte.class);
+                        var frameDelay = new CaptureRequest.Key<>("org.quic.camera.eislookahead.FrameDelay", byte.class);
+                        var margin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
+
                         if (PhotonCamera.isEisLookAheadOn) {
                             builder.set(eislookahead, (byte) 1);
+                        }
+                        if (isSupported(builder, MOFAlignment)) {
+                            builder.set(MOFAlignment, (byte) 1);
+                        }
+                        if (isSupported(builder, frameDelay)) {
+                            builder.set(frameDelay, (byte) 15);
+                        }
+                        if (isSupported(builder, margin)) {
+                            builder.set(margin, (byte) 25);
                         }
                     }
 
