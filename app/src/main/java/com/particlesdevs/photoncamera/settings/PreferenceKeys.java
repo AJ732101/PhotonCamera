@@ -110,6 +110,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_CONTRAST_CURVE.mValue);
         COMMON_KEYS.add(Key.KEY_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_EXPOSURE_COMPENSATION.mValue);
+        COMMON_KEYS.add(Key.KEY_PHOTO_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_TRANSFER_FUNCTION.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_RANGE.mValue);
@@ -182,6 +183,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_MODE, resources.getString(R.string.pref_hdr_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLORSPACE, resources.getString(R.string.pref_color_space_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_VIDEO_CODEC, resources.getString(R.string.pref_photo_video_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_RANGE, resources.getString(R.string.pref_video_range_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE, resources.getString(R.string.pref_color_space_default_value));
@@ -222,7 +224,6 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISTORTION_CORRECTION_MODE, resources.getString(R.string.pref_distortion_correction_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHADING_MODE, resources.getString(R.string.pref_shading_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE, resources.getBoolean(R.bool.pref_alternate_preview_template_default_value));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TEN_BIT_SURFACE_TARGET, resources.getString(R.string.pref_ten_bit_surface_target_default_value));
 
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
@@ -783,10 +784,6 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE);
     }
 
-    public static String getTenBitSurfaceTarget() {
-        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_TEN_BIT_SURFACE_TARGET);
-    }
-
     public static float getDigitalZoomFactorValue() {
         return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_DIGITAL_ZOOM_FACTOR);
     }
@@ -852,6 +849,10 @@ public class PreferenceKeys {
 
     public static int getPhotoTransferFunction() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PHOTO_TRANSFER_FUNCTION);
+    }
+
+    public static String getPhotoVideoCodec() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_PHOTO_VIDEO_CODEC);
     }
 
     public static String getPhotoRange() {
@@ -995,6 +996,7 @@ public class PreferenceKeys {
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),
         KEY_EFFECT_MODE(R.string.pref_effect_mode_key),
+        KEY_PHOTO_VIDEO_CODEC(R.string.pref_photo_video_code_key),
         KEY_PHOTO_TRANSFER_FUNCTION(R.string.pref_photo_transfer_function_key),
         KEY_PHOTO_COLOR_SPACE(R.string.pref_photo_colorspace_key),
         KEY_PHOTO_RANGE(R.string.pref_photo_range_key),
@@ -1007,7 +1009,6 @@ public class PreferenceKeys {
         KEY_DISTORTION_CORRECTION_MODE(R.string.pref_distortion_correction_mode_key),
         KEY_SHADING_MODE(R.string.pref_shading_mode_key),
         KEY_ALTERNATE_PREVIEW_TEMPLATE(R.string.pref_alternate_preview_template_key),
-        KEY_TEN_BIT_SURFACE_TARGET(R.string.pref_ten_bit_surface_target_key),
 
         /**
          * Enhanced settings keys

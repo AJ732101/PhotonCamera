@@ -159,6 +159,7 @@
     <string name="pref_new_settings_global_key" translatable="false">pref_new_settings_global_key</string>
     <string name="pref_lossless_sw_encoding_key" translatable="false">pref_lossless_sw_encoding_key</string>
     <string name="pref_use_stream_usecase_key" translatable="false">pref_use_stream_usecase_key</string>
+    <string name="pref_photo_video_code_key" translatable="false">pref_photo_video_code_key</string>
     <string name="pref_photo_transfer_function_key" translatable="false">pref_photo_transfer_function_key</string>
     <string name="pref_photo_colorspace_key" translatable="false">pref_photo_colorspace_key</string>
     <string name="pref_photo_range_key" translatable="false">pref_photo_range_key</string>

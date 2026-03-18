@@ -5,9 +5,11 @@
     <string name="luma_nr_count">Helligkeit Rauschreduktion Stärke</string>
     <string name="frame_count">Bilder für Synthese/Stacking </string>
     <string name="frame_count_summary">Anzahl der Bilder für die Synthese (Stacking)</string>
+    <string name="contrast_curve_exposure_compensation">Belichtungskorrektur für Kontrastkurven</string>
     <string name="single_frame_quality">Foto Qualität</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="audio_bitrate">Bitrate [kBit/s]</string>
+    <string name="audio_zoom">Audio Zoom</string>
     <string name="disable_aligning">Ausrichtung deakivieren</string>
     <string name="processing_processname">Prozessiere %1$s...</string>
     <string name="turn_on_system_nr">System Rauschredultion</string>
@@ -30,12 +32,14 @@
     <string name="sharpness">Schärfe</string>
     <string name="turn_on_grid">Gitterlinien anzeigen</string>
     <string name="raw">Speicherformat</string>
+    <string name="demosaic">Demosaic</string>
     <string name="turn_on_round_edges">Abgerundete Kanten</string>
     <string name="enable_remosaic">Re-Mosaic Aktivieren</string>
     <string name="general">Allgemein</string>
     <string name="telegram">Telegram Gruppe/Kanal</string>
     <string name="hdrxNR">Rauschunterdrückung</string>
     <string name="turn_on_watermark">Wasserzeichen Aktivieren</string>
+    <string name="exposure_fusion_method">Belichtungsfusion Methode 2 (nicht 3)</string>
     <string name="sure_delete">Möchten Sie dieses Bild wirklich löschen?</string>
     <string name="sure_delete_multiple">Sicher, dass Sie %1$s Bild(er) löschen möchten? %2$s werden gelöscht.</string>
     <string name="cancel">Abbrechen</string>
@@ -62,6 +66,7 @@
     <string name="preview_format">Ziel Format</string>
     <string name="real_preview_format">Vorschau Format</string>
     <string name="raw_format">RAW Format</string>
+    <string name="function_button_one">Funktionsknopf 1</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
     <string name="about">Über</string>
@@ -92,6 +97,7 @@
     <string name="mode_video">Video</string>
     <string name="countdown_timer">Auslöseverzögerung</string>
     <string name="flash">Blitz/Leuchte</string>
+    <string name="color_lut">Farb LUT (Look Up Table)</string>
     <string name="focus_peaking">Fokusbereiche hervorheben</string>
     <string name="this_device">Dein Gerät - %1$s</string>
     <string name="sync_on">Sync. An</string>
@@ -135,7 +141,9 @@
     <string name="turn_on_extend_exposure">Belichtungszeit erweitern</string>
     <string name="turn_on_alternate_loupe">Alternative Fokusvergrößerung (Fokuslupe)</string>
     <string name="virtual_horizon_text">Winkelangabe Virtueller Horizont</string>
+    <string name="gps_location">GPS Standort</string>
     <string name="codec">Codec</string>
+    <string name="video_codec">Video Codec</string>
     <string name="video_resolution">Auflösung</string>
     <string name="video_framerate">Bildwiederholfrequenz</string>
     <string name="video">Video</string>
@@ -145,12 +153,14 @@
     <string name="turn_on_10bit">Minimale Auslöseverzögerung</string>
     <string name="video_10bit">10 Bit Video</string>
     <string name="jpg">JPEG</string>
+    <string name="video_logical_workaround">Workaround für Logische/Physische IDs</string>
     <string name="video_new_rec">Neue Aufnahmemethode</string>
     <string name="noise_processing">Rauschminderung</string>
     <string name="edge_processing">Kantenverarbeitung</string>
     <string name="zoom">Zoom</string>
     <string name="keyframe_interval">Keyframe Intervall</string>
     <string name="video_encoder_name">Video Enkoder Name</string>
+    <string name="video_range">Bereich</string>
     <string name="audio_processing">Audioverarbeitung</string>
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Kanäle</string>
@@ -158,8 +168,12 @@
     <string name="noise_toggle_text">Rauschminderung</string>
     <string name="effect_mode">Effekt Modus</string>
     <string name="zsl">Minimale Auslöseverzögerung</string>
+    <string name="audio_direction">Audio/Ton Richtung</string>
     <string name="scene_and_effect_mode">Szenen und Effekt Modi</string>
+    <string name="lossless_sw_encoding">Verlustfreie SW Enkodierung (AVIF, HEIC/HEIF)</string>
     <string name="new_settings_global">Zusätzliche Einstellungen global anwenden</string>
+    <string name="photo_video_codec">Verwendeter Codec</string>
+    <string name="photo_colorspace">Farbraum</string>
     <string name="exposure_bracketing">Belichtungsreihe (Bracketing)</string>
     <string name="bracketing_off">Aus (1x)</string>
     <string name="bracketing_normal">Mittel (1x, 4x)</string>
@@ -192,6 +206,7 @@
     <string name="hdr_mode">HDR Modus</string>
     <string name="transfer_function">Transferfunktion</string>
     <string name="virtual_horizon">Virtueller Horizont</string>
+    <string name="beam_forming_separator_title">Aufnahme Charakteristik Formung</string>
     <string name="general_settings_screen_summary">Keine spezielle Kategorie</string>
     <string name="stacking_settings_screen_summary">Mehrfachbelichtungs bezogene Einstellungen (HDRX)</string>
     <string name="video_settings_screen_summary">Video bezogene Einstellungen</string>
@@ -201,4 +216,9 @@
     <string name="sensor_and_more_settings_screen_summary">Sensor bezogene Einstellungen (und mehr)</string>
     <string name="sensor_settings_screen_summary">Sensor bezogene Einstellungen</string>
     <string name="other_settings_separator_summary">Einstellungen ohne Kategorie</string>
+    <string name="exposure_compensation">Belichtungskorrektur</string>
+    <string name="allow_network_sync">Netzwerk Sync erlauben (GitHub Repo)</string>
+    <string name="use_stream_usecase">Stream Usecases verwenden</string>
+    <string name="photo_transfer_function">Übertragungsfunktion</string>
+    <string name="video_codec_based_photo_settings_title">Video Codec basierte Foto Einstellungen</string>
 </resources>

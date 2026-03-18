@@ -39,7 +39,7 @@ public class YUVSaver extends DefaultSaver{
     public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
-            String usedCodec = PhotonCamera.getSettings().tenBitSurfaceTarget;
+            String usedCodec = PhotonCamera.getSettings().photoVideoCodec; //PhotonCamera.getSettings().tenBitSurfaceTarget;
             int usedTargetFormat = PhotonCamera.getSettings().previewFormat;
             Log.d(TAG, "YCBCR_P010 format detected, attempting to save via MediaCodec or YCBCR_P010 RAW");
 
@@ -251,7 +251,6 @@ public class YUVSaver extends DefaultSaver{
                         break;
                 }
 
-                encoder = MediaCodec.createEncoderByType(mimeVid);
                 try {
                     encoder = MediaCodec.createEncoderByType(mimeVid);
                     MediaCodecInfo codecInfo = encoder.getCodecInfo();
@@ -267,35 +266,35 @@ public class YUVSaver extends DefaultSaver{
                 switch (usedCodec) {
                     case "AVIF":
                     case "AV1":
-                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         break;
                     case "APV":
-                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         break;
                     case "HEIC":
-                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         break;
                     case "HEVC":
-                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         break;
                 }
 
                 /*switch (usedCodec) {
                     case "AVIF":
                     case "AV1":
-                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createAv1Format(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         encoder = MediaCodec.createByCodecName("c2.android.av1.encoder");
                         break;
                     case "APV":
-                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createApvFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         encoder = MediaCodec.createByCodecName("c2.android.apv.encoder");
                         break;
                     case "HEIC":
-                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createDedicatedHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         encoder = MediaCodec.createByCodecName("c2.qti.heic.encoder");
                         break;
                     case "HEVC":
-                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
+                        format = createHeicFormat(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()), image.getFormat());
                         encoder = MediaCodec.createByCodecName("c2.qti.hevc.encoder.hdr");
                         break;
                 }*/
@@ -319,13 +318,20 @@ public class YUVSaver extends DefaultSaver{
                 if (inputBufferId >= 0) {
                     ByteBuffer inputBuffer = encoder.getInputBuffer(inputBufferId);
                     if (inputBuffer != null) {
-                        // This is the correct way to copy planar YUV data, respecting strides.
                         Size resResolution = new Size(Math.min(image.getWidth(), maxEncoderRes.getWidth()), Math.min(image.getHeight(), maxEncoderRes.getHeight()));
-                        if (resResolution.getWidth() == image.getWidth() && resResolution.getHeight() == image.getHeight()) {
-                            copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), inputBuffer);
-                        }
-                        else {
-                            copyPlanesToBufferCrop(image.getPlanes(), image.getWidth(), image.getHeight(), maxEncoderRes.getWidth(), maxEncoderRes.getHeight(), inputBuffer);
+                        if (image.getFormat() == ImageFormat.YUV_420_888) {
+                            if (resResolution.getWidth() == image.getWidth() && resResolution.getHeight() == image.getHeight()) {
+                                copyPackedYuv420(image, inputBuffer);
+                            } else {
+                                copyPackedYuv420Crop(image, inputBuffer, maxEncoderRes.getWidth(), maxEncoderRes.getHeight());
+                            }
+                        } else {
+                            // This is the correct way to copy planar YUV data, respecting strides.
+                            if (resResolution.getWidth() == image.getWidth() && resResolution.getHeight() == image.getHeight()) {
+                                copyPlanesToBuffer(image.getPlanes(), image.getWidth(), image.getHeight(), inputBuffer);
+                            } else {
+                                copyPlanesToBufferCrop(image.getPlanes(), image.getWidth(), image.getHeight(), maxEncoderRes.getWidth(), maxEncoderRes.getHeight(), inputBuffer);
+                            }
                         }
                         encoder.queueInputBuffer(inputBufferId, 0, inputBuffer.position(), image.getTimestamp(), MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                     }
@@ -399,9 +405,13 @@ public class YUVSaver extends DefaultSaver{
         }
     }
 
-    private MediaFormat createHeicFormat(int width, int height) {
+    private MediaFormat createHeicFormat(int width, int height, int yuvFormat) {
         MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        if (yuvFormat == ImageFormat.YCBCR_P010) {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        } else {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        }
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 200_000_000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
@@ -411,36 +421,45 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
             if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             } else {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
             }
-            if (PhotonCamera.mHdrTenPlusIsSupported == true) {
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus);
-            }
-            else if (PhotonCamera.mHdrTenIsSupported == true) {
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10);
-            }
-            else if (PhotonCamera.mHlgIsSupported == true) {
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
-            }
-            else {
+            if (yuvFormat == ImageFormat.YCBCR_P010) {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+                if (PhotonCamera.mHdrTenPlusIsSupported == true) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+                    format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus);
+                } else if (PhotonCamera.mHdrTenIsSupported == true) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+                    format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10);
+                } else if (PhotonCamera.mHlgIsSupported == true) {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+                    format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+                } else {
+                    format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                    format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                    format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+                }
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+            } else {
                 format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel51);
             }
-            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
         }
         return format;
     }
 
-    private MediaFormat createAv1Format(int width, int height) {
+    private MediaFormat createAv1Format(int width, int height, int yuvFormat) {
         MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AV1, width, height);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        if (yuvFormat == ImageFormat.YCBCR_P010) {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        } else {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        }
         format.setInteger(MediaFormat.KEY_BIT_RATE, 20_000_000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 0);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
@@ -449,22 +468,34 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
             if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             } else {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
             }
-            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
-            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
+            if (yuvFormat == ImageFormat.YCBCR_P010) {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AV1ProfileMain8);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AV1Level41);
+            }
         }
         return format;
     }
 
-    private MediaFormat createApvFormat(int width, int height) {
+    private MediaFormat createApvFormat(int width, int height, int yuvFormat) {
         MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_APV, width, height);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        if (yuvFormat == ImageFormat.YCBCR_P010) {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        } else {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        }
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 200_000_000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 0);
@@ -474,41 +505,59 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
             if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             } else {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
             }
-            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.APVProfile422_10HDR10);
-            format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
+            if (yuvFormat == ImageFormat.YCBCR_P010) {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.APVProfile422_10HDR10);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.APVProfile422_10HDR10);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
+            }
         }
         return format;
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private MediaFormat createDedicatedHeicFormat(int width, int height) {
+    private MediaFormat createDedicatedHeicFormat(int width, int height, int yuvFormat) {
         String mimeType = "image/heic";
         MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        if (yuvFormat == ImageFormat.YCBCR_P010) {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+        } else {
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+        };
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
-        format.setInteger(MediaFormat.KEY_QUALITY, 85);
+        format.setInteger(MediaFormat.KEY_QUALITY, PhotonCamera.getSettings().singleFrameQuality);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
         format.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
         format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
-            format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
             if (PhotonCamera.getSettings().photoRange.equalsIgnoreCase("Full")) {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_FULL);
             } else {
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
             }
-            //format.setInteger(MediaFormat.KEY_PROFILE, 0x6003);
-            //format.setInteger(MediaFormat.KEY_LEVEL, 0x600C);
+            if (yuvFormat == ImageFormat.YCBCR_P010) {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                format.setInteger(MediaFormat.KEY_PROFILE, 0x8);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+            } else {
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMainStill);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+            }
         }
         return format;
     }
@@ -589,6 +638,70 @@ public class YUVSaver extends DefaultSaver{
         }
 
         return true;
+    }
+
+    private void copyPackedYuv420(Image image, ByteBuffer out) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        Image.Plane[] planes = image.getPlanes();
+
+        ByteBuffer yBuf = planes[0].getBuffer();
+        int yRowStride = planes[0].getRowStride();
+        byte[] rowY = new byte[w];
+        for (int i = 0; i < h; i++) {
+            yBuf.position(i * yRowStride);
+            yBuf.get(rowY);
+            out.put(rowY);
+        }
+
+        Image.Plane uvPlane = planes[1];
+        ByteBuffer uvBuf = uvPlane.getBuffer();
+        int uvRowStride = uvPlane.getRowStride();
+        int uvHeight = h / 2;
+
+        byte[] rowUV = new byte[w];
+
+        for (int i = 0; i < uvHeight; i++) {
+            uvBuf.position(i * uvRowStride);
+            int remaining = uvBuf.remaining();
+            int toCopy = Math.min(w, remaining);
+            uvBuf.get(rowUV, 0, toCopy);
+            out.put(rowUV, 0, toCopy);
+        }
+    }
+
+    private void copyPackedYuv420Crop(Image image, ByteBuffer out, int widthOut, int heightOut) {
+        int widthIn = image.getWidth();
+        int heightIn = image.getHeight();
+        Image.Plane[] planes = image.getPlanes();
+
+        int startX = ((widthIn - widthOut) / 2) & ~1;
+        int startY = ((heightIn - heightOut) / 2) & ~1;
+
+        Image.Plane yPlane = planes[0];
+        ByteBuffer yBuf = yPlane.getBuffer();
+        int yRowStride = yPlane.getRowStride();
+        byte[] rowY = new byte[widthOut];
+
+        for (int i = 0; i < heightOut; i++) {
+            yBuf.position((startY + i) * yRowStride + startX);
+            yBuf.get(rowY);
+            out.put(rowY);
+        }
+
+        Image.Plane uvPlane = planes[1];
+        ByteBuffer uvBuf = uvPlane.getBuffer();
+        int uvRowStride = uvPlane.getRowStride();
+        int uvHeightOut = heightOut / 2;
+        byte[] rowUV = new byte[widthOut];
+
+        for (int i = 0; i < uvHeightOut; i++) {
+            uvBuf.position(((startY / 2) + i) * uvRowStride + startX);
+            int remaining = uvBuf.remaining();
+            int toCopy = Math.min(widthOut, remaining);
+            uvBuf.get(rowUV, 0, toCopy);
+            out.put(rowUV, 0, toCopy);
+        }
     }
 
     public void saveP010RawWithStride(Image image, File file) {

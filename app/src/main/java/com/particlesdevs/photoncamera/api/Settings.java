@@ -97,7 +97,6 @@ public class Settings {
     public int shadingMode = 99;
     public boolean useAlternatePreviewTemplate = false;
     public boolean useStreamUseCases = false;
-    public String tenBitSurfaceTarget = "HEVC";
     public float digitalZoomFactor = 2;
     public boolean useExternalGallery = true;
     public boolean useAlternateLoupe = true;
@@ -121,6 +120,7 @@ public class Settings {
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
     public String photoRange = "Full";
+    public String photoVideoCodec = "HEVC";
     public int audioDirection = 0;
     public float audioZoom = 0.0f;
 
@@ -230,7 +230,6 @@ public class Settings {
         distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
         shadingMode = PreferenceKeys.getShadingMode();
         useAlternatePreviewTemplate = PreferenceKeys.useAlternatePreviewTemplate();
-        tenBitSurfaceTarget = PreferenceKeys.getTenBitSurfaceTarget();
         contrastCurve = PreferenceKeys.getContrastCurve();
         effectMode = PreferenceKeys.getEffectMode();
         useLosslessSwEncoding = PreferenceKeys.isLosslessSwEncodingOn();
@@ -238,6 +237,7 @@ public class Settings {
         photoTransferFunction = PreferenceKeys.getPhotoTransferFunction();
         photoColorSpace = PreferenceKeys.getPhotoColorSpace();
         photoRange = PreferenceKeys.getPhotoRange();
+        photoVideoCodec = PreferenceKeys.getPhotoVideoCodec();
     }
 
     public void saveID() {

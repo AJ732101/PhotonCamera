@@ -778,6 +778,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                if ((characteristics == null) || (characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES) == null)) {
+                    Log.d(TAG, "DynamicRangeProfiles not available on this camera sensor -> try HLG fallback.");
+                    PhotonCamera.mHlgIsSupported = true;
+                    return false;
+                }
                 java.util.Set<Long> supportedProfiles = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES).getSupportedProfiles();
                 if (supportedProfiles == null) {
                     Log.d(TAG, "DynamicRangeProfiles not available on this camera sensor.");
@@ -830,6 +835,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
@@ -1202,7 +1208,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         try {
 //          mCaptureSession.stopRepeating();
             mPreviewInputRequest = mPreviewRequestBuilder.build();
-            mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
+            if (mPreviewInputRequest != null) {
+                mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
+            } else {
+                Log.e(TAG, "mPreviewInputRequest == null");
+            }
         } catch (IllegalStateException | IllegalArgumentException | NullPointerException e) {
             Logger.warnShort(TAG, "Cannot rebuildPreviewBuilder()!", e);
         } catch (CameraAccessException e) {
@@ -1690,7 +1700,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // Tell #mCaptureCallback to wait for the lock.
         mState = STATE_WAITING_LOCK;
         try {
-            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+            CaptureRequest req = mPreviewRequestBuilder.build();
+            if (req != null) {
+                mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+            } else {
+                Log.e(TAG,"mPreviewRequestBuilder.build() failed.");
+            }
         } catch (CameraAccessException e) {
             Log.e(TAG, "Failed to start camera preview because it couldn't access camera", e);
         } catch (IllegalStateException e) {
@@ -2558,7 +2573,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 mHighSpeedCaptureSession.setRepeatingBurst(highSpeedRequests, mCaptureCallback, mBackgroundHandler);
                             }
                             else {
-                                mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
+                                if (mPreviewInputRequest != null) {
+                                    mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
+                                } else {
+                                    Log.e(TAG, "mPreviewInputRequest == null");
+                                }
                             }
                             unlockFocus();
                         }
@@ -2989,7 +3008,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else {
             try {
                 mState = STATE_WAITING_NON_PRECAPTURE;
-                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                CaptureRequest req = mPreviewRequestBuilder.build();
+                if (req != null) {
+                    mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                } else {
+                    Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed to start camera preview because it couldn't access camera", e);
             } catch (IllegalStateException e) {
@@ -3004,7 +3028,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, newZoomValue);
                 try {
                     if (mCaptureSession != null) {
-                        mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                        CaptureRequest req = mPreviewRequestBuilder.build();
+                        if (req != null) {
+                            mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                        } else {
+                            Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                        }
                         mDigitalZoom = newZoomValue;
                     }
                 } catch (CameraAccessException e) {
@@ -3178,7 +3207,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             try {
                 if (mCaptureSession != null) {
-                    mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                    CaptureRequest req = mPreviewRequestBuilder.build();
+                    if (req != null) {
+                        mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                    } else {
+                        Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                    }
                 }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Aperture change failed", e);
@@ -3212,7 +3246,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         try {
             if (mCaptureSession != null) {
-                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                CaptureRequest req = mPreviewRequestBuilder.build();
+                if (req != null) {
+                    mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                } else {
+                    Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                }
             }
         } catch (CameraAccessException e) {
             Log.e(TAG, "Failed to set AE region", e);
@@ -3262,7 +3301,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         if (!PhotonCamera.getSettings().useAlternateLoupe) {
             try {
-                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                CaptureRequest req = mPreviewRequestBuilder.build();
+                if (req != null) {
+                    mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                } else {
+                    Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                }
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Failed to update zoom for preview.", e);
             } catch (IllegalStateException e) {
@@ -3433,13 +3477,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, mDigitalZoom);
                 }
                 else {
-                    Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
-                    if (lensDataMap != null) {
-                        CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
-                        if (camLensData != null) {
-                            float test = camLensData.getZoomFactor();
-                            captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, camLensData.getZoomFactor());
+                    if (PhotonCamera.getSettings().videoLogicalWorkaround && PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                        Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
+                        if (lensDataMap != null) {
+                            CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
+                            if (camLensData != null) {
+                                float test = camLensData.getZoomFactor();
+                                captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, camLensData.getZoomFactor());
+                            }
                         }
+                    } else {
+                        captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
                     }
                 }
             }
@@ -3851,7 +3899,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     if (useFlash) {
                         try {
                             mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
-                            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                            CaptureRequest req = mPreviewRequestBuilder.build();
+                            if (req != null) {
+                                mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                            } else {
+                                Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                            }
                         } catch (CameraAccessException e) { e.printStackTrace(); }
                     }
                 }
@@ -4586,7 +4639,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         else {
             format = MediaFormat.createVideoFormat(mimeVid, Math.min(vidWidth, maxRes.getWidth()), Math.min(vidHeight, maxRes.getHeight()));
-            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxRes.getHeight())));
+            Log.d(TAG, "using recording resolution: " + Integer.toString(Math.min(vidWidth, maxRes.getWidth())) + "x" + Integer.toString(Math.min(vidHeight, maxRes.getHeight())) + " at " + Integer.toString(PhotonCamera.getSettings().videoFramrate) + "fps");
         }
 
         //format.setString("camera_application_name", "com.particlesdevs.photonvidcam");

@@ -300,6 +300,7 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
@@ -344,6 +345,7 @@ class CameraUIViewImpl implements CameraUIView {
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||

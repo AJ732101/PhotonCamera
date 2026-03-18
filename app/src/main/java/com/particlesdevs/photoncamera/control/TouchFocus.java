@@ -126,6 +126,7 @@ public class TouchFocus {
             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+            (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
