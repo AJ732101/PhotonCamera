@@ -148,6 +148,12 @@ public class VendorTagUtils {
         PhotonCamera.hasVivoProMode = false;
         PhotonCamera.hasVivoDistortionCorrection = false;
         PhotonCamera.hasQucommAdrcOff = false;
+        PhotonCamera.hasEisRealtime = false;
+        PhotonCamera.hasEisLookAhead = false;
+        PhotonCamera.hasEisV3 = false;
+        PhotonCamera.hasIdealRaw = false;
+        PhotonCamera.hasAutoHdr = false;
+        PhotonCamera.hasSocHdrMode = false;
     }
 
     @SuppressLint({"NewApi", "LocalSuppress"})
@@ -165,10 +171,8 @@ public class VendorTagUtils {
 
         resetFlags();
 
-        boolean activate = true;
-
         try {
-            if (activate) {
+            if (!PhotonCamera.getSettings().disableVendorKeys) {
                 byte enable = 1;
                 if (PhotonCamera.isXiaomi) {
                     var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
@@ -397,14 +401,6 @@ public class VendorTagUtils {
                     builder.set(useSaturation, (int) PhotonCamera.getSettings().socQualcommSaturation);
                 }
 
-                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
-                    if (isSupported(builder, eisMode)) {
-                        PhotonCamera.hasEisModeKey = true;
-                        builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
-                    }
-                }
-
                 var enableCinematicMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableCinematicMode", Integer.class);
                 if (isSupported(builder, enableCinematicMode)) {
                     builder.set(enableCinematicMode, PhotonCamera.getSpecific().specificSetting.useCodeAuroraCinematicMode ? 1 : 0);
@@ -449,35 +445,85 @@ public class VendorTagUtils {
                     builder.set(quicDcgMode, PhotonCamera.getSpecific().specificSetting.qtiDCGMode);
                 }
 
-                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.Enabled", byte.class);
+                var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
+                if (isSupported(builder, eisMode)) {
+                    PhotonCamera.hasEisModeKey = true;
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                        builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
+                    }
+                }
 
-                    if (isSupported(builder, eislookahead)) {
-                        PhotonCamera.hasEisLookAhead = true;
-
+                var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.Enabled", byte.class);
+                if (isSupported(builder, eislookahead)) {
+                    PhotonCamera.hasEisLookAhead = true;
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                         var MOFAlignment = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MOFAlignment", byte.class);
                         var frameDelay = new CaptureRequest.Key<>("org.quic.camera.eislookahead.FrameDelay", byte.class);
                         var margin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
 
                         if (PhotonCamera.isEisLookAheadOn) {
                             builder.set(eislookahead, (byte) 1);
-                        }
-                        if (isSupported(builder, MOFAlignment)) {
-                            builder.set(MOFAlignment, (byte) 1);
-                        }
-                        if (isSupported(builder, frameDelay)) {
-                            builder.set(frameDelay, (byte) 15);
-                        }
-                        if (isSupported(builder, margin)) {
-                            builder.set(margin, (byte) 25);
+
+                            if (isSupported(builder, MOFAlignment)) {
+                                builder.set(MOFAlignment, (byte) 1);
+                            }
+                            if (isSupported(builder, frameDelay)) {
+                                builder.set(frameDelay, (byte) 10);
+                            }
+                            if (isSupported(builder, margin)) {
+                                builder.set(margin, (byte) 20);
+                            }
+                        } else {
+                            builder.set(eislookahead, (byte) 0);
                         }
                     }
+                }
 
-                    var v3Eis = new CaptureRequest.Key<>("org.quic.camera.eis3enable.EISV3Enable", byte.class);
-                    if (isSupported(builder, v3Eis)) {
-                        PhotonCamera.hasEisV3 = true;
+                var eisrealtime = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.Enabled", byte.class);
+                if (isSupported(builder, eisrealtime)) {
+                    PhotonCamera.hasEisRealtime = true;
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                        var margin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.RequestedMargin", byte.class);
+                        var minMargin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MinimalTotalMargins", byte.class);
+                        var eisOisMode = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EISOISMode", byte.class);
+                        var distMgmt = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EIS2ModeWithDM", byte.class);
+                        var motionInd = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MotionIndication", byte.class);
+
+                        if (PhotonCamera.isEisRealtimeOn) {
+                            builder.set(eisrealtime, (byte) 1);
+
+                            if (isSupported(builder, margin)) {
+                                builder.set(margin, (byte) 20); // 20% Crop für stabile Videos
+                            }
+                            if (isSupported(builder, minMargin)) {
+                                builder.set(minMargin, (byte) 10);
+                            }
+                            if (isSupported(builder, eisOisMode)) {
+                                builder.set(eisOisMode, (byte) 2); // Hybrid OIS+EIS
+                            }
+                            if (isSupported(builder, distMgmt)) {
+                                builder.set(distMgmt, (byte) 1); // Anti-Warping on
+                            }
+                            if (isSupported(builder, motionInd)) {
+                                builder.set(motionInd, (byte) 1); // Gyro-Support
+                            }
+                        } else {
+                            builder.set(eisrealtime, (byte) 0);
+                        }
+                    }
+                }
+
+                var v3Eis = new CaptureRequest.Key<>("org.quic.camera.eis3enable.EISV3Enable", byte.class);
+                if (isSupported(builder, v3Eis)) {
+                    PhotonCamera.hasEisV3 = true;
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                         if (PhotonCamera.isEisV3On) {
                             builder.set(v3Eis, (byte) 1);
+                        }
+
+                        var v3OutputCrop = new CaptureRequest.Key<>("org.quic.camera2.ipeicaconfigs.EISv3OutputCropFOV", byte.class);
+                        if (isSupported(builder, v3OutputCrop)) {
+                            builder.set(v3OutputCrop, (byte) 1);
                         }
                     }
                 }
@@ -611,78 +657,128 @@ public class VendorTagUtils {
                     }
                 }
 
-                if (!PhotonCamera.getSpecific().specificSetting.codeAuroraHdrMode.equals("default")) {
-                    CaptureRequest.Key hdrMode = null;
+                CaptureRequest.Key temporalDenoise = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.enable", byte.class);
+                if (isSupported(builder, temporalDenoise)) {
+                    builder.set(temporalDenoise, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
+                }
 
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
+                CaptureRequest.Key multiFrameData = new CaptureRequest.Key<>("com.qti.chi.multiFrameData.MultiFrameData", byte.class);
+                if (isSupported(builder, multiFrameData)) {
+                    builder.set(multiFrameData, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
+                }
+
+                multiFrameData = new CaptureRequest.Key<>("org.quic.camera.multiFrameData.multiFrameData", Integer.class);
+                if (isSupported(builder, multiFrameData)) {
+                    builder.set(multiFrameData, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? 1 : 0);
+                }
+
+                CaptureRequest.Key stackedFrame = new CaptureRequest.Key<>("com.qti.chi.stackedFrame.StackedFrame", byte.class);
+                if (isSupported(builder, stackedFrame)) {
+                    builder.set(stackedFrame, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
+                }
+
+                CaptureRequest.Key processType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.process_type", Integer.class);
+                if (isSupported(builder, processType)) {
+                    builder.set(processType, PhotonCamera.getSpecific().specificSetting.codeAuroraTemporalNoiseProcessType);
+                }
+
+                CaptureRequest.Key hdrMode = null;
+                hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
+                if (isSupported(builder, hdrMode)) {
+                    PhotonCamera.hasAutoHdr = true;
+                    builder.set(hdrMode, PhotonCamera.getSettings().socQualcommAutoHdr ? 1 : 0);
+                }
+
+                // set all HDR parameter to 0
+                if (true) {
+                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
                     if (isSupported(builder, hdrMode)) {
+                        PhotonCamera.hasSocHdrMode = true;
+                        builder.set(hdrMode, (int) 0);
+                    }
+
+                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
+                    if (isSupported(builder, hdrMode)) {
+                        PhotonCamera.hasSocHdrMode = true;
+                        builder.set(hdrMode, (int) 0);
+                    }
+
+                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
+                    if (isSupported(builder, hdrMode)) {
+                        PhotonCamera.hasSocHdrMode = true;
                         builder.set(hdrMode, (int) 0);
                     }
 
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
                     if (isSupported(builder, hdrMode)) {
-                        //builder.set(hdrMode, (int) 2);
+                        PhotonCamera.hasSocHdrMode = true;
+                        builder.set(hdrMode, (int) 0);
                     }
+                }
 
-                    CaptureRequest.Key hdrPref = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRModePreference", Integer.class);
-                    if (isSupported(builder, hdrPref)) {
-                        builder.set(hdrPref, (int) 1);
-                    }
+                var hdrModeMasterKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
+                boolean hasMasterKey = isSupported(builder, hdrModeMasterKey);
+                var snapshotHDRMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.SnapshotHDRMode", Integer.class);
+                boolean hasSnapshotKey = isSupported(builder, snapshotHDRMode);
 
-                    CaptureRequest.Key snapshotHDRMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.SnapshotHDRMode", Integer.class);
-                    if (isSupported(builder, snapshotHDRMode)) {
-                        builder.set(snapshotHDRMode, (int) 2);
-                    }
+                switch (PhotonCamera.getSettings().socQualcommHdrMode) {
+                    case 1:
+                        hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
+                        if (isSupported(builder, hdrMode)) {
+                            builder.set(hdrMode, (int) 1);
+                        }
+                        hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
+                        if (isSupported(builder, hdrMode)) {
+                            builder.set(hdrMode, (int) 3);
+                        }
+                        if (hasMasterKey) {
+                            //builder.set(hdrModeMasterKey, 1);
+                        }
+                        if (hasSnapshotKey) {
+                            //builder.set(snapshotHDRMode, 1);
+                        }
+                        break;
+                    case 2:
+                        hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
+                        if (isSupported(builder, hdrMode)) {
+                            builder.set(hdrMode, (int) 1);
+                        }
+                        hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
+                        if (isSupported(builder, hdrMode)) {
+                            builder.set(hdrMode, (int) 3);
+                        }
+                        if (hasMasterKey) {
+                            //builder.set(hdrModeMasterKey, 2);
+                        }
+                        if (hasSnapshotKey) {
+                            //builder.set(snapshotHDRMode, 2);
+                        }
+                        break;
+                    case 3:
+                        hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
+                        if (isSupported(builder, hdrMode)) {
+                            builder.set(hdrMode, (int) 1);
+                        }
+                        if (hasMasterKey) {
+                            //builder.set(hdrModeMasterKey, 3);
+                        }
+                        if (hasSnapshotKey) {
+                            //builder.set(snapshotHDRMode, 3);
+                        }
+                        break;
+                   default:
+                        if (hasMasterKey) {
+                            builder.set(hdrModeMasterKey, 0);
+                        }
+                       if (hasSnapshotKey) {
+                           builder.set(snapshotHDRMode, 0);
+                       }
+                        break;
+                }
 
-                    CaptureRequest.Key temporalDenoise = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.enable", byte.class);
-                    if (isSupported(builder, temporalDenoise)) {
-                        builder.set(temporalDenoise, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
-                    }
-                    CaptureRequest.Key processType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.process_type", Integer.class);
-                    if (isSupported(builder, processType)) {
-                        builder.set(processType, PhotonCamera.getSpecific().specificSetting.codeAuroraTemporalNoiseProcessType);
-                    }
-
-                    switch (PhotonCamera.getSpecific().specificSetting.codeAuroraHdrMode) {
-                        case "SHDR":
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 1);
-                            }
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 3);
-                            }
-                            break;
-                        case "QHDR":
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 1);
-                            }
-                            break;
-                        case "MFHDR":
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 1);
-                            }
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 3);
-                            }
-                            break;
-                        case "AUTO":
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 1);
-                            }
-                            break;
-                        case "HDR":
-                            hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
-                            if (isSupported(builder, hdrMode)) {
-                                builder.set(hdrMode, (int) 2);
-                            }
-                            break;
-                    }
+                var hdrPref = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRModePreference", Integer.class);
+                if (isSupported(builder, hdrPref)) {
+                    builder.set(hdrPref, (int) 1);
                 }
 
                 /*CaptureRequest.Key perfKey = new CaptureRequest.Key<>("com.qti.chi.enableadrcpath.enableADRCPath", Integer.class);
@@ -714,34 +810,6 @@ public class VendorTagUtils {
                 if (isSupported(builder, perfKey)) {
                     if (PhotonCamera.isQucommAdrcOff) {
                         builder.set(perfKey, (byte) 1);
-                    }
-                }
-
-                if (false) {
-                    CaptureRequest.Key hdrMode = null;
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
-                    if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
-                    }
-
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
-                    if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
-                    }
-
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
-                    if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
-                    }
-
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
-                    if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
-                    }
-
-                    hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
-                    if (isSupported(builder, hdrMode)) {
-                        builder.set(hdrMode, (int) 0);
                     }
                 }
 

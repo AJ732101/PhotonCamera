@@ -193,20 +193,12 @@ public class Specific {
                     specificSetting.customRawRes = caseS[1];
                     break;
                 }
-                case "codeAuroraHdrMode": {
-                    specificSetting.codeAuroraHdrMode = caseS[1];
-                    break;
-                }
                 case "hdrMode": {
                     specificSetting.hdrMode = caseS[1];
                     break;
                 }
                 case "networkSyncBaseUrl": {
                     specificSetting.networkSyncBaseUrl = caseS[1];
-                    break;
-                }
-                case "toneMappingMode": {
-                    specificSetting.toneMappingMode = caseS[1];
                     break;
                 }
             }

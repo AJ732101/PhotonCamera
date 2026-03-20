@@ -148,6 +148,7 @@
     <string name="turn_on_system_nr">System Noise Reduction</string>
     <string name="wide169" translatable="false">16:9</string>
     <string name="thumbnail" translatable="true">Thumbnail</string>
+    <string name="tonemapping_mode_quality" translatable="true">Tonemapping Mode Quality</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>
@@ -164,6 +165,7 @@
     <string name="virtual_horizon_text">Virtual Horizon Angle Text</string>
     <string name="allow_network_sync">Allow Network Sync (GitHub Repo)</string>
     <string name="gps_location">GPS Location</string>
+    <string name="disable_all_vendor">Disable ALL Vendor Keys</string>
 
     <!-- Video settings strings -->
     <string name="codec">Codec</string>
@@ -246,6 +248,7 @@
     <string name="soc_qualcomm_ai_mode">Qualcomm/Snapdragon AI Mode</string>
     <string name="soc_qualcomm_isz">Qualcomm/Snapdragon ISZ</string>
     <string name="soc_qualcomm_mfnr">Qualcomm/Snapdragon MFNR</string>
+    <string name="soc_qualcomm_auto_hdr">Auto HDR</string>
 
     <!-- Sensor and more settings strings -->
     <string name="hot_pixel_mode">Hot Pixel Mode</string>

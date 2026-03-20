@@ -87,6 +87,8 @@ public class Settings {
     public int socQualcommAiMode;
     public boolean socQualcommUseIsz = false;
     public boolean socQualcommUseMfnr = false;
+    public int socQualcommHdrMode = 0;
+    public boolean socQualcommAutoHdr = false;
     public boolean useZsl = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useNewSettingsGloabal = false;
@@ -123,6 +125,9 @@ public class Settings {
     public String photoVideoCodec = "HEVC";
     public int audioDirection = 0;
     public float audioZoom = 0.0f;
+    public boolean disableVendorKeys = false;
+    public boolean isTonnemappingModeQuality = false;
+
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -136,6 +141,7 @@ public class Settings {
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
         useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);
         useExposureFusionMethod2 = PreferenceKeys.isExposureFusionMethod2();
+        isTonnemappingModeQuality = PreferenceKeys.isToneMappingQualityOn();
         //DebugData = PreferenceKeys.isAfDataOn();
         roundEdge = PreferenceKeys.isRoundEdgeOn();
         sharpness = PreferenceKeys.getSharpnessValue();
@@ -169,6 +175,7 @@ public class Settings {
         theme = PreferenceKeys.getThemeValue();
         lutName = PreferenceKeys.getLutName();
         demosaicMethod = PreferenceKeys.getDemosaicMethod();
+        disableVendorKeys = PreferenceKeys.disableVendorKeys();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
@@ -217,6 +224,8 @@ public class Settings {
         socQualcommAiMode = PreferenceKeys.getSocQualcommAiMode();
         socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();
         socQualcommUseMfnr = PreferenceKeys.isSocQualcommMfnrOn();
+        socQualcommAutoHdr = PreferenceKeys.isSocQualcommAutoHdrOn();
+        socQualcommHdrMode = PreferenceKeys.getSocQualcommHdrMode();
         // QualityDoesMatter - Single Shot & Video Related
         useZsl = PreferenceKeys.isZslOn();
         useSceneAndEffectMode = PreferenceKeys.isSceneAndEffectModeOn();

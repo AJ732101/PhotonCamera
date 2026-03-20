@@ -9,7 +9,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaFormat;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -50,7 +49,6 @@ import java.util.TimeZone;
 import androidx.preference.ListPreference;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.particlesdevs.photoncamera.util.FileManager;
 
@@ -242,6 +240,10 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunction.add("EIS Look Ahead");
                 entryValuesFunction.add("EIS Look Ahead");
             }
+            if (PhotonCamera.hasEisRealtime) {
+                entriesFunction.add("EIS Realtime");
+                entryValuesFunction.add("EIS Realtime");
+            }
             if (PhotonCamera.hasEisV3) {
                 entriesFunction.add("EIS V3");
                 entryValuesFunction.add("EIS V3");
@@ -305,16 +307,28 @@ public class SettingsActivity extends BaseActivity implements
                 aiPreference.setEnabled(PhotonCamera.hasAiModeKey);
             }
 
+            String iszKey = getString(R.string.pref_soc_qualcomm_isz_key);
+            Preference iszPreference = findPreference(iszKey);
+            if (iszPreference != null) {
+                iszPreference.setEnabled(PhotonCamera.hasIszKey);
+            }
+
             String mfnrKey = getString(R.string.pref_soc_qualcomm_mfnr_key);
             Preference mfnrPreference = findPreference(mfnrKey);
             if (mfnrPreference != null) {
                 mfnrPreference.setEnabled(PhotonCamera.hasMfnrKey);
             }
 
-            String iszKey = getString(R.string.pref_soc_qualcomm_isz_key);
-            Preference iszPreference = findPreference(iszKey);
-            if (iszPreference != null) {
-                iszPreference.setEnabled(PhotonCamera.hasIszKey);
+            String autoHdrKey = getString(R.string.pref_soc_auto_hdr_key);
+            Preference autoHdrPreference = findPreference(autoHdrKey);
+            if (autoHdrPreference != null) {
+                autoHdrPreference.setEnabled(PhotonCamera.hasAutoHdr);
+            }
+
+            String socHdrModeKey = getString(R.string.pref_soc_hdr_mode_key);
+            Preference socHdrModePreference = findPreference(socHdrModeKey);
+            if (socHdrModePreference != null) {
+                socHdrModePreference.setEnabled(PhotonCamera.hasSocHdrMode);
             }
         }
     }
@@ -338,7 +352,7 @@ public class SettingsActivity extends BaseActivity implements
 
             String hdrModeKey = getString(R.string.pref_hdr_mode_key);
             Preference hdrModePreference = findPreference(hdrModeKey);
-            if (hdrPreference != null) {
+            if (hdrModePreference != null) {
                 hdrModePreference.setEnabled(PhotonCamera.hasHdr);
             }
 

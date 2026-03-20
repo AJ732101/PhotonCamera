@@ -5,9 +5,28 @@
     android:orderingFromXml="true"
     android:title="@string/soc_settings_screen_title"
     android:key="soc_settings_category"
-    android:paddingBottom="56dp">>
+    android:paddingBottom="56dp">
 
-    <PreferenceCategory app:key="soc_settings_category" app:title="@string/soc_settings_screen_title">
+    <PreferenceCategory
+        app:key="soc_settings_category"
+        app:title="@string/soc_settings_screen_title">
+
+        <ListPreference
+            android:key="@string/pref_soc_hdr_mode_key"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/hdr_mode"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/hdr_on_24px"
+            android:entries="@array/soc_hdr_mode_entries"
+            android:entryValues="@array/soc_hdr_mode_entryValues"
+            android:defaultValue="@string/pref_soc_qualcomm_hdr_mode_default"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_soc_auto_hdr_key"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/soc_qualcomm_auto_hdr"
+            android:icon="@drawable/hdr_on_24px"
+            android:defaultValue="@bool/pref_soc_qualcomm_auto_hdr_default"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_soc_qualcomm_sharpness_key"
@@ -34,7 +53,7 @@
             android:defaultValue="@string/pref_soc_qualcomm_eis_mode_default"
             app:maxValue="10"
             app:minValue="0"
-            android:icon="@drawable/ic_eis_on"/>
+            android:icon="@drawable/video_stable_24px"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_soc_qualcomm_ai_mode_key"
@@ -51,15 +70,14 @@
             android:title="@string/soc_qualcomm_isz"
             android:summary="In Sensor Zoom"
             android:icon="@drawable/zoom_in_24px"
-            android:defaultValue="@bool/pref_eis_video_def_value"/>
+            android:defaultValue="@bool/pref_soc_qualcomm_isz_default"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_soc_qualcomm_mfnr_key"
             android:layout="@layout/preference_with_margin"
             android:title="@string/soc_qualcomm_mfnr"
-            android:summary="Multiframe Noise Reduction"
             android:icon="@drawable/blur_on_24px"
-            android:defaultValue="@bool/pref_eis_video_def_value"/>
+            android:defaultValue="@bool/pref_soc_qualcomm_mfnr_default"/>
 
         <Preference
             android:layout_height="56dp"

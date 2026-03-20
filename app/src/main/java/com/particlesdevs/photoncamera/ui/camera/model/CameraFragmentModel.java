@@ -563,6 +563,10 @@ public class CameraFragmentModel extends BaseObservable {
             entriesFunction.add("EIS Look Ahead");
             entryValuesFunction.add("EIS Look Ahead");
         }
+        if (PhotonCamera.hasEisRealtime) {
+            entriesFunction.add("EIS Realtime");
+            entryValuesFunction.add("EIS Realtime");
+        }
         if (PhotonCamera.hasEisV3) {
             entriesFunction.add("EIS V3");
             entryValuesFunction.add("EIS V3");

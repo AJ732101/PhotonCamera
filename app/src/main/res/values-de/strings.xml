@@ -142,6 +142,7 @@
     <string name="turn_on_alternate_loupe">Alternative Fokusvergrößerung (Fokuslupe)</string>
     <string name="virtual_horizon_text">Winkelangabe Virtueller Horizont</string>
     <string name="gps_location">GPS Standort</string>
+    <string name="disable_all_vendor">ALLE Hersteller Schlüssel deaktivieren</string>
     <string name="codec">Codec</string>
     <string name="video_codec">Video Codec</string>
     <string name="video_resolution">Auflösung</string>
@@ -197,6 +198,7 @@
     <string name="sensor_and_more_settings_screen_title">Sensor Einstellungen (und mehr)</string>
     <string name="sensor_settings_screen_title">Sensor Einstellungen</string>
     <string name="other_settings_separator_title">Weitere Einstellungen</string>
+    <string name="soc_qualcomm_auto_hdr">Auto HDR</string>
     <string name="hot_pixel_mode">Hot Pixel Modus</string>
     <string name="color_correction_aberration_mode">Chromatische Aberrationskorrektur Methode</string>
     <string name="distortion_correction_mode">Verzerrungskorrektur Modus</string>

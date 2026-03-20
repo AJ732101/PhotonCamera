@@ -51,6 +51,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_RAW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_FUNCTION_ONE.mValue);
         COMMON_KEYS.add(Key.KEY_LUT_NAME.mValue);
+        COMMON_KEYS.add(Key.KEY_THUMBNAIL.mValue);
+        COMMON_KEYS.add(Key.KEY_TONEMAPPING_MODE_QUALITY.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
@@ -66,6 +68,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON_TEXT.mValue);
         COMMON_KEYS.add(Key.KEY_ALLOW_NETWORK_SYNC.mValue);
         COMMON_KEYS.add(Key.KEY_GPS_LOCATION.mValue);
+        COMMON_KEYS.add(Key.KEY_DISABLE_VENDOR_KEYS.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -97,6 +100,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_AI_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_AUTO_HDR.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_HDR_MODE.mValue);
         // QualityDoesMatter - Single Shot & Video Related
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
@@ -141,6 +146,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REMOSAIC, resources.getBoolean(R.bool.pref_remosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FPS_PREVIEW, resources.getBoolean(R.bool.pref_fps_preview_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TONEMAPPING_MODE_QUALITY, resources.getBoolean(R.bool.pref_tonemapping_mode_quality_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
@@ -169,6 +175,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON_TEXT, resources.getBoolean(R.bool.pref_virtual_horizon_text_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC, resources.getBoolean(R.bool.pref_allow_network_sync_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION, resources.getBoolean(R.bool.pref_gps_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS, resources.getBoolean(R.bool.pref_disable_all_vendor_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -204,6 +211,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_AI_MODE, resources.getString(R.string.pref_soc_qualcomm_ai_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ, resources.getBoolean(R.bool.pref_soc_qualcomm_isz_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR, resources.getBoolean(R.bool.pref_soc_qualcomm_mfnr_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_AUTO_HDR, resources.getBoolean(R.bool.pref_soc_qualcomm_auto_hdr_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_HDR_MODE, resources.getString(R.string.pref_soc_qualcomm_hdr_mode_default));
         // QualityDoesMatter - Single Shot and Video Related
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
@@ -309,7 +318,7 @@ public class PreferenceKeys {
         return isAfOn || isOverride;
     }
 
-     public static boolean isRemosaicOn() {
+    public static boolean isRemosaicOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_REMOSAIC);
     }
 
@@ -354,6 +363,10 @@ public class PreferenceKeys {
 
     public static boolean isThumbnailOn(){
         return getBool(Key.KEY_THUMBNAIL);
+    }
+
+    public static boolean isToneMappingQualityOn(){
+        return getBool(Key.KEY_TONEMAPPING_MODE_QUALITY);
     }
 
     public static void setBatterySaver(boolean value) {
@@ -744,6 +757,14 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR);
     }
 
+    public static boolean isSocQualcommAutoHdrOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_AUTO_HDR);
+    }
+
+    public static int getSocQualcommHdrMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_HDR_MODE);
+    }
+
     public static boolean isZslOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_ZSL);
     }
@@ -814,6 +835,10 @@ public class PreferenceKeys {
 
     public static boolean gpsLocation() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION);
+    }
+
+    public static boolean disableVendorKeys() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS);
     }
 
     public static String getContrastCurve() {
@@ -888,6 +913,7 @@ public class PreferenceKeys {
         KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
+        KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),
         KEY_HDRX_NR(R.string.pref_hdrx_nr_key),
@@ -929,6 +955,7 @@ public class PreferenceKeys {
         KEY_VIRTUAL_HORIZON_TEXT(R.string.pref_virtual_horizon_text_key),
         KEY_ALLOW_NETWORK_SYNC(R.string.pref_allow_network_sync_key),
         KEY_GPS_LOCATION(R.string.pref_gps_key),
+        KEY_DISABLE_VENDOR_KEYS(R.string.pref_disable_all_vendor_key),
 
         /**
          * QualityDoesMatter - Video settings keys
@@ -972,6 +999,8 @@ public class PreferenceKeys {
         KEY_SOC_QUALCOMM_AI_MODE(R.string.pref_soc_qualcomm_ai_mode_key),
         KEY_SOC_QUALCOMM_ISZ(R.string.pref_soc_qualcomm_isz_key),
         KEY_SOC_QUALCOMM_MFNR(R.string.pref_soc_qualcomm_mfnr_key),
+        KEY_SOC_AUTO_HDR(R.string.pref_soc_auto_hdr_key),
+        KEY_SOC_HDR_MODE(R.string.pref_soc_hdr_mode_key),
 
         /**
          * QualityDoesMatter - other

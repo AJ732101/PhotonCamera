@@ -7,6 +7,7 @@
     <string name="pref_show_grid_default" translatable="false">1</string>
     <bool name="pref_wide169_default">false</bool>
     <bool name="pref_thumbnail_default">false</bool>
+    <bool name="pref_tonemapping_mode_quality_default">false</bool>
     <bool name="pref_show_watermark_default">true</bool>
     <bool name="pref_exposure_fusion_method_default">true</bool>
     <bool name="pref_save_per_lens_settings">true</bool>
@@ -101,6 +102,7 @@
     <bool name="pref_virtual_horizon_text_default">false</bool>
     <bool name="pref_allow_network_sync_default">false</bool>
     <bool name="pref_gps_default">false</bool>
+    <bool name="pref_disable_all_vendor_default">false</bool>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_default" translatable="false">60</string>
@@ -151,6 +153,8 @@
     <string name="pref_soc_qualcomm_ai_mode_default" translatable="false">0</string>
     <bool name="pref_soc_qualcomm_isz_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_mfnr_default" translatable="false">false</bool>
+    <bool name="pref_soc_qualcomm_auto_hdr_default" translatable="false">false</bool>
+    <string name="pref_soc_qualcomm_hdr_mode_default" translatable="false">0</string>
 
     <!-- Sensor and more settings strings -->
     <string name="pref_hot_pixel_mode_default_value" translatable="false">99</string>

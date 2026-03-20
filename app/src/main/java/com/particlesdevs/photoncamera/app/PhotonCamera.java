@@ -95,6 +95,7 @@ public class PhotonCamera extends Application {
     public static boolean hasXiaomiReMosaic = false;
     public static boolean hasXiaomiQuadCfa = false;
     public static boolean hasEisLookAhead = false;
+    public static boolean hasEisRealtime = false;
     public static boolean hasEisV3 = false;
     public static boolean hasXiaomiSuperResolution = false;
     public static boolean hasIdealRaw = false;
@@ -102,6 +103,8 @@ public class PhotonCamera extends Application {
     public static boolean hasVivoProMode = false;
     public static boolean hasVivoDistortionCorrection = false;
     public static boolean hasQucommAdrcOff = false;
+    public static boolean hasAutoHdr = false;
+    public static boolean hasSocHdrMode = false;
     public static boolean mHeicIsSupported = false;
     public static boolean mHeicUltraHdrIsSupported = false;
     public static boolean mJpegRIsSupported = false;
@@ -125,6 +128,7 @@ public class PhotonCamera extends Application {
     public static boolean isSuperResOn = false;
     public static boolean isIdealRawOn = false;
     public static boolean isEisLookAheadOn = false;
+    public static boolean isEisRealtimeOn = false;
     public static boolean isEisV3On = false;
     public static boolean isVivoZeissColorOn = false;
     public static boolean isVivoDistortionCorrectionOn = false;

@@ -30,6 +30,14 @@
             android:defaultValue="@string/pref_edge_processing_default_value" />
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_tonemapping_mode_quality_key"
+            android:defaultValue="@bool/pref_tonemapping_mode_quality_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/tonemapping_mode_quality"
+            android:summary=""
+            android:icon="@drawable/colors_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_thumbnail_key"
             android:defaultValue="@bool/pref_thumbnail_default"
             android:layout="@layout/preference_with_margin"

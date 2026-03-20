@@ -40,10 +40,8 @@ public class SpecificSetting {
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";
-    public String codeAuroraHdrMode = "default"; // SHDR, QHDR, MFHDR, AUTO
     public String hdrMode = "HLG10";
     public String networkSyncBaseUrl = "https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/";
-    public String toneMappingMode = "quality";
     public SpecificSetting(){
     }
 }

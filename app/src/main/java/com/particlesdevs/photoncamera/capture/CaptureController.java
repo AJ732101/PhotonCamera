@@ -1807,13 +1807,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             captureBuilder.set(CaptureRequest.TONEMAP_GAMMA, 1/PhotonCamera.getSpecific().specificSetting.toneMapGamma);
         }
         else {
-            if (PhotonCamera.getSpecific().specificSetting.toneMappingMode.toLowerCase().contains("quality")) {
+            if (PhotonCamera.getSettings().isTonnemappingModeQuality) {
                 if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
                     captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_HIGH_QUALITY);
                 }
-            }
-            if (PhotonCamera.getSpecific().specificSetting.toneMappingMode.toLowerCase().contains("fast")) {
-                if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_HIGH_QUALITY)) {
+            } else {
+                if (checkToneMappingModes(CameraMetadata.TONEMAP_MODE_FAST)) {
                     captureBuilder.set(CaptureRequest.TONEMAP_MODE, CameraMetadata.TONEMAP_MODE_FAST);
                 }
             }
@@ -3160,6 +3159,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("EIS Look Ahead")) {
             PhotonCamera.isEisLookAheadOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("EIS Realtime")) {
+            PhotonCamera.isEisRealtimeOn = mIsFunctionOneOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("EIS V3")) {

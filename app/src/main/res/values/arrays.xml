@@ -588,6 +588,20 @@
         <item>8192</item>
     </string-array>
 
+    <string-array name="soc_hdr_mode_entries">
+        <item>Disabled</item>
+        <item>MFHDR</item>
+        <item>SHDR</item>
+        <item>QHDR</item>
+    </string-array>
+
+    <string-array name="soc_hdr_mode_entryValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
     <string-array name="transfer_function_entries">
         <item>SDR</item>
         <item>Linear</item>
