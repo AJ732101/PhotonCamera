@@ -9,13 +9,11 @@ public class SpecificSetting {
     public float[] apertureList;
     // QualityDoesMatter
     public boolean statisticsHotPixelMapMode = true;
-    public boolean useCodeAuroraMultiFrameNoiseReduction = false;
     public boolean useCodeAuroraCinematicMode = false;
     public boolean modeShowUnlimited = true;
     public boolean modeShowMotion = true;
     public boolean modeShowNight = true;
     public boolean modeShowRawVideo = true;
-    public boolean showZoomSlider = false;
     public boolean enableQLL = false;
     public boolean enableVideoLut = false;
     public int statisticsLensShadingMapMode = 99;
@@ -28,9 +26,8 @@ public class SpecificSetting {
     public int priorityShutterSpeed = 0;
     public int priorityIsoValue = 0;
     public int priorityMode = 0;
-    public int mfnrFrames = 0;
+    public int xiaomiMfnrFrames = 0;
     public int xiaomiSupernightMode = 0;
-    public int codeAuroraTemporalNoiseProcessType = 0;
     public int codeAuroraDCGMode = 0;
     public int codeAuroraEnableHDRDCGMode = 0;
     public int qtiDCGMode = 0;

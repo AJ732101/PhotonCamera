@@ -333,18 +333,30 @@ public class YUVSaver extends DefaultSaver{
                                 copyPlanesToBufferCrop(image.getPlanes(), image.getWidth(), image.getHeight(), maxEncoderRes.getWidth(), maxEncoderRes.getHeight(), inputBuffer);
                             }
                         }
-                        encoder.queueInputBuffer(inputBufferId, 0, inputBuffer.position(), image.getTimestamp(), MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                        //encoder.queueInputBuffer(inputBufferId, 0, inputBuffer.position(), image.getTimestamp(), MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                        encoder.queueInputBuffer(inputBufferId, 0, inputBuffer.position(), 0, 0);
+                        int eosBufferId = encoder.dequeueInputBuffer(50000);
+                        if (eosBufferId >= 0) {
+                            encoder.queueInputBuffer(eosBufferId, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                        }
                     }
                 }
 
                 // 4. Process the encoded output and write to muxer
                 MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
                 int trackIndex = -1;
+                int tryAgainCount = 0;
 
+                long written = 0;
                 while (true) {
-                    int outputBufferId = encoder.dequeueOutputBuffer(bufferInfo, 1000000);
+                    int outputBufferId = encoder.dequeueOutputBuffer(bufferInfo, 50000);
                     if (outputBufferId == MediaCodec.INFO_TRY_AGAIN_LATER) {
                         Log.d(TAG,"encoder status: INFO_TRY_AGAIN_LATER");
+                        tryAgainCount++;
+                        if (tryAgainCount > 20) {
+                            Log.e(TAG, "Encoder timeout: No output received from encoder for too long");
+                            break;
+                        }
                     }
                     if (outputBufferId == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                         Log.d(TAG,"encoder status: INFO_OUTPUT_BUFFERS_CHANGED");
@@ -360,6 +372,7 @@ public class YUVSaver extends DefaultSaver{
                         }
                         ByteBuffer outputBuffer = encoder.getOutputBuffer(outputBufferId);
                         int encodedImageChunkSize = bufferInfo.size;
+                        written += encodedImageChunkSize;
                         Log.d(TAG, "Encoded data size: " + encodedImageChunkSize + " bytes");
                         muxer.writeSampleData(trackIndex, outputBuffer, bufferInfo);
                         encoder.releaseOutputBuffer(outputBufferId, false);
@@ -379,7 +392,11 @@ public class YUVSaver extends DefaultSaver{
             } finally {
                 // 5. Clean up all resources
                 if (encoder != null) {
-                    try { encoder.stop(); } catch (Exception e) { Log.e(TAG, "Encoder stop error", e); }
+                    try {
+                        encoder.stop();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Encoder stop error", e);
+                    }
                     encoder.release();
                 }
                 if (muxer != null) {
@@ -415,7 +432,7 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 200_000_000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         format.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
         format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
@@ -537,7 +554,7 @@ public class YUVSaver extends DefaultSaver{
         format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
         format.setInteger(MediaFormat.KEY_QUALITY, PhotonCamera.getSettings().singleFrameQuality);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 1);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         format.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
         format.setLong(MediaFormat.KEY_DURATION, 0);
         format.setInteger(MediaFormat.KEY_ROTATION, 0);
@@ -548,15 +565,15 @@ public class YUVSaver extends DefaultSaver{
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
             }
             if (yuvFormat == ImageFormat.YCBCR_P010) {
-                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_HLG);
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().photoColorSpace);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().photoTransferFunction);
                 format.setInteger(MediaFormat.KEY_PROFILE, 0x8);
-                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel62);
             } else {
                 format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
                 format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMainStill);
-                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel62);
             }
         }
         return format;

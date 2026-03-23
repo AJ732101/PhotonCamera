@@ -319,6 +319,12 @@ public class SettingsActivity extends BaseActivity implements
                 mfnrPreference.setEnabled(PhotonCamera.hasMfnrKey);
             }
 
+            String mfnrFramesKey = getString(R.string.pref_soc_qualcomm_mfnr_frames_key);
+            Preference mfnrFramesPreference = findPreference(mfnrFramesKey);
+            if (mfnrFramesPreference != null) {
+                mfnrFramesPreference.setEnabled(PhotonCamera.hasMfnrKey);
+            }
+
             String autoHdrKey = getString(R.string.pref_soc_auto_hdr_key);
             Preference autoHdrPreference = findPreference(autoHdrKey);
             if (autoHdrPreference != null) {
@@ -329,6 +335,12 @@ public class SettingsActivity extends BaseActivity implements
             Preference socHdrModePreference = findPreference(socHdrModeKey);
             if (socHdrModePreference != null) {
                 socHdrModePreference.setEnabled(PhotonCamera.hasSocHdrMode);
+            }
+
+            String socManualWbKey = getString(R.string.pref_soc_qualcomm_manual_wb_key);
+            Preference socManualWbPreference = findPreference(socManualWbKey);
+            if (socManualWbPreference != null) {
+                socManualWbPreference.setEnabled(PhotonCamera.hasManualWb);
             }
         }
     }

@@ -166,6 +166,7 @@
     <string name="allow_network_sync">Allow Network Sync (GitHub Repo)</string>
     <string name="gps_location">GPS Location</string>
     <string name="disable_all_vendor">Disable ALL Vendor Keys</string>
+    <string name="disable_nogui_yet">Disable NoGuiYet.txt Settings</string>
 
     <!-- Video settings strings -->
     <string name="codec">Codec</string>
@@ -182,6 +183,7 @@
     <string name="video_new_rec">New Recording Pipeline</string>
     <string name="keyframe_interval">Keyframe Interval</string>
     <string name="hdr_mode">HDR Mode</string>
+    <string name="soc_hdr_mode">Qualcomm HDR Mode</string>
     <string name="transfer_function">Transfer Function</string>
     <string name="video_encoder_name">Video Encoder Name</string>
     <string name="video_range">Range</string>
@@ -205,6 +207,7 @@
     <string name="effect_mode">Effect Mode</string>
     <string name="zsl">Zero Shutter Lag</string>
     <string name="use_stream_usecase">Use Stream Usecase</string>
+    <string name="show_zoom_slider">Show Zoom Slider</string>
     <string name="photo_transfer_function">Transfer Function</string>
     <string name="photo_video_codec">Used Codec</string>
     <string name="photo_colorspace">Color Space</string>
@@ -242,13 +245,15 @@
     <string name="new_rec_separator_summary">New recording pipeline (MediaFormat/MediaCodec/MediaMuxer)</string>
 
     <!-- SoC settings strings -->
-    <string name="soc_qualcomm_sharpness">Qualcomm/Snapdragon Sharpness</string>
-    <string name="soc_qualcomm_saturation">Qualcomm/Snapdragon Saturation</string>
-    <string name="soc_qualcomm_eis_mode">Qualcomm/Snapdragon EIS Mode</string>
-    <string name="soc_qualcomm_ai_mode">Qualcomm/Snapdragon AI Mode</string>
-    <string name="soc_qualcomm_isz">Qualcomm/Snapdragon ISZ</string>
-    <string name="soc_qualcomm_mfnr">Qualcomm/Snapdragon MFNR</string>
-    <string name="soc_qualcomm_auto_hdr">Auto HDR</string>
+    <string name="soc_qualcomm_sharpness">Qualcomm Sharpness</string>
+    <string name="soc_qualcomm_saturation">Qualcomm Saturation</string>
+    <string name="soc_qualcomm_mfnr_frames">Qualcomm MFNR Frames</string>
+    <string name="soc_qualcomm_eis_mode">Qualcomm EIS Mode</string>
+    <string name="soc_qualcomm_ai_mode">Qualcomm AI Mode</string>
+    <string name="soc_qualcomm_isz">Qualcomm ISZ</string>
+    <string name="soc_qualcomm_mfnr">Qualcomm MFNR</string>
+    <string name="soc_qualcomm_auto_hdr">Qualcomm Auto HDR</string>
+    <string name="soc_qualcomm_manual_wb">Qualcomm Color Temerature</string>
 
     <!-- Sensor and more settings strings -->
     <string name="hot_pixel_mode">Hot Pixel Mode</string>

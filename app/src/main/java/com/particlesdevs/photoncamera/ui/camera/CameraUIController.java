@@ -207,7 +207,7 @@ final public class CameraUIController implements CameraUIEventsListener,
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
                         () -> {
                             if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
-                                if (PhotonCamera.getSpecific().specificSetting.showZoomSlider) {
+                                if (PhotonCamera.getSettings().showZoomSlider) {
                                     cameraFragment.cameraFragmentBinding.setZoomSliderVisible(!PreferenceKeys.isZoomOn());
                                 }
                                 else {

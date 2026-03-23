@@ -103,6 +103,7 @@
     <bool name="pref_allow_network_sync_default">false</bool>
     <bool name="pref_gps_default">false</bool>
     <bool name="pref_disable_all_vendor_default">false</bool>
+    <bool name="pref_disable_nogui_yet_default">false</bool>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_default" translatable="false">60</string>
@@ -119,6 +120,7 @@
     <bool name="pref_video_logical_workaround_def_value">false</bool>
     <bool name="pref_new_rec_video_def_value">false</bool>
     <bool name="pref_use_stream_usecase_def_value">false</bool>
+    <bool name="pref_show_zoom_slider_def_value">false</bool>
     <string name="pref_keyframe_interval_default_value" translatable="false">10</string>
     <string name="pref_hdr_mode_default_value" translatable="false">4096</string>
     <string name="pref_photo_video_codec_default_value" translatable="false">HEVC</string>
@@ -149,12 +151,14 @@
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_default" translatable="false">1</string>
     <string name="pref_soc_qualcomm_saturation_default" translatable="false">5</string>
+    <string name="pref_soc_qualcomm_mfnr_frames_default" translatable="false">5</string>
     <string name="pref_soc_qualcomm_eis_mode_default" translatable="false">0</string>
     <string name="pref_soc_qualcomm_ai_mode_default" translatable="false">0</string>
     <bool name="pref_soc_qualcomm_isz_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_mfnr_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_auto_hdr_default" translatable="false">false</bool>
     <string name="pref_soc_qualcomm_hdr_mode_default" translatable="false">0</string>
+    <string name="pref_soc_qualcomm_manual_wb_default" translatable="false">0</string>
 
     <!-- Sensor and more settings strings -->
     <string name="pref_hot_pixel_mode_default_value" translatable="false">99</string>

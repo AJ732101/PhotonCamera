@@ -88,6 +88,7 @@ public class Settings {
     public boolean socQualcommUseIsz = false;
     public boolean socQualcommUseMfnr = false;
     public int socQualcommHdrMode = 0;
+    public int socQualcommManualWb = 0;
     public boolean socQualcommAutoHdr = false;
     public boolean useZsl = false;
     public boolean useSceneAndEffectMode = false;
@@ -126,7 +127,10 @@ public class Settings {
     public int audioDirection = 0;
     public float audioZoom = 0.0f;
     public boolean disableVendorKeys = false;
+    public boolean disableNoGuiYet = false;
     public boolean isTonnemappingModeQuality = false;
+    public int socQualcommMfnrFrames = 5;
+    public boolean showZoomSlider = false;
 
 
     public void loadCache() {
@@ -176,6 +180,7 @@ public class Settings {
         lutName = PreferenceKeys.getLutName();
         demosaicMethod = PreferenceKeys.getDemosaicMethod();
         disableVendorKeys = PreferenceKeys.disableVendorKeys();
+        disableNoGuiYet = PreferenceKeys.disableNoGuiYet();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
@@ -226,6 +231,8 @@ public class Settings {
         socQualcommUseMfnr = PreferenceKeys.isSocQualcommMfnrOn();
         socQualcommAutoHdr = PreferenceKeys.isSocQualcommAutoHdrOn();
         socQualcommHdrMode = PreferenceKeys.getSocQualcommHdrMode();
+        socQualcommManualWb = PreferenceKeys.getSocQualcommManualWb();
+        socQualcommMfnrFrames = PreferenceKeys.getSocQualcommMfnrFrames();
         // QualityDoesMatter - Single Shot & Video Related
         useZsl = PreferenceKeys.isZslOn();
         useSceneAndEffectMode = PreferenceKeys.isSceneAndEffectModeOn();
@@ -247,6 +254,7 @@ public class Settings {
         photoColorSpace = PreferenceKeys.getPhotoColorSpace();
         photoRange = PreferenceKeys.getPhotoRange();
         photoVideoCodec = PreferenceKeys.getPhotoVideoCodec();
+        showZoomSlider = PreferenceKeys.showZoomSlider();
     }
 
     public void saveID() {

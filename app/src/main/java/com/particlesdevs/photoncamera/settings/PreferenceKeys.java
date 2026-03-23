@@ -69,6 +69,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_ALLOW_NETWORK_SYNC.mValue);
         COMMON_KEYS.add(Key.KEY_GPS_LOCATION.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_VENDOR_KEYS.mValue);
+        COMMON_KEYS.add(Key.KEY_DISABLE_NOGUI_YET.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -96,6 +97,8 @@ public class PreferenceKeys {
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_MFNR_FRAMES.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MANUAL_WB.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_EIS_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_AI_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
@@ -108,6 +111,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_USE_NEW_SETTINGS_GLOBAL.mValue);
         COMMON_KEYS.add(Key.KEY_LOSSLESS_SW_ENCODING.mValue);
         COMMON_KEYS.add(Key.KEY_USE_STREAM_USECASE.mValue);
+        COMMON_KEYS.add(Key.KEY_SHOW_ZOOM_SLIDER.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
@@ -176,6 +180,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC, resources.getBoolean(R.bool.pref_allow_network_sync_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION, resources.getBoolean(R.bool.pref_gps_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS, resources.getBoolean(R.bool.pref_disable_all_vendor_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET, resources.getBoolean(R.bool.pref_disable_nogui_yet_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -207,6 +212,8 @@ public class PreferenceKeys {
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS, resources.getString(R.string.pref_soc_qualcomm_sharpness_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION, resources.getString(R.string.pref_soc_qualcomm_saturation_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_MFNR_FRAMES, resources.getString(R.string.pref_soc_qualcomm_mfnr_frames_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MANUAL_WB, resources.getString(R.string.pref_soc_qualcomm_manual_wb_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_EIS_MODE, resources.getString(R.string.pref_soc_qualcomm_eis_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_AI_MODE, resources.getString(R.string.pref_soc_qualcomm_ai_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ, resources.getBoolean(R.bool.pref_soc_qualcomm_isz_default));
@@ -219,6 +226,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_NEW_SETTINGS_GLOBAL, resources.getBoolean(R.bool.pref_new_settings_global_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING, resources.getBoolean(R.bool.pref_lossless_sw_encoding_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_STREAM_USECASE, resources.getBoolean(R.bool.pref_use_stream_usecase_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER, resources.getBoolean(R.bool.pref_show_zoom_slider_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
@@ -741,6 +749,14 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION);
     }
 
+    public static int getSocQualcommMfnrFrames() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_MFNR_FRAMES);
+    }
+
+    public static int getSocQualcommManualWb() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MANUAL_WB);
+    }
+
     public static int getSocQualcommEisMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_EIS_MODE);
     }
@@ -783,6 +799,10 @@ public class PreferenceKeys {
 
     public static boolean useStreamUsecase() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_STREAM_USECASE);
+    }
+
+    public static boolean showZoomSlider() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER);
     }
 
     public static int getHotPixelMode() {
@@ -839,6 +859,10 @@ public class PreferenceKeys {
 
     public static boolean disableVendorKeys() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS);
+    }
+
+    public static boolean disableNoGuiYet() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET);
     }
 
     public static String getContrastCurve() {
@@ -956,6 +980,7 @@ public class PreferenceKeys {
         KEY_ALLOW_NETWORK_SYNC(R.string.pref_allow_network_sync_key),
         KEY_GPS_LOCATION(R.string.pref_gps_key),
         KEY_DISABLE_VENDOR_KEYS(R.string.pref_disable_all_vendor_key),
+        KEY_DISABLE_NOGUI_YET(R.string.pref_disable_nogui_yet_key),
 
         /**
          * QualityDoesMatter - Video settings keys
@@ -995,12 +1020,14 @@ public class PreferenceKeys {
          */
         KEY_SOC_QUALCOMM_SHARPNESS(R.string.pref_soc_qualcomm_sharpness_key),
         KEY_SOC_QUALCOMM_SATURATION(R.string.pref_soc_qualcomm_saturation_key),
+        KEY_SOC_QUALCOMM_MANUAL_WB(R.string.pref_soc_qualcomm_manual_wb_key),
         KEY_SOC_QUALCOMM_EIS_MODE(R.string.pref_soc_qualcomm_eis_mode_key),
         KEY_SOC_QUALCOMM_AI_MODE(R.string.pref_soc_qualcomm_ai_mode_key),
         KEY_SOC_QUALCOMM_ISZ(R.string.pref_soc_qualcomm_isz_key),
         KEY_SOC_QUALCOMM_MFNR(R.string.pref_soc_qualcomm_mfnr_key),
         KEY_SOC_AUTO_HDR(R.string.pref_soc_auto_hdr_key),
         KEY_SOC_HDR_MODE(R.string.pref_soc_hdr_mode_key),
+        KEY_SOC_MFNR_FRAMES(R.string.pref_soc_qualcomm_mfnr_frames_key),
 
         /**
          * QualityDoesMatter - other
@@ -1021,6 +1048,7 @@ public class PreferenceKeys {
         KEY_USE_NEW_SETTINGS_GLOBAL(R.string.pref_new_settings_global_key),
         KEY_LOSSLESS_SW_ENCODING(R.string.pref_lossless_sw_encoding_key),
         KEY_USE_STREAM_USECASE(R.string.pref_use_stream_usecase_key),
+        KEY_SHOW_ZOOM_SLIDER(R.string.pref_show_zoom_slider_key),
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),

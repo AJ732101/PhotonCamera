@@ -56,8 +56,9 @@ public class Specific {
         File noGuiYet = new File(sPHOTON_TUNING_DIR, "NoGuiYet.txt");
         try {
             var ret = noGuiYet.canRead();
-            if (noGuiYet.exists())
+            if (noGuiYet.exists() && !PreferenceKeys.disableNoGuiYet()) {
                 noGuiYetStr = loadLocal(noGuiYet);
+            }
         } catch (Exception e) {
             Log.e(TAG,e.toString());
         }
@@ -67,10 +68,6 @@ public class Specific {
             switch (caseS[0]) {
                 case "statisticsHotPixelMapMode": {
                     specificSetting.statisticsHotPixelMapMode = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "useCodeAuroraMultiFrameNoiseReduction": {
-                    specificSetting.useCodeAuroraMultiFrameNoiseReduction = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "useCodeAuroraCinematicMode": {
@@ -91,10 +88,6 @@ public class Specific {
                 }
                 case "modeShowRawVideo": {
                     specificSetting.modeShowRawVideo = Boolean.parseBoolean(caseS[1]);
-                    break;
-                }
-                case "showZoomSlider": {
-                    specificSetting.showZoomSlider = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
                 case "enableQLL": {
@@ -145,16 +138,12 @@ public class Specific {
                     specificSetting.priorityMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-                case "mfnrFrames": {
-                    specificSetting.mfnrFrames = Integer.parseInt(caseS[1]);
+                case "xiaomiMfnrFrames": {
+                    specificSetting.xiaomiMfnrFrames = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "xiaomiSupernightMode": {
                     specificSetting.xiaomiSupernightMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "codeAuroraTemporalNoiseProcessType": {
-                    specificSetting.codeAuroraTemporalNoiseProcessType = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "codeAuroraDCGMode": {

@@ -149,6 +149,14 @@
             android:summary=""
             android:icon="@drawable/vpn_key_off_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_disable_nogui_yet_key"
+            android:defaultValue="@bool/pref_disable_nogui_yet_default"
+            android:title="@string/disable_nogui_yet"
+            android:summary=""
+            android:icon="@drawable/border_color_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"

@@ -154,10 +154,11 @@ public class VendorTagUtils {
         PhotonCamera.hasIdealRaw = false;
         PhotonCamera.hasAutoHdr = false;
         PhotonCamera.hasSocHdrMode = false;
+        PhotonCamera.hasManualWb = false;
     }
 
     @SuppressLint({"NewApi", "LocalSuppress"})
-    public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey) {
+    public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey, boolean isPreview) {
         PhotonCamera.isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
         PhotonCamera.isGoogle = Build.BRAND.equalsIgnoreCase("google");
         PhotonCamera.isZte = Build.BRAND.equalsIgnoreCase("zte");
@@ -193,23 +194,6 @@ public class VendorTagUtils {
                         PhotonCamera.hasXiaomiHdr = true;
                         if (PhotonCamera.isHdrOn) {
                             builder.set(algoHdrMode, (byte) PhotonCamera.getSpecific().specificSetting.xiaomiHdrMode);
-                        }
-                    }
-
-                    if (PhotonCamera.getSpecific().specificSetting.mfnrFrames > 0) {
-                        var algoMfnrEnable = new CaptureRequest.Key<>("com.xiaomi.algo.mfnrEnable", byte.class);
-                        if (isSupported(builder, algoMfnrEnable)) {
-                            builder.set(algoMfnrEnable, (byte) 1);
-                        }
-
-                        var mfnrFrameNum = new CaptureRequest.Key<>("xiaomi.mfnr.frameNum", Integer.class);
-                        if (isSupported(builder, mfnrFrameNum)) {
-                            builder.set(mfnrFrameNum, PhotonCamera.getSpecific().specificSetting.mfnrFrames);
-                        }
-
-                        var mfnrFrameNum2 = new CaptureRequest.Key<>("com.xiaomi.customization.mfnr.frameNumber", Integer.class);
-                        if (isSupported(builder, mfnrFrameNum2)) {
-                            builder.set(mfnrFrameNum2, PhotonCamera.getSpecific().specificSetting.mfnrFrames);
                         }
                     }
 
@@ -406,32 +390,11 @@ public class VendorTagUtils {
                     builder.set(enableCinematicMode, PhotonCamera.getSpecific().specificSetting.useCodeAuroraCinematicMode ? 1 : 0);
                 }
 
-                var useMfnr = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableMFNR", Integer.class);
-                if (isSupported(builder, useMfnr)) {
-                    PhotonCamera.hasMfnrKey = true;
-                    builder.set(useMfnr, PhotonCamera.getSettings().socQualcommUseMfnr ? 1 : 0);
-                }
-
                 var enableIdealRAW = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableIdealRAW", byte.class);
                 if (isSupported(builder, enableIdealRAW)) {
                     if (PhotonCamera.isIdealRawOn) {
                         PhotonCamera.hasIdealRaw = true;
                         builder.set(enableIdealRAW, (byte) 1);
-                    }
-                }
-
-                if (PhotonCamera.getSpecific().specificSetting.mfnrFrames > 0) {
-                    var useMfnrQuic = new CaptureRequest.Key<>("org.quic.camera.mfnr.enable", Integer.class);
-                    if (isSupported(builder, useMfnrQuic)) {
-                        builder.set(useMfnrQuic, 1);
-                    }
-                    var mFNRTotalNumFrames = new CaptureRequest.Key<>("org.quic.camera2.mfnrconfigs.MFNRTotalNumFrames", Integer.class);
-                    if (isSupported(builder, mFNRTotalNumFrames)) {
-                        builder.set(mFNRTotalNumFrames, PhotonCamera.getSpecific().specificSetting.mfnrFrames);
-                    }
-                    var mFNRBlendFrameNum = new CaptureRequest.Key<>("org.quic.camera2.mfnrconfigs.MFNRBlendFrameNum", Integer.class);
-                    if (isSupported(builder, mFNRBlendFrameNum)) {
-                        builder.set(mFNRBlendFrameNum, PhotonCamera.getSpecific().specificSetting.mfnrFrames);
                     }
                 }
 
@@ -533,6 +496,20 @@ public class VendorTagUtils {
                     PhotonCamera.hasIdealRaw = true;
                     if (PhotonCamera.isIdealRawOn) {
                         builder.set(qtiIdealRaw, (byte) 1);
+                    }
+                }
+
+                var manualWb = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.color_temperature", Integer.class);
+                if (isSupported(builder, manualWb)) {
+                    PhotonCamera.hasManualWb = true;
+                    var partialMwbMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.partial_mwb_mode", Integer.class);
+                    if (isSupported(builder, partialMwbMode)) {
+                        // 0 = Off, 1 = CCT (Kelvin) Mode, 2 = Gains Mode
+                        builder.set(partialMwbMode, 1);
+                    }
+
+                    if (PhotonCamera.getSettings().socQualcommManualWb > 1500) {
+                        builder.set(manualWb, PhotonCamera.getSettings().socQualcommManualWb);
                     }
                 }
 
@@ -657,39 +634,10 @@ public class VendorTagUtils {
                     }
                 }
 
-                CaptureRequest.Key temporalDenoise = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.enable", byte.class);
-                if (isSupported(builder, temporalDenoise)) {
-                    builder.set(temporalDenoise, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
-                }
-
-                CaptureRequest.Key multiFrameData = new CaptureRequest.Key<>("com.qti.chi.multiFrameData.MultiFrameData", byte.class);
-                if (isSupported(builder, multiFrameData)) {
-                    builder.set(multiFrameData, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
-                }
-
-                multiFrameData = new CaptureRequest.Key<>("org.quic.camera.multiFrameData.multiFrameData", Integer.class);
-                if (isSupported(builder, multiFrameData)) {
-                    builder.set(multiFrameData, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? 1 : 0);
-                }
-
-                CaptureRequest.Key stackedFrame = new CaptureRequest.Key<>("com.qti.chi.stackedFrame.StackedFrame", byte.class);
-                if (isSupported(builder, stackedFrame)) {
-                    builder.set(stackedFrame, PhotonCamera.getSpecific().specificSetting.useCodeAuroraMultiFrameNoiseReduction ? (byte) 1 : (byte) 0);
-                }
-
-                CaptureRequest.Key processType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.process_type", Integer.class);
-                if (isSupported(builder, processType)) {
-                    builder.set(processType, PhotonCamera.getSpecific().specificSetting.codeAuroraTemporalNoiseProcessType);
-                }
-
-                CaptureRequest.Key hdrMode = null;
-                hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
-                if (isSupported(builder, hdrMode)) {
-                    PhotonCamera.hasAutoHdr = true;
-                    builder.set(hdrMode, PhotonCamera.getSettings().socQualcommAutoHdr ? 1 : 0);
-                }
+                noiseReduction(cameraCharacteristics, builder, isPreview);
 
                 // set all HDR parameter to 0
+                CaptureRequest.Key hdrMode = null;
                 if (true) {
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
                     if (isSupported(builder, hdrMode)) {
@@ -716,10 +664,11 @@ public class VendorTagUtils {
                     }
                 }
 
-                var hdrModeMasterKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
-                boolean hasMasterKey = isSupported(builder, hdrModeMasterKey);
-                var snapshotHDRMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.SnapshotHDRMode", Integer.class);
-                boolean hasSnapshotKey = isSupported(builder, snapshotHDRMode);
+                hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableAutoHDR", Integer.class);
+                if (isSupported(builder, hdrMode)) {
+                    PhotonCamera.hasAutoHdr = true;
+                    builder.set(hdrMode, PhotonCamera.getSettings().socQualcommAutoHdr ? 1 : 0);
+                }
 
                 switch (PhotonCamera.getSettings().socQualcommHdrMode) {
                     case 1:
@@ -729,13 +678,7 @@ public class VendorTagUtils {
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            builder.set(hdrMode, (int) 3);
-                        }
-                        if (hasMasterKey) {
-                            //builder.set(hdrModeMasterKey, 1);
-                        }
-                        if (hasSnapshotKey) {
-                            //builder.set(snapshotHDRMode, 1);
+                            //builder.set(hdrMode, (int) 3);
                         }
                         break;
                     case 2:
@@ -745,13 +688,7 @@ public class VendorTagUtils {
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            builder.set(hdrMode, (int) 3);
-                        }
-                        if (hasMasterKey) {
-                            //builder.set(hdrModeMasterKey, 2);
-                        }
-                        if (hasSnapshotKey) {
-                            //builder.set(snapshotHDRMode, 2);
+                            //builder.set(hdrMode, (int) 3);
                         }
                         break;
                     case 3:
@@ -759,20 +696,8 @@ public class VendorTagUtils {
                         if (isSupported(builder, hdrMode)) {
                             builder.set(hdrMode, (int) 1);
                         }
-                        if (hasMasterKey) {
-                            //builder.set(hdrModeMasterKey, 3);
-                        }
-                        if (hasSnapshotKey) {
-                            //builder.set(snapshotHDRMode, 3);
-                        }
                         break;
                    default:
-                        if (hasMasterKey) {
-                            builder.set(hdrModeMasterKey, 0);
-                        }
-                       if (hasSnapshotKey) {
-                           builder.set(snapshotHDRMode, 0);
-                       }
                         break;
                 }
 
@@ -957,7 +882,7 @@ public class VendorTagUtils {
                     if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                         var vivoSuperEis = new CaptureRequest.Key<>("vivo.control.superEis", Integer.class);
                         if (isSupported(builder, vivoSuperEis)) {
-                            //builder.set(vivoSuperEis, 1);
+                            builder.set(vivoSuperEis, 1);
                         }
 
                         var vivoEisConfig = new CaptureRequest.Key<>("vivo.control.eis.config.enable", Integer.class);
@@ -1073,6 +998,116 @@ public class VendorTagUtils {
         }
         if (useMaximumResolutionKey) {
             builder.set(CaptureRequest.SENSOR_PIXEL_MODE, CaptureRequest.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION);
+        }
+    }
+
+    private static void noiseReduction(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean isPreview) {
+        var useMfnr = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableMFNR", Integer.class);
+        if (PhotonCamera.getSettings().noiseReduction <= 0) {
+            if (isSupported(builder, useMfnr)) {
+                PhotonCamera.hasMfnrKey = true;
+            }
+            return;
+        }
+
+        if (PhotonCamera.isXiaomi && (PhotonCamera.getSpecific().specificSetting.xiaomiMfnrFrames > 0)) {
+            var algoMfnrEnable = new CaptureRequest.Key<>("com.xiaomi.algo.mfnrEnable", byte.class);
+            if (isSupported(builder, algoMfnrEnable)) {
+                builder.set(algoMfnrEnable, (byte) 1);
+            }
+
+            var xiaomiMfnrEnable = new CaptureRequest.Key<>("xiaomi.mfnr.enabled", byte.class);
+            if (isSupported(builder, xiaomiMfnrEnable)) {
+                builder.set(xiaomiMfnrEnable, (byte) 1);
+            }
+
+            var mfnrFrameNum = new CaptureRequest.Key<>("xiaomi.mfnr.frameNum", Integer.class);
+            if (isSupported(builder, mfnrFrameNum)) {
+                builder.set(mfnrFrameNum, PhotonCamera.getSpecific().specificSetting.xiaomiMfnrFrames);
+            }
+
+            var mfnrFrameNum2 = new CaptureRequest.Key<>("com.xiaomi.customization.mfnr.frameNumber", Integer.class);
+            if (isSupported(builder, mfnrFrameNum2)) {
+                builder.set(mfnrFrameNum2, PhotonCamera.getSpecific().specificSetting.xiaomiMfnrFrames);
+            }
+
+            var mmfmlEnable = new CaptureRequest.Key<>("xiaomi.mfnr.mmfmlEnable", Integer.class);
+            if (isSupported(builder, mmfmlEnable)) {
+                builder.set(mmfmlEnable, 1);
+            }
+        }
+
+        if (isSupported(builder, useMfnr)) {
+            PhotonCamera.hasMfnrKey = true;
+            if (!isPreview) {
+                builder.set(useMfnr, PhotonCamera.getSettings().socQualcommUseMfnr ? 1 : 0);
+            } else {
+                builder.set(useMfnr, 0);
+            }
+        }
+
+        // MFNR state machine deactivation in preview
+        if (isPreview) {
+            var useMfnrQuic = new CaptureRequest.Key<>("org.quic.camera.mfnr.enable", Integer.class);
+            if (isSupported(builder, useMfnrQuic)) {
+                builder.set(useMfnrQuic, 0);
+            }
+
+            var temporalDenoise = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.enable", byte.class);
+            if (isSupported(builder, temporalDenoise)) {
+                builder.set(temporalDenoise, (byte) 0);
+            }
+
+            var processType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.process_type", Integer.class);
+            if (isSupported(builder, processType)) {
+                builder.set(processType, 0);
+            }
+        }
+
+        if (PhotonCamera.getSettings().socQualcommUseMfnr && !isPreview) {
+            if (PhotonCamera.getSettings().socQualcommMfnrFrames > 0) {
+                var useMfnrQuic = new CaptureRequest.Key<>("org.quic.camera.mfnr.enable", Integer.class);
+                if (isSupported(builder, useMfnrQuic)) {
+                    builder.set(useMfnrQuic, 1);
+                }
+                var mFNRTotalNumFrames = new CaptureRequest.Key<>("org.quic.camera2.mfnrconfigs.MFNRTotalNumFrames", Integer.class);
+                if (isSupported(builder, mFNRTotalNumFrames)) {
+                    builder.set(mFNRTotalNumFrames, PhotonCamera.getSettings().socQualcommMfnrFrames);
+                }
+                var mFNRBlendFrameNum = new CaptureRequest.Key<>("org.quic.camera2.mfnrconfigs.MFNRBlendFrameNum", Integer.class);
+                if (isSupported(builder, mFNRBlendFrameNum)) {
+                    builder.set(mFNRBlendFrameNum, PhotonCamera.getSettings().socQualcommMfnrFrames);
+                }
+            }
+
+            CaptureRequest.Key temporalDenoise = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.enable", byte.class);
+            if (isSupported(builder, temporalDenoise)) {
+                builder.set(temporalDenoise, PhotonCamera.getSettings().socQualcommUseMfnr ? (byte) 1 : (byte) 0);
+            }
+
+            CaptureRequest.Key multiFrameData = new CaptureRequest.Key<>("com.qti.chi.multiFrameData.MultiFrameData", byte.class);
+            if (isSupported(builder, multiFrameData)) {
+                builder.set(multiFrameData, PhotonCamera.getSettings().socQualcommUseMfnr ? (byte) 1 : (byte) 0);
+            }
+
+            multiFrameData = new CaptureRequest.Key<>("org.quic.camera.multiFrameData.multiFrameData", Integer.class);
+            if (isSupported(builder, multiFrameData)) {
+                builder.set(multiFrameData, PhotonCamera.getSettings().socQualcommUseMfnr ? 1 : 0);
+            }
+
+            CaptureRequest.Key stackedFrame = new CaptureRequest.Key<>("com.qti.chi.stackedFrame.StackedFrame", byte.class);
+            if (isSupported(builder, stackedFrame)) {
+                builder.set(stackedFrame, PhotonCamera.getSettings().socQualcommUseMfnr ? (byte) 1 : (byte) 0);
+            }
+
+            CaptureRequest.Key processType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.temporal_denoise.process_type", Integer.class);
+            if (isSupported(builder, processType)) {
+                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    builder.set(processType, 1);
+                } else {
+                    builder.set(processType, 2);
+                }
+            }
         }
     }
 }

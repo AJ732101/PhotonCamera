@@ -2480,7 +2480,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             int SessionType = 0;
             int SessionTypeVideo = 0;
             if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo;
+                if (PhotonCamera.isEisLookAheadOn && (physicalID == logicalID)) {
+                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo | 0xF008;
+                } else if (PhotonCamera.isEisRealtimeOn && (physicalID == logicalID)) {
+                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo | 0xF004;
+                } else {
+                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo;
+                }
             }
             else {
                 SessionType = PhotonCamera.getSpecific().specificSetting.sessionType;
@@ -2532,7 +2538,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             resetPreviewAEMode();
                         }
                         Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
-                        VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey);
+                        VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey, true);
                         // Finally, we start displaying the camera preview.
                         boolean combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview;
                         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
@@ -2628,6 +2634,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     }
                 }*/
                 if (configuration != null) {
+                    configuration.setSessionParameters(mPreviewRequestBuilder.build());
                     mCameraDevice.createCaptureSession(configuration);
                 }
             } else {
@@ -3476,7 +3483,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, PhotonCamera.getSettings().digitalZoomFactor);
             }
             else {
-                if (PhotonCamera.getSpecific().specificSetting.showZoomSlider) {
+                if (PhotonCamera.getSettings().showZoomSlider) {
                     captureBuilder.set(CaptureRequest.CONTROL_ZOOM_RATIO, mDigitalZoom);
                 }
                 else {
@@ -3509,7 +3516,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, false, useMaximumResolutionKey);
+        VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, false, useMaximumResolutionKey, false);
 
         setDigitalZoomFactor(captureBuilder);
 
@@ -4016,7 +4023,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             Log.d(TAG, "CaptureBuilderStarted!");
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, PhotonCamera.getGravity().getCameraRotation(mSensorOrientation));
-            VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, true, useMaximumResolutionKey);
+            VendorTagUtils.builderSessionApply(mCameraCharacteristics, captureBuilder, true, useMaximumResolutionKey, false);
             //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
             captures = new ArrayList<>();
             BurstShakiness = new ArrayList<>();

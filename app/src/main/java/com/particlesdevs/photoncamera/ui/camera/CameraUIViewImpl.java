@@ -249,7 +249,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
             topbar.setHdrxVisible(false);
-            cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSpecific().specificSetting.showZoomSlider);
+            cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -274,7 +274,7 @@ class CameraUIViewImpl implements CameraUIView {
             topbar.setFpsVisible(true);
             topbar.setTimerVisible(false);
             topbar.setHdrxVisible(false);
-            cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSpecific().specificSetting.showZoomSlider);
+            cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -311,7 +311,7 @@ class CameraUIViewImpl implements CameraUIView {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
-                cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSpecific().specificSetting.showZoomSlider);
+                cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
             } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
@@ -356,7 +356,7 @@ class CameraUIViewImpl implements CameraUIView {
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
-                cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSpecific().specificSetting.showZoomSlider);
+                cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
             } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
