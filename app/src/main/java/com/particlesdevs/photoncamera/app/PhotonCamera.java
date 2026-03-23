@@ -105,6 +105,7 @@ public class PhotonCamera extends Application {
     public static boolean hasQucommAdrcOff = false;
     public static boolean hasAutoHdr = false;
     public static boolean hasSocHdrMode = false;
+    public static boolean hasManualWb = false;
     public static boolean mHeicIsSupported = false;
     public static boolean mHeicUltraHdrIsSupported = false;
     public static boolean mJpegRIsSupported = false;
@@ -298,11 +299,11 @@ public class PhotonCamera extends Application {
 
         mSettingsManager = new SettingsManager(this);
         mSupportedDevice = new SupportedDevice(mSettingsManager);
-        mSupportedDevice.loadCheck();
 
         MigrationManager.migrate(mSettingsManager);
-
         PreferenceKeys.initialise(mSettingsManager);
+
+        mSupportedDevice.loadCheck();
 
         mSettings = new Settings();
 
