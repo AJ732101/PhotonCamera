@@ -2761,6 +2761,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     mVideoRecordingSurface = mMediaCodecSurface;
                 } else {
                     mIsRecordingVideo = false;
+                    //cameraEventsListener.onError(TAG + "setUpMediaRecorderNew FAILED.");
                 }
             } else {
                 if (setUpMediaRecorder()) {
@@ -3146,6 +3147,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi HDR")) {
             PhotonCamera.isHdrOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Ultra HDR")) {
+            PhotonCamera.isUltraHdrOn = mIsFunctionOneOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Super Resolution")) {
@@ -4667,10 +4672,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
             }
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel52);
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         }
         else if ((PhotonCamera.getSettings().videoCodec.equals("DOLBY_VISION")) || (PhotonCamera.getSettings().videoCodec.equals("DOLBY"))) {
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt);
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd60);
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
         }
         else if (PhotonCamera.getSettings().videoCodec.equals("AVC") || PhotonCamera.getSettings().videoCodec.equals("H264")) {
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
@@ -4709,8 +4716,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.APVLevel71Band3);
         }
 
-        final int BUFFER_SIZE_HINT = vidWidth * vidHeight * 3 / 2;
-        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, BUFFER_SIZE_HINT * 3);
+        //final int BUFFER_SIZE_HINT = vidWidth * vidHeight * 3 / 2;
+        //format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, BUFFER_SIZE_HINT * 3);
 
         //format.setFloat(MediaFormat.KEY_FRAME_RATE, PhotonCamera.getSettings().videoFramrate);
         switch (PhotonCamera.getSpecific().specificSetting.newRecSurfaceType) {
@@ -4733,7 +4740,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
                 break;
             default:
-                format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+                if (PhotonCamera.getSettings().video10bit) {
+                    format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010);
+                } else  {
+                    format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+                }
                 break;
         }
         if ((PhotonCamera.getSettings().videoBitrate * 1024 * 1024) > mEncoderInfo.getMaxBitrateForMimeType(mimeVid)) {
@@ -4756,7 +4767,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 var test = PhotonCamera.getSettings().transferFunction;
                 format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().transferFunction);
 
-                if (PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10) {
+                if ((PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10) ||
+                        (PhotonCamera.getSettings().hdrMode == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus)) {
                     ByteBuffer hdrStaticInfo = ByteBuffer.allocate(25);
                     hdrStaticInfo.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -4784,8 +4796,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 }
             }
             else {
-                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
-                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
+                format.setInteger(MediaFormat.KEY_COLOR_STANDARD, PhotonCamera.getSettings().colorspace);
+                format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, PhotonCamera.getSettings().transferFunction);
             }
         }
         else {
@@ -5112,10 +5124,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         break;
                     case "HEVC":
                     case "H265":
-                        if (PhotonCamera.getSettings().videoHDR)
-                            mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
-                        else
+                        if (PhotonCamera.getSettings().videoHDR) {
+                            if (PhotonCamera.mHdrTenPlusIsSupported == true) {
+                                mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                            } else {
+                                mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                            }
+                        } else {
                             mMediaRecorder.setVideoEncodingProfileLevel(MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel62);
+                        }
                         break;
                 }
             }
