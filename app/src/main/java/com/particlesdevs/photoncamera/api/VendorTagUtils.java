@@ -9,6 +9,7 @@ import com.particlesdevs.photoncamera.util.Log;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
 import android.os.Build;
+import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,6 +139,7 @@ public class VendorTagUtils {
         PhotonCamera.hasXiaomiNight = false;
         PhotonCamera.hasXiaomiSuperNight = false;
         PhotonCamera.hasXiaomiHdr = false;
+        PhotonCamera.hasXiaomiUltraHdr = false;
         PhotonCamera.hasXiaomiAiAutoSceneDetection = false;
         PhotonCamera.hasXiaomiProVideoLog = false;
         PhotonCamera.hasXiaomiProVideoMovie = false;
@@ -157,6 +159,51 @@ public class VendorTagUtils {
         PhotonCamera.hasManualWb = false;
     }
 
+    public static void applyIdealRaw(CaptureRequest.Builder builder, int bitDepth) {
+        // Diese Keys sind die Qualcomm-Basis für das, was Xiaomi als URAW nutzt
+        var qtiIdealRaw = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.IdealRaw", byte[].class);
+        var qtiIdealRawSize = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.RawSize", byte[].class);
+
+        if (isSupported(builder, qtiIdealRaw) && isSupported(builder, qtiIdealRawSize)) {
+            byte mode;
+            byte depth;
+
+            // Bit-Tiefe Mapping für Xiaomi/Qualcomm
+            switch (bitDepth) {
+                case 14: mode = 0x03; depth = 14; break;
+                case 12: mode = 0x02; depth = 12; break;
+                default: mode = 0x01; depth = 10; break;
+            }
+
+            // Der "URAW"-Trigger: Type 1 (Ideal), Mode (Bit-Depth)
+            byte[] rawType = new byte[]{
+                    0x01, 0x00, 0x00, 0x00,
+                    mode, 0x00, 0x00, 0x00
+            };
+
+            // Der Buffer-Size-Enforcer (Input/Output gleich setzen für URAW)
+            byte[] rawSize = new byte[]{
+                    depth, 0x00, 0x00, 0x00,
+                    depth, 0x00, 0x00, 0x00
+            };
+
+            builder.set(qtiIdealRaw, rawType);
+            builder.set(qtiIdealRawSize, rawSize);
+
+            // WICHTIG: Auf Xiaomi Geräten oft zusätzlich nötig für echten URAW-Pfad:
+            if (PhotonCamera.isXiaomi) {
+                // Falls Xiaomi-spezifische URAW-Keys existieren (Vendor-Abhängig)
+                var xiaomiUraw = new CaptureRequest.Key<>("com.xiaomi.stats.enableUraw", byte.class);
+                if (isSupported(builder, xiaomiUraw)) {
+                    builder.set(xiaomiUraw, (byte) 1);
+                }
+            }
+
+            PhotonCamera.hasIdealRaw = true;
+        }
+    }
+
+
     @SuppressLint({"NewApi", "LocalSuppress"})
     public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey, boolean isPreview) {
         PhotonCamera.isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
@@ -173,7 +220,10 @@ public class VendorTagUtils {
         resetFlags();
 
         try {
+            //applyIdealRaw(builder, 10);
+
             if (!PhotonCamera.getSettings().disableVendorKeys) {
+            //if (false) {
                 byte enable = 1;
                 if (PhotonCamera.isXiaomi) {
                     var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
@@ -330,6 +380,34 @@ public class VendorTagUtils {
                         }
                     }
 
+                    var ultraHdrEnabled = new CaptureRequest.Key<>("com.xiaomi.ultraHDR.enabled", byte.class);
+                    if (isSupported(builder, ultraHdrEnabled)) {
+                        PhotonCamera.hasXiaomiUltraHdr = true;
+                        if (PhotonCamera.isUltraHdrOn) {
+                            builder.set(ultraHdrEnabled, (byte) 1);
+
+                            var ultraHdrLinear = new CaptureRequest.Key<>("com.xiaomi.ultraHDR.linearFrame", byte.class);
+                            if (isSupported(builder, ultraHdrLinear)) {
+                                builder.set(ultraHdrLinear, (byte) 0);
+                            }
+
+                            var residualGain = new CaptureRequest.Key<>("com.xiaomi.ultraHDR.residualGain", Float.class);
+                            if (isSupported(builder, residualGain)) {
+                                builder.set(residualGain, 2.0f);
+                            }
+
+                            var ultraHdrMetadata = new CaptureRequest.Key<>("com.xiaomi.ultraHDR.metadata", byte.class);
+                            if (isSupported(builder, ultraHdrMetadata)) {
+                                builder.set(ultraHdrMetadata, (byte) 1);
+                            }
+
+                            var ultraHdrEvInfo = new CaptureRequest.Key<>("com.xiaomi.ultraHDR.evInfo", byte.class);
+                            if (isSupported(builder, ultraHdrEvInfo)) {
+                                builder.set(ultraHdrEvInfo, (byte) 1);
+                            }
+                        }
+                    }
+
                     float apertureToUse = PhotonCamera.getSettings().apertureToUse;
                     if (apertureToUse < 16) {
                         boolean isSupportedGoogle = false;
@@ -390,11 +468,30 @@ public class VendorTagUtils {
                     builder.set(enableCinematicMode, PhotonCamera.getSpecific().specificSetting.useCodeAuroraCinematicMode ? 1 : 0);
                 }
 
-                var enableIdealRAW = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableIdealRAW", byte.class);
-                if (isSupported(builder, enableIdealRAW)) {
+                var enableIdealRAW1 = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableIdealRAW", byte.class);
+                if (isSupported(builder, enableIdealRAW1)) {
+                    PhotonCamera.hasIdealRaw = true;
                     if (PhotonCamera.isIdealRawOn) {
-                        PhotonCamera.hasIdealRaw = true;
-                        builder.set(enableIdealRAW, (byte) 1);
+                        builder.set(enableIdealRAW1, (byte) 1);
+                    }
+                }
+
+                var qtiIdealRaw = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.IdealRaw", byte[].class);
+                var qtiIdealRawSize = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.RawSize", byte[].class);
+                if (isSupported(builder, qtiIdealRaw) && isSupported(builder, qtiIdealRawSize)) {
+                    PhotonCamera.hasIdealRaw = true;
+                    if (PhotonCamera.isIdealRawOn) {
+                        byte[] rawTypeURAW = new byte[]{
+                                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x02, (byte) 0x00, (byte) 0x00, (byte) 0x00
+                        };
+                        byte[] rawSizeURAW = new byte[]{
+                                (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x00
+                        };
+                        builder.set(qtiIdealRaw, rawTypeURAW);
+                        builder.set(qtiIdealRawSize, rawSizeURAW);
+                        //applyIdealRaw(builder, 14);
                     }
                 }
 
@@ -403,101 +500,8 @@ public class VendorTagUtils {
                     //builder.set(quicIspCntrLtm, (byte) 1);
                 }
 
-                var quicDcgMode = new CaptureRequest.Key<>("com.qti.stats_control.DCGMode", Integer.class);
-                if (isSupported(builder, quicDcgMode)) {
-                    builder.set(quicDcgMode, PhotonCamera.getSpecific().specificSetting.qtiDCGMode);
-                }
-
-                var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
-                if (isSupported(builder, eisMode)) {
-                    PhotonCamera.hasEisModeKey = true;
-                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                        builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
-                    }
-                }
-
-                var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.Enabled", byte.class);
-                if (isSupported(builder, eislookahead)) {
-                    PhotonCamera.hasEisLookAhead = true;
-                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                        var MOFAlignment = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MOFAlignment", byte.class);
-                        var frameDelay = new CaptureRequest.Key<>("org.quic.camera.eislookahead.FrameDelay", byte.class);
-                        var margin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
-
-                        if (PhotonCamera.isEisLookAheadOn) {
-                            builder.set(eislookahead, (byte) 1);
-
-                            if (isSupported(builder, MOFAlignment)) {
-                                builder.set(MOFAlignment, (byte) 1);
-                            }
-                            if (isSupported(builder, frameDelay)) {
-                                builder.set(frameDelay, (byte) 10);
-                            }
-                            if (isSupported(builder, margin)) {
-                                builder.set(margin, (byte) 20);
-                            }
-                        } else {
-                            builder.set(eislookahead, (byte) 0);
-                        }
-                    }
-                }
-
-                var eisrealtime = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.Enabled", byte.class);
-                if (isSupported(builder, eisrealtime)) {
-                    PhotonCamera.hasEisRealtime = true;
-                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                        var margin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.RequestedMargin", byte.class);
-                        var minMargin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MinimalTotalMargins", byte.class);
-                        var eisOisMode = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EISOISMode", byte.class);
-                        var distMgmt = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EIS2ModeWithDM", byte.class);
-                        var motionInd = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MotionIndication", byte.class);
-
-                        if (PhotonCamera.isEisRealtimeOn) {
-                            builder.set(eisrealtime, (byte) 1);
-
-                            if (isSupported(builder, margin)) {
-                                builder.set(margin, (byte) 20); // 20% Crop für stabile Videos
-                            }
-                            if (isSupported(builder, minMargin)) {
-                                builder.set(minMargin, (byte) 10);
-                            }
-                            if (isSupported(builder, eisOisMode)) {
-                                builder.set(eisOisMode, (byte) 2); // Hybrid OIS+EIS
-                            }
-                            if (isSupported(builder, distMgmt)) {
-                                builder.set(distMgmt, (byte) 1); // Anti-Warping on
-                            }
-                            if (isSupported(builder, motionInd)) {
-                                builder.set(motionInd, (byte) 1); // Gyro-Support
-                            }
-                        } else {
-                            builder.set(eisrealtime, (byte) 0);
-                        }
-                    }
-                }
-
-                var v3Eis = new CaptureRequest.Key<>("org.quic.camera.eis3enable.EISV3Enable", byte.class);
-                if (isSupported(builder, v3Eis)) {
-                    PhotonCamera.hasEisV3 = true;
-                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                        if (PhotonCamera.isEisV3On) {
-                            builder.set(v3Eis, (byte) 1);
-                        }
-
-                        var v3OutputCrop = new CaptureRequest.Key<>("org.quic.camera2.ipeicaconfigs.EISv3OutputCropFOV", byte.class);
-                        if (isSupported(builder, v3OutputCrop)) {
-                            builder.set(v3OutputCrop, (byte) 1);
-                        }
-                    }
-                }
-
-                var qtiIdealRaw = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.IdealRaw", byte.class);
-                if (isSupported(builder, qtiIdealRaw)) {
-                    PhotonCamera.hasIdealRaw = true;
-                    if (PhotonCamera.isIdealRawOn) {
-                        builder.set(qtiIdealRaw, (byte) 1);
-                    }
-                }
+                dcgControl(builder);
+                videoStabilization(builder);
 
                 var manualWb = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.color_temperature", Integer.class);
                 if (isSupported(builder, manualWb)) {
@@ -553,16 +557,6 @@ public class VendorTagUtils {
                 var bayerStatsMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_exposure.enable", byte.class);
                 if (isSupported(builder, bayerStatsMode)) {
                     builder.set(bayerStatsMode, (byte) 0);
-                }
-
-                var enableHdrDcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableHDRDCGMode", Integer.class);
-                if (isSupported(builder, enableHdrDcgMode)) {
-                    builder.set(enableHdrDcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraEnableHDRDCGMode);
-                }
-
-                var dcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.DCGMode", Integer.class);
-                if (isSupported(builder, dcgMode)) {
-                    builder.set(dcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraDCGMode);
                 }
 
                 // Qualcomm LTM - local tone mapping deactivation
@@ -711,13 +705,6 @@ public class VendorTagUtils {
                     PhotonCamera.hasQucommAdrcOff = true;
                     builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 0: (byte) 1);
                 }*/
-
-                if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                    CaptureRequest.Key qtiKey = new CaptureRequest.Key<>("com.qti.chi.stabilizationmode.imageStabilizationMode", byte.class);
-                    if (isSupported(builder, qtiKey)) {
-                        builder.set(qtiKey, (byte) PhotonCamera.getSpecific().specificSetting.qtiImageStabilizationMode);
-                    }
-                }
 
                 CaptureRequest.Key perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
                 if (isSupported(builder, perfKey)) {
@@ -998,6 +985,126 @@ public class VendorTagUtils {
         }
         if (useMaximumResolutionKey) {
             builder.set(CaptureRequest.SENSOR_PIXEL_MODE, CaptureRequest.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION);
+        }
+    }
+
+    private static void dcgControl(CaptureRequest.Builder builder) {
+        final int DCG_AUTO = 0;
+        final int DCG_LCG = 1;
+        final int DCG_HCG = 2;
+        final int DCG_Dual = 3;
+
+        var dcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.DCGMode", Integer.class);
+        if (isSupported(builder, dcgMode)) {
+            if (PhotonCamera.getSpecific().specificSetting.codeAuroraDCGMode > 0) {
+                builder.set(dcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraDCGMode);
+            }
+        }
+
+        var quicDcgMode = new CaptureRequest.Key<>("com.qti.stats_control.DCGMode", Integer.class);
+        if (isSupported(builder, quicDcgMode)) {
+            if (PhotonCamera.getSpecific().specificSetting.qtiDCGMode > 0) {
+                builder.set(quicDcgMode, PhotonCamera.getSpecific().specificSetting.qtiDCGMode);
+            }
+        }
+
+        var enableHdrDcgMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableHDRDCGMode", Integer.class);
+        if (isSupported(builder, enableHdrDcgMode)) {
+            if (PhotonCamera.getSpecific().specificSetting.codeAuroraEnableHDRDCGMode > 0) {
+                builder.set(enableHdrDcgMode, PhotonCamera.getSpecific().specificSetting.codeAuroraEnableHDRDCGMode);
+            }
+        }
+    }
+
+    private static void videoStabilization(CaptureRequest.Builder builder) {
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            CaptureRequest.Key qtiKey = new CaptureRequest.Key<>("com.qti.chi.stabilizationmode.imageStabilizationMode", byte.class);
+            if (isSupported(builder, qtiKey)) {
+                builder.set(qtiKey, (byte) PhotonCamera.getSpecific().specificSetting.qtiImageStabilizationMode);
+            }
+        }
+
+        var eisMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EISMode", Integer.class);
+        if (isSupported(builder, eisMode)) {
+            PhotonCamera.hasEisModeKey = true;
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                builder.set(eisMode, (int) PhotonCamera.getSettings().socQualcommEisMode);
+            }
+        }
+
+        var eislookahead = new CaptureRequest.Key<>("org.quic.camera.eislookahead.Enabled", byte.class);
+        if (isSupported(builder, eislookahead)) {
+            PhotonCamera.hasEisLookAhead = true;
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                var MOFAlignment = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MOFAlignment", byte.class);
+                var frameDelay = new CaptureRequest.Key<>("org.quic.camera.eislookahead.FrameDelay", byte.class);
+                var margin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
+
+                if (PhotonCamera.isEisLookAheadOn) {
+                    builder.set(eislookahead, (byte) 1);
+
+                    if (isSupported(builder, MOFAlignment)) {
+                        builder.set(MOFAlignment, (byte) 1);
+                    }
+                    if (isSupported(builder, frameDelay)) {
+                        builder.set(frameDelay, (byte) 10);
+                    }
+                    if (isSupported(builder, margin)) {
+                        builder.set(margin, (byte) 20);
+                    }
+                } else {
+                    builder.set(eislookahead, (byte) 0);
+                }
+            }
+        }
+
+        var eisrealtime = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.Enabled", byte.class);
+        if (isSupported(builder, eisrealtime)) {
+            PhotonCamera.hasEisRealtime = true;
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                var margin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.RequestedMargin", byte.class);
+                var minMargin = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MinimalTotalMargins", byte.class);
+                var eisOisMode = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EISOISMode", byte.class);
+                var distMgmt = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.EIS2ModeWithDM", byte.class);
+                var motionInd = new CaptureRequest.Key<>("org.quic.camera.eisrealtime.MotionIndication", byte.class);
+
+                if (PhotonCamera.isEisRealtimeOn) {
+                    builder.set(eisrealtime, (byte) 1);
+
+                    if (isSupported(builder, margin)) {
+                        builder.set(margin, (byte) 20); // 20% Crop für stabile Videos
+                    }
+                    if (isSupported(builder, minMargin)) {
+                        builder.set(minMargin, (byte) 10);
+                    }
+                    if (isSupported(builder, eisOisMode)) {
+                        builder.set(eisOisMode, (byte) 2); // Hybrid OIS+EIS
+                    }
+                    if (isSupported(builder, distMgmt)) {
+                        builder.set(distMgmt, (byte) 1); // Anti-Warping on
+                    }
+                    if (isSupported(builder, motionInd)) {
+                        builder.set(motionInd, (byte) 1); // Gyro-Support
+                    }
+                } else {
+                    builder.set(eisrealtime, (byte) 0);
+                }
+            }
+        }
+
+        var v3Eis = new CaptureRequest.Key<>("org.quic.camera.eis3enable.EISV3Enable", byte.class);
+        if (isSupported(builder, v3Eis)) {
+            PhotonCamera.hasEisV3 = true;
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                if (PhotonCamera.isEisV3On) {
+                    builder.set(v3Eis, (byte) 1);
+                }
+
+                var v3OutputCrop = new CaptureRequest.Key<>("org.quic.camera2.ipeicaconfigs.EISv3OutputCropFOV", byte.class);
+                if (isSupported(builder, v3OutputCrop)) {
+                    builder.set(v3OutputCrop, (byte) 1);
+                }
+            }
         }
     }
 
