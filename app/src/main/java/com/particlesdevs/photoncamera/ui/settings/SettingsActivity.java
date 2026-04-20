@@ -228,6 +228,10 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunction.add("Xiaomi HDR");
                 entryValuesFunction.add("Xiaomi HDR");
             }
+            if (PhotonCamera.hasXiaomiUltraHdr) {
+                entriesFunction.add("Xiaomi Ultra HDR");
+                entryValuesFunction.add("Xiaomi Ultra HDR");
+            }
             if (PhotonCamera.hasXiaomiSuperResolution) {
                 entriesFunction.add("Xiaomi Super Resolution");
                 entryValuesFunction.add("Xiaomi Super Resolution");
