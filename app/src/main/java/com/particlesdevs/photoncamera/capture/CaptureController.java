@@ -3189,6 +3189,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isVivoProModeOn = mIsFunctionOneOn;
             restartCamera();
             return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Sensor Mode")) {
+            PhotonCamera.isVivoSensorModeOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Distortion Correction")) {
             PhotonCamera.isVivoDistortionCorrectionOn = mIsFunctionOneOn;
             restartCamera();

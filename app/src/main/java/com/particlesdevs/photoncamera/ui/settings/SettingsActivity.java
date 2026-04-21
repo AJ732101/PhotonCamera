@@ -264,6 +264,10 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunction.add("Vivo Pro Mode");
                 entryValuesFunction.add("Vivo Pro Mode");
             }
+            if (PhotonCamera.hasVivoSensorMode) {
+                entriesFunction.add("Vivo Sensor Mode");
+                entryValuesFunction.add("Vivo Sensor Mode");
+            }
             if (PhotonCamera.hasVivoDistortionCorrection) {
                 entriesFunction.add("Vivo Distortion Correction");
                 entryValuesFunction.add("Vivo Distortion Correction");

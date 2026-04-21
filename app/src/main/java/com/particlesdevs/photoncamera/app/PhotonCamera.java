@@ -102,6 +102,7 @@ public class PhotonCamera extends Application {
     public static boolean hasIdealRaw = false;
     public static boolean hasVivoZeissColor = false;
     public static boolean hasVivoProMode = false;
+    public static boolean hasVivoSensorMode = false;
     public static boolean hasVivoDistortionCorrection = false;
     public static boolean hasQucommAdrcOff = false;
     public static boolean hasAutoHdr = false;
@@ -136,6 +137,7 @@ public class PhotonCamera extends Application {
     public static boolean isVivoZeissColorOn = false;
     public static boolean isVivoDistortionCorrectionOn = false;
     public static boolean isVivoProModeOn = false;
+    public static boolean isVivoSensorModeOn = false;
     public static boolean isQucommAdrcOff = false;
     public static SensorManager mSensorManager = null;
     public static Location gpsLocation = null;

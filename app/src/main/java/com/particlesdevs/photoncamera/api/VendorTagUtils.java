@@ -9,7 +9,6 @@ import com.particlesdevs.photoncamera.util.Log;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
 import android.os.Build;
-import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,6 +147,7 @@ public class VendorTagUtils {
         PhotonCamera.hasXiaomiSuperResolution = false;
         PhotonCamera.hasVivoZeissColor = false;
         PhotonCamera.hasVivoProMode = false;
+        PhotonCamera.hasVivoSensorMode = false;
         PhotonCamera.hasVivoDistortionCorrection = false;
         PhotonCamera.hasQucommAdrcOff = false;
         PhotonCamera.hasEisRealtime = false;
@@ -706,6 +706,13 @@ public class VendorTagUtils {
                     builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 0: (byte) 1);
                 }*/
 
+                CaptureRequest.Key currentMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sensor_meta_data.current_mode", Integer.class);
+                if (isSupported(builder, currentMode)) {
+                    if (PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode >= 0) {
+                        builder.set(currentMode, PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode);
+                    }
+                }
+
                 CaptureRequest.Key perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
                 if (isSupported(builder, perfKey)) {
                     PhotonCamera.hasQucommAdrcOff = true;
@@ -918,9 +925,12 @@ public class VendorTagUtils {
                         //builder.set(vivoUltraHighRes, 1);
                     }
 
-                    var vivoForceSensorMode = new CaptureRequest.Key<>("vivo.control.forceSensorMode", Integer.class);
-                    if (isSupported(builder, vivoForceSensorMode)) {
-                        //builder.set(vivoForceSensorMode, (int) 0);
+                    var vivoControlForceSensorMode = new CaptureRequest.Key<>("vivo.control.forceSensorMode", Integer.class);
+                    if (isSupported(builder, vivoControlForceSensorMode)) {
+                        PhotonCamera.hasVivoSensorMode = true;
+                        if (PhotonCamera.isVivoSensorModeOn && (PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode >= 0)) {
+                            builder.set(vivoControlForceSensorMode, PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
+                        }
                     }
 
                     var vivoSensorMode = new CaptureRequest.Key<>("vivo.control.sensorMode", Integer.class);

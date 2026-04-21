@@ -166,6 +166,14 @@ public class Specific {
                     specificSetting.xiaomiHdrMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "sensorMetaDataCurrentMode": {
+                    specificSetting.sensorMetaDataCurrentMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "vivoControlForceSensorMode": {
+                    specificSetting.vivoControlForceSensorMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
