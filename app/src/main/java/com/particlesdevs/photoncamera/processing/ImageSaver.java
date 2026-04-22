@@ -153,7 +153,7 @@ public class ImageSaver {
             imageDescriptionBuilder.append("\n   Vignette Correction: ").append(PhotonCamera.getSettings().shadingMode);
         }
         if (PhotonCamera.hasQucommAdrcOff) {
-            imageDescriptionBuilder.append("\n   Qualcomm ADRC Off: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
+            imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
         imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
