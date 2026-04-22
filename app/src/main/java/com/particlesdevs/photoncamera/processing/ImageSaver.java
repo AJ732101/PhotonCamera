@@ -155,6 +155,9 @@ public class ImageSaver {
         if (PhotonCamera.hasQucommAdrcOff) {
             imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
+        if (PhotonCamera.isVivoSensorModeOn && (PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode >= 0)) {
+            imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
+        }
         imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
         return imageDescriptionBuilder.toString();
