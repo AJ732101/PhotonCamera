@@ -3169,6 +3169,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isQucommAdrcOff = mIsFunctionOneOn;
             restartCamera();
             return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Qualcomm Sensor Mode")) {
+            PhotonCamera.isQucommSensorModeOn = mIsFunctionOneOn;
+            restartCamera();
+            return;
         } else if (PhotonCamera.getSettings().functionOne.equals("EIS Look Ahead")) {
             PhotonCamera.isEisLookAheadOn = mIsFunctionOneOn;
             restartCamera();
@@ -4646,6 +4650,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 8192;
             vidHeight = 6144;
         }
+        else if (PhotonCamera.getSettings().videoHeight == 2304) {
+            vidWidth = 4096;
+            vidHeight = 2304;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2296) {
+            vidWidth = 4080;
+            vidHeight = 2296;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 1836) {
+            vidWidth = 3264;
+            vidHeight = 1836;
+        }
         else {
             vidWidth = 1280;
         }
@@ -5196,6 +5212,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 6666) {
             mVidWidth = 8192;
             mVidHeight = 6144;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2304) {
+            mVidWidth = 4096;
+            mVidHeight = 2304;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2296) {
+            mVidWidth = 4080;
+            mVidHeight = 2296;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 1836) {
+            mVidWidth = 3264;
+            mVidHeight = 1836;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);

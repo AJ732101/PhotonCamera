@@ -306,19 +306,19 @@ public:
     }
 
     void setGpsLatitude(double degree, double minutes, double seconds, char ref) {
-        dng_image0->SetGpsLatitude(degree, minutes, seconds, ref);
+        //dng_image0->SetGpsLatitude(degree, minutes, seconds, ref);
     }
 
     void setGpsLongitude(double degree, double minutes, double seconds, char ref) {
-        dng_image0->SetGpsLongitude(degree, minutes, seconds, ref);
+        //dng_image0->SetGpsLongitude(degree, minutes, seconds, ref);
     }
 
     void setGpsAltitude(double altitude, char ref) {
-        dng_image0->SetGpsAltitude(altitude, ref);
+        //dng_image0->SetGpsAltitude(altitude, ref);
     }
 
     void setFocalLength35mm(short focalLength) {
-        dng_image0->SetFocalLength35mm(focalLength);
+        //dng_image0->SetFocalLength35mm(focalLength);
     }
 
     void* createDng(void* imageData, int width, int height, size_t &size) {

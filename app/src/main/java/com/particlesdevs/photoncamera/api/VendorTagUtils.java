@@ -700,18 +700,19 @@ public class VendorTagUtils {
                     builder.set(hdrPref, (int) 1);
                 }
 
+                CaptureRequest.Key currentMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sensor_meta_data.current_mode", Integer.class);
+                if (isSupported(builder, currentMode)) {
+                    PhotonCamera.hasQucommSensorMode = true;
+                    if (PhotonCamera.isQucommSensorModeOn && (PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode >= 0)) {
+                        builder.set(currentMode, PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode);
+                    }
+                }
+
                 /*CaptureRequest.Key perfKey = new CaptureRequest.Key<>("com.qti.chi.enableadrcpath.enableADRCPath", Integer.class);
                 if (isSupported(builder, perfKey)) {
                     PhotonCamera.hasQucommAdrcOff = true;
                     builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 0: (byte) 1);
                 }*/
-
-                CaptureRequest.Key currentMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sensor_meta_data.current_mode", Integer.class);
-                if (isSupported(builder, currentMode)) {
-                    if (PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode >= 0) {
-                        builder.set(currentMode, PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode);
-                    }
-                }
 
                 CaptureRequest.Key perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
                 if (isSupported(builder, perfKey)) {
@@ -724,6 +725,7 @@ public class VendorTagUtils {
                         builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 1: (byte) 0);
                     }
                 }
+                //builder.set(perfKey, (byte) 1);
 
                 perfKey = new CaptureRequest.Key<>("org.quic.camera.pipelineControl.isDisableSinkNoBuffer", byte.class);
                 if (isSupported(builder, perfKey)) {
@@ -803,19 +805,19 @@ public class VendorTagUtils {
                         }
                     }
 
-                    var distortionCorrection = new CaptureRequest.Key<>("vivo.control.distortion_correction", Integer.class);
-                    if (isSupported(builder, distortionCorrection)) {
+                    var zeissColor = new CaptureRequest.Key<>("vivo.control.enableZeissColor", Integer.class);
+                    if (isSupported(builder, zeissColor)) {
                         PhotonCamera.hasVivoZeissColor = true;
                         if (PhotonCamera.isVivoZeissColorOn) {
-                            builder.set(distortionCorrection, 1);
+                            builder.set(zeissColor, 1);
                         }
                     }
 
-                    var zeissColor = new CaptureRequest.Key<>("vivo.control.enableZeissColor", Integer.class);
-                    if (isSupported(builder, zeissColor)) {
+                    var distortionCorrection = new CaptureRequest.Key<>("vivo.control.distortion_correction", Integer.class);
+                    if (isSupported(builder, distortionCorrection)) {
                         PhotonCamera.hasVivoDistortionCorrection = true;
                         if (PhotonCamera.isVivoDistortionCorrectionOn) {
-                            builder.set(zeissColor, 1);
+                            builder.set(distortionCorrection, 1);
                         }
                     }
 
@@ -873,7 +875,12 @@ public class VendorTagUtils {
                         //builder.set(vivoVideoFps, 60);
                     }
 
-                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                    var vivoVideoMode = new CaptureRequest.Key<>("vivo.control.videoMode", Integer.class);
+                    if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoVideoMode >= 0)) {
+                        builder.set(vivoVideoMode, PhotonCamera.getSpecific().specificSetting.vivoVideoMode);
+                    }
+
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && PhotonCamera.getSpecific().specificSetting.vivoUseSuperEis) {
                         var vivoSuperEis = new CaptureRequest.Key<>("vivo.control.superEis", Integer.class);
                         if (isSupported(builder, vivoSuperEis)) {
                             builder.set(vivoSuperEis, 1);
@@ -886,7 +893,7 @@ public class VendorTagUtils {
 
                         var vivoEisEnhance = new CaptureRequest.Key<>("vivo.control.eis.enhance", Integer.class);
                         if (isSupported(builder, vivoEisEnhance)) {
-                            builder.set(vivoEisEnhance, (int) 1);
+                            builder.set(vivoEisEnhance, 1);
                         }
                     }
 
@@ -922,7 +929,7 @@ public class VendorTagUtils {
 
                     var vivoUltraHighRes = new CaptureRequest.Key<>("vivo.control.ultra_highresolution", Integer.class);
                     if (isSupported(builder, vivoUltraHighRes)) {
-                        //builder.set(vivoUltraHighRes, 1);
+                        builder.set(vivoUltraHighRes, PhotonCamera.getSpecific().specificSetting.vivoUseUltraHighResolution ? 1: 0);
                     }
 
                     var vivoControlForceSensorMode = new CaptureRequest.Key<>("vivo.control.forceSensorMode", Integer.class);
@@ -930,12 +937,12 @@ public class VendorTagUtils {
                         PhotonCamera.hasVivoSensorMode = true;
                         if (PhotonCamera.isVivoSensorModeOn && (PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode >= 0)) {
                             builder.set(vivoControlForceSensorMode, PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
-                        }
-                    }
 
-                    var vivoSensorMode = new CaptureRequest.Key<>("vivo.control.sensorMode", Integer.class);
-                    if (isSupported(builder, vivoSensorMode)) {
-                        //builder.set(vivoSensorMode, (int) 0);
+                            var vivoSensorMode = new CaptureRequest.Key<>("vivo.control.sensorMode", Integer.class);
+                            if (isSupported(builder, vivoSensorMode)) {
+                                //builder.set(vivoSensorMode, PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
+                            }
+                        }
                     }
 
                     var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", Integer.class);
@@ -945,12 +952,12 @@ public class VendorTagUtils {
 
                     var vivoEngineer = new CaptureRequest.Key<>("vivo.control.engineer", Integer.class);
                     if (isSupported(builder, vivoEngineer)) {
-                        //builder.set(vivoEngineer, (int) 1);
+                        builder.set(vivoEngineer, (int) 1);
                     }
 
                     var vivoProRaw = new CaptureRequest.Key<>("vivo.control.is_ProRaw_on", Integer.class);
                     if (isSupported(builder, vivoProRaw)) {
-                        //builder.set(vivoProRaw, (int) 1);
+                        builder.set(vivoProRaw, PhotonCamera.getSpecific().specificSetting.vivoUseProRaw ? 1 : 0);
                     }
 
                     var vivo3dHdr = new CaptureRequest.Key<>("vivo.control.3dhdr_enable", Integer.class);
@@ -965,12 +972,12 @@ public class VendorTagUtils {
 
                     var vivoEnableQcomSolution = new CaptureRequest.Key<>("vivo.control.enableQcomSolution", Integer.class);
                     if (isSupported(builder, vivoEnableQcomSolution)) {
-                        //builder.set(vivoEnableQcomSolution, (int) 1);
+                        builder.set(vivoEnableQcomSolution, PhotonCamera.getSpecific().specificSetting.vivoUseQcomSolution ? 1 : 0);
                     }
 
                     var vivoEngineerRemosaicMode = new CaptureRequest.Key<>("vivo.control.EngineerRemosaicMode", Integer.class);
-                    if (isSupported(builder, vivoEngineerRemosaicMode)) {
-                        //builder.set(vivoEngineerRemosaicMode, (int) 1);
+                    if (isSupported(builder, vivoEngineerRemosaicMode) && (PhotonCamera.getSpecific().specificSetting.vivoEngineerRemosaicMode >= 0)) {
+                        builder.set(vivoEngineerRemosaicMode, PhotonCamera.getSpecific().specificSetting.vivoEngineerRemosaicMode);
                     }
 
                     var vlogEffect = new CaptureRequest.Key<>("vivo.control.session.vlogEffect", Integer.class);
@@ -978,6 +985,16 @@ public class VendorTagUtils {
                         //builder.set(vlogEffect, 1);
                     }
                 }
+
+                /*var remosaicEnabled1 = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", byte.class);
+                if (isSupported(builder, remosaicEnabled1)) {
+                    builder.set(remosaicEnabled1, (byte) 1);
+                }
+
+                var quadcfaEnabled1 = new CaptureRequest.Key<>("xiaomi.quadcfa.enabled", byte.class);
+                if (isSupported(builder, quadcfaEnabled1)) {
+                    builder.set(quadcfaEnabled1, (byte) 1);
+                }*/
 
                 if (burst) {
                     var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);

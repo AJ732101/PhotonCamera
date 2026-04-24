@@ -16,6 +16,11 @@ public class SpecificSetting {
     public boolean modeShowRawVideo = true;
     public boolean enableQLL = false;
     public boolean enableVideoLut = false;
+    public boolean vivoUseSuperEis = false;
+    public boolean vivoUseProRaw = false;
+    public boolean vivoUseQcomSolution = false;
+    public boolean vivoUseUltraHighResolution = false;
+    public int vivoEngineerRemosaicMode = -1;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public int blackLevelValue = 0;
@@ -35,6 +40,7 @@ public class SpecificSetting {
     public int xiaomiHdrMode = 1;
     public int sensorMetaDataCurrentMode = -1;
     public int vivoControlForceSensorMode = -1;
+    public int vivoVideoMode = -1;
     public float colorTint = 99.0f;
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";

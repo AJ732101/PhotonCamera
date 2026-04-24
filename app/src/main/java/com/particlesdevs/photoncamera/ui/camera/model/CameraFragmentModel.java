@@ -579,6 +579,10 @@ public class CameraFragmentModel extends BaseObservable {
             entriesFunction.add("Qualcomm ADRC Off");
             entryValuesFunction.add("Qualcomm ADRC Off");
         }
+        if (PhotonCamera.hasQucommSensorMode) {
+            entriesFunction.add("Qualcomm Sensor Mode");
+            entryValuesFunction.add("Qualcomm Sensor Mode");
+        }
         if (PhotonCamera.hasVivoZeissColor) {
             entriesFunction.add("Vivo Zeiss Color");
             entryValuesFunction.add("Vivo Zeiss Color");

@@ -128,8 +128,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.github.mohammadatif:Animatoo:master'
     implementation 'com.github.ChickenHook:RestrictionBypass:2.2'
-    implementation 'com.github.bumptech.glide:glide:5.0.5'
-    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.5'
+    implementation 'com.github.bumptech.glide:glide:5.0.7'
+    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.7'
     implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
     implementation 'com.google.code.gson:gson:2.13.2'
     // Navigation Component
@@ -141,6 +141,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.core:core-ktx:1.18.0'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.20'
+    implementation "com.anggrayudi:storage:2.2.0"
+    implementation 'me.zhanghai.android.libarchive:library:1.1.6'
     //Leak Canary
     //Use this lib to detect memory leaks when debugging
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'

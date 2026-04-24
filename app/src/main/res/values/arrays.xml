@@ -167,6 +167,9 @@
         <item>Unbinned Full</item>
         <item>Movie (1920x800)</item>
         <item>Movie (3840x1600)</item>
+        <item>Custom 1 (4096x2304)</item>
+        <item>Custom 2 (4080x2296)</item>
+        <item>Custom 3 (3264x1836)</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
@@ -180,6 +183,9 @@
         <item>6666</item>
         <item>800</item>
         <item>1600</item>
+        <item>2304</item>
+        <item>2296</item>
+        <item>1836</item>
     </string-array>
 
     <string-array name="video_framerate_entries">

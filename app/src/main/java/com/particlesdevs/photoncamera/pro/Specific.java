@@ -98,6 +98,26 @@ public class Specific {
                     specificSetting.enableVideoLut = Boolean.parseBoolean(caseS[1]);
                     break;
                 }
+                case "vivoUseSuperEis": {
+                    specificSetting.vivoUseSuperEis = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "vivoUseProRaw": {
+                    specificSetting.vivoUseProRaw = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "vivoUseQcomSolution": {
+                    specificSetting.vivoUseQcomSolution = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "vivoUseUltraHighResolution": {
+                    specificSetting.vivoUseUltraHighResolution = Boolean.parseBoolean(caseS[1]);
+                    break;
+                }
+                case "vivoEngineerRemosaicMode": {
+                    specificSetting.vivoEngineerRemosaicMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "statisticsLensShadingMapMode": {
                     specificSetting.statisticsLensShadingMapMode = Integer.parseInt(caseS[1]);
                     break;
@@ -172,6 +192,10 @@ public class Specific {
                 }
                 case "vivoControlForceSensorMode": {
                     specificSetting.vivoControlForceSensorMode = Integer.parseInt(caseS[1]);
+                    break;
+                }
+                case "vivoVideoMode": {
+                    specificSetting.vivoVideoMode = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "colorTint": {
