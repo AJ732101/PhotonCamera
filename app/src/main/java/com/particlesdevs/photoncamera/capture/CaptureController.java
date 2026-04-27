@@ -278,6 +278,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean mFormatsDetectionDone = false;
     public boolean mIsViewFinderMagnified = false;
     public boolean mIsFunctionOneOn = false;
+    public boolean mIsFunctionTwoOn = false;
     private com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer mMainRenderer = null;
     private final AtomicBoolean mIsProcessingImage = new AtomicBoolean(false);
     private final ParamController paramController;
@@ -1564,12 +1565,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             applyFormatFallback();
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
-                if (target.getHeight() > target.getWidth()) {
-                    mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
-                }
-                else {
-                    mImageReaderRaw = ImageReader.newInstance(newSize.getWidth(), newSize.getHeight(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
-                }
+                mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
                 if (target.getHeight() > target.getWidth()) {
                     mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImageReaderImages);
@@ -1826,6 +1822,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             if (PhotonCamera.getSettings().functionOne.equals("Shutter Priority") && (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0)) {
+                long ONE_SECOND_IN_NANOS = 1_000_000_000L;
+                long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
+                setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
+            }
+        }
+
+        if (mIsFunctionTwoOn) {
+            if (PhotonCamera.getSettings().functionTwo.equals("ISO Priority") && (PhotonCamera.getSpecific().specificSetting.priorityIsoValue != 0)) {
+                setIsoPriorityMode(captureBuilder, PhotonCamera.getSpecific().specificSetting.priorityIsoValue);
+            }
+
+            if (PhotonCamera.getSettings().functionTwo.equals("Shutter Priority") && (PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed != 0)) {
                 long ONE_SECOND_IN_NANOS = 1_000_000_000L;
                 long desiredShutterSpeed = ONE_SECOND_IN_NANOS / PhotonCamera.getSpecific().specificSetting.priorityShutterSpeed;
                 setShutterPriorityMode(captureBuilder, desiredShutterSpeed);
@@ -2507,7 +2515,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                 if (isHighSpeedSessionRequested) {
-                    SessionType = SessionConfiguration.SESSION_HIGH_SPEED;
+                    SessionTypeVideo = SessionConfiguration.SESSION_HIGH_SPEED;
                 }
             }
 
@@ -3249,6 +3257,138 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public void functionTwo() {
+        mIsFunctionTwoOn = !mIsFunctionTwoOn;
+        PhotonCamera.isFunctionTwoOn = mIsFunctionTwoOn;
+
+        if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Super Night Mode")) {
+            PhotonCamera.isSuperNightModeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Night Mode")) {
+            PhotonCamera.isNightModeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Re-Mosaic")) {
+            PhotonCamera.isRemosaicOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi AI Auto Scene Detection")) {
+            PhotonCamera.isAiAutoSceneDetectionOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Pro Video LOG")) {
+            PhotonCamera.isProVideoLogOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Pro Video Movie")) {
+            PhotonCamera.isProVideoLogMovie = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi HDR")) {
+            PhotonCamera.isHdrOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Ultra HDR")) {
+            PhotonCamera.isUltraHdrOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Super Resolution")) {
+            PhotonCamera.isSuperResOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Quad CFA")) {
+            PhotonCamera.isQuadCfaOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Ideal RAW")) {
+            PhotonCamera.isIdealRawOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Qualcomm ADRC Off")) {
+            PhotonCamera.isQucommAdrcOff = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Qualcomm Sensor Mode")) {
+            PhotonCamera.isQucommSensorModeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("EIS Look Ahead")) {
+            PhotonCamera.isEisLookAheadOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("EIS Realtime")) {
+            PhotonCamera.isEisRealtimeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("EIS V3")) {
+            PhotonCamera.isEisV3On = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Zeiss Color")) {
+            PhotonCamera.isVivoZeissColorOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Pro Mode")) {
+            PhotonCamera.isVivoProModeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Sensor Mode")) {
+            PhotonCamera.isVivoSensorModeOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Distortion Correction")) {
+            PhotonCamera.isVivoDistortionCorrectionOn = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Closed Aperture")) {
+            if (mIsFunctionTwoOn) {
+                if (PhotonCamera.getSettings().functionTwo.contains("Closed Aperture")) {
+                    var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                    if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                        mPreviewRequestBuilder.set(lensApertureXiaomi, 4.0f);
+                    }
+                }
+
+                if (PhotonCamera.getSettings().functionTwo.equals("Opened Aperture")) {
+                    float minAperture = 4.0f;
+                    CameraCharacteristics.Key<Float[]> vendorKey = new CameraCharacteristics.Key<>("com.xiaomi.lens.info.availableApertures", Float[].class);
+                    Float[] apert = mCameraCharacteristics.get(vendorKey);
+                    if (apert != null && apert.length > 0) {
+                        minAperture = apert[0];
+                    }
+                    var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                    if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                        mPreviewRequestBuilder.set(lensApertureXiaomi, minAperture);
+                    }
+                }
+            } else {
+                var lensApertureXiaomi = new CaptureRequest.Key<>("com.xiaomi.lens.aperture", Float.class);
+                if (VendorTagUtils.isSupported(mPreviewRequestBuilder, lensApertureXiaomi)) {
+                    mPreviewRequestBuilder.set(lensApertureXiaomi, PhotonCamera.getSettings().apertureToUse);
+                }
+            }
+            try {
+                if (mCaptureSession != null) {
+                    CaptureRequest req = mPreviewRequestBuilder.build();
+                    if (req != null) {
+                        mCaptureSession.setRepeatingRequest(req, mCaptureCallback, mBackgroundHandler);
+                    } else {
+                        Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
+                    }
+                }
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Aperture change failed", e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "No camera session", e);
+            }
+        }
+
+        if (PhotonCamera.getSettings().functionTwo.contains("Priority")) {
+            restartCamera();
+        }
+    }
+
     public void setAutoExposureCenter() {
         Rect activeArray = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
         if (activeArray == null) return;
@@ -3910,7 +4050,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
                         }
                     }
-                    Log.d(TAG, "Single shot capture completed.");
+                    Integer pixelMode = result.get(CaptureResult.SENSOR_PIXEL_MODE);
+                    Log.d(TAG, "Single shot capture completed. Sensor Pixel Mode: " + pixelMode);
                 }
 
                 @Override
