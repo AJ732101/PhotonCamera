@@ -46,6 +46,7 @@ public class Settings {
     public int realPreviewFormat;
     public int rawFormat;
     public String functionOne;
+    public String functionTwo;
     public String mCameraID;
     public float[] toneMap;
     public float[] gamma;
@@ -172,6 +173,7 @@ public class Settings {
         realPreviewFormat = PreferenceKeys.getRealPreviewFormatValue();
         rawFormat = PreferenceKeys.getRawFormatValue();
         functionOne = PreferenceKeys.getFunctionOneValue();
+        functionTwo = PreferenceKeys.getFunctionTwoValue();
         selectedMode = CameraMode.valueOf(PreferenceKeys.getCameraModeOrdinal());
         toneMap = parseToneMapArray();
         gamma = parseGammaArray();

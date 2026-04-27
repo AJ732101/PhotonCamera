@@ -39,6 +39,7 @@ public class CameraFragmentModel extends BaseObservable {
     private boolean settingsBarVisibility;
     private boolean viewfinderMaginified = false;
     private boolean functionOneOn = false;
+    private boolean functionTwoOn = false;
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
     public final MutableLiveData<Float> zoomLevel = new MutableLiveData<>(1.0f);
@@ -55,6 +56,14 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.getCaptureController() != null) {
             PhotonCamera.getCaptureController().functionOne();
             functionOneOn = !functionOneOn;
+            notifyChange();
+        }
+    }
+
+    public void onFunctionTwoClicked() {
+        if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().functionTwo();
+            functionTwoOn = !functionTwoOn;
             notifyChange();
         }
     }
@@ -625,6 +634,121 @@ public class CameraFragmentModel extends BaseObservable {
                 .show();
     }
 
+    public void onFunctionTwoLongClicked(View view) {
+        Context context = view.getContext();
+        String[] entries = context.getResources().getStringArray(R.array.function_one_entries);
+        String[] entryValues = context.getResources().getStringArray(R.array.function_one_entryValues);
+        String currentVal = PreferenceKeys.getFunctionTwoValue();
+
+        List<CharSequence> entriesFunction = new ArrayList<>(Arrays.asList(entries));
+        List<CharSequence> entryValuesFunction = new ArrayList<>(Arrays.asList(entryValues));
+
+        if (PhotonCamera.hasXiaomiNight) {
+            entriesFunction.add("Xiaomi Night Mode");
+            entryValuesFunction.add("Xiaomi Night Mode");
+        }
+        if (PhotonCamera.hasXiaomiSuperNight) {
+            entriesFunction.add("Xiaomi Super Night Mode");
+            entryValuesFunction.add("Xiaomi Super Night Mode");
+        }
+        if (PhotonCamera.hasXiaomiAiAutoSceneDetection) {
+            entriesFunction.add("Xiaomi AI Auto Scene Detection");
+            entryValuesFunction.add("Xiaomi AI Auto Scene Detection");
+        }
+        if (PhotonCamera.hasXiaomiProVideoLog) {
+            entriesFunction.add("Xiaomi Pro Video LOG");
+            entryValuesFunction.add("Xiaomi Pro Video LOG");
+        }
+        if (PhotonCamera.hasXiaomiProVideoMovie) {
+            entriesFunction.add("Xiaomi Pro Video Movie");
+            entryValuesFunction.add("Xiaomi Pro Video Movie");
+        }
+        if (PhotonCamera.hasXiaomiReMosaic) {
+            entriesFunction.add("Xiaomi Re-Mosaic");
+            entryValuesFunction.add("Xiaomi Re-Mosaic");
+        }
+        if (PhotonCamera.hasXiaomiQuadCfa) {
+            entriesFunction.add("Xiaomi Quad CFA");
+            entryValuesFunction.add("Xiaomi Quad CFA");
+        }
+        if (PhotonCamera.hasXiaomiHdr) {
+            entriesFunction.add("Xiaomi HDR");
+            entryValuesFunction.add("Xiaomi HDR");
+        }
+        if (PhotonCamera.hasXiaomiUltraHdr) {
+            entriesFunction.add("Xiaomi Ultra HDR");
+            entryValuesFunction.add("Xiaomi Ultra HDR");
+        }
+        if (PhotonCamera.hasXiaomiSuperResolution) {
+            entriesFunction.add("Xiaomi Super Resolution");
+            entryValuesFunction.add("Xiaomi Super Resolution");
+        }
+        if (PhotonCamera.hasIdealRaw) {
+            entriesFunction.add("Ideal RAW");
+            entryValuesFunction.add("Ideal RAW");
+        }
+        if (PhotonCamera.hasEisLookAhead) {
+            entriesFunction.add("EIS Look Ahead");
+            entryValuesFunction.add("EIS Look Ahead");
+        }
+        if (PhotonCamera.hasEisRealtime) {
+            entriesFunction.add("EIS Realtime");
+            entryValuesFunction.add("EIS Realtime");
+        }
+        if (PhotonCamera.hasEisV3) {
+            entriesFunction.add("EIS V3");
+            entryValuesFunction.add("EIS V3");
+        }
+        if (PhotonCamera.hasQucommAdrcOff) {
+            entriesFunction.add("Qualcomm ADRC Off");
+            entryValuesFunction.add("Qualcomm ADRC Off");
+        }
+        if (PhotonCamera.hasQucommSensorMode) {
+            entriesFunction.add("Qualcomm Sensor Mode");
+            entryValuesFunction.add("Qualcomm Sensor Mode");
+        }
+        if (PhotonCamera.hasVivoZeissColor) {
+            entriesFunction.add("Vivo Zeiss Color");
+            entryValuesFunction.add("Vivo Zeiss Color");
+        }
+        if (PhotonCamera.hasVivoProMode) {
+            entriesFunction.add("Vivo Pro Mode");
+            entryValuesFunction.add("Vivo Pro Mode");
+        }
+        if (PhotonCamera.hasVivoSensorMode) {
+            entriesFunction.add("Vivo Sensor Mode");
+            entryValuesFunction.add("Vivo Sensor Mode");
+        }
+        if (PhotonCamera.hasVivoDistortionCorrection) {
+            entriesFunction.add("Vivo Distortion Correction");
+            entryValuesFunction.add("Vivo Distortion Correction");
+        }
+
+        CharSequence[] finalEntries = entriesFunction.toArray(new CharSequence[0]);
+        CharSequence[] finalValues = entryValuesFunction.toArray(new CharSequence[0]);
+
+        int checkedItem = -1;
+        for (int i = 0; i < finalValues.length; i++) {
+            if (finalValues[i].toString().equals(currentVal)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.function_button_two)
+                .setSingleChoiceItems(finalEntries, checkedItem, (dialog, which) -> {
+                    String selectedValue = finalValues[which].toString();
+                    PhotonCamera.getSettings().functionTwo = selectedValue;
+                    PreferenceKeys.setFunctionTwoValue(selectedValue);
+
+                    dialog.dismiss();
+                    notifyChange();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     public void onMagnifierLongClicked(View view) {
         if (PhotonCamera.getCaptureController() != null) {
             PhotonCamera.getCaptureController().setAutoExposureCenter();
@@ -686,6 +810,10 @@ public class CameraFragmentModel extends BaseObservable {
 
     public boolean isFunctionOneOn() {
         return functionOneOn;
+    }
+
+    public boolean isFunctionTwoOn() {
+        return functionTwoOn;
     }
 
     @Bindable

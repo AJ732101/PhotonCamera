@@ -50,6 +50,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_REAL_PREVIEW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_RAW_FORMAT.mValue);
         COMMON_KEYS.add(Key.KEY_FUNCTION_ONE.mValue);
+        COMMON_KEYS.add(Key.KEY_FUNCTION_TWO.mValue);
         COMMON_KEYS.add(Key.KEY_LUT_NAME.mValue);
         COMMON_KEYS.add(Key.KEY_THUMBNAIL.mValue);
         COMMON_KEYS.add(Key.KEY_TONEMAPPING_MODE_QUALITY.mValue);
@@ -161,6 +162,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REAL_PREVIEW_FORMAT, resources.getString(R.string.pref_real_preview_format_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAW_FORMAT, resources.getString(R.string.pref_raw_format_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FUNCTION_ONE, resources.getString(R.string.pref_function_one_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FUNCTION_TWO, resources.getString(R.string.pref_function_two_default));
         settingsManager.setDefaults(Key.CAMERA_ID, resources.getString(R.string.camera_id_default), new String[]{"0", "1"});
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
@@ -322,7 +324,8 @@ public class PreferenceKeys {
      */
     public static boolean isAfDataOn() {
         boolean isAfOn = preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA);
-        boolean isOverride = PhotonCamera.getSettings().functionOne.equals("Debug Info") && PhotonCamera.isFunctionOneOn;
+        boolean isOverride = (PhotonCamera.getSettings().functionOne.equals("Debug Info") && PhotonCamera.isFunctionOneOn) ||
+                             (PhotonCamera.getSettings().functionTwo.equals("Debug Info") && PhotonCamera.isFunctionTwoOn);
         return isAfOn || isOverride;
     }
 
@@ -488,8 +491,16 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_FUNCTION_ONE);
     }
 
+    public static String getFunctionTwoValue() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_FUNCTION_TWO);
+    }
+
     public static void setFunctionOneValue(String value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_FUNCTION_ONE, value);
+    }
+
+    public static void setFunctionTwoValue(String value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_FUNCTION_TWO, value);
     }
 
     public static int getCFAValue() {
@@ -964,6 +975,7 @@ public class PreferenceKeys {
         KEY_REAL_PREVIEW_FORMAT(R.string.pref_real_preview_format_key),
         KEY_RAW_FORMAT(R.string.pref_raw_format_key),
         KEY_FUNCTION_ONE(R.string.pref_function_one_key),
+        KEY_FUNCTION_TWO(R.string.pref_function_two_key),
         KEY_TELEGRAM(R.string.pref_telegram_channel_key),
         KEY_CONTRIBUTORS(R.string.pref_contributors_key),
         KEY_THEME(R.string.pref_theme_key),

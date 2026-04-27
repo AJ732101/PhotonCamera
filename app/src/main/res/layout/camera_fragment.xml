@@ -218,6 +218,23 @@
                 app:layout_constraintEnd_toEndOf="@+id/buttonMagnifyViewfinder"
                 app:layout_constraintBottom_toTopOf="@+id/buttonMagnifyViewfinder" />
 
+            <ToggleButton
+                android:id="@+id/buttonFunctionTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/aux_container_background"
+                android:checked="@{uimodel.isFunctionTwoOn}"
+                android:textColor="@{uimodel.isFunctionTwoOn ? 0xFF00FF00 : 0xFFFF0000}"
+                android:textOn="Fn2 ON"
+                android:textOff="Fn2 OFF"
+                app:bindRotate="@{uimodel}"
+                android:onClick="@{() -> uimodel.onFunctionTwoClicked()}"
+                android:onLongClick="@{() -> uimodel.onFunctionTwoLongClicked(buttonFunctionTwo)}"
+                android:layout_marginBottom="45dp"
+                app:layout_constraintStart_toStartOf="@+id/buttonFunctionOne"
+                app:layout_constraintEnd_toEndOf="@+id/buttonFunctionOne"
+                app:layout_constraintBottom_toTopOf="@+id/buttonFunctionOne" />
+
             <FrameLayout
                 android:id="@+id/zoom_value_container"
                 android:layout_width="wrap_content"

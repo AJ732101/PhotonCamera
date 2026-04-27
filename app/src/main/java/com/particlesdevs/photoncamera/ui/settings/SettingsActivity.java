@@ -182,109 +182,169 @@ public class SettingsActivity extends BaseActivity implements
             }
 
             // function button population
-            ListPreference functionPreference = findPreference(getString(R.string.pref_function_one_key));
-            if (functionPreference == null) {
+            ListPreference functionOnePreference = findPreference(getString(R.string.pref_function_one_key));
+            ListPreference functionTwoPreference = findPreference(getString(R.string.pref_function_two_key));
+            if ((functionOnePreference == null) || (functionTwoPreference == null)) {
                 return;
             }
-            String currentFunctionValue = functionPreference.getValue();
+            String currentFunctionOneValue = functionOnePreference.getValue();
+            String currentFunctionTwoValue = functionTwoPreference.getValue();
 
-            List<CharSequence> entriesFunction = new ArrayList<>();
-            List<CharSequence> entryValuesFunction = new ArrayList<>();
+            List<CharSequence> entriesFunctionOne = new ArrayList<>();
+            List<CharSequence> entryValuesFunctionOne = new ArrayList<>();
 
-            if (functionPreference.getEntries() != null && functionPreference.getEntryValues() != null) {
-                Collections.addAll(entriesFunction, functionPreference.getEntries());
-                Collections.addAll(entryValuesFunction, functionPreference.getEntryValues());
+            List<CharSequence> entriesFunctionTwo = new ArrayList<>();
+            List<CharSequence> entryValuesFunctionTwo = new ArrayList<>();
+
+            if (functionOnePreference.getEntries() != null && functionOnePreference.getEntryValues() != null) {
+                Collections.addAll(entriesFunctionOne, functionOnePreference.getEntries());
+                Collections.addAll(entryValuesFunctionOne, functionOnePreference.getEntryValues());
+            }
+
+            if (functionTwoPreference.getEntries() != null && functionTwoPreference.getEntryValues() != null) {
+                Collections.addAll(entriesFunctionTwo, functionTwoPreference.getEntries());
+                Collections.addAll(entryValuesFunctionTwo, functionTwoPreference.getEntryValues());
             }
 
             if (PhotonCamera.hasXiaomiNight) {
-                entriesFunction.add("Xiaomi Night Mode");
-                entryValuesFunction.add("Xiaomi Night Mode");
+                entriesFunctionOne.add("Xiaomi Night Mode");
+                entryValuesFunctionOne.add("Xiaomi Night Mode");
+                entriesFunctionTwo.add("Xiaomi Night Mode");
+                entryValuesFunctionTwo.add("Xiaomi Night Mode");
             }
             if (PhotonCamera.hasXiaomiSuperNight) {
-                entriesFunction.add("Xiaomi Super Night Mode");
-                entryValuesFunction.add("Xiaomi Super Night Mode");
+                entriesFunctionOne.add("Xiaomi Super Night Mode");
+                entryValuesFunctionOne.add("Xiaomi Super Night Mode");
+                entriesFunctionTwo.add("Xiaomi Super Night Mode");
+                entryValuesFunctionTwo.add("Xiaomi Super Night Mode");
             }
             if (PhotonCamera.hasXiaomiAiAutoSceneDetection) {
-                entriesFunction.add("Xiaomi AI Auto Scene Detection");
-                entryValuesFunction.add("Xiaomi AI Auto Scene Detection");
+                entriesFunctionOne.add("Xiaomi AI Auto Scene Detection");
+                entryValuesFunctionOne.add("Xiaomi AI Auto Scene Detection");
+                entriesFunctionTwo.add("Xiaomi AI Auto Scene Detection");
+                entryValuesFunctionTwo.add("Xiaomi AI Auto Scene Detection");
             }
             if (PhotonCamera.hasXiaomiProVideoLog) {
-                entriesFunction.add("Xiaomi Pro Video LOG");
-                entryValuesFunction.add("Xiaomi Pro Video LOG");
+                entriesFunctionOne.add("Xiaomi Pro Video LOG");
+                entryValuesFunctionOne.add("Xiaomi Pro Video LOG");
+                entriesFunctionTwo.add("Xiaomi Pro Video LOG");
+                entryValuesFunctionTwo.add("Xiaomi Pro Video LOG");
             }
             if (PhotonCamera.hasXiaomiProVideoMovie) {
-                entriesFunction.add("Xiaomi Pro Video Movie");
-                entryValuesFunction.add("Xiaomi Pro Video Movie");
+                entriesFunctionOne.add("Xiaomi Pro Video Movie");
+                entryValuesFunctionOne.add("Xiaomi Pro Video Movie");
+                entriesFunctionTwo.add("Xiaomi Pro Video Movie");
+                entryValuesFunctionTwo.add("Xiaomi Pro Video Movie");
             }
             if (PhotonCamera.hasXiaomiReMosaic) {
-                entriesFunction.add("Xiaomi Re-Mosaic");
-                entryValuesFunction.add("Xiaomi Re-Mosaic");
+                entriesFunctionOne.add("Xiaomi Re-Mosaic");
+                entryValuesFunctionOne.add("Xiaomi Re-Mosaic");
+                entriesFunctionTwo.add("Xiaomi Re-Mosaic");
+                entryValuesFunctionTwo.add("Xiaomi Re-Mosaic");
             }
             if (PhotonCamera.hasXiaomiQuadCfa) {
-                entriesFunction.add("Xiaomi Quad CFA");
-                entryValuesFunction.add("Xiaomi Quad CFA");
+                entriesFunctionOne.add("Xiaomi Quad CFA");
+                entryValuesFunctionOne.add("Xiaomi Quad CFA");
+                entriesFunctionTwo.add("Xiaomi Quad CFA");
+                entryValuesFunctionTwo.add("Xiaomi Quad CFA");
             }
             if (PhotonCamera.hasXiaomiHdr) {
-                entriesFunction.add("Xiaomi HDR");
-                entryValuesFunction.add("Xiaomi HDR");
+                entriesFunctionOne.add("Xiaomi HDR");
+                entryValuesFunctionOne.add("Xiaomi HDR");
+                entriesFunctionTwo.add("Xiaomi HDR");
+                entryValuesFunctionTwo.add("Xiaomi HDR");
             }
             if (PhotonCamera.hasXiaomiUltraHdr) {
-                entriesFunction.add("Xiaomi Ultra HDR");
-                entryValuesFunction.add("Xiaomi Ultra HDR");
+                entriesFunctionOne.add("Xiaomi Ultra HDR");
+                entryValuesFunctionOne.add("Xiaomi Ultra HDR");
+                entriesFunctionTwo.add("Xiaomi Ultra HDR");
+                entryValuesFunctionTwo.add("Xiaomi Ultra HDR");
             }
             if (PhotonCamera.hasXiaomiSuperResolution) {
-                entriesFunction.add("Xiaomi Super Resolution");
-                entryValuesFunction.add("Xiaomi Super Resolution");
+                entriesFunctionOne.add("Xiaomi Super Resolution");
+                entryValuesFunctionOne.add("Xiaomi Super Resolution");
+                entriesFunctionTwo.add("Xiaomi Super Resolution");
+                entryValuesFunctionTwo.add("Xiaomi Super Resolution");
             }
             if (PhotonCamera.hasIdealRaw) {
-                entriesFunction.add("Ideal RAW");
-                entryValuesFunction.add("Ideal RAW");
+                entriesFunctionOne.add("Ideal RAW");
+                entryValuesFunctionOne.add("Ideal RAW");
+                entriesFunctionTwo.add("Ideal RAW");
+                entryValuesFunctionTwo.add("Ideal RAW");
             }
             if (PhotonCamera.hasEisLookAhead) {
-                entriesFunction.add("EIS Look Ahead");
-                entryValuesFunction.add("EIS Look Ahead");
+                entriesFunctionOne.add("EIS Look Ahead");
+                entryValuesFunctionOne.add("EIS Look Ahead");
+                entriesFunctionTwo.add("EIS Look Ahead");
+                entryValuesFunctionTwo.add("EIS Look Ahead");
             }
             if (PhotonCamera.hasEisRealtime) {
-                entriesFunction.add("EIS Realtime");
-                entryValuesFunction.add("EIS Realtime");
+                entriesFunctionOne.add("EIS Realtime");
+                entryValuesFunctionOne.add("EIS Realtime");
+                entriesFunctionTwo.add("EIS Realtime");
+                entryValuesFunctionTwo.add("EIS Realtime");
             }
             if (PhotonCamera.hasEisV3) {
-                entriesFunction.add("EIS V3");
-                entryValuesFunction.add("EIS V3");
+                entriesFunctionOne.add("EIS V3");
+                entryValuesFunctionOne.add("EIS V3");
+                entriesFunctionTwo.add("EIS V3");
+                entryValuesFunctionTwo.add("EIS V3");
             }
             if (PhotonCamera.hasQucommAdrcOff) {
-                entriesFunction.add("Qualcomm ADRC Off");
-                entryValuesFunction.add("Qualcomm ADRC Off");
+                entriesFunctionOne.add("Qualcomm ADRC Off");
+                entryValuesFunctionOne.add("Qualcomm ADRC Off");
+                entriesFunctionTwo.add("Qualcomm ADRC Off");
+                entryValuesFunctionTwo.add("Qualcomm ADRC Off");
             }
             if (PhotonCamera.hasQucommSensorMode) {
-                entriesFunction.add("Qualcomm Sensor Mode");
-                entryValuesFunction.add("Qualcomm Sensor Mode");
+                entriesFunctionOne.add("Qualcomm Sensor Mode");
+                entryValuesFunctionOne.add("Qualcomm Sensor Mode");
+                entriesFunctionTwo.add("Qualcomm Sensor Mode");
+                entryValuesFunctionTwo.add("Qualcomm Sensor Mode");
             }
             if (PhotonCamera.hasVivoZeissColor) {
-                entriesFunction.add("Vivo Zeiss Color");
-                entryValuesFunction.add("Vivo Zeiss Color");
+                entriesFunctionOne.add("Vivo Zeiss Color");
+                entryValuesFunctionOne.add("Vivo Zeiss Color");
+                entriesFunctionTwo.add("Vivo Zeiss Color");
+                entryValuesFunctionTwo.add("Vivo Zeiss Color");
             }
             if (PhotonCamera.hasVivoProMode) {
-                entriesFunction.add("Vivo Pro Mode");
-                entryValuesFunction.add("Vivo Pro Mode");
+                entriesFunctionOne.add("Vivo Pro Mode");
+                entryValuesFunctionOne.add("Vivo Pro Mode");
+                entriesFunctionTwo.add("Vivo Pro Mode");
+                entryValuesFunctionTwo.add("Vivo Pro Mode");
             }
             if (PhotonCamera.hasVivoSensorMode) {
-                entriesFunction.add("Vivo Sensor Mode");
-                entryValuesFunction.add("Vivo Sensor Mode");
+                entriesFunctionOne.add("Vivo Sensor Mode");
+                entryValuesFunctionOne.add("Vivo Sensor Mode");
+                entriesFunctionTwo.add("Vivo Sensor Mode");
+                entryValuesFunctionTwo.add("Vivo Sensor Mode");
             }
             if (PhotonCamera.hasVivoDistortionCorrection) {
-                entriesFunction.add("Vivo Distortion Correction");
-                entryValuesFunction.add("Vivo Distortion Correction");
+                entriesFunctionOne.add("Vivo Distortion Correction");
+                entryValuesFunctionOne.add("Vivo Distortion Correction");
+                entriesFunctionTwo.add("Vivo Distortion Correction");
+                entryValuesFunctionTwo.add("Vivo Distortion Correction");
             }
 
-            functionPreference.setEntries(entriesFunction.toArray(new CharSequence[0]));
-            functionPreference.setEntryValues(entryValuesFunction.toArray(new CharSequence[0]));
+            functionOnePreference.setEntries(entriesFunctionOne.toArray(new CharSequence[0]));
+            functionOnePreference.setEntryValues(entryValuesFunctionOne.toArray(new CharSequence[0]));
+            functionTwoPreference.setEntries(entriesFunctionTwo.toArray(new CharSequence[0]));
+            functionTwoPreference.setEntryValues(entryValuesFunctionTwo.toArray(new CharSequence[0]));
 
-            if (!entryValuesFunction.contains(currentFunctionValue)) {
-                if (entryValuesFunction.equals("ISO Priority")) {
-                    functionPreference.setValue("ISO Priority");
+            if (!entryValuesFunctionOne.contains(currentFunctionOneValue)) {
+                if (entryValuesFunctionOne.equals("ISO Priority")) {
+                    functionOnePreference.setValue("ISO Priority");
                 } else if (!entryPrevValues.isEmpty()) {
-                    functionPreference.setValue(entryPrevValues.get(0).toString());
+                    functionOnePreference.setValue(entryPrevValues.get(0).toString());
+                }
+            }
+
+            if (!entryValuesFunctionTwo.contains(currentFunctionTwoValue)) {
+                if (entryValuesFunctionTwo.equals("Shutter Priority")) {
+                    functionTwoPreference.setValue("Shutter Priority");
+                } else if (!entryPrevValues.isEmpty()) {
+                    functionTwoPreference.setValue(entryPrevValues.get(0).toString());
                 }
             }
         }

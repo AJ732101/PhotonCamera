@@ -77,6 +77,7 @@
     <string name="real_preview_format">Preview Format</string>
     <string name="raw_format">RAW Format</string>
     <string name="function_button_one">Function Button 1</string>
+    <string name="function_button_two">Function Button 2</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="about">About</string>

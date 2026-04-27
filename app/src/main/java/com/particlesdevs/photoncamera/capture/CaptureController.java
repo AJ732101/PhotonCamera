@@ -1207,7 +1207,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void rebuildPreviewBuilder() {
         if(burst) return;
         try {
-//          mCaptureSession.stopRepeating();
+            if (mCaptureSession == null || mPreviewRequestBuilder == null) {
+                return;
+            }
             mPreviewInputRequest = mPreviewRequestBuilder.build();
             if (mPreviewInputRequest != null) {
                 mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
@@ -1664,18 +1666,28 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // If image format is provided, use it to determine supported sizes; else use target class
         StreamConfigurationMap config = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-        Size[] allSizes = config.getOutputSizes(SurfaceTexture.class);
+        Size[] allSizes;
+        if (targetMode == CameraMode.VIDEO && PhotonCamera.getSettings().videoFramrate >= 120) {
+            allSizes = config.getHighSpeedVideoSizes();
+        } else {
+            allSizes = config.getOutputSizes(SurfaceTexture.class);
+        }
 
         Size retsize = null;
-        for (Size size : allSizes) {
-            int sizeShort = Math.min(size.getHeight(), size.getWidth());
-            int sizeLong = Math.max(size.getHeight(), size.getWidth());
-            if (sizeLong % aspectRatio.getHeight() == 0 &&
-                    sizeShort == aspectRatio.getWidth() * sizeLong / aspectRatio.getHeight() &&
-                    sizeShort * sizeLong <= ResolutionSolution.previewRes) {
-                retsize = new Size(sizeShort, sizeLong);
-                break;
+        if (allSizes != null) {
+            for (Size size : allSizes) {
+                int sizeShort = Math.min(size.getHeight(), size.getWidth());
+                int sizeLong = Math.max(size.getHeight(), size.getWidth());
+                if (sizeLong % aspectRatio.getHeight() == 0 &&
+                        sizeShort == aspectRatio.getWidth() * sizeLong / aspectRatio.getHeight() &&
+                        sizeShort * sizeLong <= ResolutionSolution.previewRes) {
+                    retsize = new Size(sizeShort, sizeLong);
+                    break;
+                }
             }
+        }
+        if (retsize == null && allSizes != null && allSizes.length > 0) {
+            retsize = allSizes[0];
         }
         if (retsize == null) {
             retsize = new Size(800, 600);
@@ -2225,7 +2237,29 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-            FpsRangeDef = new Range<>(PhotonCamera.getSettings().videoFramrate, PhotonCamera.getSettings().videoFramrate);
+            int targetFps = PhotonCamera.getSettings().videoFramrate;
+            if (targetFps >= 120) {
+                StreamConfigurationMap config = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                Range<Integer>[] hsRanges = config.getHighSpeedVideoFpsRanges();
+                boolean hsSupported = false;
+                if (hsRanges != null) {
+                    for (Range<Integer> r : hsRanges) {
+                        if (r.getUpper() >= targetFps) {
+                            hsSupported = true;
+                            break;
+                        }
+                    }
+                }
+                if (hsSupported) {
+                    FpsRangeDef = new Range<>(targetFps, targetFps);
+                    Log.d(TAG, "High Speed FPS Range set to: " + FpsRangeDef);
+                } else {
+                    Log.w(TAG, "Requested High Speed FPS " + targetFps + " not supported. Fallback to 60.");
+                    FpsRangeDef = new Range<>(60, 60);
+                }
+            } else {
+                FpsRangeDef = new Range<>(targetFps, targetFps);
+            }
         }
         else if(FpsRangeDef == null || FpsRangeDef.getLower() > def) {
             FpsRangeDef = new Range<>(7, 30);
@@ -2413,7 +2447,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     hdrProfile = DynamicRangeProfiles.HDR10;
                 }
                 // video
-                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR) {
+                if (mIsRecordingVideo && PhotonCamera.getSettings().videoHDR && PhotonCamera.getSettings().videoFramrate < 120) {
                     config.setDynamicRangeProfile(hdrProfile);
                 }
                 // Ultra HDR or 10 Bit surface as target (for encoding after image capture)
@@ -2422,7 +2456,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         config.setDynamicRangeProfile(hdrProfile);
                     }
                 }
-                else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei)) {
+                else if ((mPreviewTargetFormat == ImageFormat.YCBCR_P010) && (mImageReaderPreview.getSurface() == surfacei) && PhotonCamera.getSettings().videoFramrate < 120) {
                     config.setDynamicRangeProfile(hdrProfile);
                 }
 
@@ -2548,15 +2582,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         Camera2ApiAutoFix.applyPrev(mPreviewRequestBuilder);
                         VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, false, useMaximumResolutionKey, true);
                         // Finally, we start displaying the camera preview.
-                        boolean combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview;
-                        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-                            combinedFpsResult60 = PhotonCamera.getSettings().fpsPreview || (PhotonCamera.getSettings().videoFramrate == 60);
+                        Range<Integer> targetRange = FpsRangeDef;
+                        if (PhotonCamera.getSettings().videoFramrate >= 120 && !mIsRecordingVideo) {
+                            // If we are not recording, use a variable range to allow regular session compatibility
+                            targetRange = new Range<>(30, PhotonCamera.getSettings().videoFramrate);
                         }
-                        if (!combinedFpsResult60) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
-                        } else {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
-                        }
+                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, targetRange);
 
                         setAdvancedParameters(mPreviewRequestBuilder, true);
                         activateLut();
@@ -2746,11 +2777,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return configureSurfacesRawVideo(isBurstSession);
         }
-        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && mIsRecordingVideo && PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
-            return configureSurfacesLutVideo(isBurstSession);
-        }
 
-        List<Surface> surfaces = new ArrayList<>();
         boolean isHighSpeedSupported = false;
         int[] capabilities = mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         if (capabilities != null) {
@@ -2762,6 +2789,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
         boolean isHighSpeedSessionRequested = mIsRecordingVideo && isHighSpeedSupported && (PhotonCamera.getSettings().videoFramrate >= 120);
+
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && mIsRecordingVideo && PhotonCamera.getSpecific().specificSetting.enableVideoLut && !isHighSpeedSessionRequested) {
+            return configureSurfacesLutVideo(isBurstSession);
+        }
+
+        List<Surface> surfaces = new ArrayList<>();
 
         if (mIsRecordingVideo) {
             if (PhotonCamera.getSettings().videoNewRec) {
@@ -2780,13 +2813,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
 
             if (isHighSpeedSessionRequested) {
+                if (mTextureSurface != null && mTextureSurface.isValid()) {
+                    surfaces.add(mTextureSurface);
+                }
                 if (mVideoRecordingSurface != null && mVideoRecordingSurface.isValid()) {
                     surfaces.add(mVideoRecordingSurface);
                     if (mPreviewRequestBuilder != null) {
                         mPreviewRequestBuilder.addTarget(mVideoRecordingSurface);
                     }
-                    Log.i(TAG, "Configuring surfaces for HIGH-SPEED session. Using ONLY video surface.");
                 }
+                Log.i(TAG, "Configuring surfaces for HIGH-SPEED session.");
             } else {
                 if (mTextureSurface != null && mTextureSurface.isValid()) {
                     surfaces.add(mTextureSurface);
@@ -4803,6 +4839,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 3264;
             vidHeight = 1836;
         }
+        else if (PhotonCamera.getSettings().videoHeight == 2608) {
+            vidWidth = 4624;
+            vidHeight = 2608;
+        }
         else {
             vidWidth = 1280;
         }
@@ -5365,6 +5405,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 1836) {
             mVidWidth = 3264;
             mVidHeight = 1836;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 2608) {
+            mVidWidth = 4624;
+            mVidHeight = 2608;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);

@@ -555,7 +555,7 @@ public class Parameters {
     @NonNull
     @Override
     public String toString() {
-        return "parameters:\n" +
+        String metaData = "parameters:\n" +
                 "\n hasGainMap=" + hasGainMap +
                 "\n FrameCount=" + FrameNumberSelector.frameCount +
                 "\n CameraID=" + PhotonCamera.getSettings().mCameraID +
@@ -572,8 +572,25 @@ public class Parameters {
                 "\n Color=" + PhotonCamera.getSettings().colorMethod +
                 "\n PreviewFormat=" + PhotonCamera.getSettings().previewFormat +
                 "\n FocalL=" + FltFormat(focalLength) +
-                "\n LUT=" + PhotonCamera.getSettings().lutName +
-                "\n Version=" + PhotonCamera.getVersion();
+                "\n LUT=" + PhotonCamera.getSettings().lutName;
+
+        if (PhotonCamera.isQucommAdrcOff) {
+            metaData += "\n ADRC=Off";
+        } else {
+            metaData += "\n ADRC=On";
+        }
+
+        if (PhotonCamera.isQucommSensorModeOn) {
+            metaData += "\n QcomSensorMode=" + PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode;
+        }
+
+        if (PhotonCamera.isVivoSensorModeOn) {
+            metaData += "\n VivoSensorMode=" + PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode;
+        }
+
+        metaData += "\n Version=" + PhotonCamera.getVersion();;
+
+        return metaData;
     }
 
     @SuppressLint("DefaultLocale")

@@ -634,11 +634,14 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         }
 
         if (PhotonCamera.getSettings().useVirtualHorizon && (mHorizonIndicatorView != null) && (PhotonCamera.getHorizonAndGear() != null)) {
+            mHorizonIndicatorView.setVisibility(View.VISIBLE);
             mHorizonIndicatorView.updateDisplayRotation(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
             mHorizonIndicatorView.updateAngles(PhotonCamera.getHorizonAndGear().getRoll(), PhotonCamera.getHorizonAndGear().getPitch(), PhotonCamera.getHorizonAndGear().getYaw());
             if (getCameraFragmentViewModel() != null) {
                 mHorizonIndicatorView.setViewfinderMagnified(getCameraFragmentViewModel().getCameraFragmentModel().isViewfinderMagnified());
             }
+        } else {
+            mHorizonIndicatorView.setVisibility(View.GONE);
         }
 
         // GPS
@@ -657,7 +660,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         }
 
         surfaceView.post(() -> {
-            if (PhotonCamera.getSettings().functionOne.equals("Histogram") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) {
+            if ((PhotonCamera.getSettings().functionOne.equals("Histogram") || PhotonCamera.getSettings().functionTwo.equals("Histogram")) && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) {
                 paintHistogram(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
             } else {
                 paintDummyHistogram();
@@ -679,7 +682,9 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 }
                 //captureController.cameraEventsListener.mCurrentShutterSpeed = String.valueOf(result.get(CaptureResult.SENSOR_EXPOSURE_TIME) / 1000000000);
             }
-            if (PreferenceKeys.isAfDataOn() || (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn())) {
+            if (PreferenceKeys.isAfDataOn() ||
+                (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) ||
+                (PhotonCamera.getSettings().functionTwo.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionTwoOn())) {
                 //stringMap.put("ISO", String.valueOf(expoPair.iso));
                 String physCamId = result.get(CaptureResult.LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID);
                 String camID = physCamId;

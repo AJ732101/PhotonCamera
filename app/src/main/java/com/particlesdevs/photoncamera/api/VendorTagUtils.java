@@ -1010,7 +1010,9 @@ public class VendorTagUtils {
         } catch (Exception e){
             Log.w(TAG, "Error applying vendor tags to CaptureRequest.Builder", e);
         }
-        if (useMaximumResolutionKey) {
+
+        if (useMaximumResolutionKey)
+        {
             builder.set(CaptureRequest.SENSOR_PIXEL_MODE, CaptureRequest.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION);
         }
     }

@@ -51,6 +51,7 @@
     <string name="pref_real_preview_format_key" translatable="false">pref_real_preview_format_key</string>
     <string name="pref_raw_format_key" translatable="false">pref_raw_format_key</string>
     <string name="pref_function_one_key" translatable="false">pref_function_one_key</string>
+    <string name="pref_function_two_key" translatable="false">pref_function_two_key</string>
     <string name="pref_cfa_key" translatable="false">pref_cfa_key</string>
     <string name="pref_remosaic_key" translatable="false">pref_remosaic_key</string>
     <string name="pref_telegram_channel_key" translatable="false">pref_telegram_channel_key</string>
