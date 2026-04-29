@@ -805,6 +805,28 @@ public class VendorTagUtils {
                         }
                     }
 
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().videoFramrate >= 120)) {
+                        var vivoControlHitchcockEnable = new CaptureRequest.Key<>("vivo.control.hitchcock.enable", byte.class);
+                        if (isSupported(builder, vivoControlHitchcockEnable)) {
+                            builder.set(vivoControlHitchcockEnable, (byte) 1);
+                        }
+
+                        var vivoControlHitchcockMode = new CaptureRequest.Key<>("vivo.control.hitchcock.mode", Integer.class);
+                        if (isSupported(builder, vivoControlHitchcockMode)) {
+                            builder.set(vivoControlHitchcockMode, 4);
+                        }
+
+                        var vivoControlHitchcockFramenum = new CaptureRequest.Key<>("vivo.control.hitchcock.framenum", Integer.class);
+                        if (isSupported(builder, vivoControlHitchcockFramenum)) {
+                            builder.set(vivoControlHitchcockFramenum, PhotonCamera.getSettings().videoFramrate);
+                        }
+
+                        var vivoControlCurrentMode = new CaptureRequest.Key<>("vivo.control.currentMode", Integer.class);
+                        if (isSupported(builder, vivoControlCurrentMode)) {
+                            builder.set(vivoControlCurrentMode, 13);
+                        }
+                    }
+
                     var zeissColor = new CaptureRequest.Key<>("vivo.control.enableZeissColor", Integer.class);
                     if (isSupported(builder, zeissColor)) {
                         PhotonCamera.hasVivoZeissColor = true;
@@ -983,6 +1005,25 @@ public class VendorTagUtils {
                     var vlogEffect = new CaptureRequest.Key<>("vivo.control.session.vlogEffect", Integer.class);
                     if (isSupported(builder, vlogEffect)) {
                         //builder.set(vlogEffect, 1);
+                    }
+                }
+
+                // custom vendor keys
+                if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName != null) {
+                    for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName.length; i++) {
+                        var customByteKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName[i], byte.class);
+                        if (isSupported(builder, customByteKey)) {
+                            builder.set(customByteKey, (byte) PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteValue[i]);
+                        }
+                    }
+                }
+
+                if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name != null) {
+                    for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name.length; i++) {
+                        var customInt32Key = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name[i], Integer.class);
+                        if (isSupported(builder, customInt32Key)) {
+                            builder.set(customInt32Key, PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Value[i]);
+                        }
                     }
                 }
 

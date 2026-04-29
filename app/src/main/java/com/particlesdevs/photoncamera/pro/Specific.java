@@ -198,6 +198,22 @@ public class Specific {
                     specificSetting.vivoVideoMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "customVendorKeyTypeByteValue": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeByteValue = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteValue.length; i++) {
+                        specificSetting.customVendorKeyTypeByteValue[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeInt32Value": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeInt32Value = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Value.length; i++) {
+                        specificSetting.customVendorKeyTypeInt32Value[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
@@ -220,6 +236,22 @@ public class Specific {
                 }
                 case "networkSyncBaseUrl": {
                     specificSetting.networkSyncBaseUrl = caseS[1];
+                    break;
+                }
+                case "customVendorKeyTypeByteName": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeByteName = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteName.length; i++) {
+                        specificSetting.customVendorKeyTypeByteName[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeInt32Name": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeInt32Name = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Name.length; i++) {
+                        specificSetting.customVendorKeyTypeInt32Name[i] = ids[i];
+                    }
                     break;
                 }
             }
