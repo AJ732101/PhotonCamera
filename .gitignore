@@ -88,3 +88,10 @@ lint/tmp/
 # lint/reports/
 /app/google-services.json
 .idea/.name
+/app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator.java.bak
+/app/src/main/assets/chaiNNer/load_image_old.py
+/app/src/main/java/com/particlesdevs/photoncamera/capture/capture.7z
+/app/src/main/assets/watermark/photoncamera_watermark_old.png
+/app/src/main/assets/watermark/watermark.zip
+/app/src/main/assets/ContrastCurves/BCEI.93fe38e0-0383-461f-a715-651b7f7053dd.png
+/app/src/main/assets/ContrastCurves/BCEI.251611b4-3bd2-4ea1-970b-1aa07a6d4dbc.png

@@ -367,6 +367,12 @@ public class SettingsActivity extends BaseActivity implements
                 saturationPreference.setEnabled(PhotonCamera.hasSaturationKey);
             }
 
+            String contrastKey = getString(R.string.pref_soc_qualcomm_contrast_key);
+            Preference contrastPreference = findPreference(contrastKey);
+            if (contrastPreference != null) {
+                contrastPreference.setEnabled(PhotonCamera.hasContrastKey);
+            }
+
             String eisKey = getString(R.string.pref_soc_qualcomm_eis_mode_key);
             Preference eisPreference = findPreference(eisKey);
             if (eisPreference != null) {

@@ -198,22 +198,6 @@ public class Specific {
                     specificSetting.vivoVideoMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-                case "customVendorKeyTypeByteValue": {
-                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                    specificSetting.customVendorKeyTypeByteValue = new int[ids.length];
-                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteValue.length; i++) {
-                        specificSetting.customVendorKeyTypeByteValue[i] = Integer.parseInt(ids[i]);
-                    }
-                    break;
-                }
-                case "customVendorKeyTypeInt32Value": {
-                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                    specificSetting.customVendorKeyTypeInt32Value = new int[ids.length];
-                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Value.length; i++) {
-                        specificSetting.customVendorKeyTypeInt32Value[i] = Integer.parseInt(ids[i]);
-                    }
-                    break;
-                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
@@ -251,6 +235,38 @@ public class Specific {
                     specificSetting.customVendorKeyTypeInt32Name = new String[ids.length];
                     for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Name.length; i++) {
                         specificSetting.customVendorKeyTypeInt32Name[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeFloatName": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeFloatName = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeFloatName.length; i++) {
+                        specificSetting.customVendorKeyTypeFloatName[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeByteValue": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeByteValue = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteValue.length; i++) {
+                        specificSetting.customVendorKeyTypeByteValue[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeInt32Value": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeInt32Value = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Value.length; i++) {
+                        specificSetting.customVendorKeyTypeInt32Value[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeFloatValue": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeFloatValue = new float[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeFloatValue.length; i++) {
+                        specificSetting.customVendorKeyTypeFloatValue[i] = Float.parseFloat(ids[i]);
                     }
                     break;
                 }

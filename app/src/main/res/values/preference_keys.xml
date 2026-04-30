@@ -138,6 +138,7 @@
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_key" translatable="false">pref_soc_qualcomm_sharpness_key</string>
     <string name="pref_soc_qualcomm_saturation_key" translatable="false">pref_soc_qualcomm_saturation_key</string>
+    <string name="pref_soc_qualcomm_contrast_key" translatable="false">pref_soc_qualcomm_contrast_key</string>
     <string name="pref_soc_qualcomm_mfnr_frames_key" translatable="false">pref_soc_qualcomm_mfnr_frames_key</string>
     <string name="pref_soc_qualcomm_eis_mode_key" translatable="false">pref_soc_qualcomm_eis_mode_key</string>
     <string name="pref_soc_qualcomm_ai_mode_key" translatable="false">pref_soc_qualcomm_ai_mode_key</string>

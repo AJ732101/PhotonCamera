@@ -84,6 +84,7 @@ public class Settings {
     public int singleFrameQuality;
     public int socQualcommSharpness;
     public int socQualcommSaturation;
+    public int socQualcommContrast;
     public int socQualcommEisMode;
     public int socQualcommAiMode;
     public boolean socQualcommUseIsz = false;
@@ -227,6 +228,7 @@ public class Settings {
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         socQualcommSharpness = PreferenceKeys.getSocQualcommSharpness();
         socQualcommSaturation = PreferenceKeys.getSocQualcommSaturation();
+        socQualcommContrast = PreferenceKeys.getSocQualcommContrast();
         socQualcommEisMode = PreferenceKeys.getSocQualcommEisMode();
         socQualcommAiMode = PreferenceKeys.getSocQualcommAiMode();
         socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();

@@ -448,7 +448,7 @@ public class DngCreator {
         if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             setDescription(parameters.toString());
         }
-        setSoftware("PhotonVidCam v0.97");
+        setSoftware("PhotonVidCam v0.98");
 
         // Set current date and time
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US);

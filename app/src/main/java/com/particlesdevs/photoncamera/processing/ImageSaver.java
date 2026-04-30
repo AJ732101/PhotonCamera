@@ -130,6 +130,7 @@ public class ImageSaver {
         imageDescriptionBuilder.append("\n   Edge Processing: ").append((PhotonCamera.getSettings().edgeProcessing > 0) ? "Enabled" : "Disabled");
         imageDescriptionBuilder.append("\n   Digital Zoom: ").append(PhotonCamera.getSettings().zoom2X ? "Enabled" : "Disabled");
         imageDescriptionBuilder.append("\n   SoC Saturation: ").append(PhotonCamera.getSettings().socQualcommSaturation);
+        imageDescriptionBuilder.append("\n   SoC Contrast: ").append(PhotonCamera.getSettings().socQualcommContrast);
         imageDescriptionBuilder.append("\n   SoC Sharpness: ").append(PhotonCamera.getSettings().socQualcommSharpness);
         if (PhotonCamera.getSettings().hotPixelMode == 99) {
             imageDescriptionBuilder.append("\n   Hot Pixel Mode: Device Default");

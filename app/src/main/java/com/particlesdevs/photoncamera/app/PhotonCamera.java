@@ -80,6 +80,7 @@ public class PhotonCamera extends Application {
     public static boolean isHuawei = false;
     public static boolean hasIszKey = false;
     public static boolean hasSaturationKey = false;
+    public static boolean hasContrastKey = false;
     public static boolean hasSharpnessKey = false;
     public static boolean hasEisModeKey = false;
     public static boolean hasAiModeKey = false;

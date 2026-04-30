@@ -248,6 +248,7 @@
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm Sharpness</string>
     <string name="soc_qualcomm_saturation">Qualcomm Saturation</string>
+    <string name="soc_qualcomm_contrast">Qualcomm Contrast</string>
     <string name="soc_qualcomm_mfnr_frames">Qualcomm MFNR Frames</string>
     <string name="soc_qualcomm_eis_mode">Qualcomm EIS Mode</string>
     <string name="soc_qualcomm_ai_mode">Qualcomm AI Mode</string>

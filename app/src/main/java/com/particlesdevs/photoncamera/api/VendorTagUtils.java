@@ -131,6 +131,7 @@ public class VendorTagUtils {
     private static void resetFlags() {
         PhotonCamera.hasIszKey = false;
         PhotonCamera.hasSaturationKey = false;
+        PhotonCamera.hasContrastKey = false;
         PhotonCamera.hasSharpnessKey = false;
         PhotonCamera.hasEisModeKey = false;
         PhotonCamera.hasAiModeKey = false;
@@ -460,7 +461,13 @@ public class VendorTagUtils {
                 var useSaturation = new CaptureRequest.Key<>("org.codeaurora.qcamera3.saturation.use_saturation", Integer.class);
                 if (isSupported(builder, useSaturation)) {
                     PhotonCamera.hasSaturationKey = true;
-                    builder.set(useSaturation, (int) PhotonCamera.getSettings().socQualcommSaturation);
+                    builder.set(useSaturation, PhotonCamera.getSettings().socQualcommSaturation);
+                }
+
+                var useContrast = new CaptureRequest.Key<>("org.codeaurora.qcamera3.contrast.level", Integer.class);
+                if (isSupported(builder, useContrast)) {
+                    PhotonCamera.hasContrastKey = true;
+                    builder.set(useContrast, PhotonCamera.getSettings().socQualcommContrast);
                 }
 
                 var enableCinematicMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableCinematicMode", Integer.class);
@@ -1023,6 +1030,15 @@ public class VendorTagUtils {
                         var customInt32Key = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name[i], Integer.class);
                         if (isSupported(builder, customInt32Key)) {
                             builder.set(customInt32Key, PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Value[i]);
+                        }
+                    }
+                }
+
+                if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName != null) {
+                    for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName.length; i++) {
+                        var customFloatKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName[i], Float.class);
+                        if (isSupported(builder, customFloatKey)) {
+                            builder.set(customFloatKey, PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatValue[i]);
                         }
                     }
                 }
