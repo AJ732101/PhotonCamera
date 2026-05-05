@@ -707,27 +707,29 @@ public class VendorTagUtils {
                     builder.set(hdrPref, (int) 1);
                 }
 
-                for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                    try {
-                        String camID = "";
-                        String sensorMode = "";
-                        if(id.contains("-")){
-                            camID = id.split("-")[0];
-                            sensorMode = id.split("-")[1];
-                        }
-
-                        if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                            var sensorModeKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
-                            if (isSupported(builder, sensorModeKey)) {
-                                PhotonCamera.hasQucommSensorMode = true;
-                                if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
-                                    builder.set(sensorModeKey, Integer.valueOf(sensorMode));
-                                }
+                if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
+                    for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                        try {
+                            String camID = "";
+                            String sensorMode = "";
+                            if (id.contains("-")) {
+                                camID = id.split("-")[0];
+                                sensorMode = id.split("-")[1];
                             }
-                            break;
-                        }
-                    } catch (Exception ignored) {
 
+                            if (PhotonCamera.getSettings().mCameraID.contains(camID)) {
+                                var sensorModeKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
+                                if (isSupported(builder, sensorModeKey)) {
+                                    PhotonCamera.hasQucommSensorMode = true;
+                                    if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
+                                        builder.set(sensorModeKey, Integer.valueOf(sensorMode));
+                                    }
+                                }
+                                break;
+                            }
+                        } catch (Exception ignored) {
+
+                        }
                     }
                 }
 
@@ -977,27 +979,29 @@ public class VendorTagUtils {
                         builder.set(vivoUltraHighRes, PhotonCamera.getSpecific().specificSetting.vivoUseUltraHighResolution ? 1: 0);
                     }
 
-                    for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                        try {
-                            String camID = "";
-                            String sensorMode = "";
-                            if(id.contains("-")){
-                                camID = id.split("-")[0];
-                                sensorMode = id.split("-")[1];
-                            }
-
-                            if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                                var vivoControlForceSensorMode = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
-                                if (isSupported(builder, vivoControlForceSensorMode)) {
-                                    PhotonCamera.hasVivoSensorMode = true;
-                                    if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
-                                        builder.set(vivoControlForceSensorMode, Integer.valueOf(sensorMode));
-                                    }
+                    if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
+                        for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                            try {
+                                String camID = "";
+                                String sensorMode = "";
+                                if (id.contains("-")) {
+                                    camID = id.split("-")[0];
+                                    sensorMode = id.split("-")[1];
                                 }
-                                break;
-                            }
-                        } catch (Exception ignored) {
 
+                                if (PhotonCamera.getSettings().mCameraID.contains(camID)) {
+                                    var vivoControlForceSensorMode = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
+                                    if (isSupported(builder, vivoControlForceSensorMode)) {
+                                        PhotonCamera.hasVivoSensorMode = true;
+                                        if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
+                                            builder.set(vivoControlForceSensorMode, Integer.valueOf(sensorMode));
+                                        }
+                                    }
+                                    break;
+                                }
+                            } catch (Exception ignored) {
+
+                            }
                         }
                     }
 

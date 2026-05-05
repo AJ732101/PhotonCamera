@@ -580,29 +580,31 @@ public class Parameters {
             metaData += "\n ADRC=On";
         }
 
-        String sensorMode = "";
-        for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-            try {
-                String camID = "";
-                if(id.contains("-")){
-                    camID = id.split("-")[0];
-                    sensorMode = id.split("-")[1];
-                }
+        if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
+            String sensorMode = "";
+            for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                try {
+                    String camID = "";
+                    if (id.contains("-")) {
+                        camID = id.split("-")[0];
+                        sensorMode = id.split("-")[1];
+                    }
 
-                if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                    break;
-                }
-            } catch (Exception ignored) {
+                    if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
+                        break;
+                    }
+                } catch (Exception ignored) {
 
+                }
             }
-        }
 
-        if (PhotonCamera.isQucommSensorModeOn) {
-            metaData += "\n QcomSensorMode=" + sensorMode;
-        }
+            if (PhotonCamera.isQucommSensorModeOn) {
+                metaData += "\n QcomSensorMode=" + sensorMode;
+            }
 
-        if (PhotonCamera.isVivoSensorModeOn) {
-            metaData += "\n VivoSensorMode=" + sensorMode;
+            if (PhotonCamera.isVivoSensorModeOn) {
+                metaData += "\n VivoSensorMode=" + sensorMode;
+            }
         }
 
         metaData += "\n Version=" + PhotonCamera.getVersion();;

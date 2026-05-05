@@ -160,29 +160,31 @@ public class ImageSaver {
             imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
 
-        String sensorMode = "";
-        for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-            try {
-                String camID = "";
-                if(id.contains("-")){
-                    camID = id.split("-")[0];
-                    sensorMode = id.split("-")[1];
-                }
+        if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
+            String sensorMode = "";
+            for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                try {
+                    String camID = "";
+                    if (id.contains("-")) {
+                        camID = id.split("-")[0];
+                        sensorMode = id.split("-")[1];
+                    }
 
-                if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                    break;
-                }
-            } catch (Exception ignored) {
+                    if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
+                        break;
+                    }
+                } catch (Exception ignored) {
 
+                }
             }
+            if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
+                imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(sensorMode);
+            }
+            if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
+                imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(sensorMode);
+            }
+            imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
         }
-        if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
-            imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(sensorMode);
-        }
-        if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
-            imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(sensorMode);
-        }
-        imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
         return imageDescriptionBuilder.toString();
     }
