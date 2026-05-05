@@ -38,8 +38,8 @@ public class SpecificSetting {
     public int qtiDCGMode = 0;
     public int qtiImageStabilizationMode = 0;
     public int xiaomiHdrMode = 1;
-    public int sensorMetaDataCurrentMode = -1;
-    public int vivoControlForceSensorMode = -1;
+    public String[] sensorModes;
+    public String sensorModeKey = "vivo.control.forceSensorMode";
     public int vivoVideoMode = -1;
     public float colorTint = 99.0f;
     public String recPrefix = "";

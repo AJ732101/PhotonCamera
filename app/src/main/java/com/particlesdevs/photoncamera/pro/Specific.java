@@ -186,14 +186,6 @@ public class Specific {
                     specificSetting.xiaomiHdrMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-                case "sensorMetaDataCurrentMode": {
-                    specificSetting.sensorMetaDataCurrentMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "vivoControlForceSensorMode": {
-                    specificSetting.vivoControlForceSensorMode = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "vivoVideoMode": {
                     specificSetting.vivoVideoMode = Integer.parseInt(caseS[1]);
                     break;
@@ -268,6 +260,19 @@ public class Specific {
                     for (int i = 0; i < specificSetting.customVendorKeyTypeFloatValue.length; i++) {
                         specificSetting.customVendorKeyTypeFloatValue[i] = Float.parseFloat(ids[i]);
                     }
+                    break;
+                }
+                case "sensorModes": {
+                    Log.d(TAG, "Sensor Modes Loaded: " + caseS[1]);
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.sensorModes = new String[ids.length];
+                    for (int i = 0; i < specificSetting.sensorModes.length; i++) {
+                        specificSetting.sensorModes[i] = ids[i];
+                    }
+                    break;
+                }
+                case "sensorModeKey": {
+                    specificSetting.sensorModeKey = caseS[1];
                     break;
                 }
             }

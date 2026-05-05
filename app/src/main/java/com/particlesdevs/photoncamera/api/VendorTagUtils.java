@@ -707,11 +707,27 @@ public class VendorTagUtils {
                     builder.set(hdrPref, (int) 1);
                 }
 
-                CaptureRequest.Key currentMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sensor_meta_data.current_mode", Integer.class);
-                if (isSupported(builder, currentMode)) {
-                    PhotonCamera.hasQucommSensorMode = true;
-                    if (PhotonCamera.isQucommSensorModeOn && (PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode >= 0)) {
-                        builder.set(currentMode, PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode);
+                for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                    try {
+                        String camID = "";
+                        String sensorMode = "";
+                        if(id.contains("-")){
+                            camID = id.split("-")[0];
+                            sensorMode = id.split("-")[1];
+                        }
+
+                        if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
+                            var sensorModeKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
+                            if (isSupported(builder, sensorModeKey)) {
+                                PhotonCamera.hasQucommSensorMode = true;
+                                if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
+                                    builder.set(sensorModeKey, Integer.valueOf(sensorMode));
+                                }
+                            }
+                            break;
+                        }
+                    } catch (Exception ignored) {
+
                     }
                 }
 
@@ -961,16 +977,27 @@ public class VendorTagUtils {
                         builder.set(vivoUltraHighRes, PhotonCamera.getSpecific().specificSetting.vivoUseUltraHighResolution ? 1: 0);
                     }
 
-                    var vivoControlForceSensorMode = new CaptureRequest.Key<>("vivo.control.forceSensorMode", Integer.class);
-                    if (isSupported(builder, vivoControlForceSensorMode)) {
-                        PhotonCamera.hasVivoSensorMode = true;
-                        if (PhotonCamera.isVivoSensorModeOn && (PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode >= 0)) {
-                            builder.set(vivoControlForceSensorMode, PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
-
-                            var vivoSensorMode = new CaptureRequest.Key<>("vivo.control.sensorMode", Integer.class);
-                            if (isSupported(builder, vivoSensorMode)) {
-                                //builder.set(vivoSensorMode, PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
+                    for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+                        try {
+                            String camID = "";
+                            String sensorMode = "";
+                            if(id.contains("-")){
+                                camID = id.split("-")[0];
+                                sensorMode = id.split("-")[1];
                             }
+
+                            if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
+                                var vivoControlForceSensorMode = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
+                                if (isSupported(builder, vivoControlForceSensorMode)) {
+                                    PhotonCamera.hasVivoSensorMode = true;
+                                    if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
+                                        builder.set(vivoControlForceSensorMode, Integer.valueOf(sensorMode));
+                                    }
+                                }
+                                break;
+                            }
+                        } catch (Exception ignored) {
+
                         }
                     }
 

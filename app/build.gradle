@@ -41,7 +41,7 @@ android {
 
 
     defaultConfig {
-        applicationId 'com.google.module.evaluation'
+        applicationId 'com.xiaomi.module.evaluation'
         minSdk 29
         targetSdk 36
         versionCode versionBuild

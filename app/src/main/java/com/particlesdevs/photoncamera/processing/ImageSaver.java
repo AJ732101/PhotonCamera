@@ -159,11 +159,28 @@ public class ImageSaver {
         if (PhotonCamera.hasQucommAdrcOff) {
             imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
-        if (PhotonCamera.isVivoSensorModeOn && (PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode >= 0)) {
-            imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(PhotonCamera.getSpecific().specificSetting.vivoControlForceSensorMode);
+
+        String sensorMode = "";
+        for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
+            try {
+                String camID = "";
+                if(id.contains("-")){
+                    camID = id.split("-")[0];
+                    sensorMode = id.split("-")[1];
+                }
+
+                if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
+                    break;
+                }
+            } catch (Exception ignored) {
+
+            }
         }
-        if (PhotonCamera.isQucommSensorModeOn && (PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode >= 0)) {
-            imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(PhotonCamera.getSpecific().specificSetting.sensorMetaDataCurrentMode);
+        if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
+            imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(sensorMode);
+        }
+        if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
+            imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(sensorMode);
         }
         imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
