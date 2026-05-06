@@ -15,9 +15,11 @@ import com.particlesdevs.photoncamera.processing.opengl.scripts.AverageParams;
 import com.particlesdevs.photoncamera.processing.opengl.scripts.AverageRaw;
 import com.particlesdevs.photoncamera.processing.parameters.FrameNumberSelector;
 import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
+import com.particlesdevs.photoncamera.processing.render.Parameters;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class UnlimitedProcessor extends ProcessorBase {
     private static final String TAG = "UnlimitedProcessor";
@@ -30,6 +32,8 @@ public class UnlimitedProcessor extends ProcessorBase {
 
     /* config */
     private int saveRAW;
+
+    private Parameters parameters;
 
     public UnlimitedProcessor(ProcessingEventsListener processingEventsListener) {
         super(processingEventsListener);
@@ -55,6 +59,8 @@ public class UnlimitedProcessor extends ProcessorBase {
         unlimitedEnd = false;
         lock = false;
         this.callback = callback;
+        parameters = new Parameters();
+        fillParams = false;
     }
 
     public void unlimitedCycle(Image image) {
@@ -64,18 +70,17 @@ public class UnlimitedProcessor extends ProcessorBase {
         }*/
         int width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
         int height = image.getHeight();
-        PhotonCamera.getParameters().rawSize = new Point(width, height);
         if(!fillParams){
-            PhotonCamera.getParameters().FillConstParameters(characteristics, PhotonCamera.getParameters().rawSize);
-            PhotonCamera.getParameters().FillDynamicParameters(captureResult, captureRequest, IsoExpoSelector.fullpairs.get(0).iso);
-            PhotonCamera.getParameters().cameraRotation = this.cameraRotation;
-            exifData.IMAGE_DESCRIPTION = PhotonCamera.getParameters().toString();
+            parameters.FillConstParameters(characteristics, new Point(width, height));
+            parameters.FillDynamicParameters(captureResult, captureRequest, IsoExpoSelector.fullpairs.get(0).iso);
+            parameters.cameraRotation = this.cameraRotation;
+            exifData.IMAGE_DESCRIPTION = parameters.toString();
             fillParams = true;
         }
         if (averageRaw == null) {
-            averageRaw = new AverageRaw(PhotonCamera.getParameters().rawSize, "UnlimitedAvr");
+            averageRaw = new AverageRaw(parameters.rawSize, "UnlimitedAvr");
         }
-        averageRaw.additionalParams = new AverageParams(null, image.getPlanes()[0].getBuffer());
+        averageRaw.additionalParams = new AverageParams(null, image.getPlanes()[0].getBuffer(), parameters);
         averageRaw.Run();
         unlimitedCounter++;
         /*
@@ -83,7 +88,7 @@ public class UnlimitedProcessor extends ProcessorBase {
             unlimitedEnd = false;
             lock = true;
             FrameNumberSelector.frameCount = unlimitedCounter;
-            PhotonCamera.getParameters().noiseModeler.computeStackingNoiseModel();
+            parameters.noiseModeler.computeStackingNoiseModel();
             unlimitedCounter = 0;
             try {
                 processUnlimited(image);
@@ -97,21 +102,21 @@ public class UnlimitedProcessor extends ProcessorBase {
 
     private void processUnlimited() {
         callback.onStarted();
-//        PhotonCamera.getParameters().path = ImageSaver.jpgFilePathToSave.getAbsolutePath();
+//        parameters.path = ImageSaver.jpgFilePathToSave.getAbsolutePath();
         processingEventsListener.onProcessingStarted("Unlimited");
         averageRaw.FinalScript();
         ByteBuffer unlimitedBuffer = averageRaw.Output;
         averageRaw.close();
         averageRaw = null;
 
-        IncreaseWLBL();
+        IncreaseWLBL(parameters);
 
         if (saveRAW >= 1) {
 
             processingEventsListener.onProcessingFinished("Unlimited rawSaver Processing Finished");
             unlimitedBuffer.position(0);
 
-            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, unlimitedBuffer, PhotonCamera.getParameters());
+            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, unlimitedBuffer, parameters);
 
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
             if (saveRAW == 2) {
@@ -123,11 +128,12 @@ public class UnlimitedProcessor extends ProcessorBase {
 
 
         PostPipeline pipeline = new PostPipeline();
-        Bitmap bitmap = pipeline.Run(unlimitedBuffer, PhotonCamera.getParameters());
+        Bitmap bitmap = pipeline.Run(unlimitedBuffer, parameters);
 
         processingEventsListener.onProcessingFinished("Unlimited JPG Processing Finished");
-
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        imageFile = Paths.get(imageFile.toAbsolutePath() + ".jpg");
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, bitmap,
+                PhotonCamera.getSettings().singleFrameQuality, exifData);
 
         processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);
 
@@ -141,7 +147,7 @@ public class UnlimitedProcessor extends ProcessorBase {
         unlimitedEnd = false;
         lock = true;
         FrameNumberSelector.frameCount = unlimitedCounter;
-        PhotonCamera.getParameters().noiseModeler.computeStackingNoiseModel();
+        parameters.noiseModeler.computeStackingNoiseModel();
         unlimitedCounter = 1;
         try {
             processUnlimited();

@@ -71,4 +71,11 @@ public class Math2 {
             x = upperlimit;
         return x;
     }
+    public static double clamp(double x, double lowerlimit, double upperlimit) {
+        if (x < lowerlimit)
+            x = lowerlimit;
+        if (x > upperlimit)
+            x = upperlimit;
+        return x;
+    }
 }

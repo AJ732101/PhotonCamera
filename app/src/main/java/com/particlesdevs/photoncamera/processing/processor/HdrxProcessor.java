@@ -85,6 +85,10 @@ public class HdrxProcessor extends ProcessorBase {
             Camera2ApiAutoFix.ApplyRes(captureResult);
             if (imageFormat == CaptureController.RAW_FORMAT) {
                 ApplyHdrX();
+            } else {
+                Log.d(TAG, "HdrX processing skipped due to unsupported image format: " + imageFormat);
+                callback.onFinished();
+                return;
             }
 //            if (isYuv) {
 //                ApplyStabilization();
@@ -245,26 +249,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
         selected = 0;
 
-        processingParameters.noiseModeler.computeStackingNoiseModel(1);
-        float NoiseS = processingParameters.noiseModeler.computeModel[0].first.floatValue() +
-                processingParameters.noiseModeler.computeModel[1].first.floatValue() +
-                processingParameters.noiseModeler.computeModel[2].first.floatValue();
-        float NoiseO = processingParameters.noiseModeler.computeModel[0].second.floatValue() +
-                processingParameters.noiseModeler.computeModel[1].second.floatValue() +
-                processingParameters.noiseModeler.computeModel[2].second.floatValue();
-        NoiseS /= 3.f;
-        NoiseO /= 3.f;
-        double noisempy = Math.pow(2.0, PhotonCamera.getSettings().mergeStrength);
-        int cnt = (int) ((NoiseS + NoiseO) * PhotonCamera.getSettings().frameCount * Math.pow(2.0, PhotonCamera.getSettings().mergeStrength) / (0.001f));
-        Log.d(TAG, "Desired Frame count0:" + cnt);
-        cnt = Math.max(cnt, 3);
-        //cnt = Math.min(cnt,images.size());
-        cnt = images.size();
-        processingParameters.noiseModeler.computeStackingNoiseModel(cnt);
-        Log.d(TAG, "Desired Frame count1:" + cnt);
-        NoiseS = (float) Math.max(NoiseS * noisempy, Float.MIN_NORMAL);
-        NoiseO = (float) Math.max(NoiseO * noisempy, Float.MIN_NORMAL);
-        FrameNumberSelector.frameCount = cnt;
+
 
         Log.d(TAG, "White Level:" + processingParameters.whiteLevel);
         Log.d(TAG, "Wrapper.loadFrame");
@@ -275,38 +260,40 @@ public class HdrxProcessor extends ProcessorBase {
         Log.d(TAG, "Packing");
         //WrapperAl.packImages();
         Log.d(TAG, "Packed");
-        PyramidMerging pyramidMerging = new PyramidMerging(new Point(width, height), images);
-        pyramidMerging.parameters = processingParameters;
-        pyramidMerging.Run();
-        pyramidMerging.close();
-        output = pyramidMerging.Output;
-        for (int i = 1; i < images.size(); i++) {
-            images.get(i).close();
+        if(images.size() > 1) {
+            PyramidMerging pyramidMerging = new PyramidMerging(new Point(width, height), images);
+            pyramidMerging.parameters = processingParameters;
+            pyramidMerging.Run();
+            pyramidMerging.close();
+            output = pyramidMerging.Output;
+            for (int i = 0; i < images.size(); i++) {
+                images.get(i).close();
+            }
+            IncreaseWLBL(processingParameters);
+        } else {
+            output = images.get(0).buffer;
+            images.get(0).buffer = null;
         }
-
-        IncreaseWLBL(processingParameters);
         Log.d(TAG, "HDRX Alignment elapsed:" + (System.currentTimeMillis() - startTime) + " ms");
-        //Black shot fix
-        ByteBuffer result = output;
         if ((saveRAW >= 1) && alignAlgorithm != 2) {
             boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, output,
                     processingParameters);
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
-
             if (saveRAW == 2) {
                 processingEventsListener.onProcessingFinished("HdrX RAW Processing Finished");
                 callback.onFinished();
-                images.get(0).close();
                 Allocator.free(output);
                 Allocator.getMemoryCount();
                 return;
             }
         }
-        images.get(0).close();
+
+        processingParameters.noiseModeler.computeStackingNoiseModel(images.size());
+
         PostPipeline pipeline = new PostPipeline();
 
-        Bitmap img = pipeline.Run(result, processingParameters);
-        Allocator.free(result);
+        Bitmap img = pipeline.Run(output, processingParameters);
+        Allocator.free(output);
 
         img = overlay(img, pipeline.debugData.toArray(new Bitmap[0]));
         try {

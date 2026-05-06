@@ -11,6 +11,8 @@ import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.LensShadingMap;
 import android.os.Build;
 import android.os.Environment;
+
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Rational;
 import android.util.SizeF;
@@ -22,6 +24,7 @@ import com.particlesdevs.photoncamera.processing.parameters.ExposureIndex;
 import com.particlesdevs.photoncamera.processing.parameters.FrameNumberSelector;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.capture.CaptureController;
+import com.particlesdevs.photoncamera.util.Allocator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -88,6 +91,7 @@ public class Parameters {
     public float[] calibrationTransform2 = new float[9];
     public float[] ForwardTransform2 = new float[9];
     public int current35mmFocalLength = 0;
+    public boolean mirror = false;
 
     // GPS
     public double gpsLatitudeDegree = 0.0;
@@ -98,8 +102,32 @@ public class Parameters {
     public double gpsLongitudeSeconds = 0.0;
     public double gpsAltitude = 0.0;
 
+    @Tunable(title = "Use Dynamic Black Level", category = "Parameters", defaultValue = 0, min = 0, max = 1, step = 1,
+            description = "Use dynamic black level from the camera2api capture result if available (may cause instability on some devices)"
+    )
+    boolean useDynamicBlackLevel;
+
+    @Tunable(title = "Use Dynamic White Level", category = "Parameters", defaultValue = 1, min = 0, max = 1, step = 1,
+            description = "Use dynamic black level from the camera2api capture result if available (may cause instability on some devices)"
+    )
+    boolean useDynamicWhiteLevel;
+
+    @Tunable(title = "Black Level Override", category = "Parameters",
+            defaultValue = -1.0f, min = -1.0f, max = 65535.f, step = 1.0f,
+            description = "Override black level for all channels -1 is disabled")
+    float blackLevelOverride;
+
+    @Tunable(title = "White Level Override", category = "Parameters",
+            defaultValue = -1, min = -1, max = 65535, step = 1,
+            description = "Override black level for all channels -1 is disabled")
+    int whiteLevelOverride;
+
+    @Tunable(title = "Disable front mirror", category = "Parameters", defaultValue = 0, min = 0, max = 1, step = 1,
+            description = "Disable front camera mirroring")
+    boolean disableMirror;
 
     public void FillConstParameters(CameraCharacteristics characteristics, Point size) {
+        com.particlesdevs.photoncamera.settings.TunableInjector.inject(this);
         rawSize = size;
         alignmentSize = new Point((size.x / (tile)) + 1, (size.y / (tile)) + 1);
         tilesX = (rawSize.x / 800) + 1;
@@ -177,6 +205,13 @@ public class Parameters {
         sensorPix = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
         if (sensorPix == null) {
             sensorPix = new Rect(0, 0, rawSize.x, rawSize.y);
+        }
+        var facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+            mirror = true;
+        }
+        if(disableMirror){
+            mirror = false;
         }
         //hotPixels = PhotonCamera.getCameraFragment().mHotPixelMap;
     }
@@ -269,6 +304,12 @@ public class Parameters {
         }
         this.focalLength = focalLength;
         current35mmFocalLength = PhotonCamera.getParameters().current35mmFocalLength;
+		if (Allocator.binning) {
+            for (int i = 0; i < blackLevel.length; i++) {
+                blackLevel[i] = Math.min(blackLevel[i] * 4f, 65535f);
+            }
+            whiteLevel = Math.min(whiteLevel * 4, 65535);
+        }
     }
 
 

@@ -112,8 +112,10 @@
     <string name="reset">Reset All</string>
     <string name="reset_preferences_warning">This will reset all settings to their default values. Continue?</string>
     <string name="backup">Backup</string>
+    <string name="backup_summary_json">Export all settings to JSON (includes per-lens settings)</string>
     <string name="app_will_restart">App Will Restart</string>
     <string name="restore">Restore</string>
+    <string name="restore_summary_json">Import settings from JSON or XML file</string>
     <string name="empty_file_name_error">File name cannot be an empty string</string>
     <string name="device_unsupport">Warning: Unsupported device</string>
     <string name="af_mode">Auto Focus Mode</string>
@@ -121,6 +123,8 @@
     <string name="multiple_deleted_success">%1$s file(s) deleted! %2$s cleared.</string>
     <string name="supported_devices">Supported Devices</string>
     <string name="list_not_loaded" translatable="false"><![CDATA[<list not loaded>]]></string>
+    <string name="fetch_configurations">Fetch Configurations</string>
+    <string name="fetch_configurations_summary">Download device-specific tuning from the network and update cached settings</string>
     <string name="this_device">Your Device - %1$s</string>
     <string name="sync_on">Sync. On</string>
     <string name="sync_off">Sync. Off</string>

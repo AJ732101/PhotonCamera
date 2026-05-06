@@ -9,7 +9,7 @@ out vec4 Output;
 
 #define SIGMA 10.0
 #define BSIGMA 0.1
-#define MSIZE 7
+#define MSIZE 15
 #define KSIZE (MSIZE-1)/2
 #define TRANSPOSE 1
 #define INSIZE 1,1
@@ -38,11 +38,10 @@ void main() {
     ivec2 xy = ivec2(gl_FragCoord.xy);
     xy+=ivec2(0,yOffset);
     vec3 c = vec3(texelFetch(InputBuffer, xy, 0).rgb);
-    float noisefactor = texture(NoiseMap, vec2(xy)/vec2(INSIZE)).g;
+    float noisefactor = dot(c,vec3(0.25));// = texture(NoiseMap, vec2(xy)/vec2(INSIZE)).g;
     {
         //declare stuff
         //const int kSize = (MSIZE-1)/2;
-        float kernel[MSIZE];
         vec3 final_colour = vec3(0.0);
         //float sigX = sigma.x;
         //float sigY = sigma.y;
@@ -60,25 +59,23 @@ void main() {
         //sigX*=((NRcancell-br)*(NRcancell-br))/(NRcancell*NRcancell);
         //sigX =clamp(sigX+NRshift,minNR,maxNR);
 
-        float sigY = sqrt(noisefactor*NOISES*(INTENSE*2.2 + 1.0)/2.0 + NOISEO*INTENSE*2.2);
+        float sigY = sqrt(noisefactor*NOISES + NOISEO);
+        //float sigY = 1.0;
         float sigX = 2.5;
         //sigY = max(0.01,sigY);
         //create the 1-D kernel
         float Z = 0.0;
-        for (int j = 0; j <= KSIZE; ++j)
-        {
-            kernel[KSIZE+j] = kernel[KSIZE-j] = normpdf(float(j), sigX);
-        }
         vec3 cc;
         float factor;
-        float bZ = 1.0/normpdf(0.0, sigY);
+        //float bZ = 1.0/normpdf(0.0, sigY);
         //read out the texels
         for (int i=-KSIZE; i <= KSIZE; ++i)
         {
+            float kx = normpdf(float(i), sigX);
             for (int j=-KSIZE; j <= KSIZE; ++j)
             {
                 cc = vec3(texelFetch(InputBuffer, xy+ivec2(i,j), 0).rgb);
-                factor = normpdf3(cc-c, sigY)*bZ*kernel[KSIZE+j]*kernel[KSIZE+i];
+                factor = normpdf3(cc-c, sigY)*kx*normpdf(float(j), sigX);
                 Z += factor;
                 final_colour += factor*cc;
             }
@@ -86,7 +83,11 @@ void main() {
         if (Z < 0.0001f) {
             Output = vec4(c,1.0);
         } else {
-            Output = vec4(clamp(final_colour/Z,0.0,1.0),1.0);
+            vec3 res = final_colour/Z;
+            //Output = vec4(clamp(res,0.0,1.0),1.0);
+            float br = dot(c,vec3(0.25,0.5,0.25));
+            float br2 = dot(res,vec3(0.25,0.5,0.25));
+            Output = vec4(clamp(br * (res / br2),0.0,1.0),1.0);
         }
         //vec4 test = vec4(texture(NoiseMap, vec2(xy)/mapsize).r);
         //test = clamp(test*1.0,0.0,1.0);

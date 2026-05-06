@@ -103,6 +103,21 @@ public class GLBuffer implements AutoCloseable {
         byteBuffer.clear();
     }
 
+    public void uploadBuffer(int[] data, int count) {
+        Bind();
+        int uploadSize = Math.min(count, size) * mFormat.mFormat.mSize;
+        ByteBuffer buffer = (ByteBuffer)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, uploadSize, GL_MAP_WRITE_BIT);
+        checkEglError("map buffer for write");
+        if (buffer != null) {
+            buffer.order(ByteOrder.nativeOrder());
+            IntBuffer intbuf = buffer.asIntBuffer();
+            intbuf.put(data, 0, Math.min(count, size));
+        }
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        checkEglError("unmap buffer after write:" + mBufferID);
+        UnBind();
+    }
+
     @Override
     public void close() {
         glDeleteBuffers(1, new int[]{mBufferID}, 0);

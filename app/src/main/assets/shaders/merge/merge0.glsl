@@ -4,13 +4,13 @@ precision highp float;
 precision highp sampler2D;
 precision highp image2D;
 uniform highp usampler2D inTexture;
-uniform highp usampler2D alterTexture;
 uniform highp sampler2D alignmentTexture;
 //layout(r16ui, binding = 0) uniform highp readonly uimage2D inTexture;
 layout(rgba16f, binding = 0) uniform highp readonly image2D avrTexture;
 layout(rgba8, binding = 1) uniform highp readonly image2D hotPixTexture;
 layout(rgba16f, binding = 2) uniform highp readonly image2D baseTexture;
 layout(rgba16f, binding = 3) uniform highp writeonly image2D outTexture;
+layout(rgba16f, binding = 4) uniform highp readonly image2D alterTexture;
 
 uniform float minLevel;
 uniform float whiteLevel;
@@ -24,6 +24,7 @@ uniform ivec2 border;
 uniform ivec2 shift;
 uniform ivec2 alignmentSize;
 uniform ivec2 rawHalf;
+uniform vec4 analogBalance;
 #define TILE 2
 #define CONCAT 1
 #define M_PI 3.1415926535897932384626433832795
@@ -52,11 +53,17 @@ vec4 windowxy4(ivec2 xy){
                 window(float(xy.x)) * window(float(xy.y+1)),
                 window(float(xy.x+1)) * window(float(xy.y+1)));
 }
-
+/*
 vec4 robustWeight(vec4 w){
     float mv = min(w.r, min(w.g, min(w.b, w.a)));
-    mv = smoothstep(0.1, 0.9, mv);
+    //mv = smoothstep(0.1, 0.9, mv);
     return vec4(mv);
+}*/
+vec4 robustWeight(vec4 w){
+    return vec4(w.r * 2.0 + w.g + w.a,
+    w.g * 2.0 + w.b + w.r,
+    w.b * 2.0 + w.a + w.g,
+    w.a * 2.0 + w.r + w.b) / 4.0;
 }
 
 vec2 vec4ToAlignment(vec4 alignment) {
@@ -86,16 +93,16 @@ void main() {
     w[1] = windowxy4((TILE*xy)%TILE_AL + ivec2(0,TILE_AL));
     w[0] = windowxy4((TILE*xy)%TILE_AL + ivec2(TILE_AL));
     vec4 alignedSum = vec4(0.0);
-    vec4 bayerNone = getBayerVec(xy * TILE, alterTexture);
+    vec4 bayerNone = imageLoad(alterTexture, xy);
     //ivec2 alignPrev = ivec2(xy);
     for (int i = 0; i < 4; i++) {
-        ivec2 xyT = clamp(ivec2((TILE*xy)/TILE_AL + ivec2(i % 2, i / 2)),ivec2(0),alignmentSize);
+        ivec2 xyT = clamp(ivec2((TILE*xy)/TILE_AL + ivec2(i % 2, i / 2)),ivec2(0),alignmentSize-1);
         vec4 alignLoad = texelFetch(alignmentTexture, xyT + shift, 0);
         //ivec2 xyT = (TILE*xy)/TILE_AL;
-        //vec2 seed = hash22(vec2(xy)/vec2(outSize));
-        //float mpy = 1.0;
-        /*if(seed.x < 0.1) {
-            mpy = seed.y * 5.0;
+        /*vec2 seed = hash22(vec2(xyT)/vec2(alignmentSize));
+        float mpy = 1.0;
+        if(seed.x < 0.1) {
+            mpy = 50.0;
         }*/
         //mpy = (seed.x + seed.y) * 5.0;
         ivec2 align = ivec2(vec4ToAlignment(alignLoad));
@@ -107,7 +114,7 @@ void main() {
         aligned = aligned * ivec2(not(lt)) + ivec2(-aligned) * ivec2(lt);
         bvec2 gt = greaterThan(aligned, ivec2(outSize - 1));
         aligned = (2 * ivec2(outSize) - aligned - 1) * ivec2(gt) + aligned * ivec2(not(gt));*/
-        vec4 bayerAlter = getBayerVec(aligned * TILE, alterTexture);
+        vec4 bayerAlter = imageLoad(alterTexture, aligned);
 
         //vec4 bayerPrev = getBayerVec(alignPrev * TILE, alterTexture);
         vec4 w1 = (abs(bayerAlter*vec4(exposure) - bayerBase));
@@ -125,7 +132,8 @@ void main() {
         //bayerPrev = bayerAlter;
     }
 
-    alignedSum = clamp(alignedSum, vec4(0.0), vec4(5.0));
+
+    alignedSum = clamp(alignedSum, vec4(0.0), vec4(1.0));
     alignedSum *= vec4(exposure);
     float target = 1.0;
     if(exposure <= 0.9){
@@ -139,18 +147,18 @@ void main() {
     float mixf = clamp(max((ma-target*exposure),(mb-target*exposure))/(max(0.01,exposure-target*exposure)),0.0,1.0);
     float mixf2 = clamp(max((target*exposureLow-ma),(target*exposureLow-mb))/(max(0.01,exposureLow-target*exposureLow)),0.0,1.0);
     vec4 bbDiff = bayerBase - bayer;
-    bbDiff *= robustWeight(sqrt(vec4(1.0) - ((bbDiff*bbDiff)/(noise*noise*8.0 + bbDiff*bbDiff))));
+    vec4 bbDiffm = max(abs(bbDiff) - noise, vec4(0.0));
+    bbDiff *= (((noise*noise*8.0)/(noise*noise*8.0 + bbDiffm*bbDiffm)));
 
     //vec4 denoised = mix(bayer+bbDiff, bayer, clamp(mb,0.0,1.0));
     vec4 denoised = bayer+bbDiff;
     //alignedSum = mix(alignedSum, bayer, clamp(mixf+mixf2, 0.0,1.0));
-    alignedSum -= denoised;
+    alignedSum -= bayer;
+    alignedSum *= analogBalance;
     /*if(any(greaterThan(abs(alignedSum), vec4(target*exposure)))) {
         alignedSum = vec4(0.0);
     }*/
-    alignedSum *= robustWeight(sqrt(vec4(1.0) - ((alignedSum*alignedSum)/(noise*noise*4.0 + alignedSum*alignedSum))));
-    /*if(length(alignedSum) > 0.1) {
-        alignedSum = vec4(0.0);
-    }*/
-    imageStore(outTexture, xy, alignedSum);
+    vec4 an = max(abs(alignedSum) - noise, vec4(0.0));
+    alignedSum *= (((noise*noise*4.0)/(noise*noise*4.0 + an*an)));
+    imageStore(outTexture, xy, clamp(alignedSum, vec4(-1.0), vec4(1.0)));
 }

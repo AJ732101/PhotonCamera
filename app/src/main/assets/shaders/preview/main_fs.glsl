@@ -3,10 +3,13 @@ precision mediump float;
 uniform samplerExternalOES sTexture;
 uniform vec2 resolution;
 uniform bool enablePeak;
+uniform bool mirror;
 out vec4 Output;
 in vec2 texCoord;
 void main() {
     vec2 uv = texCoord.xy;
+    if(mirror)
+        uv.y = 1.0 - uv.y;
     vec4 color = texture(sTexture, uv);
     vec2 size = resolution;
     // focus peaking
@@ -23,6 +26,6 @@ void main() {
     float w = (diff * diff) /(denoiseK + (diff * diff));
     vec4 dc = vec4(1.0,0.0,1.0,0.0);
     if(enablePeak)
-    color = color + dc*32.0*diff*w;
+        color = color + dc*32.0*diff*w;
     Output = color;
 }

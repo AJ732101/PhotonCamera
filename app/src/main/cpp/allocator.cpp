@@ -118,6 +118,154 @@ Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopyConvert(JNIEnv
     return buffer;
 }
 
+// Helper: decode one RAW10 row into dst (width uint16_t values)
+static void decodeRaw10Row(const uint8_t* row_start, uint16_t* dst, int width) {
+    int bytes_per_row = (width * 10) / 8;
+    for (int col = 0, px = 0; col + 4 < bytes_per_row && px + 3 < width; col += 5, px += 4) {
+        uint8_t b0 = row_start[col];
+        uint8_t b1 = row_start[col + 1];
+        uint8_t b2 = row_start[col + 2];
+        uint8_t b3 = row_start[col + 3];
+        uint8_t b4 = row_start[col + 4];
+        dst[px]     = (uint16_t)((b0 << 2) | (b4 & 0x03));
+        dst[px + 1] = (uint16_t)((b1 << 2) | ((b4 >> 2) & 0x03));
+        dst[px + 2] = (uint16_t)((b2 << 2) | ((b4 >> 4) & 0x03));
+        dst[px + 3] = (uint16_t)((b3 << 2) | (b4 >> 6));
+    }
+}
+
+// Helper: Bayer-aware 2x2 binning matching dngCreator::applyBayerBinning.
+// Each output pixel combines 4 same-colour pixels from a 4x4 input block.
+// input is width*height uint16_t (packed, no stride padding).
+static void applyBayerBinning(const uint16_t* input, uint16_t* output,
+                               int srcWidth, int srcHeight,
+                               int outWidth, int outHeight) {
+    for (int oy = 0; oy < outHeight; oy++) {
+        int blockStartRow = (oy / 2) * 4;
+        int dr    = oy % 2;
+        int inRow  = blockStartRow + dr;
+        int inRow2 = (inRow + 2 < srcHeight) ? inRow + 2 : srcHeight - 1;
+
+        for (int ox = 0; ox < outWidth; ox++) {
+            int blockStartCol = (ox / 2) * 4;
+            int dc    = ox % 2;
+            int inCol  = blockStartCol + dc;
+            int inCol2 = (inCol + 2 < srcWidth) ? inCol + 2 : srcWidth - 1;
+
+            uint32_t sum =
+                (uint32_t)input[inRow  * srcWidth + inCol ] +
+                (uint32_t)input[inRow  * srcWidth + inCol2] +
+                (uint32_t)input[inRow2 * srcWidth + inCol ] +
+                (uint32_t)input[inRow2 * srcWidth + inCol2];
+
+            output[oy * outWidth + ox] = (uint16_t)(sum > 65535u ? 65535u : sum);
+        }
+    }
+}
+
+// Converts RAW10 to uint16, then applies Bayer-aware 2x2 sum binning.
+// Output size: (width/2) * (height/2) * sizeof(uint16_t)
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopyConvertBinning(JNIEnv *env, jclass clazz,
+                                                                                  jint capacity, jobject originBuffer,
+                                                                                  jint width, jint row_stride, jint offset) {
+    int height = capacity / row_stride;
+    int out_width  = width  / 2;
+    int out_height = height / 2;
+    int output_size = out_width * out_height * (int)sizeof(uint16_t);
+
+    auto* allocation = static_cast<uint16_t*>(malloc(output_size));
+    jobject buffer = env->NewDirectByteBuffer(allocation, output_size);
+    if (buffer == nullptr) {
+        LOGD("allocateAndCopyConvertBinning: failed to allocate output");
+        free(allocation);
+        return nullptr;
+    }
+
+    void* ptr = env->GetDirectBufferAddress(originBuffer);
+    if (ptr == nullptr) {
+        LOGD("allocateAndCopyConvertBinning: failed to get buffer address");
+        free(allocation);
+        return nullptr;
+    }
+
+    // Decode entire RAW10 image into a packed uint16 buffer (no row padding)
+    int full_size = width * height * (int)sizeof(uint16_t);
+    auto* decoded = static_cast<uint16_t*>(malloc(full_size));
+    if (decoded == nullptr) {
+        LOGD("allocateAndCopyConvertBinning: failed to allocate decode buffer");
+        free(allocation);
+        return nullptr;
+    }
+    uint8_t* input = static_cast<uint8_t*>(ptr) + offset;
+    for (int row = 0; row < height; row++) {
+        decodeRaw10Row(input + row * row_stride, decoded + row * width, width);
+    }
+
+    applyBayerBinning(decoded, allocation, width, height, out_width, out_height);
+    free(decoded);
+
+    memoryCount += output_size;
+    LOGD("allocateAndCopyConvertBinning: %dx%d -> %dx%d, memory %ld MB",
+         width, height, out_width, out_height, (memoryCount / 1024) / 1024);
+    return buffer;
+}
+
+// Applies Bayer-aware 2x2 sum binning on a RAW16 (uint16_t) buffer.
+// row_stride is in bytes; output is (width/2)*(height/2)*sizeof(uint16_t)
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_particlesdevs_photoncamera_util_Allocator_allocateAndCopyBinning(JNIEnv *env, jclass clazz,
+                                                                           jint capacity, jobject originBuffer,
+                                                                           jint width, jint height, jint row_stride) {
+    int out_width  = width  / 2;
+    int out_height = height / 2;
+    int output_size = out_width * out_height * (int)sizeof(uint16_t);
+
+    auto* allocation = static_cast<uint16_t*>(malloc(output_size));
+    jobject buffer = env->NewDirectByteBuffer(allocation, output_size);
+    if (buffer == nullptr) {
+        LOGD("allocateAndCopyBinning: failed to allocate output");
+        free(allocation);
+        return nullptr;
+    }
+
+    void* ptr = env->GetDirectBufferAddress(originBuffer);
+    if (ptr == nullptr) {
+        LOGD("allocateAndCopyBinning: failed to get buffer address");
+        free(allocation);
+        return nullptr;
+    }
+
+    // If row_stride matches width (no padding), bin directly
+    int stride_pixels = row_stride / (int)sizeof(uint16_t);
+    if (stride_pixels == width) {
+        applyBayerBinning(static_cast<const uint16_t*>(ptr), allocation,
+                          width, height, out_width, out_height);
+    } else {
+        // De-stride into a packed buffer first
+        int full_size = width * height * (int)sizeof(uint16_t);
+        auto* packed = static_cast<uint16_t*>(malloc(full_size));
+        if (packed == nullptr) {
+            LOGD("allocateAndCopyBinning: failed to allocate pack buffer");
+            free(allocation);
+            return nullptr;
+        }
+        const uint8_t* src = static_cast<const uint8_t*>(ptr);
+        for (int row = 0; row < height; row++) {
+            memcpy(packed + row * width, src + row * row_stride, width * sizeof(uint16_t));
+        }
+        applyBayerBinning(packed, allocation, width, height, out_width, out_height);
+        free(packed);
+    }
+
+    memoryCount += output_size;
+    LOGD("allocateAndCopyBinning: %dx%d -> %dx%d, memory %ld MB",
+         width, height, out_width, out_height, (memoryCount / 1024) / 1024);
+    return buffer;
+}
+
 #pragma clang diagnostic pop
 
 extern "C"

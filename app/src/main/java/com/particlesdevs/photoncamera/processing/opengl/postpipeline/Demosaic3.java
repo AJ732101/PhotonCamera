@@ -3,6 +3,7 @@ package com.particlesdevs.photoncamera.processing.opengl.postpipeline;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.FileManager;
 
 public class Demosaic3 extends Node {
@@ -12,22 +13,31 @@ public class Demosaic3 extends Node {
 
     @Override
     public void Compile() {}
+    
+    @Tunable(title = "Grad Size", category = "Demosaic", max = 5.0f, defaultValue = 1.5f)
     float gradSize = 1.5f;
+    
+    @Tunable(title = "Fuse Min", category = "Demosaic", max = 1.0f, defaultValue = 0.0f)
     float fuseMin = 0.f;
+    
+    @Tunable(title = "Fuse Max", category = "Demosaic", max = 2.0f, defaultValue = 1.0f)
     float fuseMax = 1.f;
+    
+    @Tunable(title = "Fuse Shift", category = "Demosaic", min = -2.0f, max = 2.0f, defaultValue = -0.5f)
     float fuseShift = -0.5f;
+    
+    @Tunable(title = "Fuse Multiply", category = "Demosaic", max = 20.0f, defaultValue = 6.0f)
     float fuseMpy = 6.0f;
+    
+    @Tunable(title = "Green Min", category = "Demosaic", max = 0.001f, defaultValue = 0.00000001f, step = 0.00000001f)
     float greenMin = 1e-8f;
+    
+    @Tunable(title = "Green Max", category = "Demosaic", max = 2.0f, defaultValue = 1.0f)
     float greenMax = 1.0f;
+    
     @Override
     public void Run() {
-        gradSize = getTuning("GradSize",gradSize);
-        fuseMin = getTuning("FuseMin",fuseMin);
-        fuseMax = getTuning("FuseMax",fuseMax);
-        fuseShift = getTuning("FuseShift",fuseShift);
-        fuseMpy = getTuning("FuseMpy",fuseMpy);
-        greenMin = getTuning("GreenMin",greenMin);
-        greenMax = getTuning("GreenMax",greenMax);
+        // Values are automatically injected in BeforeRun()!
         GLTexture glTexture;
         glTexture = previousNode.WorkingTexture;
         //Gradients
@@ -70,7 +80,7 @@ public class Demosaic3 extends Node {
         glProg.setDefine("greenmax",greenMax);
         glProg.setLayout(tile,tile,1);
         //glProg.useFileProgram(FileManager.sPHOTON_TUNING_DIR + "demosaicp2ec.glsl",true);
-        glProg.useAssetProgram("demosaic/demosaicp2ed",true);
+        glProg.useAssetProgram("demosaic/demosaicp2ed2",true);
         glProg.setTextureCompute("inTexture", glTexture,false);
         glProg.setTextureCompute("greenTexture", outp,false);
         glProg.setTextureCompute("igTexture", basePipeline.main3,false);
@@ -80,5 +90,6 @@ public class Demosaic3 extends Node {
         glProg.computeManual(WorkingTexture.mSize.x/tile,WorkingTexture.mSize.y/tile,1);
         glProg.close();
         endT("demosaicp2ec");
+        WorkingTexture = basePipeline.swap3();
     }
 }

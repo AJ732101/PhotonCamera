@@ -5,49 +5,133 @@ import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
+import com.particlesdevs.photoncamera.processing.render.NoiseModeler;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
+import com.particlesdevs.photoncamera.util.Math2;
+
+import org.w3c.dom.Text;
 
 public class ESD3D2 extends Node {
-
-    public ESD3D2() {
+    boolean needClose = false;
+    public ESD3D2(boolean closing) {
         super("", "ES3D");
+        needClose = closing;
     }
 
     @Override
     public void Compile() {
     }
+    @Tunable(title = "Enable", category = "Denoise", defaultValue = 1, min = 0, max = 1, step = 1, description = "Enable ESD3D Denoising")
+    boolean enable = true;
+
+    @Tunable(title = "Noise To Kernel Size", category = "Denoise", max = 50.0f, defaultValue = 24.0f)
+    float noiseToKernelSize = 24.0f;
+
+    @Tunable(title = "Noise Target", category = "Denoise", max = 0.1f, defaultValue = 0.00390625f, step = 0.0001f,
+            description = "Target noise level to map to minimum kernel size (1/256 = 0.00390625)"
+    )
+    float noiseTarget = 1.0f/256.f;
+
+    @Tunable(title = "Luma", category = "Denoise", max = 2.0f, defaultValue = 0.8f,
+            description = "Luma strength multiplier for denoising"
+    )
+    float luma = 0.8f;
+
+    @Tunable(title = "Max Kernel", category = "Denoise", min = 1.0f, max = 51.0f, defaultValue = 21.0f, step = 1.0f,
+            description = "Maximum kernel size for denoising"
+    )
+    int maxSize = 21;
+
+    @Tunable(title = "Min Kernel", category = "Denoise", min = 1.0f, max = 21.0f, defaultValue = 7.0f, step = 1.0f,
+            description = "Minimum kernel size for denoising"
+    )
+    int minSize = 7;
+
+    @Tunable(title = "Moire Reduction", category = "Denoise", max = 5.0f, defaultValue = 1.5f, step = 0.1f,
+            description = "Moire reduction strength"
+    )
+    float moire = 1.5f;
+
+    @Tunable(title = "Use Color Denoising", category = "Denoise", defaultValue = 1, min = 0, max = 1, step = 1,
+            description = "Whether to apply subsampling denoising to color channels (in addition to luma)"
+    )
+    boolean useColorDenoising = true;
+
+    void ESD3DRun(GLTexture inputTexture, GLTexture outputTexture, float moire, float scale) {
+        {
+            float NoiseS = basePipeline.noiseS;
+            float NoiseO = basePipeline.noiseO;
+            NoiseS /= scale;
+            NoiseO /= scale;
+            Log.d(Name, "NoiseS:" + NoiseS + ", NoiseO:" + NoiseO);
+            glProg.setDefine("NOISES", NoiseS);
+            glProg.setDefine("NOISEO", NoiseO);
+            glProg.setDefine("MOIRE", moire);
+            glProg.setDefine("LUMA", luma);
+
+            glProg.setDefine("INSIZE", basePipeline.mParameters.rawSize);
+            //float ks = 1.0f + Math.min((basePipeline.noiseS+basePipeline.noiseO) * 3.0f * noiseToKernelSize, 34.f);
+            //int msize = 7 + (int)ks - (int)ks%2;
+            double noiseMpy = Math.max((NoiseS+NoiseO)/noiseTarget, 0.0000001);
+            double kernelSize = 1.0f + Math.sqrt(noiseMpy) * noiseToKernelSize;
+            int msize = Math.min(minSize + (int)kernelSize - (int)kernelSize%2, maxSize);
+            Log.d("ESD3D", "KernelSize: "+kernelSize+" MSIZE: "+msize);
+            glProg.setDefine("KERNELSIZE", (float)(kernelSize));
+            glProg.setDefine("MSIZE", msize);
+            glProg.useAssetProgram("denoise/esd3d2");
+            //glProg.setTexture("NoiseMap", basePipeline.main4);
+            glProg.setTexture("InputBuffer", inputTexture);
+            //glProg.setTexture("GradBuffer", grad);
+            glProg.drawBlocks(outputTexture);
+        }
+    }
+    public void guidedUpsample(GLTexture lowresInput, GLTexture guide, GLTexture guideHigh, GLTexture output, int scaling) {
+        //glProg.setDefine("USE_GUIDE_BRIGHTNESS", useGuideBrightness);
+        glProg.setDefine("SCALE", scaling);
+        glProg.useAssetProgram("denoise/guidedupsample", false);
+        glProg.setTexture("LowresInput", lowresInput);
+        glProg.setTexture("Guide", guide);
+        glProg.setTexture("GuideHigh", guideHigh);
+        glProg.setVar("noiseS", basePipeline.noiseS);
+        glProg.setVar("noiseO", basePipeline.noiseO);
+        glProg.drawBlocks(output, output.mSize);
+        glProg.closed = true;
+    }
 
     @Override
     public void Run() {
-        GLTexture map = glUtils.medianDown(previousNode.WorkingTexture,4);
-        GLTexture grad;
-
-        //if(previousNode.WorkingTexture != basePipeline.main3){
-            grad = basePipeline.main3;
-        //}
-        //else grad = basePipeline.getMain();
-        glUtils.ConvDiff(previousNode.WorkingTexture, grad, 0.f);
-
-
-
-        WorkingTexture = basePipeline.getMain();
-        GLTexture temp = new GLTexture(WorkingTexture);
-        glUtils.ops(WorkingTexture,map,temp,"in1-in2","",0);
-        {
-            Log.d(Name, "NoiseS:" + basePipeline.noiseS + ", NoiseO:" + basePipeline.noiseO);
-            glProg.setDefine("NOISES", basePipeline.noiseS);
-            glProg.setDefine("NOISEO", basePipeline.noiseO);
-            glProg.setDefine("INSIZE", previousNode.WorkingTexture.mSize);
-            glProg.useAssetProgram("esd3d");
-            glProg.setTexture("NoiseMap", map);
-            glProg.setTexture("InputBuffer", previousNode.WorkingTexture);
-            glProg.setTexture("GradBuffer", grad);
-            glProg.drawBlocks(temp);
+        if (!enable) {
+            WorkingTexture = previousNode.WorkingTexture;
+            return;
         }
-        GLTexture ntex = basePipeline.getMain();
-        glUtils.ops(temp,map,ntex,"in1+in2","",0);
-        WorkingTexture = ntex;
+        float N = (float) Math.sqrt(0.5 * basePipeline.noiseS + basePipeline.noiseO);
+        float targetN = noiseTarget;
+        float scaleF = Math2.clamp(N/targetN, 1.0f, 4.0f);
+        int scale = (int)(scaleF + 0.5f);
+        GLTexture outp;
+        Log.d(Name, "Scaling factor:" + scale);
+        if(!useColorDenoising){
+            outp = previousNode.WorkingTexture;
+        } else {
+            if (scale != 1) {
+                basePipeline.main4 = glUtils.gaussdown(previousNode.WorkingTexture, scale);
+                WorkingTexture = basePipeline.getMain();
+                ESD3DRun(basePipeline.main4, WorkingTexture, 0.0f, scaleF * 0.75f);
+                outp = basePipeline.getMain();
+                guidedUpsample(WorkingTexture, basePipeline.main4, previousNode.WorkingTexture, outp, scale);
+            } else {
+                WorkingTexture = basePipeline.getMain();
+                ESD3DRun(previousNode.WorkingTexture, WorkingTexture, 0.0f, 1.0f);
+                outp = basePipeline.getMain();
+                guidedUpsample(WorkingTexture, previousNode.WorkingTexture, previousNode.WorkingTexture, outp, scale);
+            }
+        }
+        WorkingTexture = basePipeline.getMain();
+        ESD3DRun(outp, WorkingTexture, moire, 1.0f);
         glProg.closed = true;
-        map.close();
-        temp.close();
+        if(basePipeline.main4 != null){
+            basePipeline.main4.close();
+            basePipeline.main4 = null;
+        }
     }
 }

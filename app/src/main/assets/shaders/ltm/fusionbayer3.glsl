@@ -10,13 +10,13 @@ uniform sampler2D normalExpo;
 uniform sampler2D normalExpoDiff;
 
 uniform int level;
-uniform ivec2 upscaleIn;
+uniform vec2 upscaleIn;
 uniform float gauss;
 uniform float target;
 //#define TARGET 0.0
 //#define GAUSS 0.5
 #define MAXLEVEL 4
-#define NORM 4.0
+#define NORM 1.0
 #define EPS 1e-6
 #define LAPLACEMIN 0.01
 #define EXPOMIN 0.01
@@ -38,7 +38,7 @@ void main() {
     ivec2 xyCenter = ivec2(gl_FragCoord.xy);
     // If this is the lowest layer, start with zero.
     float base = (useUpsampled)
-    ? textureBicubicHardware(upsampled, (vec2(gl_FragCoord.xy))/(vec2(upscaleIn))).r
+    ? texture(upsampled, (vec2(gl_FragCoord.xy))*(vec2(upscaleIn))).r
     : float(0.0);
 
     // To know that, look at multiple factors.

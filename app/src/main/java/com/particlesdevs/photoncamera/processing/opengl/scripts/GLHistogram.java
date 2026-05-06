@@ -74,7 +74,7 @@ public class GLHistogram implements AutoCloseable{
         int tile = 8;
         glProg.setDefine("SCALE",resize);
         glProg.setDefine("HISTSIZE", histSize);
-        glProg.setDefine("HISTMPY", (float)(histSize-1));
+        //glProg.setDefine("HISTMPY", (float)(histSize-1));
         glProg.setDefine("COL_R", Rc);
         glProg.setDefine("COL_G", Gc);
         glProg.setDefine("COL_B", Bc);
@@ -85,7 +85,8 @@ public class GLHistogram implements AutoCloseable{
         glProg.setLayout(tile,tile,1);
         glProg.useAssetProgram("histogram",true);
         glProg.setTexture("inTexture",input);
-        glProg.setVar("exposure", exposure);
+        float histMpy = (float)(histSize-1);
+        glProg.setVar("exposure", exposure[0] * histMpy, exposure[1] * histMpy, exposure[2] * histMpy, exposure[3] * histMpy);
         glProg.setBufferCompute("histogramRed",buffers[0]);
         glProg.setBufferCompute("histogramGreen",buffers[1]);
         glProg.setBufferCompute("histogramBlue",buffers[2]);

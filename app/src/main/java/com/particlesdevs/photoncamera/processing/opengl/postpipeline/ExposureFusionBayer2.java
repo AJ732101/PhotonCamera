@@ -9,6 +9,7 @@ import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.processing.opengl.GLUtils;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
 import com.particlesdevs.photoncamera.processing.opengl.scripts.GLHistogram;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.BufferUtils;
 import com.particlesdevs.photoncamera.util.Math2;
 import com.particlesdevs.photoncamera.util.SplineInterpolator;
@@ -67,7 +68,7 @@ public class ExposureFusionBayer2 extends Node {
         return tex;
     }
     void getHistogram(GLTexture lowGauss){
-        GLTexture vectored = glUtils.convertVec4(lowGauss,"in1.r*64.0*in1.r*64.0");
+        GLTexture vectored = glUtils.convertVec4(lowGauss,"in1.r*4.0");
         //GLImage sourceh = glUtils.GenerateGLImage(lowGauss.mSize);
         glHistogram = new GLHistogram(basePipeline.glint.glProcessing);
         glHistogram.Compute(vectored);
@@ -81,7 +82,7 @@ public class ExposureFusionBayer2 extends Node {
     float autoExposureHigh(){
         float avr = 0.f;
         float w = 0.01f;
-        float full = 0.f;
+        float full = 1.f;
         for(int i = 0; i < 255; i++){
             full += glHistogram.outputArr[0][i];
         }
@@ -92,10 +93,16 @@ public class ExposureFusionBayer2 extends Node {
             float mpy = cnt*(ind);
             avr+=mpy;
             w+=cnt;
-            Log.d(Name,"Overexp pos:"+ind+" val:"+cnt);
+            //Log.d(Name,"Overexp pos:"+ind+" val:"+cnt);
         }
+        var gain =  Math.max(128/(avr/w + 1),1.f);
         Log.d(Name,"Overexp pos:"+avr/w);
-        return Math.max(128/(avr/w + 1),1.f);
+        float gainNoiseMax = Math.max((float) (noiseMax / Math.sqrt(basePipeline.noiseS * 0.5 + basePipeline.noiseO)), 1.0f);
+        if(gain > gainNoiseMax) {
+            Log.d(Name, "Clamping gain by noise from " + gain + " to " + gainNoiseMax);
+            gain = gainNoiseMax;
+        }
+        return gain;
         //return mix(avr/w,max, overExposeMaxFusion);
     }
     float autoExposureLow(){
@@ -131,26 +138,199 @@ public class ExposureFusionBayer2 extends Node {
     GLHistogram glHistogram;
     Point initialSize;
     Point WorkSize;
+    
+    @Tunable(
+        title = "Over Expose Multiplier",
+        description = "Multiplier for overexposed image pair",
+        category = "Exposure Fusion",
+        defaultValue = 1.0f,
+        min = 0.0f,
+        max = 2.0f,
+        step = 0.01f
+    )
     float overExposeMpy = 1.0f;
+    
+    @Tunable(
+        title = "Over Expose Max Fusion",
+        description = "Maximum fusion factor for overexposed areas",
+        category = "Exposure Fusion",
+        defaultValue = 1.0f,
+        min = 0.0f,
+        max = 2.0f,
+        step = 0.01f
+    )
     float overExposeMaxFusion = 1.0f;
+    
+    @Tunable(
+        title = "Under Expose Multiplier",
+        description = "Multiplier for underexposure adjustment",
+        category = "Exposure Fusion",
+        defaultValue = 0.85f,
+        min = 0.0f,
+        max = 2.0f,
+        step = 0.01f
+    )
     float underExposeMpy = 0.85f;
+    
+    @Tunable(
+        title = "Under Expose Min Fusion",
+        description = "Minimum fusion factor for underexposed areas",
+        category = "Exposure Fusion",
+        defaultValue = 0.0f,
+        min = 0.0f,
+        max = 1.0f,
+        step = 0.01f
+    )
     float underExposeMinFusion = 0.0f;
+    
+    @Tunable(
+        title = "Gamma coefficient",
+        description = "Gamma coefficient used in underexposure search calculations",
+        category = "Exposure Fusion",
+        defaultValue = 1.0f,
+        min = 0.1f,
+        max = 3.0f,
+        step = 0.1f
+    )
     float gammaKSearch = 1.0f;
+    
     float gammaKShadowSearch = 0.8f;
+    
+    @Tunable(
+        title = "Base Exposure",
+        description = "Base exposure value for fusion",
+        category = "Exposure Fusion",
+        defaultValue = 1.00f,
+        min = 0.1f,
+        max = 5.0f,
+        step = 0.01f
+    )
     float baseExpose = 1.00f;
+    
+    @Tunable(
+        title = "Gauss Size",
+        description = "Gaussian kernel size for fusion weighting",
+        category = "Exposure Fusion",
+        defaultValue = 4.0f,
+        min = 1.0f,
+        max = 10.0f,
+        step = 0.1f
+    )
     float gaussSize = 4.0f;
+    
+    @Tunable(
+        title = "Target Luma",
+        description = "Target luminance value",
+        category = "Exposure Fusion",
+        defaultValue = 0.5f,
+        min = 0.0f,
+        max = 1.0f,
+        step = 0.01f
+    )
     float targetLuma = 0.5f;
-    float downScalePerLevel = 2.2f;
+    
+    @Tunable(
+        title = "DownScale Per Level",
+        description = "Downscaling factor per pyramid level",
+        category = "Exposure Fusion",
+        defaultValue = 2.0f,
+        min = 1.5f,
+        max = 4.0f,
+        step = 0.1f
+    )
+    float downScalePerLevel = 2.0f;
+    
+    @Tunable(
+        title = "Dehazing",
+        description = "Dehazing strength",
+        category = "Exposure Fusion",
+        defaultValue = 0.2f,
+        min = 0.0f,
+        max = 1.0f,
+        step = 0.01f
+    )
     float dehazing = 0.2f;
 
+    @Tunable(
+        title = "Hard Level",
+        description = "Hard level threshold",
+        category = "Exposure Fusion",
+        defaultValue = 0.1f,
+        min = 0.0f,
+        max = 1.0f,
+        step = 0.01f
+    )
     float softUpperLevel = 0.1f;
+    
+    @Tunable(
+        title = "Soft Level",
+        description = "Soft level threshold",
+        category = "Exposure Fusion",
+        defaultValue = 0.0f,
+        min = 0.0f,
+        max = 1.0f,
+        step = 0.01f
+    )
     float softLoverLevel = 0.0f;
+    
+    @Tunable(
+        title = "Fusion Expo Low Limit",
+        description = "Lower limit for fusion exposure",
+        category = "Exposure Fusion",
+        defaultValue = 1.f/16.f,
+        min = 0.001f,
+        max = 1.0f,
+        step = 0.001f
+    )
     float fusionExpoLowLimit = 1.f/16.f;
+    
+    @Tunable(
+        title = "Fusion Expo High Limit",
+        description = "Upper limit for fusion exposure",
+        category = "Exposure Fusion",
+        defaultValue = 64.f,
+        min = 1.0f,
+        max = 100.0f,
+        step = 0.1f
+    )
     float fusionExpoHighLimit = 64.f;
+    
+    @Tunable(
+        title = "Overexposed Upper Limit",
+        description = "Upper limit for overexposed areas",
+        category = "Exposure Fusion",
+        defaultValue = 1.0f,
+        min = 0.5f,
+        max = 2.0f,
+        step = 0.01f
+    )
     float overexposedUpperLimit = 1.0f;
+    
+    @Tunable(
+        title = "Fusion Laplace Factor Min",
+        description = "Minimum factor for Laplace fusion",
+        category = "Exposure Fusion",
+        defaultValue = 0.01f,
+        min = 0.001f,
+        max = 0.1f,
+        step = 0.001f
+    )
     float fusionLaplaceFactorMin = 0.01f;
+    
+    @Tunable(
+        title = "Fusion Expo Factor Min",
+        description = "Minimum factor for fusion exposure",
+        category = "Exposure Fusion",
+        defaultValue = 0.01f,
+        min = 0.001f,
+        max = 0.1f,
+        step = 0.001f
+    )
     float fusionExpoFactorMin = 0.01f;
-    int curvePointsCount = 5;
+
+    @Tunable(title = "Noise Max", category = "Exposure Fusion", max = 1.0f, defaultValue = 0.05f)
+    float noiseMax;
+    
     float[] toneCurveX;
     float[] toneCurveY;
 
@@ -158,35 +338,40 @@ public class ExposureFusionBayer2 extends Node {
     float[] shadowCurveY;
     GLTexture interpolatedCurve;
     GLTexture shadowMap;
-    boolean disableFusion = false;
+    
+    @Tunable(title = "Enable", category = "Exposure Fusion", defaultValue = 1, min = 0, max = 1, step = 1,
+            description = "Enable Exposure Fusion Post Processing")
+    boolean enable = true;
+    
+    @Tunable(
+        title = "Use Symmetric Exposure Fork",
+        description = "Use symmetric exposure fork calculation",
+        category = "Exposure Fusion",
+        defaultValue = 0,
+        min = 0,
+        max = 1,
+        step = 1
+    )
     boolean useSymmetricExposureFork = false;
+    
+    @Tunable(
+        title = "Curve Points Count",
+        description = "Number of points in tone curve",
+        category = "Exposure Fusion",
+        defaultValue = 5.0f,
+        min = 3.0f,
+        max = 10.0f,
+        step = 1.0f
+    )
+    int curvePointsCount = 5;
+    
     @Override
     public void Run() {
-        disableFusion = getTuning("DisableFusion",disableFusion);
-        if(disableFusion){
+        if (!enable) {
             WorkingTexture = previousNode.WorkingTexture;
             glProg.closed = true;
             return;
         }
-        useSymmetricExposureFork = getTuning("UseSymmetricExposureFork",useSymmetricExposureFork);
-        //overExposeMpy =            getTuning("OverExposeMpy", overExposeMpy);
-        overExposeMaxFusion =      getTuning("OverExposeMaxFusion", overExposeMaxFusion);
-        underExposeMinFusion =     getTuning("UnderExposeMinFusion", underExposeMinFusion);
-        underExposeMpy =           getTuning("UnderExposeMpy", underExposeMpy);
-        baseExpose =               getTuning("BaseExposure",baseExpose);
-        gaussSize =                getTuning("GaussSize",gaussSize);
-        targetLuma =               getTuning("TargetLuma",targetLuma);
-        dehazing =                 getTuning("Dehazing",dehazing);
-        downScalePerLevel =        getTuning("DownScalePerLevel",downScalePerLevel);
-        curvePointsCount =         getTuning("CurvePointsCount",curvePointsCount);
-        fusionExpoLowLimit =         getTuning("FusionExpoLowLimit",fusionExpoLowLimit);
-        fusionExpoHighLimit =         getTuning("FusionExpoHighLimit",fusionExpoHighLimit);
-        overexposedUpperLimit = getTuning("OverexposedUpperLimit", overexposedUpperLimit);
-        fusionExpoFactorMin = getTuning("FusionExpoFactorMin", fusionExpoFactorMin);
-        fusionLaplaceFactorMin = getTuning("FusionLaplaceFactorMin", fusionLaplaceFactorMin);
-
-        softUpperLevel = getTuning("HardLevel", softUpperLevel);
-        softLoverLevel = getTuning("SoftLevel", softLoverLevel);
         toneCurveX = new float[curvePointsCount];
         toneCurveY = new float[curvePointsCount];
         shadowCurveX = new float[curvePointsCount];
@@ -227,8 +412,8 @@ public class ExposureFusionBayer2 extends Node {
 
 
         overExposeMpy = 1.0f + (float) PhotonCamera.getSettings().compressor;
-        toneCurveX = getTuning("TonemapCurveX", toneCurveX);
-        toneCurveY = getTuning("TonemapCurveY", toneCurveY);
+        // Note: toneCurveX and toneCurveY arrays are not yet supported by Tunable system
+        // They are initialized based on curvePointsCount above
         ArrayList<Float> curveX = new ArrayList<>();
         ArrayList<Float> curveY = new ArrayList<>();
         float maxC = 0.f;
@@ -322,7 +507,7 @@ public class ExposureFusionBayer2 extends Node {
         //glProg.setTexture("highExpo",highExpo.gauss[ind]);
         glProg.setTexture("normalExpoDiff",normalExpo.gauss[ind]);
         //glProg.setTexture("highExpoDiff",highExpo.gauss[ind]);
-        glProg.setVar("upscaleIn",binnedFuse.mSize);
+        glProg.setVar("upscaleIn",1.0f/binnedFuse.mSize.x,1.0f/binnedFuse.mSize.y);
         glProg.setVar("blendMpy",1.f);
 
         glProg.drawBlocks(binnedFuse,normalExpo.sizes[ind]);
@@ -341,7 +526,7 @@ public class ExposureFusionBayer2 extends Node {
             glProg.setVar("useUpsampled", 1);
             glProg.setVar("blendMpy",1.0f+dehazing-dehazing*((float)i)/(normalExpo.laplace.length-1.f));
             glProg.setVar("level",i);
-            glProg.setVar("upscaleIn",normalExpo.sizes[i]);
+            glProg.setVar("upscaleIn",1.0f/normalExpo.sizes[i].x, 1.0f/normalExpo.sizes[i].y);
             glProg.setVar("gauss", gaussSize);
             glProg.setVar("target", targetLuma);
             // We can discard the previous work in progress merge.

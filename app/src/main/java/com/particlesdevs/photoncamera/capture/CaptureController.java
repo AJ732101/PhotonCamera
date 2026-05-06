@@ -4105,7 +4105,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             } else {
                                 Log.e(TAG, "mPreviewRequestBuilder.build() failed.");
                             }
-                        } catch (CameraAccessException e) { e.printStackTrace(); }
+                        } catch (CameraAccessException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             };
@@ -4350,7 +4352,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                     if (onUnlimited && !unlimitedStarted) {
                         mImageSaver.processStart(mCameraCharacteristics, result, request, cameraRotation);
-                        setupAudioRecorder(PhotonCamera.rawVideoPath + "/audio_track.m4a");
+                        //setupAudioRecorder(PhotonCamera.rawVideoPath + "/audio_track.m4a");
                         unlimitedStarted = true;
                     }
                     if(frameCount == 0)

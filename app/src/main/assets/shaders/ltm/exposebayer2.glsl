@@ -78,6 +78,14 @@ float contrastSin(float value, float contrast) {
     return mix(value,convSin(value),contrast);
 }
 
+float aces(float x) {
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
 
 void main() {
     ivec2 xyCenter = ivec2(gl_FragCoord.xy);
@@ -89,7 +97,7 @@ void main() {
     inp.a = texelFetch(InputBuffer, xyCenter+ivec2(1,1), 0).r;
     vec4 gains = textureBicubicHardware(GainMap, vec2(xyCenter)/vec2(textureSize(InputBuffer, 0)));
     inp *= (gains.r + gains.g + gains.b + gains.a) / 4.0;
-    inp /= neutral.rggb;
+    //inp /= neutral.rggb;
     inp = clamp(inp, vec4(0.0), vec4(1.0));
     //inp = clamp(inp,vec4(0.0001),vec3(NEUTRALPOINT).rggb)/vec3(NEUTRALPOINT).rggb;
 
@@ -108,16 +116,16 @@ void main() {
     br = luminocity(v3);
     br = gammaEncode(br);
     //br = mix(br,gammaEncode(br),clamp(br-1.0,0.0,0.6));
-    result.g = clamp(br,0.0,highLim);
+    result.g = clamp((br),0.0,1.0);
     v3 = brIn(inp,mix(STRHIGH,1.0,0.5));
     br = luminocity(v3);
     br = gammaEncode(br);
     //br = mix(br,gammaEncode(br),clamp(br-1.0,0.0,0.6));
-    result.b = clamp(br,0.0,highLim);
+    result.b = clamp((br),0.0,1.0);
     v3 = brIn(inp,mix(STRHIGH,1.0,0.25));
     br = luminocity(v3);
     br = gammaEncode(br);
     //br = mix(br,gammaEncode(br),clamp(br-1.0,0.0,0.6));
-    result.a = clamp(br,0.0,highLim);
-    result /= 64.0;
+    result.a = clamp((br),0.0,1.0);
+    result /= 4.0;
 }

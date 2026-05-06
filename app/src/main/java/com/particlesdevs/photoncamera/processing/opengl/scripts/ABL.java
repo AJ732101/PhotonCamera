@@ -1,5 +1,7 @@
 package com.particlesdevs.photoncamera.processing.opengl.scripts;
 
+import android.annotation.SuppressLint;
+
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.processing.opengl.GLBuffer;
@@ -27,22 +29,19 @@ public class ABL implements AutoCloseable{
             exposure[i] = 1.0f;
         }
     }
-    public float[] Compute(float[] whitePoint, double noise, GLTexture input) {
-        GLHistogram histogram = new GLHistogram(context, 256);
+    @SuppressLint("DefaultLocale")
+    public float[] Compute(double minExposureMpy, double maxEV, double noise, GLTexture input) {
+        GLHistogram histogram = new GLHistogram(context, histSize);
         histogram.Rc = true;
         histogram.Gc = true;
         histogram.Bc = true;
         histogram.Ac = false;
-        float expoSearch = 8.0f/(float)(noise + 1.0f/1024.f); // Search for exposure based on noise level
+        double minNoiseVal = Math.pow(2.0, -maxEV);
+        double expoSearch = minExposureMpy/(noise + minNoiseVal); // Search for exposure based on noise level
         Log.d(TAG, "Exposure Search Value: " + expoSearch);
-        float norm = (whitePoint[0] + whitePoint[1] + whitePoint[2]) / 3.0f;
-        for (int i = 0; i < whitePoint.length; i++) {
-            whitePoint[i] /= norm;
-            Log.d(TAG, "White Point[" + i + "] = " + whitePoint[i]);
-        }
-        histogram.exposure[0] = expoSearch / whitePoint[0];
-        histogram.exposure[1] = expoSearch / whitePoint[1];
-        histogram.exposure[2] = expoSearch / whitePoint[2];
+        histogram.exposure[0] = (float) (expoSearch);
+        histogram.exposure[1] = (float) (expoSearch);
+        histogram.exposure[2] = (float) (expoSearch);
 
         int[][] hist = histogram.Compute(input);
 
@@ -57,7 +56,7 @@ public class ABL implements AutoCloseable{
 
         for (int i = 0; i < blackLevels.length; i++) {
             //blackLevels[i] = calculateBlackLevel(hist[i]);
-            blackLevels[i] /= expoSearch / whitePoint[i];
+            blackLevels[i] /= (float) (expoSearch);
         }
 
         Log.d(TAG, String.format("Bruteforce Black Levels - R: %.4f, G: %.4f, B: %.4f",

@@ -47,6 +47,15 @@ float stddev(vec3 XYZ) {
     return sqrt((diff.r + diff.g + diff.b) / 3. + 0.001);
 }
 
+float aces(float x) {
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
 vec3 brIn(vec4 inp, float factor2){
     float br2 = inp.r+inp.g+inp.b+inp.a;
     br2/=4.0;
@@ -114,19 +123,19 @@ void main() {
     br = gammaEncode(br);
 
     highMpy = mix(initial_br, highMpy, OVEREXPOSEMPY);
-    result.r = clamp(br,0.0,1.0);
+    result.r = clamp(aces(br),0.0,1.0);
     v3 = brIn(inp,highMpy);
     //float highLim = mix(highMpy,1.0,0.25);
     float highLim = UPPERLIM;
     //v3 = vec3(inp.r,(inp.g+inp.b)/2.0,inp.a)*highMpy;
     br = highMpy;
     br = gammaEncode(br);
-    result.g = clamp(br,0.0,highLim);
+    result.g = clamp(aces(br),0.0,1.0);
     br = mix(highMpy,initial_br,1.0/6.0);
     //br = gammaEncode(br);
-    result.b = clamp(br,0.0,highLim);
+    result.b = clamp(aces(br),0.0,1.0);
     br = mix(highMpy,initial_br,1.0/4.0);
     //br = gammaEncode(br);
-    result.a = clamp(br,0.0,highLim);
-    result /= 4.0;
+    result.a = clamp(aces(br),0.0,1.0);
+    result /= 1.0;
 }

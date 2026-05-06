@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.api;
 
+import android.annotation.SuppressLint;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -47,7 +48,7 @@ public class CameraReflectionApi {
             // Use RestrictionBypass to get the protected getKeys method
             // The method signature is: getKeys(Class<?> type, Class<TKey> keyClass, CameraMetadata<TKey> instance, int[] filterTags, boolean includeSynthetic)
             Log.d("CameraAPI", "Attempting to get getKeys method from CameraMetadata class");
-            Method getKeysMethod = RestrictionBypass.getDeclaredMethod(
+            Method getKeysMethod = NativeEngine.getCameraMethod(
                     CameraMetadata.class,
                     "getKeys",
                     Class.class,
@@ -97,7 +98,7 @@ public class CameraReflectionApi {
             // Use RestrictionBypass to get the protected getKeys method
             // The method signature is: getKeys(Class<?> type, Class<TKey> keyClass, CameraMetadata<TKey> instance, int[] filterTags, boolean includeSynthetic)
             Log.d("CameraAPI", "Attempting to get getKeys method from CameraMetadata class");
-            Method getKeysMethod = RestrictionBypass.getDeclaredMethod(
+            Method getKeysMethod = NativeEngine.getCameraMethod(
                     CameraMetadata.class,
                     "getKeys",
                     Class.class,
@@ -139,64 +140,64 @@ public class CameraReflectionApi {
     public static <T> void set(CameraCharacteristics characteristics, CameraCharacteristics.Key<T> key, T value) {
         try {
             //Class<?> metadataNativeClass = ReflectBypass.findClass("android/hardware/camera2/impl/CameraMetadataNative");
-            Field CameraMetadataNativeField = RestrictionBypass.getDeclaredField(CameraCharacteristics.class, "mProperties");
+            Field CameraMetadataNativeField = NativeEngine.getCameraField(CameraCharacteristics.class, "mProperties");
             CameraMetadataNativeField.setAccessible(true);
             Object CameraMetadataNative = CameraMetadataNativeField.get(characteristics);
             assert CameraMetadataNative != null;
-            Method set = RestrictionBypass.getDeclaredMethod(CameraMetadataNative.getClass(), "setBase", CameraCharacteristics.Key.class, Object.class);
+            Method set = NativeEngine.getCameraMethod(CameraMetadataNative.getClass(), "setBase", CameraCharacteristics.Key.class, Object.class);
             set.setAccessible(true);
             set.invoke(CameraMetadataNative, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("CameraAPI", "Failed to set CameraCharacteristics key:" + Log.getStackTraceString(e));
         }
     }
 
     public static <T> void set(CaptureResult.Key<T> key, T value) {
         try {
-            Field CameraMetadataNativeField = RestrictionBypass.getDeclaredField(CaptureResult.class, "mResults");
+            Field CameraMetadataNativeField = NativeEngine.getCameraField(CaptureResult.class, "mResults");
             CameraMetadataNativeField.setAccessible(true);
             Object CameraMetadataNative = CameraMetadataNativeField.get(CaptureController.mCaptureResult);
             assert CameraMetadataNative != null;
-            Method set = RestrictionBypass.getDeclaredMethod(CameraMetadataNative.getClass(), "set", CaptureResult.Key.class, Object.class);
+            Method set = NativeEngine.getCameraMethod(CameraMetadataNative.getClass(), "set", CaptureResult.Key.class, Object.class);
             set.setAccessible(true);
             set.invoke(CameraMetadataNative, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("CameraAPI", "Failed to set CaptureResult key:" + Log.getStackTraceString(e));
         }
     }
 
     public static <T> void set(CaptureResult.Key<T> key, T value, CaptureResult res) {
         try {
-            Field CameraMetadataNativeField = RestrictionBypass.getDeclaredField(CaptureResult.class, "mResults");
+            Field CameraMetadataNativeField = NativeEngine.getCameraField(CaptureResult.class, "mResults");
             CameraMetadataNativeField.setAccessible(true);
             Object CameraMetadataNative = CameraMetadataNativeField.get(res);
             assert CameraMetadataNative != null;
-            Method set = RestrictionBypass.getDeclaredMethod(CameraMetadataNative.getClass(), "set", CaptureResult.Key.class, Object.class);
+            Method set = NativeEngine.getCameraMethod(CameraMetadataNative.getClass(), "set", CaptureResult.Key.class, Object.class);
             set.setAccessible(true);
             set.invoke(CameraMetadataNative, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("CameraAPI", "Failed to set CaptureResult key:" + Log.getStackTraceString(e));
         }
     }
 
     public static <T> void set(CaptureRequest request, CaptureRequest.Key<T> key, T value) {
         try {
-            Field CameraMetadataNativeField = RestrictionBypass.getDeclaredField(CaptureRequest.class, "mLogicalCameraSettings");
+            Field CameraMetadataNativeField = NativeEngine.getCameraField(CaptureRequest.class, "mLogicalCameraSettings");
             CameraMetadataNativeField.setAccessible(true);
             Object CameraMetadataNative = CameraMetadataNativeField.get(request);
             assert CameraMetadataNative != null;
-            Method set = RestrictionBypass.getDeclaredMethod(CameraMetadataNative.getClass(), "set", CaptureRequest.Key.class, Object.class);
+            Method set = NativeEngine.getCameraMethod(CameraMetadataNative.getClass(), "set", CaptureRequest.Key.class, Object.class);
             set.setAccessible(true);
             set.invoke(CameraMetadataNative, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("CameraAPI", "Failed to set CaptureRequest key:" + Log.getStackTraceString(e));
         }
     }
 
     public static ByteBuffer replaceImageBuffer(Image.Plane plane, ByteBuffer buffer) {
         ByteBuffer oldBuffer = null;
         try {
-            Field mNativeBufferField = RestrictionBypass.getDeclaredField(plane.getClass(), "mBuffer");
+            Field mNativeBufferField = NativeEngine.getCameraField(plane.getClass(), "mBuffer");
             mNativeBufferField.setAccessible(true);
             oldBuffer = (ByteBuffer) mNativeBufferField.get(plane);
             mNativeBufferField.set(plane, buffer);
@@ -212,23 +213,21 @@ public class CameraReflectionApi {
                                                   int operatingMode,
                                                   CameraCaptureSession.StateCallback callback,
                                                   Handler handler) throws CameraAccessException, InvocationTargetException, IllegalAccessException {
-        Method createCustomCaptureSession = null;
         try {
-            createCustomCaptureSession = RestrictionBypass.getDeclaredMethod(cameraDevice.getClass(), "createCustomCaptureSession",
+            Method createCustomCaptureSession = NativeEngine.getCameraMethod(cameraDevice.getClass(), "createCustomCaptureSession",
             //createCustomCaptureSession = cameraDevice.getClass().getDeclaredMethod("createCustomCaptureSession",
                     InputConfiguration.class,List.class,Integer.TYPE,CameraCaptureSession.StateCallback.class,Handler.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            createCustomCaptureSession.setAccessible(true);
+            createCustomCaptureSession.invoke(cameraDevice,inputConfig,outputs,operatingMode,callback,handler);
+        } catch (Exception e) {
+            Log.d("CameraAPI", "Failed to find createCustomCaptureSession method:" + Log.getStackTraceString(e));
         }
-        createCustomCaptureSession.setAccessible(true);
-        createCustomCaptureSession.invoke(cameraDevice,inputConfig,outputs,operatingMode,callback,handler);
-
     }
 
     public static void PatchBL(BlackLevelPattern pattern, int[] bl) {
         try {
             //noinspection JavaReflectionMemberAccess
-            Field mCfaOffsetsField = pattern.getClass().getDeclaredField("mCfaOffsets");
+            @SuppressLint("SoonBlockedPrivateApi") Field mCfaOffsetsField = pattern.getClass().getDeclaredField("mCfaOffsets");
             mCfaOffsetsField.setAccessible(true);
             Object mCfaOffsets = mCfaOffsetsField.get(pattern);
             for (int i = 0; i < 4; i++) {
@@ -236,7 +235,7 @@ public class CameraReflectionApi {
                 Array.set(mCfaOffsets, i, bl[i]);
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            Log.d("CameraAPI", "Failed to patch black level pattern:" + Log.getStackTraceString(e));
         }
 
     }

@@ -76,7 +76,11 @@ public class Node {
     public void endT(String name) {
         Log.d(Name, name + " elapsed:" + (System.currentTimeMillis() - timeStart) + " ms");
     }
-    public void BeforeRun(){}
+    public void BeforeRun(){
+        // Automatically inject tunable values before each run
+        // This ensures settings changes are always picked up
+        com.particlesdevs.photoncamera.settings.TunableInjector.inject(this);
+    }
     public void Run() {}
     public void AfterRun(){}
     public void BeforeCompile(){}

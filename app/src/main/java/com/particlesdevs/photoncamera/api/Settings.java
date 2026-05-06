@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.api;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
+import com.particlesdevs.photoncamera.util.Allocator;
 
 import static android.hardware.camera2.CaptureRequest.NOISE_REDUCTION_MODE_OFF;
 
@@ -17,6 +18,7 @@ public class Settings {
     public boolean energySaving;
     public boolean aspect169;
     public boolean useThumbnail;
+    public boolean binning;
     public boolean DebugData;
     public boolean roundEdge;
     public boolean align;
@@ -145,6 +147,8 @@ public class Settings {
         watermark = PreferenceKeys.isShowWatermarkOn();
         energySaving = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
+        binning = PreferenceKeys.isBinningOn();
+        Allocator.binning = binning;
         useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);
         useExposureFusionMethod2 = PreferenceKeys.isExposureFusionMethod2();
         isTonnemappingModeQuality = PreferenceKeys.isToneMappingQualityOn();

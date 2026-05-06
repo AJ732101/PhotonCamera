@@ -8,6 +8,7 @@ import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
 import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 
 public class Sharpen2 extends Node {
     public Sharpen2() {
@@ -17,18 +18,32 @@ public class Sharpen2 extends Node {
     @Override
     public void Compile() {
     }
-    float blurSize = 0.20f;
-    float sharpSize = 0.9f;
-    float sharpMin = 0.4f;
-    float sharpMax = 1.0f;
-    float denoiseActivity = 0.0f;
+    
+    @Tunable(
+            title = "Sharp Size", description = "Size parameter for sharpening",
+            category = "Sharpening", min = 0.0f, max = 2.0f, defaultValue = 0.9f, step = 0.01f
+    )
+    float sharpSize;
+    
+    @Tunable(
+            title = "Sharp Min", description = "Minimum sharpening threshold",
+            category = "Sharpening", min = 0.0f, max = 2.0f, defaultValue = 0.4f, step = 0.01f
+    )
+    float sharpMin;
+    
+    @Tunable(
+            title = "Sharp Max", description = "Maximum sharpening threshold",
+            category = "Sharpening", min = 0.0f, max = 2.0f, defaultValue = 1.0f, step = 0.01f
+    )
+    float sharpMax;
+    
+    @Tunable(
+            title = "Denoise Activity", description = "Denoise intensity parameter",
+            category = "Sharpening", min = 0.0f, max = 1.0f, defaultValue = 0.0f, step = 0.01f)
+    float denoiseActivity;
+    
     @Override
     public void Run() {
-        denoiseActivity = getTuning("DenoiseActivity",denoiseActivity);
-        blurSize = getTuning("BlurSize", blurSize);
-        sharpSize = getTuning("SharpSize", sharpSize);
-        sharpMin = getTuning("SharpMin",sharpMin);
-        sharpMax = getTuning("SharpMax",sharpMax);
         glProg.setDefine("INTENSE",denoiseActivity);
         glProg.setDefine("INSIZE",basePipeline.mParameters.rawSize);
         glProg.setDefine("SHARPSIZE",sharpSize);

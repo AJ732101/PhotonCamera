@@ -246,6 +246,11 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHADING_MODE, resources.getString(R.string.pref_shading_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALTERNATE_PREVIEW_TEMPLATE, resources.getBoolean(R.bool.pref_alternate_preview_template_default_value));
 
+        // Photon Camera Merging
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_DOWNSCALE_4X, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_WRITE_ZIP, true);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169, true);
+
         settingsManager.addListener((settingsManager1, key) -> {
             if (isPerLensSettingsOn()) {
                 if (key.equals(Key.CAMERA_ID.mValue)) {
@@ -385,6 +390,11 @@ public class PreferenceKeys {
     public static void setBatterySaver(boolean value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_ENERGY_SAVING,value);
     }
+
+    public static boolean isBinningOn(){
+        return getBool(Key.KEY_BINNING);
+    }
+
     public static void setSaveRaw(int value) {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_SAVE_RAW,value);
     }
@@ -945,6 +955,18 @@ public class PreferenceKeys {
         preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_LUT_NAME, value);
     }
 
+    public static boolean isRawVideoDownscale4x() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_DOWNSCALE_4X);
+    }
+
+    public static boolean isRawVideoWriteZip() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_WRITE_ZIP);
+    }
+
+    public static boolean isRawVideoCrop169() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -954,6 +976,7 @@ public class PreferenceKeys {
         KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
+        KEY_BINNING(R.string.pref_binning_key),
         KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),
@@ -987,6 +1010,7 @@ public class PreferenceKeys {
         KEY_THEME(R.string.pref_theme_key),
         KEY_THEME_ACCENT(R.string.pref_theme_accent_key),
         KEY_SHOW_GRADIENT(R.string.pref_show_gradient_key),
+        KEY_HIDE_GALLERY_ICON(R.string.pref_hide_gallery_icon_key),
         KEY_AF_MODE(R.string.pref_af_mode_key),
         KEY_AE_MODE(R.string.pref_ae_mode_key),
         KEY_BRACKETING_MODE(R.string.pref_bracketing_key),
@@ -1090,6 +1114,9 @@ public class PreferenceKeys {
          * Enhanced settings keys
          */
         KEY_PREVIEW_RESOLUTION(R.string.pref_preview_resolution_key),////TODO add preview resolution selector
+        KEY_RAWVIDEO_DOWNSCALE_4X(R.string.pref_rawvideo_downscale_4x_key),
+        KEY_RAWVIDEO_WRITE_ZIP(R.string.pref_rawvideo_write_zip_key),
+        KEY_RAWVIDEO_CROP_169(R.string.pref_rawvideo_crop_169_key),
         KEY_SHOW_AF_DATA(R.string.pref_show_afdata_key),
         KEY_SAVE_RAW(R.string.pref_save_raw_key),
         KEY_DEMOSAIC_METHOD(R.string.pref_demosaic_key),

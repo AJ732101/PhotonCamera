@@ -11,6 +11,7 @@ public class NoiseModeler {
     public Pair<Double,Double>[] computeModel;
     public int AnalogueISO;
     public int SensivityISO;
+    double adaptiveMpy = 1.0;
     public NoiseModeler(Pair<Double,Double>[] inModel, Integer analogISO, Integer ISO, int bayer, SpecificSettingSensor specificSettingSensor) {
         AnalogueISO = analogISO;
         SensivityISO = ISO;
@@ -77,15 +78,17 @@ public class NoiseModeler {
         Log.d(TAG, "ComputedNoiseModel1->" + computeModel[1]);
         Log.d(TAG, "ComputedNoiseModel2->" + computeModel[2]);
     }
+    public void setAdaptiveMpy(double mpy){
+        adaptiveMpy = mpy;
+    }
 
     public void computeStackingNoiseModel(){
         computeStackingNoiseModel(FrameNumberSelector.frameCount);
     }
     public void computeStackingNoiseModel(int FrameCnt){
-        double noiseRemove = Math.pow(FrameCnt,0.9);
-        computeModel[0] = new Pair<>(baseModel[0].first/noiseRemove,baseModel[0].second/(Math.pow(noiseRemove,1.0)));
-        computeModel[1] = new Pair<>(baseModel[1].first/noiseRemove,baseModel[1].second/(Math.pow(noiseRemove,1.0)));
-        computeModel[2] = new Pair<>(baseModel[2].first/noiseRemove,baseModel[2].second/(Math.pow(noiseRemove,1.0)));
+        computeModel[0] = new Pair<>(adaptiveMpy * baseModel[0].first/ (double) FrameCnt,adaptiveMpy * baseModel[0].second/ (double) FrameCnt);
+        computeModel[1] = new Pair<>(adaptiveMpy * baseModel[1].first/ (double) FrameCnt,adaptiveMpy * baseModel[1].second/ (double) FrameCnt);
+        computeModel[2] = new Pair<>(adaptiveMpy * baseModel[2].first/ (double) FrameCnt,adaptiveMpy * baseModel[2].second/ (double) FrameCnt);
     }
     private double computeNoiseModelS(double Sensitivity,Pair<Double,Double> sGenerator) {
         double returning = sGenerator.first * Sensitivity + sGenerator.second;

@@ -6,6 +6,7 @@ import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
 import com.particlesdevs.photoncamera.processing.render.NoiseModeler;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 
 public class ESD3D extends Node {
     boolean needClose = false;
@@ -17,21 +18,44 @@ public class ESD3D extends Node {
     @Override
     public void Compile() {
     }
-    float moire = 1.5f;
-    float luma = 0.8f;
+    @Tunable(title = "Enable", category = "Denoise", defaultValue = 1, min = 0, max = 1, step = 1, description = "Enable ESD3D Denoising")
+    boolean enable;
+    
+    @Tunable(title = "Noise To Kernel Size", category = "Denoise", max = 50.0f, defaultValue = 24.0f)
     float noiseToKernelSize = 24.0f;
+    
+    @Tunable(title = "Noise Target", category = "Denoise", max = 0.1f, defaultValue = 0.00390625f, step = 0.0001f,
+            description = "Target noise level to map to minimum kernel size (1/256 = 0.00390625)"
+    )
     float noiseTarget = 1.0f/256.f;
+    
+    @Tunable(title = "Luma", category = "Denoise", max = 2.0f, defaultValue = 0.8f,
+            description = "Luma strength multiplier for denoising"
+    )
+    float luma = 0.8f;
+    
+    @Tunable(title = "Max Kernel", category = "Denoise", min = 1.0f, max = 51.0f, defaultValue = 21.0f, step = 1.0f,
+            description = "Maximum kernel size for denoising"
+    )
     int maxSize = 21;
+    
+    @Tunable(title = "Min Kernel", category = "Denoise", min = 1.0f, max = 21.0f, defaultValue = 7.0f, step = 1.0f,
+            description = "Minimum kernel size for denoising"
+    )
     int minSize = 7;
+
+    @Tunable(title = "Moire Reduction", category = "Denoise", max = 5.0f, defaultValue = 1.5f, step = 0.1f,
+            description = "Moire reduction strength"
+    )
+    float moire = 1.5f;
 
     @Override
     public void Run() {
-        //moire = getTuning("MoireRemoveMpy",moire);
-        noiseToKernelSize = getTuning("NoiseToKernelSize",noiseToKernelSize);
-        noiseTarget = getTuning("NoiseTarget",noiseTarget);
-        luma = getTuning("Luma",luma);
-        maxSize = getTuning("MaxKernel",maxSize);
-        minSize = getTuning("MinKernel",minSize);
+        if (!enable) {
+            WorkingTexture = previousNode.WorkingTexture;
+            return;
+        }
+        // Values are automatically injected in BeforeRun()!
         //if(basePipeline.main4 == null)
         //    basePipeline.main4 = glUtils.medianDown(previousNode.WorkingTexture,4);
         //GLTexture grad;

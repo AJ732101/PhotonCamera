@@ -9,7 +9,7 @@ layout(rgba16f, binding = 1) uniform highp readonly image2D greenTexture;
 layout(rgba16f, binding = 2) uniform highp readonly image2D igTexture;
 layout(rgba16f, binding = 3) uniform highp writeonly image2D outTexture;
 uniform int yOffset;
-uniform vec4 neutral;
+//uniform vec4 neutral;
 //out vec3 Output;
 //#define EPS 0.0001
 //#define EPS2 0.001
@@ -39,12 +39,12 @@ int getBayerPattern(ivec2 pos) {
 }
 
 float getBayerSample(ivec2 pos) {
-    return imageLoad(inTexture, pos).r/neutral[getBayerPattern(pos)] + EPS2;
+    return imageLoad(inTexture, pos).r;// + EPS2;
     //return float(texelFetch(RawBuffer, pos, 0).x);
 }
 
 vec2 gr(ivec2 pos){
-    return imageLoad(greenTexture, pos).rg/neutral[1] + EPS2;
+    return imageLoad(greenTexture, pos).rg;// + EPS2;
     //return texelFetch(GreenBuffer, pos, 0).xy;
 }
 
@@ -244,7 +244,7 @@ float dhtg1(ivec2 pos){
 
 void main() {
     //ivec2 pos = ivec2(gl_FragCoord.xy);
-    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pos = max(ivec2(gl_GlobalInvocationID.xy), ivec2(4));
     ivec2 localPos = ivec2(gl_LocalInvocationID.xy);
     ivec2 workgroupStart = ivec2(gl_WorkGroupID.xy) * ivec2(gl_WorkGroupSize.xy);
     int fact1 = pos.x%2;
@@ -334,8 +334,8 @@ void main() {
             outp.r = getC(grk, dhtd(pos));
         }
     }
-    outp = clamp((outp-EPS2)*neutral.rga,0.0,1.0);
+    outp = clamp(outp,0.0,1.0);
     //outp.rb = vec2(igE, igS);
-    imageStore(outTexture, pos, vec4(outp, 1.0));
+    imageStore(outTexture, ivec2(gl_GlobalInvocationID.xy), vec4(outp, 1.0));
     //imageStore(outTexture, pos, vec4(gr(pos).x));
 }

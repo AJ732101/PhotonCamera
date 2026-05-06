@@ -236,14 +236,15 @@ public class GLUtils {
     }
 
     public GLTexture gaussdown(GLTexture in, int k){
-        GLTexture out = new GLTexture((in.mSize.x/k) + (k)-1,(in.mSize.y/k) + (k)-1,in.mFormat);
-        return gaussdown(in,out,k,(double)k*1.3);
+        GLTexture out = new GLTexture((in.mSize.x/k),(in.mSize.y/k),in.mFormat, null, GL_LINEAR, GL_CLAMP_TO_EDGE);
+        return gaussdown(in,out,k,(double)k*0.5);
     }
     public GLTexture gaussdown(GLTexture in, int k,double blur){
-        GLTexture out = new GLTexture((in.mSize.x/k) + (k)-1,(in.mSize.y/k) + (k)-1,in.mFormat);
+        GLTexture out = new GLTexture((in.mSize.x/k),(in.mSize.y/k),in.mFormat);
         return gaussdown(in,out,k,blur);
     }
     public GLTexture gaussdown(GLTexture in,GLTexture out, int k,double blur){
+        int stride = Math.max(1, k/2);
         glProg.useProgram(
                 "precision highp "+in.mFormat.getTemSamp()+";\n" +
                         "precision highp float;\n" +
@@ -252,29 +253,26 @@ public class GLUtils {
                         "uniform "+in.mFormat.getTemSamp()+" InputBuffer;\n" +
                         "uniform int yOffset;\n" +
                         "out tvar Output;\n" +
-                        //"#define size1 ("+(double)k*0.3+")\n" +
-                        "#define transpose ("+(int)((k/2)+1)+")\n" +
-                        "#define size1 ("+blur/((k/2)+1)+")\n" +
+                        "#define transpose ("+stride+")\n" +
+                        "#define size1 ("+(blur/stride)+")\n" +
                         "#define MSIZE1 5\n" +
                         "#define resize ("+k+")\n" +
                         "float normpdf(in float x, in float sigma){return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;}\n" +
                         "void main() {\n" +
                         "    ivec2 xy = ivec2(gl_FragCoord.xy);\n" +
-                        "    xy+=ivec2(0,yOffset-resize);\n" +
+                        "    xy+=ivec2(0,yOffset);\n" +
                         "    xy*=resize;\n" +
                         "    const int kSize = (MSIZE1-1)/2;\n" +
                         "    float kernel[MSIZE1];\n" +
                         "    tvar mask = tvar(0.0);\n" +
-                        "    float pdfsize = 0.0;\n" +
+                        "    float pdfsize = 0.00001;\n" +
                         "    for (int j = 0; j <= kSize; ++j) kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), size1);\n" +
                         "    for (int i=-kSize; i <= kSize; ++i){\n" +
                         "        for (int j=-kSize; j <= kSize; ++j){\n" +
                         "            float pdf = kernel[kSize+j]*kernel[kSize+i];\n" +
                         "            vec4 inp = texelFetch(InputBuffer, (xy+ivec2(i*transpose,j*transpose)), 0);\n" +
-                        "            if(length(inp) > 1.0/10000.0){\n" +
-                        "                mask+=tvar(inp)*pdf;\n" +
-                        "                pdfsize+=pdf;\n" +
-                        "            }\n" +
+                        "            mask+=tvar(inp)*pdf;\n" +
+                        "            pdfsize+=pdf;\n" +
                         "        }\n" +
                         "    }\n" +
                         "    mask/=pdfsize;\n" +
@@ -473,6 +471,25 @@ public class GLUtils {
         glProg.closed = true;
         return out;
     }
+
+    /**
+     * Gaussian downsample - applies Gaussian blur before downsampling.
+     * This is proper for creating Gaussian pyramids to avoid aliasing and
+     * properly separate frequency bands for Laplacian pyramid fusion.
+     */
+    public GLTexture gaussianDownsample(GLTexture in, Point outSize) {
+        double downscaleFactor = (double)in.mSize.x / outSize.x;
+        GLTexture out = new GLTexture(outSize, in.mFormat);
+
+        glProg.useUtilProgram("gaussdown", false);
+        glProg.setTexture("InputBuffer", in);
+        glProg.setVar("inputSize", in.mSize);
+        glProg.setVar("downscaleFactor", (float)downscaleFactor);
+        glProg.drawBlocks(out, outSize);
+        glProg.closed = true;
+
+        return out;
+    }
     public void Convolve(GLTexture in, GLTexture out, float[] kernel, boolean centered,boolean abs){
         String center = "";
         if(centered) center = "Output += 0.5;\n";
@@ -657,6 +674,10 @@ public class GLUtils {
         return out;
     }
     public GLTexture convertVec4(GLTexture in1,String operation){
+        GLTexture out = new GLTexture(in1.mSize,new GLFormat(GLFormat.DataType.FLOAT_16,4));
+        return convertVec4(in1, operation, out);
+    }
+    public GLTexture convertVec4(GLTexture in1,String operation, GLTexture out){
         glProg.useProgram(
                 "precision highp "+in1.mFormat.getTemSamp()+";\n" +
                         "precision highp float;\n" +
@@ -672,7 +693,6 @@ public class GLUtils {
                         "    Output = vec4("+operation+");\n" +
                         "}\n");
         glProg.setTexture("InputBuffer",in1);
-        GLTexture out = new GLTexture(in1.mSize,new GLFormat(GLFormat.DataType.FLOAT_16,4));
         glProg.drawBlocks(out);
         return out;
     }
@@ -779,7 +799,7 @@ public class GLUtils {
                 glUtils.interpolate(gauss[i - 1],gauss[i]);
             }
             System.arraycopy(gauss, 1, upscale, 0, upscale.length);
-            glProg.useAssetProgram("pyramiddiff",false);
+            glProg.useAssetProgram("utils/pyramiddiff",false);
             for (int i = 0; i < laplace.length; i++) {
                 glProg.setTexture("target", gauss[i]);
                 glProg.setTexture("base", upscale[i]);
@@ -798,7 +818,7 @@ public class GLUtils {
         }
         public GLTexture getLaplace(int number){
             if(number > sizes.length || number < 0) return null;
-            glProg.useAssetProgram("pyramiddiff",false);
+            glProg.useAssetProgram("utils/pyramiddiff",false);
             GLTexture downscaled = getGauss(number);
             glProg.setTexture("target", downscaled);
             glProg.setTexture("base", getGauss(number+1));
@@ -863,18 +883,15 @@ public class GLUtils {
         boolean autostep = step == 0;
         for (int i = 1; i < pyramid.gauss.length; i++) {
             //if(autostep && i < 2) step = 2; else step = 4;
-            //downscaled[i] = gaussdown(downscaled[i - 1],step);
             Point insize = pyramid.gauss[i-1].mSize;
             if(autostep && (insize.x <= step+2 || insize.y <= step+2)) step = 2;
             int sizex = (int)(insize.x/step);
             int sizey = (int)(insize.y/step);
             sizex = Math.max(1,sizex);
             sizey = Math.max(1,sizey);
-            pyramid.gauss[i] = interpolate(pyramid.gauss[i - 1],new Point(sizex,sizey));
-            //GLTexture old = downscaled[i];
-            //downscaled[i] = blursmall(downscaled[i],3,1.4);
-            //old.close();
-            //downscaled[i] = medianDown(downscaled[i-1],new GLTexture(new Point(sizex,sizey),downscaled[i-1].mFormat), (float) step);
+            // Use Gaussian downsample instead of simple interpolation
+            // This properly blurs before downsampling to avoid aliasing
+            pyramid.gauss[i] = gaussianDownsample(pyramid.gauss[i - 1], new Point(sizex,sizey));
             pyramid.sizes[i] = new Point((int)(pyramid.sizes[i-1].x/step),(int)(pyramid.sizes[i-1].y/step));
             Log.d("Pyramid","downscale:"+pyramid.sizes[i]);
         }
@@ -884,7 +901,7 @@ public class GLUtils {
         for (int i = 0; i < pyramid.laplace.length; i++) {
             glProg.setTexture("target", pyramid.gauss[i]);
             glProg.setTexture("base", pyramid.gauss[i + 1]);
-            glProg.setVar("size",pyramid.sizes[i]);
+            glProg.setVar("size",1.0f/pyramid.sizes[i].x, 1.0f/pyramid.sizes[i].y);
             glProg.setVar("size2", pyramid.gauss[i + 1].mSize);
             //glProg.setTexture("base", downscaled[i]);
             //glProg.setTexture("target", upscale[i]);
@@ -896,11 +913,11 @@ public class GLUtils {
 
         return pyramid;
     }
-    
+
     public Pyramid createPyramidStore(int levels, GLTexture input, GLUtils.Pyramid pyramid){
         return createPyramidStore(levels, input, pyramid, true);
     }
-    
+
     public Pyramid createPyramidStore(int levels, GLTexture input, GLUtils.Pyramid pyramid, boolean useLaplace){
         pyramid.levels = levels;
         pyramid.step = 2.0;
@@ -939,18 +956,19 @@ public class GLUtils {
             for (int i = 0; i < pyramid.laplace.length; i++) {
                 glProg.setTexture("target", pyramid.gauss[i]);
                 glProg.setTexture("base", pyramid.gauss[i + 1]);
-                glProg.setVar("size",pyramid.sizes[i]);
+                //glProg.setVar("size",pyramid.sizes[i]);
+                glProg.setVar("size", 1.0f/pyramid.sizes[i].x, 1.0f/pyramid.sizes[i].y);
                 glProg.setVar("size2", pyramid.gauss[i + 1].mSize);
                 //glProg.setTexture("base", downscaled[i]);
                 //glProg.setTexture("target", upscale[i]);
                 if (pyramid.laplace[i] == null)
                     pyramid.laplace[i] = new GLTexture(pyramid.sizes[i],pyramid.gauss[i + 1].mFormat, null, GL_LINEAR, GL_MIRRORED_REPEAT);
                 glProg.drawBlocks(pyramid.laplace[i]);
-                    //Log.d("Pyramid","diff:"+pyramid.laplace[i].mSize+" downscaled:"+pyramid.gauss[i].mSize);
+                //Log.d("Pyramid","diff:"+pyramid.laplace[i].mSize+" downscaled:"+pyramid.gauss[i].mSize);
             }
         }
         return pyramid;
-    }    
+    }
 
     public GLImage GenerateGLImage(Point size){
         return GenerateGLImage(size,4);

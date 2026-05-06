@@ -6,6 +6,7 @@ uniform usampler2D InputBuffer;
 uniform sampler2D GainMap;
 uniform sampler2D Kodak;
 uniform ivec2 RawSize;
+uniform vec2 RawInvSize;
 uniform vec4 blackLevel;
 uniform vec3 whitePoint;
 uniform int CfaPattern;
@@ -37,7 +38,7 @@ void main() {
     #endif
     float balance;
     #if USEGAIN == 1
-    vec4 gains = textureBicubicHardware(GainMap, vec2(xy)/vec2(RawSize));
+    vec4 gains = texture(GainMap, vec2(xy)*vec2(RawInvSize));
     gains.rgb = vec3(gains.r,(gains.g+gains.b)/2.0,gains.a);
     gains.rgb /= dot(gains.rgb,vec3(1.0/3.0));
     #else
@@ -69,7 +70,7 @@ void main() {
                 Output = gains.b*(Output-level.b-BLB)/(1.0-level.b);
             }
         }
-    Output = clamp(Output,0.0,balance);
+    Output = clamp(Output/balance,0.0,1.0);
     #endif
     #if TESTPATTERN == 1
         ivec2 diag = ivec2(xy.x+xy.y,xy.x-xy.y);

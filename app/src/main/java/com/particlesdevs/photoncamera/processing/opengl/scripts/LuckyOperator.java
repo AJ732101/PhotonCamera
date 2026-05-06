@@ -25,7 +25,7 @@ public class LuckyOperator extends GLOneScript {
         GLProg glProg = glOne.glProgram;
         GLTexture input1 = new GLTexture(insize,new GLFormat(GLFormat.DataType.UNSIGNED_16),scriptParams.input);
         glProg.setTexture("InputBuffer",input1);
-        glProg.setVar("CfaPattern",PhotonCamera.getParameters().cfaPattern);
+        glProg.setVar("CfaPattern",scriptParams.parameters.cfaPattern);
         WorkingTexture = new GLTexture(input1.mSize.x/2,input1.mSize.y/2,new GLFormat(GLFormat.DataType.FLOAT_16),null);
         glProg.drawBlocks(input1);
         GLTexture luckyTex = new GLTexture(input1.mSize,WorkingTexture.mFormat,null);

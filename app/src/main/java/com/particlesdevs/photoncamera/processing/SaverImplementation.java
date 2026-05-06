@@ -15,6 +15,7 @@ import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.control.GyroBurst;
 import com.particlesdevs.photoncamera.processing.processor.ProcessorBase;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
+import com.particlesdevs.photoncamera.util.Allocator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,45 +40,39 @@ public class SaverImplementation {
         int height;
         int offset = 0;
         int capacity = image.getPlanes()[0].getBuffer().capacity();
-        var imageFormat = image.getFormat();
-        boolean noStride = false;
         if ((imageFormat == ImageFormat.RAW10) || (imageFormat == ImageFormat.RAW12)) {
             width = image.getWidth();
             height = image.getHeight();
-            //noStride = true;
         } else {
-            var a = image.getPlanes()[0].getRowStride();
-            var b = image.getPlanes()[0].getPixelStride();
-            if (a != 0 && b != 0) {
-                width = image.getPlanes()[0].getRowStride() / image.getPlanes()[0].getPixelStride();
-            }
-            else {
-                width = image.getWidth();
-            }
+            width = image.getPlanes()[0].getRowStride() /
+                    image.getPlanes()[0].getPixelStride();
             height = image.getHeight();
         }
-        if (PhotonCamera.getSettings().aspect169) {
-            if (width > height) {
+        if(PhotonCamera.getSettings().aspect169){
+            if(width > height){
                 height = width * 9 / 16;
-                int offsetH = (image.getHeight() - height) / 2;
-                offsetH -= offsetH % 2;
-                if (image.getPlanes()[0].getRowStride() != 0) {
+                int offsetH;
+                if (ImageSaver.SETTINGS.cropType) {
+                    // Do nothing
+                } else {
+                    offsetH = (image.getHeight() - height) / 2;
+                    offsetH -= offsetH % 2;
                     offset = image.getPlanes()[0].getRowStride() * offsetH;
-                    capacity = image.getPlanes()[0].getRowStride() * height;
                 }
+                capacity = image.getPlanes()[0].getRowStride() * height;
             }
         }
-        ImageFrame frame = null;
-        if (!noStride && (image.getPlanes()[0].getRowStride() != 0)) {
-            frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride(), offset, capacity);
-        }
-        else {
-            frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getWidth(), offset, capacity);
-        }
+        Allocator.binning = PhotonCamera.getSettings().binning;
+        ImageFrame frame = new ImageFrame(image.getPlanes()[0].getBuffer(), image.getFormat(), width, image.getPlanes()[0].getRowStride(), offset, capacity);
         frame.timestamp = image.getTimestamp();
 
-        frame.width = width;
-        frame.height = height;
+        if (Allocator.binning) {
+            frame.width = width / 2;
+            frame.height = height / 2;
+        } else {
+            frame.width = width;
+            frame.height = height;
+        }
 
         return frame;
     }

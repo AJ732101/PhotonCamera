@@ -8,13 +8,81 @@ import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+
+import com.particlesdevs.photoncamera.util.SimpleStorageHelper;
 
 public class Gyro {
     private static final String TAG = "Gyroscope";
     protected final float fk = 0.8f;
     private final SensorManager mSensorManager;
     private final Sensor mGyroSensor;
+    private Sensor mAccelSensor;
+    private Sensor mMagSensor;
+
+    // ---- Gyroscope recording state ----
+    // ~8 min at 400 Hz gyro; excess samples are silently dropped
+    private static final int MAX_REC_SAMPLES = 200_000;
+    private volatile boolean isVideoRecording = false;
+    private volatile long videoFirstFrameTs = Long.MIN_VALUE;
+    private long videoStartWallTimeMs;
+    private Path videoOutputPath;
+    private double videoFrameRate;
+
+    private long[]  recTimestamps;
+    private float[] recGx, recGy, recGz;   // rad/s
+    private float[] recAx, recAy, recAz;   // m/s²  (latest accel at each gyro tick)
+    private float[] recMx, recMy, recMz;   // µT     (latest mag at each gyro tick)
+    private volatile int   recCount;
+    private volatile float latestAx, latestAy, latestAz;
+    private volatile float latestMx, latestMy, latestMz;
+    private volatile boolean recHasMag;
+
+    private final SensorEventListener mVideoRecordingListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (!isVideoRecording) return;
+            switch (event.sensor.getType()) {
+                case Sensor.TYPE_GYROSCOPE: {
+                    int idx = recCount;
+                    if (idx < MAX_REC_SAMPLES) {
+                        recTimestamps[idx] = event.timestamp;
+                        recGx[idx] = event.values[0];
+                        recGy[idx] = event.values[1];
+                        recGz[idx] = event.values[2];
+                        recAx[idx] = latestAx;
+                        recAy[idx] = latestAy;
+                        recAz[idx] = latestAz;
+                        recMx[idx] = latestMx;
+                        recMy[idx] = latestMy;
+                        recMz[idx] = latestMz;
+                        recCount = idx + 1;
+                    }
+                    break;
+                }
+                case Sensor.TYPE_ACCELEROMETER:
+                    latestAx = event.values[0];
+                    latestAy = event.values[1];
+                    latestAz = event.values[2];
+                    break;
+                case Sensor.TYPE_MAGNETIC_FIELD:
+                    latestMx = event.values[0];
+                    latestMy = event.values[1];
+                    latestMz = event.values[2];
+                    recHasMag = true;
+                    break;
+            }
+        }
+        @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    };
     public float[] mAngles;
     private boolean gyroburst = false;
     private float burstout = 0.f;
@@ -157,6 +225,34 @@ public class Gyro {
             //Log.d(TAG, "GyroBurst counter:" + BurstShakiness.size()+" sampleCount:"+counter+" shakiness:"+gyroBurst.shakiness);
         }
     }
+    /**
+     * Fills BurstShakiness for ZSL captures by extracting per-frame gyro motion from the
+     * continuous circle buffer, matching each frame's sensor timestamp window.
+     *
+     * @param frameTimestamps sensor timestamps (nanoseconds) for each pre-captured ZSL frame
+     * @param exposureTimeNs  exposure duration (nanoseconds) to define each frame's time window
+     * @param result          list to receive one GyroBurst entry per frame
+     */
+    public void buildZslBurstShakiness(long[] frameTimestamps, long exposureTimeNs, ArrayList<GyroBurst> result) {
+        this.BurstShakiness = result;
+        for (long frameTs : frameTimestamps) {
+            long windowStart = frameTs - Math.max(exposureTimeNs, 1);
+            long windowEnd = frameTs;
+            GyroBurst burst = new GyroBurst(gyroCircle);
+            int sampleCount = 0;
+            for (int i = 0; i < gyroCircle; i++) {
+                long ts = circleBurst.timestampss[i];
+                if (ts >= windowStart && ts <= windowEnd && sampleCount < gyroCircle) {
+                    burst.movementss[0][sampleCount] = circleBurst.movementss[0][i];
+                    burst.movementss[1][sampleCount] = circleBurst.movementss[1][i];
+                    burst.movementss[2][sampleCount] = circleBurst.movementss[2][i];
+                    sampleCount++;
+                }
+            }
+            burst.samples = sampleCount;
+            result.add(burst);
+        }
+    }
 
     public void CompleteSequence() {
         integrate = false;
@@ -235,5 +331,190 @@ public class Gyro {
     }
     public boolean getTripod(){
         return (tripodShakiness < 25) && PhotonCamera.getSettings().selectedMode == CameraMode.NIGHT;
+    }
+
+    // -------------------------------------------------------------------------
+    // Gyroscore GCSV recording
+    // -------------------------------------------------------------------------
+
+    /**
+     * Begin buffering IMU data for a Gyroscore sidecar file.
+     * Call this when RAW video recording starts (before the first frame).
+     */
+    public void startVideoRecording(Path outputFolder, double frameRate) {
+        if (isVideoRecording) return;
+        videoOutputPath      = outputFolder.resolve("GYROFLOW.gcsv");
+        videoFrameRate       = frameRate;
+        videoFirstFrameTs    = Long.MIN_VALUE;
+        videoStartWallTimeMs = System.currentTimeMillis();
+
+        recTimestamps = new long[MAX_REC_SAMPLES];
+        recGx = new float[MAX_REC_SAMPLES];
+        recGy = new float[MAX_REC_SAMPLES];
+        recGz = new float[MAX_REC_SAMPLES];
+        recAx = new float[MAX_REC_SAMPLES];
+        recAy = new float[MAX_REC_SAMPLES];
+        recAz = new float[MAX_REC_SAMPLES];
+        recMx = new float[MAX_REC_SAMPLES];
+        recMy = new float[MAX_REC_SAMPLES];
+        recMz = new float[MAX_REC_SAMPLES];
+        recCount  = 0;
+        recHasMag = false;
+        latestAx = latestAy = latestAz = 0f;
+        latestMx = latestMy = latestMz = 0f;
+
+        if (mAccelSensor == null)
+            mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (mMagSensor == null)
+            mMagSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        mSensorManager.registerListener(mVideoRecordingListener, mGyroSensor,
+                SensorManager.SENSOR_DELAY_FASTEST);
+        if (mAccelSensor != null)
+            mSensorManager.registerListener(mVideoRecordingListener, mAccelSensor,
+                    SensorManager.SENSOR_DELAY_FASTEST);
+        if (mMagSensor != null)
+            mSensorManager.registerListener(mVideoRecordingListener, mMagSensor,
+                    SensorManager.SENSOR_DELAY_FASTEST);
+
+        isVideoRecording = true;
+        Log.d(TAG, "Gyroflow recording started, output: " + videoOutputPath);
+    }
+
+    /**
+     * Mark the sensor timestamp of the first camera frame so the GCSV timestamps
+     * are relative to it (t=0 = first frame).  Negative t values in the GCSV
+     * represent data captured before the first frame, which Gyroflow ignores.
+     *
+     * @param cameraTimestampNs {@code Image.getTimestamp()} of the first captured frame
+     */
+    public void syncFirstFrame(long cameraTimestampNs) {
+        if (videoFirstFrameTs == Long.MIN_VALUE)
+            videoFirstFrameTs = cameraTimestampNs;
+    }
+
+    /**
+     * Stop buffering and write the GCSV sidecar file on a background thread.
+     */
+    public void stopVideoRecording() {
+        if (!isVideoRecording) return;
+        isVideoRecording = false;
+
+        mSensorManager.unregisterListener(mVideoRecordingListener, mGyroSensor);
+        if (mAccelSensor != null)
+            mSensorManager.unregisterListener(mVideoRecordingListener, mAccelSensor);
+        if (mMagSensor != null)
+            mSensorManager.unregisterListener(mVideoRecordingListener, mMagSensor);
+
+        final int    count       = recCount;
+        final long   originTs    = videoFirstFrameTs;
+        final long[] timestamps  = recTimestamps;
+        final float[] gx = recGx, gy = recGy, gz = recGz;
+        final float[] ax = recAx, ay = recAy, az = recAz;
+        final float[] mx = recMx, my = recMy, mz = recMz;
+        final boolean hasMag     = recHasMag;
+        final Path    outPath    = videoOutputPath;
+        final double  frameRate  = videoFrameRate;
+        final long    wallTimeMs = videoStartWallTimeMs;
+
+        recTimestamps = null;
+        recGx = recGy = recGz = null;
+        recAx = recAy = recAz = null;
+        recMx = recMy = recMz = null;
+
+        new Thread(() -> writeGcsv(outPath, timestamps, gx, gy, gz, ax, ay, az,
+                mx, my, mz, hasMag, count, originTs, frameRate, wallTimeMs),
+                "GyroflowWriter").start();
+    }
+
+    /**
+     * Opens a {@link PrintWriter} for the GCSV file.
+     * Primary: SAF-backed OutputStream via {@link SimpleStorageHelper} � required on
+     * Android 11+ to bypass FUSE MediaProvider write restrictions in DCIM directories.
+     * Fallback: {@link Files#newOutputStream} for app-specific or test paths.
+     */
+    private PrintWriter openGcsvWriter(Path outPath) {
+        OutputStream os = SimpleStorageHelper.openOutputStreamByAbsPath(outPath.toString());
+        if (os != null) {
+            return new PrintWriter(new BufferedWriter(
+                    new OutputStreamWriter(os, StandardCharsets.UTF_8)));
+        }
+        Log.w(TAG, "SAF open failed for GCSV, falling back to Files.newOutputStream");
+        try {
+            return new PrintWriter(new BufferedWriter(
+                    new OutputStreamWriter(Files.newOutputStream(outPath), StandardCharsets.UTF_8)));
+        } catch (IOException e) {
+            Log.e(TAG, "openGcsvWriter fallback failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void writeGcsv(Path outPath,
+                           long[] timestamps,
+                           float[] gx, float[] gy, float[] gz,
+                           float[] ax, float[] ay, float[] az,
+                           float[] mx, float[] my, float[] mz,
+                           boolean hasMag, int count,
+                           long originTs, double frameRate, long wallTimeMs) {
+        // Fall back to first sensor sample as origin if no frame was synced.
+        long origin = (originTs != Long.MIN_VALUE) ? originTs
+                : (count > 0 ? timestamps[0] : 0L);
+
+        PrintWriter pw = openGcsvWriter(outPath);
+        if (pw == null) {
+            Log.e(TAG, "Cannot open GCSV output: " + outPath);
+            return;
+        }
+        // PrintWriter silently swallows write errors; use checkError() at the end.
+        try (PrintWriter p = pw) {
+            p.println("GYROFLOW IMU LOG");
+            p.println("version,1.3");
+            p.println("id,photoncamera_android");
+            // XYZ = identity mapping; user may need to adjust in Gyroflow's
+            // IMU Orientation field to match their specific device.
+            p.println("orientation,XYZ");
+            p.println("note,PhotonCamera RAW Video");
+            p.println("fwversion," + PhotonCamera.getVersion());
+            p.println("timestamp," + (wallTimeMs / 1000L));
+            p.println("vendor,PhotonCamera");
+            p.println("videofilename," + outPath.getParent().getFileName());
+            // tscale: timestamps are stored as nanoseconds ? seconds = � 1e-9
+            p.println("tscale,1.0e-9");
+            // gscale: Android TYPE_GYROSCOPE already in rad/s ? 1.0
+            p.println("gscale,1.0");
+            // ascale: Android TYPE_ACCELEROMETER in m/s�; Gyroflow expects g
+            p.printf("ascale,%.10f%n", 1.0 / 9.80665);
+            if (hasMag) {
+                // mscale: Android TYPE_MAGNETIC_FIELD in �T; 1 gauss = 100 �T
+                p.println("mscale,0.01");
+                p.println("t,gx,gy,gz,ax,ay,az,mx,my,mz");
+            } else {
+                p.println("t,gx,gy,gz,ax,ay,az");
+            }
+
+            StringBuilder sb = new StringBuilder(128);
+            for (int i = 0; i < count; i++) {
+                sb.setLength(0);
+                sb.append(timestamps[i] - origin);
+                sb.append(',').append(gx[i]);
+                sb.append(',').append(gy[i]);
+                sb.append(',').append(gz[i]);
+                sb.append(',').append(ax[i]);
+                sb.append(',').append(ay[i]);
+                sb.append(',').append(az[i]);
+                if (hasMag) {
+                    sb.append(',').append(mx[i]);
+                    sb.append(',').append(my[i]);
+                    sb.append(',').append(mz[i]);
+                }
+                p.println(sb);
+            }
+
+            if (p.checkError()) {
+                Log.e(TAG, "GCSV write error (disk full or SAF fault): " + outPath);
+            } else {
+                Log.d(TAG, "GCSV written: " + count + " samples ? " + outPath);
+            }
+        }
     }
 }

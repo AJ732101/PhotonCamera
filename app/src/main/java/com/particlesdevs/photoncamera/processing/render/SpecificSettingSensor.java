@@ -38,6 +38,7 @@ public class SpecificSettingSensor {
     //Noise model [A,B,C,D][bayer]
     public double[][] NoiseModelerArr;
     public boolean ModelerExists = false;
+    public int[] preferredResolution;
     public SpecificSettingSensor(){
         NoiseModelerArr = new double[4][4];
 

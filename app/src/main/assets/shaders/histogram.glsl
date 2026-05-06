@@ -9,7 +9,7 @@ uniform vec4 exposure;
 #define COL_A 1
 #define COL_CUSTOM 0
 #define HISTSIZE 256
-#define HISTMPY 255.0
+//#define HISTMPY 255.0
 #define SCALE 1
 #define HISTSTEPS uint(HISTSIZE/64)
 
@@ -42,63 +42,60 @@ shared uint localAlpha[HISTSIZE];
 
 #define LAYOUT //
 LAYOUT
+
 void main() {
     ivec2 storePos = ivec2(gl_GlobalInvocationID.xy)*SCALE;
     ivec2 imgsize = textureSize(inTexture,0).xy;
-    uint index = uint(gl_LocalInvocationIndex); // 0 - 64
+    uint index = uint(gl_LocalInvocationIndex) * HISTSTEPS; // 0 - 64 * HISTSTEPS
     for (uint i = 0u; i < HISTSTEPS; i++) {
         #if COL_R == 1
-        localRed[index*HISTSTEPS + i] = 0u;
+        localRed[index + i] = 0u;
         #endif
         #if COL_G == 1
-        localGreen[index*HISTSTEPS + i] = 0u;
+        localGreen[index + i] = 0u;
         #endif
         #if COL_B == 1
-        localBlue[index*HISTSTEPS + i] = 0u;
+        localBlue[index + i] = 0u;
         #endif
         #if COL_A == 1
-        localAlpha[index*HISTSTEPS + i] = 0u;
+        localAlpha[index + i] = 0u;
         #endif
     }
     barrier();
 
     if (storePos.x < imgsize.x && storePos.y < imgsize.y) {
         vec4 texColor = texture(inTexture,(vec2(storePos) + 0.5)/vec2(imgsize));
-        uvec4 texColorUint = clamp(uvec4(exposure * texColor * HISTMPY), uvec4(0), uvec4(HISTMPY));
+        uvec4 texColorUint = clamp(uvec4(exposure * texColor), uvec4(0), uvec4(HISTSIZE - 1));
         #if COL_CUSTOM == 1
             CUSTOM_PROGRAM;
-        #else
-            #if COL_R == 1
-            atomicAdd(localRed[texColorUint.r], 1u);
-            #endif
-            #if COL_G == 1
-            atomicAdd(localGreen[texColorUint.g], 1u);
-            #endif
-            #if COL_B == 1
-            atomicAdd(localBlue[texColorUint.b], 1u);
-            #endif
-            #if COL_A == 1
-            atomicAdd(localAlpha[texColorUint.a], 1u);
-            #endif
+        #endif
+        #if COL_R == 1
+        atomicAdd(localRed[texColorUint.r], 1u);
+        #endif
+        #if COL_G == 1
+        atomicAdd(localGreen[texColorUint.g], 1u);
+        #endif
+        #if COL_B == 1
+        atomicAdd(localBlue[texColorUint.b], 1u);
+        #endif
+        #if COL_A == 1
+        atomicAdd(localAlpha[texColorUint.a], 1u);
         #endif
     }
     barrier();
 
     for (uint i = 0u; i < HISTSTEPS; i++) {
-        #if COL_CUSTOM == 1
-        #else
         #if COL_R == 1
-        atomicAdd(reds[index*HISTSTEPS + i], localRed[index*HISTSTEPS + i]);
+        atomicAdd(reds[index + i], localRed[index + i]);
         #endif
         #if COL_G == 1
-        atomicAdd(greens[index*HISTSTEPS + i], localGreen[index*HISTSTEPS + i]);
+        atomicAdd(greens[index + i], localGreen[index + i]);
         #endif
         #if COL_B == 1
-        atomicAdd(blues[index*HISTSTEPS + i], localBlue[index*HISTSTEPS + i]);
+        atomicAdd(blues[index + i], localBlue[index + i]);
         #endif
         #if COL_A == 1
-        atomicAdd(alphas[index*HISTSTEPS + i], localAlpha[index*HISTSTEPS + i]);
-        #endif
+        atomicAdd(alphas[index + i], localAlpha[index + i]);
         #endif
     }
 }

@@ -23,7 +23,7 @@ import java.util.List;
 
 import static androidx.constraintlayout.widget.ConstraintSet.GONE;
 
-class CameraUIViewImpl implements CameraUIView {
+public class CameraUIViewImpl implements CameraUIView {
     private static final String TAG = "CameraUIView";
     private final CameraFragment cameraFragment;
     private final ProgressBar mCaptureProgressBar;

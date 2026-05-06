@@ -52,6 +52,12 @@ struct DngMetadata {
     bool has_analog_balance = false;
     size_t strip_offset = 0;
     unsigned short* delinearizationTable = nullptr;
+    double frame_rate = 0.0;
+    bool has_frame_rate = false;
+    bool binning = false;
+    bool binning_uses_average = false;
+    int original_width = 0;
+    int original_height = 0;
 };
 
 #ifdef __cplusplus
@@ -146,8 +152,26 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setNoiseProfile(
         JNIEnv *env, jobject obj, jlong creatorPtr, jdoubleArray noiseProfile);
 
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFrameRate(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jdouble frameRate);
+
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setCompression(
         JNIEnv *env, jobject obj, jlong creatorPtr, jboolean compression);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setBinning(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jboolean binning);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(
+        JNIEnv *env, jobject obj, jlong creatorPtr);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchive(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jstring path);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchiveByFd(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jint fd);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_closeArchive(
+        JNIEnv *env, jobject obj, jlong creatorPtr);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsLatitude(
         JNIEnv *env, jobject obj, jlong creatorPtr, jdouble degree, jdouble minute, jdouble second, jchar ref);
@@ -157,15 +181,9 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGpsAltitude(
         JNIEnv *env, jobject obj, jlong creatorPtr, jdouble altitude, jchar ref);
-
+        
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFocalLength35mm(
         JNIEnv *env, jobject obj, jlong creatorPtr, jshort focalLength);
-
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setFrameRate(
-        JNIEnv *env, jobject obj, jlong creatorPtr, jdouble fps);
-
-JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(
-JNIEnv *env, jobject obj, jlong creatorPtr);
 
 #ifdef __cplusplus
 }

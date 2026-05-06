@@ -3,40 +3,32 @@ precision highp usampler2D;
 precision highp sampler2D;
 uniform sampler2D InputBuffer;
 uniform usampler2D InputBuffer2;
-uniform int unlimitedcount;
+uniform float unlimitedWeight;
 uniform vec4 blackLevel;
 uniform int CfaPattern;
-uniform vec3 WhitePoint;
-uniform int whitelevel;
+uniform vec4 WhiteBalance;
+uniform float whiteLevel;
 uniform int first;
 uniform int yOffset;
-out float Output;
+out vec4 Output;
+
+vec4 bayerToVec4(ivec2 coords){
+    return vec4(
+        clamp(float(texelFetch(InputBuffer2, (coords + ivec2(0,0)), 0).x)/whiteLevel,0.0,1.0),
+        clamp(float(texelFetch(InputBuffer2, (coords + ivec2(1,0)), 0).x)/whiteLevel,0.0,1.0),
+        clamp(float(texelFetch(InputBuffer2, (coords + ivec2(0,1)), 0).x)/whiteLevel,0.0,1.0),
+        clamp(float(texelFetch(InputBuffer2, (coords + ivec2(1,1)), 0).x)/whiteLevel,0.0,1.0)
+    );
+}
 
 void main() {
     ivec2 xy = ivec2(gl_FragCoord.xy);
     xy+=ivec2(0,yOffset);
-    ivec2 fact = (xy-ivec2(CfaPattern%2,CfaPattern/2))%2;
-    float balance;
-    if(fact.x+fact.y == 1){
-        balance = WhitePoint.g;
-    } else {
-        if(fact.x == 0){
-            balance = WhitePoint.r;
-        } else {
-            balance = WhitePoint.b;
-        }
-    }
+    vec4 inp = clamp(WhiteBalance*(bayerToVec4(xy*2)-blackLevel)/(vec4(1.0)-blackLevel),
+                     vec4(0.0), vec4(1.0));
     if(first == 1){
-        Output =
-        clamp(float(texelFetch(InputBuffer2, (xy), 0).x)/float(whitelevel),0.0,balance);
+        Output = inp;
     } else {
-        Output =
-        mix(
-        float(texelFetch(InputBuffer, (xy), 0).x)
-        ,
-        clamp(float(texelFetch(InputBuffer2, (xy), 0).x)/float(whitelevel),0.0,balance)
-        ,
-        1.f/float(unlimitedcount)
-        );
+        Output = mix(texelFetch(InputBuffer, (xy), 0), inp, unlimitedWeight);
     }
 }

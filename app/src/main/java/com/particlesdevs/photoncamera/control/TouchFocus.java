@@ -74,6 +74,10 @@ public class TouchFocus {
     }
 
     private void setFocus(int x, int y) {
+        if (captureController.mImageReaderPreview == null) {
+            Log.w(TAG, "setFocus(): mImageReaderPreview is null, camera not ready yet");
+            return;
+        }
         Point size = new Point(captureController.mImageReaderPreview.getWidth(), captureController.mImageReaderPreview.getHeight());
         Point CurUi = new Point(textureView.getWidth(),textureView.getHeight());
         Size sizee = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
@@ -182,17 +186,20 @@ public class TouchFocus {
         captureController.rebuildPreviewBuilderOneShot();
         builder.set(CaptureRequest.CONTROL_AF_REGIONS, rectaf);
         builder.set(CaptureRequest.CONTROL_AE_REGIONS, rectaf);
+        builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
         builder.set(CaptureRequest.CONTROL_AF_MODE, PreferenceKeys.getAfMode());
         builder.set(CaptureRequest.CONTROL_AE_MODE, Math.max(PreferenceKeys.getAeMode(), 1));
         //set focus area repeating,else cam forget after one frame where it should focus
         //trigger af start only once. cam starts focusing till its focused or failed
-        builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-        builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
-        captureController.rebuildPreviewBuilderOneShot();
-        //set focus trigger back to idle to signal cam after focusing is done to do nothing
-        builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
-        builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE);
-        captureController.rebuildPreviewBuilderOneShot();
+        if(PreferenceKeys.getAfMode() == CaptureRequest.CONTROL_AF_MODE_AUTO) {
+            builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
+            captureController.rebuildPreviewBuilderOneShot();
+            //set focus trigger back to idle to signal cam after focusing is done to do nothing
+            builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE);
+            captureController.rebuildPreviewBuilderOneShot();
+        }
         captureController.rebuildPreviewBuilder();
         isTouchFocus = true;
     }

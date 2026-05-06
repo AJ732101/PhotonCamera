@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.ui.settings;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.settings.SettingsManager;
 import com.particlesdevs.photoncamera.ui.SplashActivity;
 import com.particlesdevs.photoncamera.ui.settings.custompreferences.ResetPreferences;
+import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.util.log.FragmentLifeCycleMonitor;
 
 import java.text.SimpleDateFormat;
@@ -884,6 +886,7 @@ public class SettingsActivity extends BaseActivity implements
                 activity.runOnUiThread(()-> {
             Preference restorePref = findPreference(mContext.getString(R.string.pref_restore_preferences_key));
             if (restorePref != null) {
+                restorePref.setSummary(mContext.getString(R.string.restore_summary_json));
                 restorePref.setOnPreferenceChangeListener((preference, newValue) -> {
                     String restoreResult = BackupRestoreUtil.restorePreferences(mContext, newValue.toString());
                     Snackbar.make(mRootView, restoreResult, Snackbar.LENGTH_LONG).show();
@@ -897,6 +900,7 @@ public class SettingsActivity extends BaseActivity implements
             activity.runOnUiThread(()-> {
                 Preference backupPref = findPreference(mContext.getString(R.string.pref_backup_preferences_key));
                 if (backupPref != null) {
+                    backupPref.setSummary(mContext.getString(R.string.backup_summary_json));
                     backupPref.setOnPreferenceChangeListener((preference, newValue) -> {
                         String backupResult = BackupRestoreUtil.backupSettings(mContext, newValue.toString());
                         Snackbar.make(mRootView, backupResult, Snackbar.LENGTH_LONG).show();
@@ -932,6 +936,29 @@ public class SettingsActivity extends BaseActivity implements
             }
         }
 
+        private void setFetchConfigurationsPref() {
+            Preference fetchPref = findPreference(mContext.getString(R.string.pref_fetch_configurations_key));
+            if (fetchPref != null) {
+                fetchPref.setOnPreferenceClickListener(preference -> {
+                    preference.setSummary(mContext.getString(R.string.fetch_configurations_summary) + " (fetching�)");
+                    new Thread(() -> {
+                        supportedDevice.fetchFromNetwork();
+                    if (activity != null) {
+                        activity.runOnUiThread(() -> {
+                            preference.setSummary(mContext.getString(R.string.fetch_configurations_summary));
+                            com.google.android.material.snackbar.Snackbar.make(
+                                    activity.findViewById(android.R.id.content),
+                                    "Device configurations updated. Restart to apply camera changes.",
+                                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).show();
+                        });
+                    }
+                    }).start();
+                    return true;
+                });
+            }
+        }
+
         private void removePreferenceFromScreen(String preferenceKey) {
             PreferenceScreen parentScreen = findPreference(SettingsFragment.KEY_MAIN_PARENT_SCREEN);
             if (parentScreen != null)
@@ -942,6 +969,13 @@ public class SettingsActivity extends BaseActivity implements
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // Guard against null key (can happen during preference restore)
+            if (key == null) {
+                return;
+            }
+            
+            Log.d("SettingsFragment", "onSharedPreferenceChanged: key=" + key);
+            
             if (key.equals(PreferenceKeys.Key.KEY_SAVE_PER_LENS_SETTINGS.mValue)) {
                 setHdrxTitle();
                 if (PreferenceKeys.isPerLensSettingsOn()) {
@@ -962,6 +996,17 @@ public class SettingsActivity extends BaseActivity implements
             }
             if (key.equalsIgnoreCase(PreferenceKeys.Key.KEY_FRAME_COUNT.mValue)) {
                 setFramesSummary();
+            }
+            if (key.equalsIgnoreCase(PreferenceKeys.Key.KEY_HIDE_GALLERY_ICON.mValue)) {
+                Log.d("SettingsFragment", "Hide gallery icon changed, expected key: " + PreferenceKeys.Key.KEY_HIDE_GALLERY_ICON.mValue);
+                try {
+                    boolean hideIcon = mSettingsManager.getBoolean(SettingsManager.SCOPE_GLOBAL, PreferenceKeys.Key.KEY_HIDE_GALLERY_ICON);
+                    Log.d("SettingsFragment", "Hide gallery icon value: " + hideIcon);
+                    toggleGalleryIconVisibility(hideIcon);
+                } catch (Exception e) {
+                    Log.e("SettingsFragment", "Error toggling gallery icon: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -989,6 +1034,66 @@ public class SettingsActivity extends BaseActivity implements
                     frameCountPreference.setSummary(mContext.getString(R.string.unprocessed_raw));
                 } else {
                     frameCountPreference.setSummary(mContext.getString(R.string.frame_count_summary));
+                }
+            }
+        }
+
+        private void toggleGalleryIconVisibility(boolean hideIcon) {
+            try {
+                // Get the ComponentName for the activity-alias using explicit package name
+                String packageName = mContext.getPackageName();
+                ComponentName galleryLauncher = new ComponentName(
+                        packageName,
+                        packageName + ".gallery.ui.GalleryActivityLauncher"
+                );
+                
+                // Get the package manager
+                PackageManager pm = mContext.getPackageManager();
+                
+                // Set the component enabled state based on hideIcon preference
+                // If hideIcon is true, disable the launcher icon; otherwise enable it
+                int newState = hideIcon ? 
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED : 
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+                
+                Log.d("SettingsFragment", "Toggling gallery icon visibility:");
+                Log.d("SettingsFragment", "  hideIcon=" + hideIcon);
+                Log.d("SettingsFragment", "  newState=" + newState);
+                Log.d("SettingsFragment", "  component=" + galleryLauncher);
+                
+                pm.setComponentEnabledSetting(
+                        galleryLauncher,
+                        newState,
+                        PackageManager.DONT_KILL_APP
+                );
+                
+                Log.d("SettingsFragment", "Component state changed successfully");
+                
+                // Show a message to user
+                if (activity != null) {
+                    String message = hideIcon ? 
+                            "Gallery icon will be hidden from launcher" : 
+                            "Gallery icon will be visible in launcher";
+                    activity.runOnUiThread(() -> 
+                            com.google.android.material.snackbar.Snackbar.make(
+                                    activity.findViewById(android.R.id.content),
+                                    message,
+                                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).show()
+                    );
+                }
+            } catch (Exception e) {
+                Log.e("SettingsFragment", "Error in toggleGalleryIconVisibility: " + e.getMessage());
+                e.printStackTrace();
+                // Show error message to user
+                if (activity != null) {
+                    activity.runOnUiThread(() -> 
+                            com.google.android.material.snackbar.Snackbar.make(
+                                    activity.findViewById(android.R.id.content),
+                                    "Error toggling gallery icon: " + e.getMessage(),
+                                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).show()
+                    );
                 }
             }
         }
@@ -1028,7 +1133,25 @@ public class SettingsActivity extends BaseActivity implements
 
         @Override
         public boolean onPreferenceTreeClick(@NonNull Preference preference) {
-            return true;
+            // Log which preference was clicked
+            Log.d("SettingsFragment", "onPreferenceTreeClick: " + preference.getKey());
+            
+            // Handle tunable submenu click manually to ensure proper navigation
+            if ("pref_tunable_submenu".equals(preference.getKey())) {
+                Log.d("SettingsFragment", "Tunable submenu clicked, navigating...");
+                
+                // Navigate to the submenu (preferences will be generated in the new fragment's onCreate)
+                if (preference instanceof PreferenceScreen) {
+                    PreferenceScreen screen = (PreferenceScreen) preference;
+                    if (activity instanceof SettingsActivity) {
+                        ((SettingsActivity) activity).onPreferenceStartScreen(this, screen);
+                        return true;
+                    }
+                }
+            }
+            
+            // Return false to allow default handling (like opening other subscreens)
+            return super.onPreferenceTreeClick(preference);
         }
 
         @Override

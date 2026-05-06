@@ -73,6 +73,7 @@ public class Bayer2Float extends Node {
         glProg.setVar("patSize", 2);
         glProg.setVar("whitePoint", basePipeline.mParameters.whitePoint);
         glProg.setVar("RawSize", basePipeline.mParameters.rawSize);
+        glProg.setVar("RawInvSize", 1.0f/basePipeline.mParameters.rawSize.x, 1.0f/basePipeline.mParameters.rawSize.y);
         Log.d(Name, "whitelevel:" + basePipeline.mParameters.whiteLevel);
         glProg.setVarU("whitelevel", (basePipeline.mParameters.whiteLevel));
         glProg.setTexture("GainMap", GainMapTex);
@@ -108,12 +109,12 @@ public class Bayer2Float extends Node {
         glProg.setVar("Regeneration", postPipeline.regenerationSense);
         glProg.setVar("MinimalInd", minimal);
         Point wsize = new Point(basePipeline.mParameters.rawSize);
-        basePipeline.main2 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim));
+        basePipeline.main2 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim), null, GL_LINEAR, GL_CLAMP_TO_EDGE);
         WorkingTexture = basePipeline.main2;
 
         glProg.drawBlocks(WorkingTexture);
-        basePipeline.main1 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim));
-        basePipeline.main3 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim));
+        basePipeline.main1 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim), null, GL_LINEAR, GL_CLAMP_TO_EDGE);
+        basePipeline.main3 = new GLTexture(wsize, new GLFormat(GLFormat.DataType.FLOAT_16, GLDrawParams.WorkDim), null, GL_LINEAR, GL_CLAMP_TO_EDGE);
         ((PostPipeline) basePipeline).GainMap = GainMapTex;
         glProg.closed = true;
         in.close();

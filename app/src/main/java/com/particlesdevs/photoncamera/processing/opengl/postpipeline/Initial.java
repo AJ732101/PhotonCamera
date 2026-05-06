@@ -13,6 +13,7 @@ import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
 import com.particlesdevs.photoncamera.processing.render.ColorCorrectionTransform;
 import com.particlesdevs.photoncamera.processing.render.Converter;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.BufferUtils;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.SplineInterpolator;
@@ -38,8 +39,8 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
             lut.close();
         }
         if (postLut != null) postLut.close();
-        interpolatedCurve.close();
-        GammaTexture.close();
+        if (interpolatedCurve != null) interpolatedCurve.close();
+        if (GammaTexture != null) GammaTexture.close();
         if (HSVTexture != null) HSVTexture.close();
         if (LookupTexture != null) LookupTexture.close();
         if(((PostPipeline)basePipeline).FusionMap != null) ((PostPipeline)basePipeline).FusionMap.close();
@@ -58,42 +59,66 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
     GLTexture LookupTexture;
     GLImage lutbm;
     float highersatmpy = 1.0f;
+    @Tunable(title = "Enable", category = "Color & Tone", defaultValue = 1, min = 0, max = 1, step = 1, description = "Enable camera matrix color correction, tone mapping and gamma correction")
+    boolean enable;
+    
+    @Tunable(title = "Gamma Coefficient", category = "Color & Tone", min = 1.0f, max = 3.0f, defaultValue = 2.2f)
     float gammaKoefficientGenerator = 2.2f;
+    
+    @Tunable(title = "Gamma Model X1", category = "Color & Tone", min = -20.0f, max = 20.0f, defaultValue = 7.1896f)
     float gammax1 = 7.1896f;
+    
+    @Tunable(title = "Gamma Model X2", category = "Color & Tone", min = -100.0f, max = 100.0f, defaultValue = -50.8195f)
     float gammax2 = -50.8195f;
+    
+    @Tunable(title = "Gamma Model X3", category = "Color & Tone", min = -200.0f, max = 200.0f, defaultValue = 129.3564f)
     float gammax3 = 129.3564f;
+    
+    @Tunable(title = "Tonemap X1", category = "Color & Tone", min = -2.0f, max = 2.0f, defaultValue = -0.15f)
     float tonemapx1 =-0.15f;
+    
+    @Tunable(title = "Tonemap X2", category = "Color & Tone", min = -5.0f, max = 5.0f, defaultValue = 2.55f)
     float tonemapx2 = 2.55f;
+    
+    @Tunable(title = "Tonemap X3", category = "Color & Tone", min = -5.0f, max = 5.0f, defaultValue = -1.6f)
     float tonemapx3 = -1.6f;
+    
+    @Tunable(title = "Saturation Const", category = "Color & Tone", max = 3.0f, defaultValue = 1.0f)
     float saturationConst = 1.f;
+    
+    @Tunable(title = "Saturation Gauss", category = "Color & Tone", max = 3.0f, defaultValue = 1.5f)
     float saturationGauss = 1.5f;
+    
+    @Tunable(title = "Saturation Red", category = "Color & Tone", max = 3.0f, defaultValue = 1.0f)
     float saturationRed = 1.0f;
+    
+    @Tunable(title = "Epsilon", category = "Color & Tone", max = 0.01f, defaultValue = 0.0008f, step = 0.0001f)
     float eps = 0.0008f;
+    
+    //@Tunable(title = "Curve Points Count", category = "Color & Tone", min = 4.0f, max = 10.0f, defaultValue = 6.0f, step = 1.0f)
     int curvePointsCount = 6;
+    
+    @Tunable(title = "Vignette Correction", category = "Color & Tone", max = 2.0f, defaultValue = 1.0f)
+    float vignetteCorrection = 1.0f;
+    
+    @Tunable(title = "Tone Mix", category = "Color & Tone", max = 1.0f, defaultValue = 0.5f)
+    float toneMix = 0.5f;
+    
+    @Tunable(title = "LTM Mix", category = "Color & Tone", max = 1.0f, defaultValue = 0.0f)
+    float ltmMix = 0.0f;
+    
     float[] intenseCurveX;
     float[] intenseCurveY;
     float[] intenseHardCurveX;
     float[] intenseHardCurveY;
-    float vignetteCorrection = 1.0f;
-    float toneMix = 0.5f;
-    float ltmMix = 0.0f;
+    
     @Override
     public void Run() {
-        gammaKoefficientGenerator =getTuning("GammaKoefficientGenerator", gammaKoefficientGenerator);
-        gammax1 =   getTuning("GammaModelX1",gammax1    );
-        gammax2 =   getTuning("GammaModelX2",gammax2    );
-        gammax3 =   getTuning("GammaModelX3",gammax3    );
-        tonemapx1 = getTuning("TonemapModelX1",tonemapx1);
-        tonemapx2 = getTuning("TonemapModelX2",tonemapx2);
-        tonemapx3 = getTuning("TonemapModelX3",tonemapx3);
-        saturationConst = getTuning("SaturationConst",saturationConst);
-        saturationGauss = getTuning("SaturationGauss",saturationGauss);
-        saturationRed =   getTuning("SaturationRed",  saturationRed);
-        eps =             getTuning("Epsilon",        eps      );
-        curvePointsCount =         getTuning("CurvePointsCount",curvePointsCount);
-        vignetteCorrection = getTuning("VignetteCorrection",vignetteCorrection);
-        toneMix = getTuning("ToneMix",toneMix);
-        ltmMix = getTuning("ToneMapUsageMix",ltmMix);
+        if (!enable) {
+            WorkingTexture = super.previousNode.WorkingTexture;
+            return;
+        }
+        // Values are automatically injected in BeforeRun()!
         intenseCurveX = new float[curvePointsCount];
         intenseCurveY = new float[curvePointsCount];
 
@@ -147,6 +172,7 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
             intenseHardCurveY[5] = 1.0f;
         }
 
+        // Array values still use getTuning for now (can be enhanced later)
         intenseCurveX = getTuning("FusionIntenseCurveX", intenseCurveX);
         intenseCurveY = getTuning("FusionIntenseCurveY", intenseCurveY);
         intenseHardCurveX = getTuning("FusionIntenseHardCurveX", intenseHardCurveX);
@@ -186,11 +212,8 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         glProg.setDefine("NOISES",  basePipeline.noiseS);
         glProg.setDefine("EPS", eps);
 
-        File postlut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
-        if (!postlut.exists()){
-            postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
-        }
-        if (postlut.exists()){
+        File postlut = new File(FileManager.sPHOTON_TUNING_DIR,"lut.png");
+        if(postlut.exists()){
             lutbm = new GLImage(postlut);
             postLut = new GLTexture(lutbm,GL_LINEAR,GL_CLAMP_TO_EDGE,0);
             glProg.setDefine("POSTLUT",true);

@@ -401,7 +401,7 @@ vec3 applyColorSpace(vec3 pRGB,float tonemapGain, float gainsVal){
         corr = cub0*(1.0-(br0-0.25)*4.0) + cub1*((br0-0.25)*4.0);
     }
     #endif
-    pRGB = corr*sensorToIntermediate*pRGB;
+    pRGB = corr*sensorToIntermediate*(pRGB*neutralPoint);
     vec3 pHSV = rgb2hsl(pRGB);
     #if USE_HSV == 1
 
@@ -416,8 +416,9 @@ vec3 applyColorSpace(vec3 pRGB,float tonemapGain, float gainsVal){
     //pRGB /= br;
     //float vignetteFactor = mix(0.0,VIGNETTE,clamp(br*100.0 - 0.01,0.0,1.0));
     float noise = sqrt(NOISES + NOISEO + 1e-8);
-    float vignetteFactor = smoothstep(0.0,noise * 8.0,br)*VIGNETTE;
-    gainsVal = mix(float(1.0), gainsVal, vignetteFactor);
+    //float vignetteFactor = smoothstep(0.0,min(noise, 0.1),br)*VIGNETTE;
+    float vignetteFactor = (br*br/(br*br+noise*noise))*VIGNETTE;
+    gainsVal = mix(float(1.0), gainsVal, 1.0);
     //br = clamp(reinhard_extended(br*gainsVal,max(1.0,gainsVal)),0.0,1.0);
     //br = clamp(reinhard_extended(br*tonemapGain,max(1.0,tonemapGain)),0.0,1.0);
     pRGB = clamp(pRGB*mix(tonemapGain,1.0,LTMMIX), 0.0,1.0);
@@ -439,7 +440,10 @@ vec3 applyColorSpace(vec3 pRGB,float tonemapGain, float gainsVal){
 }
 
 float getGain(vec2 coordsShift){
-    float ingain = texture(FusionMap, (gl_FragCoord.xy)/vec2(INSIZE) + coordsShift/vec2(INSIZE)).r;
+    vec2 fusionSize = vec2(textureSize(FusionMap, 0));
+    vec2 inputSize = vec2(textureSize(InputBuffer, 0));
+    vec2 baseCoord = (gl_FragCoord.xy + coordsShift) / inputSize;
+    float ingain = texture(FusionMap, baseCoord).r;
     //float ingain = texelFetch(FusionMap, xy, 0).r;
     /*if(ingain > 0.0){
         ingain = 1.0/ingain;
@@ -461,6 +465,14 @@ vec3 contrastSin(vec3 value, float contrast)
     return mix(value,contr,contrast);
 }
 
+float aces(float x) {
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
 
 void main() {
     ivec2 xy = ivec2(gl_FragCoord.xy);
@@ -510,34 +522,52 @@ void main() {
     }
     tonemapGain = gain / Z;
     */
-    float sumX = 0.0, sumY = 0.0, sumXX = 0.0, sumXY = 0.0;
-    for (int i = -3; i <= 3; i++) {
-        for (int j = -3; j <= 3; j++) {
-            float lightness = dot(texelFetch(InputBuffer, xy + ivec2(i*2, j*2), 0).rgb, vec3(1.0/3.0));
-            float gain = getGain(vec2(i*2, j*2));
-            sumX += lightness;
-            sumY += gain;
-            sumXX += lightness * lightness;
-            sumXY += lightness * gain;
+    // Guided upsampling with Gaussian-weighted linear model
+    /*float momentX = 0.0, momentY = 0.0, momentX2 = 0.0, momentXY = 0.0;
+    float ws = 0.0;
+    const float sigma = 1.2;
+    const float sigmaSq2 = 2.0 * sigma * sigma;
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            // Average lightness over 2x2 block to match FusionMap resolution
+            vec2 offset = vec2(float(i*2), float(j*2));
+            float lightness = 0.0;
+            lightness += dot(texelFetch(InputBuffer, xy + ivec2(i*2, j*2), 0).rgb, vec3(1.0/3.0));
+            lightness += dot(texelFetch(InputBuffer, xy + ivec2(i*2+1, j*2), 0).rgb, vec3(1.0/3.0));
+            lightness += dot(texelFetch(InputBuffer, xy + ivec2(i*2, j*2+1), 0).rgb, vec3(1.0/3.0));
+            lightness += dot(texelFetch(InputBuffer, xy + ivec2(i*2+1, j*2+1), 0).rgb, vec3(1.0/3.0));
+            lightness *= 0.25;
+            float gain = getGain(offset);
+            
+            // Gaussian weight based on spatial distance
+            float w = exp(-float(i*i + j*j) / sigmaSq2);
+            
+            momentX += lightness * w;
+            momentY += gain * w;
+            momentX2 += lightness * lightness * w;
+            momentXY += lightness * gain * w;
+            ws += w;
         }
     }
-    float invCount = 1.0 / float(49.0);
-    float meanX = sumX * invCount;
-    float meanY = sumY * invCount;
-    float covXY = sumXY * invCount - meanX * meanY;
-    float varX = sumXX * invCount - meanX * meanX;
-    // Handle zero variance case
-    float a = (abs(varX) < 1e-6) ? 0.0 : covXY / varX;
-    float b = meanY - a * meanX;
-    tonemapGain =  a * dot(sRGB.rgb,vec3(1.0/3.0)) + b;
-    tonemapGain = mix(1.0,tonemapGain,texture(IntenseCurve, vec2(dot(sRGB.rgb,vec3(1.0/3.0)),0.0)).r);
+    float invWs = 1.0 / ws;
+    float meanX = momentX * invWs;
+    float meanY = momentY * invWs;
+    float covXY = momentXY * invWs - meanX * meanY;
+    float varX = momentX2 * invWs - meanX * meanX;
+    // Handle zero variance case with epsilon for stability
+    float a = covXY / (max(varX, 0.0) + 0.0001);
+    float b = meanY - a * meanX;*/
+    vec2 gainAB = texture(FusionMap, vec2(gl_FragCoord.xy)/vec2(textureSize(InputBuffer, 0))).rg * FUSIONGAIN;
+    tonemapGain =  gainAB.r * ((luminocity(sRGB))) + gainAB.g;
+    //tonemapGain = mix(1.0,tonemapGain,texture(IntenseCurve, vec2(dot(sRGB.rgb,vec3(1.0/3.0)),0.0)).r);
+    //tonemapGain = max(tonemapGain, 0.5);
     #endif
     float br = (sRGB.r+sRGB.g+sRGB.b)/3.0;
     vec4 gains = textureBicubicHardware(GainMap, vec2(xy)/vec2(textureSize(InputBuffer, 0)));
     gains.rgb = vec3(gains.r,(gains.g+gains.b)/2.0,gains.a);
     float gainsVal = dot(gains.rgb,vec3(1.0/3.0));
     sRGB = applyColorSpace(sRGB,tonemapGain, gainsVal);
-    //sRGB = clamp(sRGB,0.0,1.0);
+    //sRGB = vec3(tonemapGain);
     #if LUT == 1
     //sRGB = lookup(sRGB);
     #endif
@@ -550,9 +580,10 @@ void main() {
     //sat2*=br;
     sRGB = saturate(sRGB,SATURATION2,SATURATION);
     sRGB = contrastSin(sRGB,mix(CONTRAST+SHADOWS, CONTRAST, luminocity(sRGB)));
-    float noiseO = (NOISEO*NOISEO)*0.25;
-    noiseO = min(noiseO,0.25);
-    Output = clamp((sRGB-noiseO)/(vec3(1.0)-noiseO),0.0,1.0);
+    //float noiseO = (NOISEO*NOISEO)*0.25;
+    //noiseO = min(noiseO,0.25);
+    //Output = clamp((sRGB-noiseO)/(vec3(1.0)-noiseO),0.0,1.0);
+    Output = clamp(sRGB,0.0,1.0);
     #if POSTLUT == 1
         Output = postlookup(Output);
     #endif

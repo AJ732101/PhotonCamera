@@ -67,5 +67,7 @@ float IG(ivec2 pos, ivec2 stp) {
 
 void main(){
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
-    imageStore(outTexture, pos, vec4(IG(pos, ivec2(1,0)), IG(pos, ivec2(0,1)), 0.0, 1.0));
+    vec2 res = vec2(0.0);
+    res = vec2(IG(pos, ivec2(1,0)), IG(pos, ivec2(0,1)));
+    imageStore(outTexture, pos, clamp(abs(vec4(res.x, res.y, 0.0, 1.0)), vec4(0.0), vec4(1.0)));
 }

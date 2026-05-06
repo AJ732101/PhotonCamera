@@ -42,5 +42,6 @@ public class Demosaic extends Node {
         WorkingTexture = basePipeline.main3;
         glProg.drawBlocks(WorkingTexture);
         glProg.close();
+        WorkingTexture = basePipeline.swap3();
     }
 }

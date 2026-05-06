@@ -71,6 +71,21 @@ public class GLBasePipeline implements AutoCloseable {
         }
     }
 
+    // Swaps main3 with main1 and main2
+    public GLTexture swap3() {
+        if(texnum == 1) {
+            GLTexture temp = main1;
+            main1 = main3;
+            main3 = temp;
+            return main1;
+        } else {
+            GLTexture temp = main2;
+            main2 = main3;
+            main3 = temp;
+            return main2;
+        }
+    }
+
     private void tuningLog(String name, String value){
         if(loggedTuning) Log.d("Tuning",name+" = "+ value);
     }

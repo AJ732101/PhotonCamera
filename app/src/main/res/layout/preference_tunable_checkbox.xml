@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Custom layout for tunable checkboxes - reduced left margin -->
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:listPreferredItemHeight"
+        android:paddingEnd="@dimen/camera_settings_entry_margin"
+        android:paddingStart="@dimen/camera_settings_entry_margin"
+        android:orientation="horizontal">
+
+    <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:layout_marginTop="@dimen/camera_settings_entry_margin"
+            android:layout_marginBottom="@dimen/camera_settings_entry_margin"
+            android:layout_gravity="center_vertical">
+
+        <TextView
+                android:textSize="@dimen/camera_settings_preference_font_size"
+                android:ellipsize="marquee"
+                android:id="@android:id/title"
+                android:fadingEdge="horizontal"
+                tools:text="Checkbox Title"
+                android:gravity="start|center_vertical"
+                android:textColor="?android:textColorPrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+                android:textAppearance="?android:textAppearanceSmall"
+                android:textColor="?android:textColorSecondary"
+                android:id="@android:id/summary"
+                android:layout_width="wrap_content"
+                tools:text="Checkbox description"
+                android:layout_height="wrap_content"
+                android:layout_below="@android:id/title"
+                android:layout_alignStart="@android:id/title"/>
+    </RelativeLayout>
+    
+    <LinearLayout
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:id="@android:id/widget_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingEnd="?android:scrollbarSize"
+            android:paddingStart="10dp"/>
+</LinearLayout>
+
+
+
+
+
+
+

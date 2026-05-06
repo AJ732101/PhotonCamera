@@ -17,10 +17,10 @@ uniform ivec2 rawHalf;
 uniform float exposure;
 uniform float integralNorm;
 
-#define TILE 8
 #define TILE_AL 16
+#define TILE (TILE_AL/2)
 #define M_PI 3.1415926535897932384626433832795
-#define OFFSETS 4
+#define OFFSETS 5
 #import median
 
 shared mat4 inputDifferences[TILE*TILE]; // use this to store the 3x3 search grid images differences
@@ -127,15 +127,16 @@ highp vec2 getPrevOffset(ivec2 tile_xy) {
     ivec2 localOffsets[OFFSETS];
     localOffsets[0] = ivec2(0, 0);
     localOffsets[1] = ivec2(1, 0);
-    localOffsets[2] = ivec2(0, 1);
-    localOffsets[3] = ivec2(1, 1);
-#if OFFSETS > 4
+    localOffsets[2] = ivec2(-1, 0);
+    localOffsets[3] = ivec2(0, 1);
+    localOffsets[4] = ivec2(0, -1);
+/*#if OFFSETS > 4
     localOffsets[4] = ivec2(-1, 0);
     localOffsets[5] = ivec2(0, -1);
     localOffsets[6] = ivec2(-1, -1);
     localOffsets[7] = ivec2(-1, 1);
     localOffsets[8] = ivec2(1, -1);
-#endif
+#endif*/
     vec2 prevOffset = vec2(0.0);
     // Local thread ID within work group
     ivec2 localID = ivec2(gl_LocalInvocationID.xy) - ivec2(TILE/2, TILE/2); // 0 - TILE-1
@@ -185,15 +186,16 @@ highp vec3 computeAlignment(ivec2 tile_xy, vec2 prevOffset) {
     ivec2 localOffsets[OFFSETS];
     localOffsets[0] = ivec2(0, 0);
     localOffsets[1] = ivec2(1, 0);
-    localOffsets[2] = ivec2(0, 1);
-    localOffsets[3] = ivec2(1, 1);
-#if OFFSETS > 4
+    localOffsets[2] = ivec2(-1, 0);
+    localOffsets[3] = ivec2(0, 1);
+    localOffsets[4] = ivec2(0, -1);
+/*#if OFFSETS > 4
     localOffsets[4] = ivec2(-1, 0);
     localOffsets[5] = ivec2(0, -1);
     localOffsets[6] = ivec2(-1, -1);
     localOffsets[7] = ivec2(-1, 1);
     localOffsets[8] = ivec2(1, -1);
-#endif
+#endif*/
     // Local thread ID within work group
     ivec2 localID = ivec2(gl_LocalInvocationID.xy) - ivec2(TILE/2, TILE/2); // 0 - TILE-1
     int localIndex = int(gl_LocalInvocationIndex); // 0 - TILE*TILE-1

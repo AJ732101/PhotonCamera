@@ -1,8 +1,11 @@
 package com.particlesdevs.photoncamera.processing.opengl.postpipeline;
 
+import android.hardware.camera2.CameraCharacteristics;
+
 import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.processing.opengl.GLImage;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.processing.opengl.nodes.Node;
@@ -14,11 +17,13 @@ import java.io.IOException;
 
 import static android.opengl.GLES20.GL_CLAMP_TO_EDGE;
 import static android.opengl.GLES20.GL_LINEAR;
+import static android.opengl.GLES20.GL_REPEAT;
 
 public class RotateWatermark extends Node {
     private int rotate;
     private boolean watermarkNeeded;
     private GLImage watermark;
+    private GLImage noise;
     public RotateWatermark(int rotation) {
         super("", "Rotate");
         rotate = rotation;
@@ -30,6 +35,7 @@ public class RotateWatermark extends Node {
     @Override
     public void AfterRun() {
         if(watermark != null) watermark.close();
+        if(noise != null) noise.close();
     }
 
     @Override
@@ -43,9 +49,11 @@ public class RotateWatermark extends Node {
             File waterExternal = new File(FileManager.sPHOTON_TUNING_DIR,"watermark.png");
             if (waterExternal.exists()) watermark = new GLImage(waterExternal);
             else watermark = new GLImage(PhotonCamera.getAssetLoader().getInputStream("watermark/photoncamera_watermark.png"));
+            noise = new GLImage(PhotonCamera.getAssetLoader().getInputStream("noise.png"));
             glProg.setTexture("Watermark", new GLTexture(watermark,GL_LINEAR,GL_CLAMP_TO_EDGE,0));
+            glProg.setTexture("Noise", new GLTexture(noise,GL_LINEAR,GL_REPEAT,0));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.d(Name,"Failed to load watermark or noise texture:" + Log.getStackTraceString(e));
         }
 
         glProg.setTexture("InputBuffer", previousNode.WorkingTexture);
@@ -71,6 +79,11 @@ public class RotateWatermark extends Node {
         }
         Log.d(Name,"selected rotation:"+rot);
         glProg.setVar("rotate",rot);
+        if(basePipeline.mParameters.mirror) {
+            glProg.setVar("mirror", 1);
+        } else {
+            glProg.setVar("mirror", 0);
+        }
         glProg.setVar("cropSize",((PostPipeline)basePipeline).cropSize);
         glProg.setVar("rawSize",basePipeline.mParameters.rawSize);
         Log.d(Name,"Crop size:"+((PostPipeline)basePipeline).cropSize);

@@ -31,6 +31,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.particlesdevs.photoncamera.settings.TunableInjector;
+
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.getImageSaver;
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.init;
 
@@ -38,7 +40,10 @@ public class ImageSaver {
     /**
      * Image frame buffer
      */
+    public static final int JPG_QUALITY = 98;
     private static final String TAG = "ImageSaver";
+
+    public static final ImageSaverSettings SETTINGS = new ImageSaverSettings();
 
     public SaverImplementation implementation;
     private int imageFormat;
@@ -48,6 +53,10 @@ public class ImageSaver {
 
     public void setFrameCount(int desiredFrameCount){
         this.desiredFrameCount = desiredFrameCount;
+    }
+
+    public void setImageFormat(int imageFormat) {
+        this.imageFormat = imageFormat;
     }
 
     public void updateFrameCount(int desiredFrameCount){
@@ -62,6 +71,7 @@ public class ImageSaver {
     public ImageSaver(ProcessingEventsListener processingEventsListener) {
         implementation = new DefaultSaver(processingEventsListener);
         init(implementation);
+        TunableInjector.inject(SETTINGS);
     }
 
     public void initProcess(ImageReader mReader) {
@@ -183,8 +193,9 @@ public class ImageSaver {
             if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
                 imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(sensorMode);
             }
-            imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
         }
+
+        imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
 
         return imageDescriptionBuilder.toString();
     }
@@ -262,10 +273,12 @@ public class ImageSaver {
     }
 
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
+    	TunableInjector.inject(SETTINGS);
         implementation.runRaw(imageFormat, characteristics, captureResult, captureRequest, burstShakiness, cameraRotation, exposures);
     }
 
     public void processStart(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
+    	TunableInjector.inject(SETTINGS);
         implementation = ImageSaverSelector.getImageSaver(PhotonCamera.getSettings().rawFormat, implementation);
         implementation.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
     }

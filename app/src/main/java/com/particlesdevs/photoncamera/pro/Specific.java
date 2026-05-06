@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.pro;
 
+import android.content.Context;
 import android.os.Build;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -349,5 +350,112 @@ public class Specific {
     }
     private void saveSpecific(){
         mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_is_dual_session", specificSetting.isDualSessionSupported);
+    }
+
+    private void parseAndApply(ArrayList<String> inputStr) {
+        for (String str : inputStr) {
+            String[] caseS = str.replace(" ", "").replace("\n", "").split("=");
+            if (caseS.length < 2) continue;
+            switch (caseS[0]) {
+                case "isDualSessionSupported":
+                    specificSetting.isDualSessionSupported = Boolean.parseBoolean(caseS[1]);
+                    break;
+                case "blackLevel": {
+                    String[] bl = caseS[1].split(",");
+                    blackLevel = new float[]{Float.parseFloat(bl[0]), Float.parseFloat(bl[1]),
+                            Float.parseFloat(bl[2]), Float.parseFloat(bl[3])};
+                    break;
+                }
+                case "rawColorCorrection":
+                    specificSetting.isRawColorCorrection = Boolean.parseBoolean(caseS[1]);
+                    break;
+                case "sensorModeKey": {
+                    specificSetting.sensorModeKey = caseS[1];
+                    break;
+                }
+                case "cameraIDS": {
+                    Log.d(TAG, "Camera IDs Loaded: " + caseS[1]);
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.cameraIDS = new String[ids.length];
+                    for (int i = 0; i < specificSetting.cameraIDS.length; i++) {
+                        specificSetting.cameraIDS[i] = ids[i];
+                    }
+                    break;
+                }
+                case "sensorModes": {
+                    Log.d(TAG, "Sensor Modes Loaded: " + caseS[1]);
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.sensorModes = new String[ids.length];
+                    for (int i = 0; i < specificSetting.sensorModes.length; i++) {
+                        specificSetting.sensorModes[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeByteName": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeByteName = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteName.length; i++) {
+                        specificSetting.customVendorKeyTypeByteName[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeInt32Name": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeInt32Name = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Name.length; i++) {
+                        specificSetting.customVendorKeyTypeInt32Name[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeFloatName": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeFloatName = new String[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeFloatName.length; i++) {
+                        specificSetting.customVendorKeyTypeFloatName[i] = ids[i];
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeByteValue": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeByteValue = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeByteValue.length; i++) {
+                        specificSetting.customVendorKeyTypeByteValue[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeInt32Value": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeInt32Value = new int[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeInt32Value.length; i++) {
+                        specificSetting.customVendorKeyTypeInt32Value[i] = Integer.parseInt(ids[i]);
+                    }
+                    break;
+                }
+                case "customVendorKeyTypeFloatValue": {
+                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
+                    specificSetting.customVendorKeyTypeFloatValue = new float[ids.length];
+                    for (int i = 0; i < specificSetting.customVendorKeyTypeFloatValue.length; i++) {
+                        specificSetting.customVendorKeyTypeFloatValue[i] = Float.parseFloat(ids[i]);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void fetchFromNetwork(Context context) {
+        try {
+            String device = Build.BRAND.toLowerCase() + "/" + Build.DEVICE.toLowerCase();
+            Log.d(TAG, "Fetching from network for device: " + device);
+            ArrayList<String> inputStr = loadNetwork(device);
+            if (!inputStr.isEmpty()) {
+                parseAndApply(inputStr);
+                mSettingsManager.set(PreferenceKeys.Key.DEVICES_PREFERENCE_FILE_NAME.mValue, "specific_loaded", true);
+                saveSpecific();
+                Log.d(TAG, "Network fetch successful");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Network fetch failed: " + e.toString());
+        }
     }
 }

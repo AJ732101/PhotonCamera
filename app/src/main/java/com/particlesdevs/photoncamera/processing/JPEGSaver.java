@@ -25,27 +25,10 @@ public class JPEGSaver extends DefaultSaver {
     public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         try {
-            IMAGE_BUFFER.add(getFrame(image));
             byte[] bytes = new byte[buffer.remaining()];
-            if (IMAGE_BUFFER.size() == PhotonCamera.getCaptureController().mMeasuredFrameCnt && PhotonCamera.getSettings().frameCount != 1) {
-                Path jpgPath = ImagePath.newJPGFilePath();
-                buffer.duplicate().get(bytes);
-                Files.write(jpgPath, bytes);
-                ExifInterface exif = new ExifInterface(jpgPath.toString());
-                //exif.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, ImageSaver.createProcessingString());
-                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
-                    exif.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
-                    if (PhotonCamera.gpsLocation.hasAltitude()) {
-                        exif.setAltitude(PhotonCamera.gpsLocation.getAltitude());
-                    }
-                }
-                exif.saveAttributes();
 
-                IMAGE_BUFFER.clear();
-            }
             if (PhotonCamera.getSettings().frameCount == 1) {
                 Path jpgPath = ImagePath.newJPGFilePath();
-                IMAGE_BUFFER.clear();
                 buffer.get(bytes);
                 Files.write(jpgPath, bytes);
                 ExifInterface exif = new ExifInterface(jpgPath.toString());
@@ -61,6 +44,25 @@ public class JPEGSaver extends DefaultSaver {
                 image.close();
                 processingEventsListener.onProcessingFinished("JPEG: Single Frame, Not Processed!");
                 processingEventsListener.notifyImageSavedStatus(true, jpgPath);
+                return;
+            }
+
+            IMAGE_BUFFER.add(getFrame(image));
+            if (IMAGE_BUFFER.size() == PhotonCamera.getCaptureController().mMeasuredFrameCnt && PhotonCamera.getSettings().frameCount != 1) {
+                Path jpgPath = ImagePath.newJPGFilePath();
+                buffer.duplicate().get(bytes);
+                Files.write(jpgPath, bytes);
+                ExifInterface exif = new ExifInterface(jpgPath.toString());
+                //exif.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, ImageSaver.createProcessingString());
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    exif.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        exif.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                }
+                exif.saveAttributes();
+
+                IMAGE_BUFFER.clear();
             }
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
