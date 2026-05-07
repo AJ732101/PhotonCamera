@@ -190,31 +190,31 @@ public:
     // --- Archive API (backed by libarchive via dlopen) ---
 
     // Shared init: ZIP format, STORED entries (no compression — fastest possible).
-    void setupArchiveFormat() {
+    void setupArchiveFormat(int compressionLevel) {
         g_libarchive.write_set_format_zip(archive_handle);
         // No outer filter wrapper; ZIP handles per-entry compression internally.
         g_libarchive.write_add_filter_none(archive_handle);
 
         if (g_libarchive.write_set_format_option) {
             // Current: STORED — zero CPU cost, maximum write speed.
-            g_libarchive.write_set_format_option(archive_handle, "zip", "compression", "store");
-
-            // To switch to DEFLATE instead, replace the line above with:
-            //   g_libarchive.write_set_format_option(archive_handle, "zip", "compression", "deflate");
-            // Optionally also set the level (1 = fastest, 9 = best ratio):
-            //   g_libarchive.write_set_format_option(archive_handle, "zip", "compression-level", "1");
+            if (compressionLevel >= 1) {
+                // (1 = fastest, 9 = best ratio):
+                g_libarchive.write_set_format_option(archive_handle, "zip", "compression-level", std::to_string(compressionLevel).c_str());
+            } else {
+                g_libarchive.write_set_format_option(archive_handle, "zip", "compression", "store");
+            }
         }
         LOGD("Archive: ZIP stored (no compression)");
     }
 
-    void openArchive(const std::string& path) {
+    void openArchive(const std::string& path, int compressionLevel) {
         if (archive_handle) closeArchive();
         if (!g_libarchive.load()) {
             LOGE("openArchive: libarchive not available");
             return;
         }
         archive_handle = g_libarchive.write_new();
-        setupArchiveFormat();
+        setupArchiveFormat(compressionLevel);
         if (g_libarchive.write_open_filename(archive_handle, path.c_str()) != ARCHIVE_OK) {
             LOGE("archive_write_open_filename failed: %s", path.c_str());
             g_libarchive.write_free(archive_handle);
@@ -225,14 +225,14 @@ public:
         LOGD("Archive opened (path): %s", path.c_str());
     }
 
-    void openArchiveByFd(int fd) {
+    void openArchiveByFd(int fd, int compressionLevel) {
         if (archive_handle) closeArchive();
         if (!g_libarchive.load()) {
             LOGE("openArchiveByFd: libarchive not available");
             return;
         }
         archive_handle = g_libarchive.write_new();
-        setupArchiveFormat();
+        setupArchiveFormat(compressionLevel);
         if (g_libarchive.write_open_fd(archive_handle, fd) != ARCHIVE_OK) {
             LOGE("archive_write_open_fd failed for fd=%d", fd);
             g_libarchive.write_free(archive_handle);
@@ -1213,21 +1213,21 @@ public:
         }
     }
     
-    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchive(JNIEnv *env, jobject obj, jlong creatorPtr, jstring path) {
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchive(JNIEnv *env, jobject obj, jlong creatorPtr, jstring path, jint compressionLevel) {
         DngCreator *creator = reinterpret_cast<DngCreator *>(creatorPtr);
         if (creator && path) {
             const char *pathStr = env->GetStringUTFChars(path, nullptr);
             if (pathStr) {
-                creator->openArchive(std::string(pathStr));
+                creator->openArchive(std::string(pathStr), compressionLevel);
                 env->ReleaseStringUTFChars(path, pathStr);
             }
         }
     }
 
-    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchiveByFd(JNIEnv *env, jobject obj, jlong creatorPtr, jint fd) {
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchiveByFd(JNIEnv *env, jobject obj, jlong creatorPtr, jint fd, jint compressionLevel) {
         DngCreator *creator = reinterpret_cast<DngCreator *>(creatorPtr);
         if (creator) {
-            creator->openArchiveByFd(static_cast<int>(fd));
+            creator->openArchiveByFd(static_cast<int>(fd), compressionLevel);
         }
     }
 

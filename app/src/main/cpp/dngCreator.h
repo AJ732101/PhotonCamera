@@ -165,10 +165,10 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
         JNIEnv *env, jobject obj, jlong creatorPtr);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchive(
-        JNIEnv *env, jobject obj, jlong creatorPtr, jstring path);
+        JNIEnv *env, jobject obj, jlong creatorPtr, jstring path, jint compressionLevel);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_openArchiveByFd(
-        JNIEnv *env, jobject obj, jlong creatorPtr, jint fd);
+        JNIEnv *env, jobject obj, jlong creatorPtr, jint fd, jint compressionLevel);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_closeArchive(
         JNIEnv *env, jobject obj, jlong creatorPtr);

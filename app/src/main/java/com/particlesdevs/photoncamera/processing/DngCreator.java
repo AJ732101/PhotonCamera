@@ -68,8 +68,8 @@ public class DngCreator {
     private native void setFocalLength35mm(long nativePtr, short focalLength);
     private native void destroy(long nativePtr);
     private native void writeFile(long nativePtr, ByteBuffer dngBuffer, ByteBuffer raw, String path, int offset);
-    private native void openArchive(long nativePtr, String path);
-    private native void openArchiveByFd(long nativePtr, int fd);
+    private native void openArchive(long nativePtr, String path, int compressionLevel);
+    private native void openArchiveByFd(long nativePtr, int fd, int compressionLevel);
     private native void closeArchive(long nativePtr);
 
     public DngCreator() {
@@ -565,12 +565,13 @@ public class DngCreator {
      * {@link #closeArchive} when all frames have been written to finalise the ZIP.
      *
      * @param archivePath Absolute path of the output .zip file (must be writable)
+     * @param compressionLevel 0..9 where 0 is no compression and 9 is max compression
      */
-    public void openArchive(String archivePath) {
+    public void openArchive(String archivePath, int compressionLevel) {
         if (archivePath == null || archivePath.isEmpty()) {
             throw new IllegalArgumentException("archivePath must not be null or empty");
         }
-        openArchive(nativePtr, archivePath);
+        openArchive(nativePtr, archivePath, compressionLevel);
     }
 
     /**
@@ -579,10 +580,11 @@ public class DngCreator {
      * {@link #writeFile} calls will store each DNG as an archive entry instead of individual files.
      *
      * @param fd Writable file descriptor obtained from {@code ParcelFileDescriptor.getFd()}
+     * @param compressionLevel 0..9 where 0 is no compression and 9 is max compression
      */
-    public void openArchiveByFd(int fd) {
+    public void openArchiveByFd(int fd, int compressionLevel) {
         if (fd < 0) throw new IllegalArgumentException("fd must be a valid (>= 0) file descriptor");
-        openArchiveByFd(nativePtr, fd);
+        openArchiveByFd(nativePtr, fd, compressionLevel);
     }
 
     /**

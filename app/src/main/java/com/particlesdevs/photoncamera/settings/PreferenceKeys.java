@@ -249,6 +249,7 @@ public class PreferenceKeys {
         // Photon Camera Merging
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_DOWNSCALE_4X, false);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_WRITE_ZIP, true);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_COMPRESS_ZIP, false);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169, true);
 
         settingsManager.addListener((settingsManager1, key) -> {
@@ -963,6 +964,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_WRITE_ZIP);
     }
 
+    public static boolean isRawVideoCompressZip() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_COMPRESS_ZIP);
+    }
+
     public static boolean isRawVideoCrop169() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169);
     }
@@ -1116,6 +1121,7 @@ public class PreferenceKeys {
         KEY_PREVIEW_RESOLUTION(R.string.pref_preview_resolution_key),////TODO add preview resolution selector
         KEY_RAWVIDEO_DOWNSCALE_4X(R.string.pref_rawvideo_downscale_4x_key),
         KEY_RAWVIDEO_WRITE_ZIP(R.string.pref_rawvideo_write_zip_key),
+        KEY_RAWVIDEO_COMPRESS_ZIP(R.string.pref_rawvideo_compress_zip_key),
         KEY_RAWVIDEO_CROP_169(R.string.pref_rawvideo_crop_169_key),
         KEY_SHOW_AF_DATA(R.string.pref_show_afdata_key),
         KEY_SAVE_RAW(R.string.pref_save_raw_key),

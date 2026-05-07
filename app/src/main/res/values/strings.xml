@@ -192,8 +192,9 @@
     <string name="transfer_function">Transfer Function</string>
     <string name="video_encoder_name">Video Encoder Name</string>
     <string name="video_range">Range</string>
-    <string name="rawvideo_downscale_4x">Downscale 4x</string>
+    <string name="rawvideo_downscale_4x">Half Resolution</string>
     <string name="rawvideo_write_zip">Write ZIP</string>
+    <string name="rawvideo_compress_zip">Compress ZIP</string>
     <string name="rawvideo_crop_169">Crop to 16:9</string>
 
     <!-- Audio settings strings -->

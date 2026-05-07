@@ -98,7 +98,7 @@ public class RawVideoProcessor extends ProcessorBase {
         // Create output folder if not exists
         try {
             Files.createDirectories(outputFolder);
-            if(!PreferenceKeys.isRawVideoWriteZip())
+            if (!PreferenceKeys.isRawVideoWriteZip())
                 Files.createDirectories(outputFolder.resolve(".dng"));
         } catch (IOException e) {
             Log.d(TAG, "Failed to create output directory: " + outputFolder + ", error: " + Log.getStackTraceString(e));
@@ -111,8 +111,7 @@ public class RawVideoProcessor extends ProcessorBase {
         writeExecutor = Executors.newSingleThreadExecutor();
         Thread th = new Thread( () -> {
             // Always record the rear (away-from-user) microphone
-            rawAudioRecorder.start(
-                    outputFolder.resolve("RAW_MIC.flac").toString());
+            rawAudioRecorder.start(outputFolder.resolve("RAW_MIC.flac").toString());
         });
         th.start();
         parameters = new Parameters();
@@ -165,13 +164,13 @@ public class RawVideoProcessor extends ProcessorBase {
             dngCreator.setBinning(PreferenceKeys.isRawVideoDownscale4x());
             dngCreator.setFrameRate(resolveFrameRate());
             dngCreator.setCompression(false);
-            if(PreferenceKeys.isRawVideoWriteZip()) {
+            if (PreferenceKeys.isRawVideoWriteZip()) {
                 String archivePath = outputFolder.resolve("dng.zip").toString();
                 int archiveFd = SimpleStorageHelper.openFdForWrite(archivePath);
                 if (archiveFd >= 0) {
-                    dngCreator.openArchiveByFd(archiveFd);
+                    dngCreator.openArchiveByFd(archiveFd, PreferenceKeys.isRawVideoCompressZip() ? 1 : 0);
                 } else {
-                    dngCreator.openArchive(archivePath);
+                    dngCreator.openArchive(archivePath, PreferenceKeys.isRawVideoCompressZip() ? 1 : 0);
                 }
             }
             /*if(format == ImageFormat.RAW_SENSOR) {
@@ -212,7 +211,7 @@ public class RawVideoProcessor extends ProcessorBase {
             final int slot = writeBufferCounter % writeBufferSize;
             @SuppressLint("DefaultLocale")
             String path = outputFolder.resolve(String.format(".dng/RAW_%05d.dng", startCounter)).toString();
-            if(PreferenceKeys.isRawVideoWriteZip()) {
+            if (PreferenceKeys.isRawVideoWriteZip()) {
                 path = String.format("RAW_%05d.dng", startCounter);
             }
             ByteBuffer rawSlot = rawBuffers[slot];
@@ -262,7 +261,19 @@ public class RawVideoProcessor extends ProcessorBase {
         rawAudioRecorder.stop();
         if (writeExecutor != null) {
             writeExecutor.shutdown();
-            dngCreator.closeArchive();
+            try {
+                if (!writeExecutor.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS)) {
+                    Log.e(TAG, "writeExecutor did not terminate in time, some frames might be lost");
+                }
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Interrupted while waiting for writeExecutor", e);
+                Thread.currentThread().interrupt();
+            }
+
+            if (dngCreator != null) {
+                dngCreator.closeArchive();
+                dngCreator.close();
+            }
             writeExecutor = null;
         }
     }
