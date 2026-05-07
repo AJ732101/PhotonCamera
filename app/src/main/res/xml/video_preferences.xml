@@ -154,6 +154,37 @@
 
         </PreferenceCategory>
 
+        <PreferenceCategory
+            android:layout="@layout/preference_category_layout"
+            app:key="sensor_and_more_settings_category"
+            app:title="@string/raw_video_separator_title">
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:key="@string/pref_rawvideo_downscale_4x_key"
+                android:defaultValue="false"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/rawvideo_downscale_4x"
+                android:summary=""
+                android:icon="@drawable/display_settings_24px" />
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:key="@string/pref_rawvideo_write_zip_key"
+                android:defaultValue="true"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/rawvideo_write_zip"
+                android:summary=""
+                android:icon="@drawable/folder_zip_24px" />
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:key="@string/pref_rawvideo_crop_169_key"
+                android:defaultValue="true"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/rawvideo_crop_169"
+                android:summary=""
+                android:icon="@drawable/aspect_ratio_24px" />
+
+        </PreferenceCategory>
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

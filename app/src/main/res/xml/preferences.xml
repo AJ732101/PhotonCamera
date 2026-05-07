@@ -62,6 +62,12 @@
             android:icon="@drawable/burst_mode_24px" />
     </PreferenceCategory>
 
+    <PreferenceScreen
+        android:key="pref_tunable_submenu"
+        android:title="Tunable Settings"
+        android:summary="Advanced tunable parameters"
+        android:icon="@drawable/ic_tune_black_24dp" />
+
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
         android:key="pref_category_single_shot_key"

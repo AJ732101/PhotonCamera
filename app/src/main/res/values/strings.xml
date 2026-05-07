@@ -192,6 +192,9 @@
     <string name="transfer_function">Transfer Function</string>
     <string name="video_encoder_name">Video Encoder Name</string>
     <string name="video_range">Range</string>
+    <string name="rawvideo_downscale_4x">Downscale 4x</string>
+    <string name="rawvideo_write_zip">Write ZIP</string>
+    <string name="rawvideo_crop_169">Crop to 16:9</string>
 
     <!-- Audio settings strings -->
     <string name="audio_processing">Source</string>
@@ -232,11 +235,13 @@
     <string name="soc_settings_screen_title">Soc Speciic Settings</string>
     <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
     <string name="sensor_and_more_settings_screen_title">Sensor Settings (and more)</string>
+    <string name="tunable_settings_title">Tunable Settings</string>
     <string name="sensor_settings_screen_title">Sensor Settings</string>
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
     <string name="video_codec_based_photo_settings_title">Video Codec based Photo Settings</string>
     <string name="beam_forming_separator_title">Beam Forming</string>
+    <string name="raw_video_separator_title">RAW Video</string>
 
     <string name="general_settings_screen_summary">No dedicated category</string>
     <string name="stacking_settings_screen_summary">Multiframe related settings (HDRX)</string>

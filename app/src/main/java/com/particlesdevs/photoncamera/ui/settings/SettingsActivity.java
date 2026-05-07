@@ -36,6 +36,7 @@ import com.particlesdevs.photoncamera.pro.SupportedDevice;
 import com.particlesdevs.photoncamera.settings.BackupRestoreUtil;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.settings.SettingsManager;
+import com.particlesdevs.photoncamera.settings.TunablePreferenceGenerator;
 import com.particlesdevs.photoncamera.ui.SplashActivity;
 import com.particlesdevs.photoncamera.ui.settings.custompreferences.ResetPreferences;
 import com.particlesdevs.photoncamera.util.Log;
@@ -711,6 +712,7 @@ public class SettingsActivity extends BaseActivity implements
         private Context mContext;
         private View mRootView;
         private SupportedDevice supportedDevice;
+        private boolean tunablePreferencesGenerated = false;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -803,6 +805,14 @@ public class SettingsActivity extends BaseActivity implements
             supportedDevice = Objects.requireNonNull(PhotonCamera.getInstance(activity)).getSupportedDevice();
             Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
                     .registerOnSharedPreferenceChangeListener(this);
+
+            String rootKey = getArguments() != null ? getArguments().getString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT) : null;
+            if ("pref_tunable_submenu".equals(rootKey))
+            {
+                Log.d("SettingsFragment", "Inside Stacking or Tunable container, preparing dynamic prefs");
+                generateTunablePreferences();
+            }
+
             showHideHdrxSettings();
             setFramesSummary();
             setVersionDetails();
@@ -815,6 +825,94 @@ public class SettingsActivity extends BaseActivity implements
             setSupportedDevices();
             setProTitle();
             setThisDevice();
+        }
+
+        private void generateTunablePreferences() {
+            // Only generate once per fragment instance
+            if (tunablePreferencesGenerated) {
+                Log.d("SettingsActivity", "Tunable preferences already generated, skipping");
+                return;
+            }
+            tunablePreferencesGenerated = true;
+            Log.d("SettingsActivity", "=== generateTunablePreferences called ===");
+            Log.d("SettingsActivity", "Context: " + (mContext != null ? "OK" : "NULL"));
+            Log.d("SettingsActivity", "PreferenceScreen: " + (getPreferenceScreen() != null ? "OK" : "NULL"));
+
+            try {
+                // Ensure tunable classes are registered
+                com.particlesdevs.photoncamera.settings.TunableSettingsManager.ensureTunableClassesRegistered();
+
+                // Register with TunablePreferenceGenerator for UI generation
+                for (Class<?> clazz : com.particlesdevs.photoncamera.settings.TunableRegistry.TUNABLE_CLASSES) {
+                    TunablePreferenceGenerator.registerTunableClass(clazz);
+                }
+
+                Log.d("SettingsActivity", "Registered classes, now generating preferences...");
+
+                PreferenceScreen screen = getPreferenceScreen();
+                Log.d("SettingsActivity", "Target PreferenceScreen: " + screen.getKey() + " (count before: " + screen.getPreferenceCount() + ")");
+
+                // Generate preferences and add to screen
+                TunablePreferenceGenerator.generatePreferences(mContext, screen);
+
+                Log.d("SettingsActivity", "Generated preferences (count after: " + screen.getPreferenceCount() + ")");
+
+                // Add reset button for tunable preferences
+                addTunableResetButton();
+
+                Log.d("SettingsActivity", "=== generateTunablePreferences completed (final count: " + screen.getPreferenceCount() + ") ===");
+            } catch (Exception e) {
+                Log.e("SettingsActivity", "ERROR in generateTunablePreferences", e);
+                e.printStackTrace();
+            }
+        }
+
+        private void addTunableResetButton() {
+            try {
+                // When we're inside the tunable submenu fragment, getPreferenceScreen() IS the tunable submenu
+                androidx.preference.PreferenceScreen tunableSubmenu = getPreferenceScreen();
+
+                if (tunableSubmenu != null) {
+                    Log.d("SettingsActivity", "Adding reset button to tunable submenu (preferenceCount before: " + tunableSubmenu.getPreferenceCount() + ")");
+
+                    // Create reset button preference
+                    androidx.preference.Preference resetButton = new androidx.preference.Preference(mContext);
+                    resetButton.setKey("pref_reset_tunable_settings");
+                    resetButton.setTitle("Reset All to Defaults");
+                    resetButton.setSummary("Reset all tunable parameters to their default values");
+                    resetButton.setIcon(android.R.drawable.ic_menu_revert);
+                    resetButton.setOrder(9999); // Force to the end
+
+                    resetButton.setOnPreferenceClickListener(preference -> {
+                        // Reset all tunable settings
+                        com.particlesdevs.photoncamera.settings.TunableSettingsManager.resetAllToDefaults(mContext);
+
+                        // Restart the settings activity to refresh UI
+                        if (getActivity() != null) {
+                            getActivity().recreate();
+                        }
+
+                        com.particlesdevs.photoncamera.app.PhotonCamera.showToast("Tunable settings reset to defaults");
+                        return true;
+                    });
+
+                    tunableSubmenu.addPreference(resetButton);
+                    Log.d("SettingsActivity", "Added reset button (preferenceCount after: " + tunableSubmenu.getPreferenceCount() + ")");
+
+                    androidx.preference.Preference spacer = new androidx.preference.Preference(mContext);
+                    spacer.setSelectable(false);
+                    spacer.setKey("pref_spacer_bottom");
+                    spacer.setTitle("");
+                    spacer.setSummary("");
+                    spacer.setOrder(10000);
+
+                    tunableSubmenu.addPreference(spacer);
+                } else {
+                    Log.w("SettingsActivity", "PreferenceScreen is null, cannot add reset button");
+                }
+            } catch (Exception e) {
+                Log.e("SettingsActivity", "Error adding reset button", e);
+            }
         }
 
         private void showHideHdrxSettings() {
