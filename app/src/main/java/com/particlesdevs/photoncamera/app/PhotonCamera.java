@@ -126,6 +126,7 @@ public class PhotonCamera extends Application {
     public static boolean mHdrTenPlusIsSupported = false;
     public static boolean isFunctionOneOn = false;
     public static boolean isFunctionTwoOn = false;
+    public static boolean isSessionTypeOn = true;
     public static boolean isSuperNightModeOn = false;
     public static boolean isNightModeOn = false;
     public static boolean isRemosaicOn = false;

@@ -223,6 +223,16 @@ public class VendorTagUtils {
         try {
             //applyIdealRaw(builder, 10);
 
+            // Android
+            // Definition mit dem korrekten Byte-Typ
+            var demosaicMode = new CaptureRequest.Key<>("android.demosaic.mode", Byte.class);
+            if (isSupported(builder, demosaicMode)) {
+                // 0 = OFF, 1 = FAST, 2 = HIGH_QUALITY
+                if (PhotonCamera.getSpecific().specificSetting.androidDemosaicMode >= 0) {
+                    builder.set(demosaicMode, (byte) PhotonCamera.getSpecific().specificSetting.androidDemosaicMode);
+                }
+            }
+
             if (!PhotonCamera.getSettings().disableVendorKeys) {
             //if (false) {
                 byte enable = 1;
@@ -409,6 +419,17 @@ public class VendorTagUtils {
                         }
                     }
 
+                    if (false) {
+                        // Definition der Qualcomm Tuning Keys
+                        var FEATURE_1_MODE = new CaptureRequest.Key<>("org.quic.camera2.tuning.feature.Feature1Mode", Byte.class);
+                        var FEATURE_2_MODE = new CaptureRequest.Key<>("org.quic.camera2.tuning.feature.Feature2Mode", Byte.class);
+                        var SCENE_MODE = new CaptureRequest.Key<>("org.quic.camera2.tuning.feature.SceneMode", Byte.class);
+
+                        builder.set(FEATURE_1_MODE, (byte) 13);
+                        builder.set(FEATURE_2_MODE, (byte) 41);
+                        builder.set(SCENE_MODE, (byte) 40);
+                    }
+
                     float apertureToUse = PhotonCamera.getSettings().apertureToUse;
                     if (apertureToUse < 16) {
                         boolean isSupportedGoogle = false;
@@ -479,26 +500,8 @@ public class VendorTagUtils {
                 if (isSupported(builder, enableIdealRAW1)) {
                     PhotonCamera.hasIdealRaw = true;
                     if (PhotonCamera.isIdealRawOn) {
-                        builder.set(enableIdealRAW1, (byte) 1);
-                    }
-                }
-
-                var qtiIdealRaw = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.IdealRaw", byte[].class);
-                var qtiIdealRawSize = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.RawSize", byte[].class);
-                if (isSupported(builder, qtiIdealRaw) && isSupported(builder, qtiIdealRawSize)) {
-                    PhotonCamera.hasIdealRaw = true;
-                    if (PhotonCamera.isIdealRawOn) {
-                        byte[] rawTypeURAW = new byte[]{
-                                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                                (byte) 0x02, (byte) 0x00, (byte) 0x00, (byte) 0x00
-                        };
-                        byte[] rawSizeURAW = new byte[]{
-                                (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x00,
-                                (byte) 0x00, (byte) 0x0C, (byte) 0x00, (byte) 0x00
-                        };
-                        builder.set(qtiIdealRaw, rawTypeURAW);
-                        builder.set(qtiIdealRawSize, rawSizeURAW);
-                        //applyIdealRaw(builder, 14);
+                        builder.set(enableIdealRAW1, (byte) 2);
+                        applyIdealRaw(builder, 14);
                     }
                 }
 
@@ -931,16 +934,22 @@ public class VendorTagUtils {
                         var vivoSuperEis = new CaptureRequest.Key<>("vivo.control.superEis", Integer.class);
                         if (isSupported(builder, vivoSuperEis)) {
                             builder.set(vivoSuperEis, 1);
+                        } else {
+                            builder.set(vivoSuperEis, 0);
                         }
 
                         var vivoEisConfig = new CaptureRequest.Key<>("vivo.control.eis.config.enable", Integer.class);
                         if (isSupported(builder, vivoEisConfig)) {
-                            builder.set(vivoEisConfig, 1);
+                            if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoEisConfig >= 0)) {
+                                builder.set(vivoEisConfig, PhotonCamera.getSpecific().specificSetting.vivoEisConfig);
+                            }
                         }
 
                         var vivoEisEnhance = new CaptureRequest.Key<>("vivo.control.eis.enhance", Integer.class);
                         if (isSupported(builder, vivoEisEnhance)) {
-                            builder.set(vivoEisEnhance, 1);
+                            if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoEisEnhance >= 0)) {
+                                builder.set(vivoEisEnhance, PhotonCamera.getSpecific().specificSetting.vivoEisEnhance);
+                            }
                         }
                     }
 
@@ -1030,6 +1039,12 @@ public class VendorTagUtils {
                         //builder.set(vivoDcgHdr, (int) 2564);
                     }
 
+                    var vivoStreamsUsage = new CaptureRequest.Key<>("vivo.control.streamsUsage", Integer[].class);
+                    if (isSupported(builder, vivoStreamsUsage)) {
+                        Integer[] streamsUsageValues = new Integer[]{3, 1, 0, 0};
+                        builder.set(vivoStreamsUsage, streamsUsageValues);
+                    }
+
                     var vivoEnableQcomSolution = new CaptureRequest.Key<>("vivo.control.enableQcomSolution", Integer.class);
                     if (isSupported(builder, vivoEnableQcomSolution)) {
                         builder.set(vivoEnableQcomSolution, PhotonCamera.getSpecific().specificSetting.vivoUseQcomSolution ? 1 : 0);
@@ -1061,6 +1076,15 @@ public class VendorTagUtils {
                         var customInt32Key = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name[i], Integer.class);
                         if (isSupported(builder, customInt32Key)) {
                             builder.set(customInt32Key, PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Value[i]);
+                        }
+                    }
+                }
+
+                if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name != null) {
+                    for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name.length; i++) {
+                        var customInt64Key = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name[i], Long.class);
+                        if (isSupported(builder, customInt64Key)) {
+                            builder.set(customInt64Key, PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Value[i]);
                         }
                     }
                 }

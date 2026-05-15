@@ -2532,7 +2532,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             else {
                 SessionType = PhotonCamera.getSpecific().specificSetting.sessionType;
-                if (mTargetFormat == ImageFormat.HEIC) {
+                if ((mTargetFormat == ImageFormat.HEIC) || !PhotonCamera.isSessionTypeOn) {
                     SessionType = 0;
                 }
             }
@@ -3165,7 +3165,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mIsFunctionOneOn = !mIsFunctionOneOn;
         PhotonCamera.isFunctionOneOn = mIsFunctionOneOn;
 
-        if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Super Night Mode")) {
+        if (PhotonCamera.getSettings().functionOne.equals("Session Type (OpCode) OFF")) {
+            PhotonCamera.isSessionTypeOn = !mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Super Night Mode")) {
             PhotonCamera.isSuperNightModeOn = mIsFunctionOneOn;
             restartCamera();
             return;
@@ -3297,7 +3301,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mIsFunctionTwoOn = !mIsFunctionTwoOn;
         PhotonCamera.isFunctionTwoOn = mIsFunctionTwoOn;
 
-        if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Super Night Mode")) {
+        if (PhotonCamera.getSettings().functionOne.equals("Session Type (OpCode) OFF")) {
+            PhotonCamera.isSessionTypeOn = !mIsFunctionOneOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Super Night Mode")) {
             PhotonCamera.isSuperNightModeOn = mIsFunctionTwoOn;
             restartCamera();
             return;
@@ -4148,17 +4156,17 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             // This is the CaptureRequest.Builder that we use to take a picture.
             final CaptureRequest.Builder captureBuilder;
-            if(PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                 captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-                if(PhotonCamera.getSettings().fpsPreview){
+                if (PhotonCamera.getSettings().fpsPreview){
                     captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeHigh);
                 } else {
-
+                    captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 30));
                 }
             } else {
                 captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+                captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 30));
             }
-            captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new Range<>(30, 30));
             float focus = mFocus;
             double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
 
@@ -4805,47 +4813,40 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             vidWidth = 1920;
         } else if (PhotonCamera.getSettings().videoHeight == 1600) {
             vidWidth = 2 * 1920;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 9999) {
+        } else if (PhotonCamera.getSettings().videoHeight == 9999) {
             Size maxSensorRes = getMaxSensorResolution(mCameraManager, PhotonCamera.getSettings().mCameraID);
             if (maxSensorRes != null) {
                 vidWidth = maxSensorRes.getWidth();
                 vidHeight = maxSensorRes.getHeight();
-            }
-            else {
+            } else {
                 Log.d(TAG, "getMaxSensorResolution failed");
                 return null;
             }
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 8888) {
+        } else if (PhotonCamera.getSettings().videoHeight == 8888) {
             vidWidth = 6016;
             vidHeight = 4512;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 7777) {
+        } else if (PhotonCamera.getSettings().videoHeight == 7777) {
             vidWidth = 7680;
             vidHeight = 5760;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 6666) {
+        } else if (PhotonCamera.getSettings().videoHeight == 6666) {
             vidWidth = 8192;
             vidHeight = 6144;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2304) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2304) {
             vidWidth = 4096;
             vidHeight = 2304;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2296) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2296) {
             vidWidth = 4080;
             vidHeight = 2296;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 1836) {
+        } else if (PhotonCamera.getSettings().videoHeight == 1836) {
             vidWidth = 3264;
             vidHeight = 1836;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2608) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2608) {
             vidWidth = 4624;
             vidHeight = 2608;
-        }
-        else {
+        } else if (PhotonCamera.getSettings().videoHeight == 1584) {
+            vidWidth = 2816;
+            vidHeight = 1584;
+        } else {
             vidWidth = 1280;
         }
 
@@ -5411,6 +5412,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if (PhotonCamera.getSettings().videoHeight == 2608) {
             mVidWidth = 4624;
             mVidHeight = 2608;
+        }
+        else if (PhotonCamera.getSettings().videoHeight == 1584) {
+            mVidWidth = 2816;
+            mVidHeight = 1584;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);

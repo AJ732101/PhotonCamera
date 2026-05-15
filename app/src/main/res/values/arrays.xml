@@ -106,6 +106,7 @@
         <item>Open Aperture</item>
         <item>Lock Video Params 1</item>
         <item>Lock Video Params 2</item>
+        <item>Session Type (OpCode) OFF</item>
     </string-array>
 
     <string-array name="function_one_entryValues">
@@ -117,6 +118,7 @@
         <item>Open Aperture</item>
         <item>Lock Video Params 1</item>
         <item>Lock Video Params 2</item>
+        <item>Session Type (OpCode) OFF</item>
     </string-array>
 
     <string-array name="location_geotag_entryValues">
@@ -171,6 +173,7 @@
         <item>Custom 2 (4080x2296)</item>
         <item>Custom 3 (3264x1836)</item>
         <item>Custom 4 (4624x2608)</item>
+        <item>Custom 5 (2816x1584)</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
@@ -188,6 +191,7 @@
         <item>2296</item>
         <item>1836</item>
         <item>2308</item>
+        <item>1584</item>
     </string-array>
 
     <string-array name="video_framerate_entries">

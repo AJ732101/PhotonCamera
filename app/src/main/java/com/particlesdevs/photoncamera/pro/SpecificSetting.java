@@ -41,6 +41,9 @@ public class SpecificSetting {
     public String[] sensorModes;
     public String sensorModeKey = "vivo.control.forceSensorMode";
     public int vivoVideoMode = -1;
+    public int vivoEisConfig = -1;
+    public int vivoEisEnhance = -1;
+    public int androidDemosaicMode = -1;
     public float colorTint = 99.0f;
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";
@@ -48,9 +51,11 @@ public class SpecificSetting {
     public String hdrMode = "HLG10";
     public String[] customVendorKeyTypeByteName;
     public String[] customVendorKeyTypeInt32Name;
+    public String[] customVendorKeyTypeInt64Name;
     public String[] customVendorKeyTypeFloatName;
     public int[] customVendorKeyTypeByteValue;
     public int[] customVendorKeyTypeInt32Value;
+    public long[] customVendorKeyTypeInt64Value;
     public float[] customVendorKeyTypeFloatValue;
     public String networkSyncBaseUrl = "https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/";
     public SpecificSetting(){
