@@ -2195,6 +2195,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void determineFramerate(CameraCharacteristics characteristics) {
+        if ((PhotonCamera.getSpecific().specificSetting.targetFps > 0) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            FpsRangeHigh = new Range<>(PhotonCamera.getSpecific().specificSetting.targetFps, PhotonCamera.getSpecific().specificSetting.targetFps);
+            FpsRangeDef = new Range<>(PhotonCamera.getSpecific().specificSetting.targetFps, PhotonCamera.getSpecific().specificSetting.targetFps);
+
+            return;
+        }
+
         Range<Integer>[] ranges = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
         int def = 30;
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {

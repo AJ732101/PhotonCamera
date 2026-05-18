@@ -221,20 +221,15 @@ public class VendorTagUtils {
         resetFlags();
 
         try {
-            //applyIdealRaw(builder, 10);
-
-            // Android
-            // Definition mit dem korrekten Byte-Typ
-            var demosaicMode = new CaptureRequest.Key<>("android.demosaic.mode", Byte.class);
-            if (isSupported(builder, demosaicMode)) {
-                // 0 = OFF, 1 = FAST, 2 = HIGH_QUALITY
-                if (PhotonCamera.getSpecific().specificSetting.androidDemosaicMode >= 0) {
-                    builder.set(demosaicMode, (byte) PhotonCamera.getSpecific().specificSetting.androidDemosaicMode);
-                }
-            }
-
             if (!PhotonCamera.getSettings().disableVendorKeys) {
-            //if (false) {
+                var demosaicMode = new CaptureRequest.Key<>("android.demosaic.mode", Byte.class);
+                if (isSupported(builder, demosaicMode)) {
+                    // 0 = OFF, 1 = FAST, 2 = HIGH_QUALITY
+                    if (PhotonCamera.getSpecific().specificSetting.androidDemosaicMode >= 0) {
+                        builder.set(demosaicMode, (byte) PhotonCamera.getSpecific().specificSetting.androidDemosaicMode);
+                    }
+                }
+
                 byte enable = 1;
                 if (PhotonCamera.isXiaomi) {
                     var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
@@ -1041,8 +1036,11 @@ public class VendorTagUtils {
 
                     var vivoStreamsUsage = new CaptureRequest.Key<>("vivo.control.streamsUsage", Integer[].class);
                     if (isSupported(builder, vivoStreamsUsage)) {
-                        Integer[] streamsUsageValues = new Integer[]{3, 1, 0, 0};
-                        builder.set(vivoStreamsUsage, streamsUsageValues);
+                        //Integer[] streamsUsageValues = new Integer[]{3, 1, 0, 0};   // ???
+                        //Integer[] streamsUsageValues = new Integer[]{4, 1, 4, 19, 0};   // Photo
+                        //Integer[] streamsUsageValues = new Integer[]{3, 1, 4, 0};   // Landscape
+                        Integer[] streamsUsageValues = new Integer[]{2, 1, 0};   // Pro
+                        //builder.set(vivoStreamsUsage, streamsUsageValues);
                     }
 
                     var vivoEnableQcomSolution = new CaptureRequest.Key<>("vivo.control.enableQcomSolution", Integer.class);
@@ -1113,6 +1111,22 @@ public class VendorTagUtils {
                     if (isSupported(builder, remosaicEnabled)) {
                         builder.set(remosaicEnabled, enable);
                     }
+                    var remosaicEnabled2 = new CaptureRequest.Key<>("com.mediatek.control.capture.remosaicenable", int[].class);
+                    if (isSupported(builder, remosaicEnabled2)) {
+                        builder.set(remosaicEnabled2, new int[]{1});
+                    }
+                }
+            } else {
+                var clientName = new CaptureRequest.Key<>("com.xiaomi.sessionparams.clientName", String.class);
+                if (isSupported(builder, clientName)) {
+                    builder.set(clientName, "com.android.camera");
+                }
+                if (burst) {
+                    var remosaicEnabled = new CaptureRequest.Key<>("xiaomi.remosaic.enabled", Byte.class);
+                    if (isSupported(builder, remosaicEnabled)) {
+                        builder.set(remosaicEnabled, (byte) 1);
+                    }
+
                     var remosaicEnabled2 = new CaptureRequest.Key<>("com.mediatek.control.capture.remosaicenable", int[].class);
                     if (isSupported(builder, remosaicEnabled2)) {
                         builder.set(remosaicEnabled2, new int[]{1});

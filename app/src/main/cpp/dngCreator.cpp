@@ -810,7 +810,7 @@ public:
     }
 
     void setFocalLength35mm(short focalLength) {
-        //dng_image0->SetFocalLength35mm(focalLength);
+        dng_image0->SetCustomFieldLong(0xA405, focalLength);
     }
 };
 

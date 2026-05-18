@@ -171,6 +171,9 @@ public class ImageSaver {
         if (PhotonCamera.hasQucommAdrcOff) {
             imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
+        if ((PhotonCamera.isSessionTypeOn) && (PhotonCamera.getSpecific().specificSetting.sessionType > 0)) {
+            imageDescriptionBuilder.append("\n   OpCode: ").append(PhotonCamera.getSpecific().specificSetting.sessionType);
+        }
 
         if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
             String sensorMode = "";
@@ -337,6 +340,7 @@ public class ImageSaver {
         public static boolean saveStackedRaw(Path dngFilePath, ByteBuffer buffer, Parameters parameters) {
             return saveSingleRaw(dngFilePath, buffer, parameters);
         }
+
         public static boolean saveSingleRaw(Path dngFilePath,
                                             ImageFrame image,
                                             CameraCharacteristics characteristics,

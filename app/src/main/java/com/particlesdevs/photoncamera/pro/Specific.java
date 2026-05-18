@@ -203,6 +203,10 @@ public class Specific {
                     specificSetting.androidDemosaicMode = Integer.parseInt(caseS[1]);
                     break;
                 }
+                case "targetFps": {
+                    specificSetting.targetFps = Integer.parseInt(caseS[1]);
+                    break;
+                }
                 case "colorTint": {
                     specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;

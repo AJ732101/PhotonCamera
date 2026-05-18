@@ -465,7 +465,7 @@ public class DngCreator {
     public void setParameters(Parameters parameters) {
         short[] blackLevel = new short[4];
         for (int i = 0; i < 4; i++) {
-            if (PhotonCamera.getSpecific().specificSetting.blackLevelValue > 0) {
+            if (PhotonCamera.getSpecific().specificSetting.blackLevelValue >= 0) {
                 blackLevel[i] = (short) PhotonCamera.getSpecific().specificSetting.blackLevelValue;
             } else if (parameters.whiteLevel <= parameters.blackLevel[i]) {
                 blackLevel[i] = 64;
@@ -520,13 +520,15 @@ public class DngCreator {
         setAsShotNeutral(toDouble(parameters.whitePoint));
         setCFAPattern(parameters.cfaPattern);
         setOrientation(parameters.cameraRotation/90);
-        setGainMap(parameters.gainMap,
-                parameters.sensorPix.top,
-                parameters.sensorPix.left,
-                parameters.sensorPix.bottom,
-                parameters.sensorPix.right,
-                parameters.mapSize.x,
-                parameters.mapSize.y);
+        if ((PhotonCamera.getSpecific().specificSetting.sessionType != 36875) && (PhotonCamera.getSettings().shadingMode != 0)) {
+            setGainMap(parameters.gainMap,
+                    parameters.sensorPix.top,
+                    parameters.sensorPix.left,
+                    parameters.sensorPix.bottom,
+                    parameters.sensorPix.right,
+                    parameters.mapSize.x,
+                    parameters.mapSize.y);
+        }
         setFocalLength35mm((short)parameters.current35mmFocalLength);
 
         if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
