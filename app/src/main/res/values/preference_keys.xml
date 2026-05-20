@@ -148,7 +148,9 @@
     <!-- SoC settings strings -->
     <string name="pref_soc_qualcomm_sharpness_key" translatable="false">pref_soc_qualcomm_sharpness_key</string>
     <string name="pref_soc_qualcomm_saturation_key" translatable="false">pref_soc_qualcomm_saturation_key</string>
+    <string name="pref_soc_qualcomm_saturation_video_key" translatable="false">pref_soc_qualcomm_saturation_video_key</string>
     <string name="pref_soc_qualcomm_contrast_key" translatable="false">pref_soc_qualcomm_contrast_key</string>
+    <string name="pref_soc_qualcomm_contrast_video_key" translatable="false">pref_soc_qualcomm_contrast_video_key</string>
     <string name="pref_soc_qualcomm_mfnr_frames_key" translatable="false">pref_soc_qualcomm_mfnr_frames_key</string>
     <string name="pref_soc_qualcomm_eis_mode_key" translatable="false">pref_soc_qualcomm_eis_mode_key</string>
     <string name="pref_soc_qualcomm_ai_mode_key" translatable="false">pref_soc_qualcomm_ai_mode_key</string>
@@ -157,6 +159,11 @@
     <string name="pref_soc_auto_hdr_key" translatable="false">pref_soc_auto_hdr_key</string>
     <string name="pref_soc_hdr_mode_key" translatable="false">pref_soc_hdr_mode_key</string>
     <string name="pref_soc_qualcomm_manual_wb_key" translatable="false">pref_soc_qualcomm_manual_wb_key</string>
+
+    <!-- Vendor Keys settings strings -->
+    <string name="pref_vendor_key_name_key" translatable="false">pref_vendor_key_name_key</string>
+    <string name="pref_vendor_key_type_key" translatable="false">pref_vendor_key_type_key</string>
+    <string name="pref_vendor_key_value_key" translatable="false">pref_vendor_key_value_key</string>
 
     <!-- Sensor and More/Other settings strings -->
     <string name="pref_hot_pixel_mode_key" translatable="false">pref_hot_pixel_mode_key</string>

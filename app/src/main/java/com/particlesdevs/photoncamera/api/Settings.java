@@ -87,6 +87,8 @@ public class Settings {
     public int socQualcommSharpness;
     public int socQualcommSaturation;
     public int socQualcommContrast;
+    public int socQualcommSaturationHdrVideo;
+    public int socQualcommContrastHdrVideo;
     public int socQualcommEisMode;
     public int socQualcommAiMode;
     public boolean socQualcommUseIsz = false;
@@ -241,6 +243,8 @@ public class Settings {
         socQualcommSharpness = PreferenceKeys.getSocQualcommSharpness();
         socQualcommSaturation = PreferenceKeys.getSocQualcommSaturation();
         socQualcommContrast = PreferenceKeys.getSocQualcommContrast();
+        socQualcommSaturationHdrVideo = PreferenceKeys.getSocQualcommSaturationVideo();
+        socQualcommContrastHdrVideo = PreferenceKeys.getSocQualcommContrastVideo();
         socQualcommEisMode = PreferenceKeys.getSocQualcommEisMode();
         socQualcommAiMode = PreferenceKeys.getSocQualcommAiMode();
         socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();

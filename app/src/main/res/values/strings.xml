@@ -238,6 +238,7 @@
     <string name="video_settings_screen_title">Video Settings</string>
     <string name="audio_settings_screen_title">Audio Settings</string>
     <string name="soc_settings_screen_title">Soc Speciic Settings</string>
+    <string name="vendor_keys_settings_screen_title">Vendor Keys Settings</string>
     <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
     <string name="sensor_and_more_settings_screen_title">Sensor Settings (and more)</string>
     <string name="tunable_settings_title">Tunable Settings</string>
@@ -253,6 +254,7 @@
     <string name="video_settings_screen_summary">Video related settings</string>
     <string name="audio_settings_screen_summary">Audio related settings</string>
     <string name="soc_settings_screen_summary">SoC (CPU/GPU/ISP) related settings</string>
+    <string name="vendor_keys_screen_summary">Vendor Keys related settings</string>
     <string name="single_shot_settings_screen_summary">Single shot and video settings</string>
     <string name="sensor_and_more_settings_screen_summary">Sensor related settings (and more)</string>
     <string name="sensor_settings_screen_summary">Sensor related settings</string>
@@ -262,7 +264,9 @@
     <!-- SoC settings strings -->
     <string name="soc_qualcomm_sharpness">Qualcomm Sharpness</string>
     <string name="soc_qualcomm_saturation">Qualcomm Saturation</string>
+    <string name="soc_qualcomm_saturation_video">Qualcomm Saturation HDR Video</string>
     <string name="soc_qualcomm_contrast">Qualcomm Contrast</string>
+    <string name="soc_qualcomm_contrast_video">Qualcomm Contrast HDR Video</string>
     <string name="soc_qualcomm_mfnr_frames">Qualcomm MFNR Frames</string>
     <string name="soc_qualcomm_eis_mode">Qualcomm EIS Mode</string>
     <string name="soc_qualcomm_ai_mode">Qualcomm AI Mode</string>

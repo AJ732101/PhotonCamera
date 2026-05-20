@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Paint;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureRequest;
 import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +18,7 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +55,7 @@ import java.util.TimeZone;
 
 import androidx.preference.ListPreference;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import com.particlesdevs.photoncamera.util.FileManager;
@@ -639,6 +644,165 @@ public class SettingsActivity extends BaseActivity implements
         }
     }
 
+    public static class VendorKeysSettingsFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.vendor_keys_preferences, rootKey);
+            PreferenceScreen screen = getPreferenceScreen();
+            Context ctx = getContext();
+
+            //screen.addPreference(new VendorKeyEntry(ctx, "Name", "Type", "Value"));
+
+            androidx.preference.PreferenceCategory categoryConfigured = new androidx.preference.PreferenceCategory(ctx);
+            categoryConfigured.setTitle("Configured (NoGuiYet.txt)");
+            screen.addPreference(categoryConfigured);
+
+            Preference headerConfigured = new Preference(ctx);
+            headerConfigured.setLayoutResource(R.layout.vendor_keys_header);
+            headerConfigured.setSelectable(false);
+            screen.addPreference(headerConfigured);
+
+            // 1. Byte
+            if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName != null) {
+                for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName.length; i++) {
+                    screen.addPreference(new VendorKeyEntry(ctx,
+                            PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteName[i], "Byte",
+                            String.valueOf(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeByteValue[i])));
+                }
+            }
+
+            // 2. Int32
+            if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name != null) {
+                for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name.length; i++) {
+                    screen.addPreference(new VendorKeyEntry(ctx,
+                            PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Name[i], "Int32",
+                            String.valueOf(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt32Value[i])));
+                }
+            }
+
+            // 3. Int64
+            if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name != null) {
+                for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name.length; i++) {
+                    screen.addPreference(new VendorKeyEntry(ctx,
+                            PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Name[i], "Int64",
+                            String.valueOf(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeInt64Value[i])));
+                }
+            }
+
+            // 4. Float
+            if (PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName != null) {
+                for (int i = 0; i < PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName.length; i++) {
+                    screen.addPreference(new VendorKeyEntry(ctx,
+                            PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatName[i], "Float",
+                            String.valueOf(PhotonCamera.getSpecific().specificSetting.customVendorKeyTypeFloatValue[i])));
+                }
+            }
+
+            androidx.preference.PreferenceCategory categoryFoundOnDevice = new androidx.preference.PreferenceCategory(ctx);
+            categoryFoundOnDevice.setTitle("Available on this Camera ID");
+            screen.addPreference(categoryFoundOnDevice);
+
+            Preference header = new Preference(ctx);
+            header.setLayoutResource(R.layout.vendor_keys_device_header);
+            header.setSelectable(false);
+            screen.addPreference(header);
+
+            int keyNum = 0;
+            List<CaptureRequest.Key<?>> requestKeys = CaptureController.mCameraCharacteristics.getAvailableCaptureRequestKeys();
+            if (requestKeys != null) {
+                for (CaptureRequest.Key<?> key : requestKeys) {
+                    keyNum++;
+                    String keyName = key.getName();
+                    
+                    Class<?> type = null;
+                    try {
+                        // Deep search: Check all fields of the Key and its potential internal Key delegate
+                        java.lang.reflect.Field[] fields = key.getClass().getDeclaredFields();
+                        for (java.lang.reflect.Field f : fields) {
+                            f.setAccessible(true);
+                            Object val = f.get(key);
+                            if (val instanceof Class) {
+                                type = (Class<?>) val;
+                                break;
+                            }
+                            // If it's the internal CameraMetadataNative.Key (common in newer Android)
+                            if (val != null && val.getClass().getName().contains("Key")) {
+                                for (java.lang.reflect.Field f2 : val.getClass().getDeclaredFields()) {
+                                    f2.setAccessible(true);
+                                    Object val2 = f2.get(val);
+                                    if (val2 instanceof Class) {
+                                        type = (Class<?>) val2;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (type != null) break;
+                        }
+                    } catch (Exception ignored) {}
+
+                    String keyType = "???";
+                    if (type != null) {
+                        keyType = type.getSimpleName()
+                                .replace("Integer", "Int32")
+                                .replace("Long", "Int64");
+
+                        if (type.isArray()) {
+                            keyType = type.getComponentType().getSimpleName()
+                                    .replace("Integer", "Int32")
+                                    .replace("Long", "Int64") + "[]";
+                        }
+                    }
+
+                    screen.addPreference(new VendorKeyDeviceEntry(ctx, keyName, keyType));
+                }
+            }
+
+            Preference overallKeys = new Preference(ctx);
+            overallKeys.setSelectable(false);
+            overallKeys.setTitle(String.valueOf("Number of Capture Request Keys: " + keyNum));
+            screen.addPreference(overallKeys);
+
+            Preference bottomSpacer = new Preference(ctx);
+            bottomSpacer.setSelectable(false);
+            bottomSpacer.setTitle("");
+            screen.addPreference(bottomSpacer);
+        }
+    }
+
+    private static class VendorKeyEntry extends Preference {
+        private final String name, type, value;
+        public VendorKeyEntry(Context context, String name, String type, String value) {
+            super(context);
+            this.name = name;
+            this.type = type;
+            this.value = value;
+            setLayoutResource(R.layout.vendor_key_row);
+        }
+        @Override
+        public void onBindViewHolder(androidx.preference.PreferenceViewHolder holder) {
+            super.onBindViewHolder(holder);
+            ((TextView) holder.findViewById(R.id.key_name)).setText(name);
+            ((TextView) holder.findViewById(R.id.key_type)).setText(type);
+            ((TextView) holder.findViewById(R.id.key_value)).setText(value);
+        }
+    }
+
+    private static class VendorKeyDeviceEntry extends Preference {
+        private final String name, type;
+        public VendorKeyDeviceEntry(Context context, String name, String type) {
+            super(context);
+            this.name = name;
+            this.type = type;
+            setLayoutResource(R.layout.vendor_key_device_row);
+        }
+        @Override
+        public void onBindViewHolder(androidx.preference.PreferenceViewHolder holder) {
+            super.onBindViewHolder(holder);
+            ((TextView) holder.findViewById(R.id.key_device_name)).setText(name);
+            ((TextView) holder.findViewById(R.id.key_device_type)).setText(type);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // --- COLD START FIX ---
@@ -789,6 +953,17 @@ public class SettingsActivity extends BaseActivity implements
                 sensorAndMoreSettingsButton.setOnPreferenceClickListener(preference -> {
                     getParentFragmentManager().beginTransaction()
                             .replace(R.id.settings_container, new SensorAndMoreSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference vendorKeysSettingsButton = findPreference("vendor_keys_settings_screen");
+            if (vendorKeysSettingsButton != null) {
+                vendorKeysSettingsButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new VendorKeysSettingsFragment())
                             .addToBackStack(null)
                             .commit();
                     return true;

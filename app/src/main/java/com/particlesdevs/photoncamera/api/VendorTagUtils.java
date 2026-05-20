@@ -477,13 +477,21 @@ public class VendorTagUtils {
                 var useSaturation = new CaptureRequest.Key<>("org.codeaurora.qcamera3.saturation.use_saturation", Integer.class);
                 if (isSupported(builder, useSaturation)) {
                     PhotonCamera.hasSaturationKey = true;
-                    builder.set(useSaturation, PhotonCamera.getSettings().socQualcommSaturation);
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && PhotonCamera.getSettings().videoHDR) {
+                        builder.set(useSaturation, PhotonCamera.getSettings().socQualcommSaturationHdrVideo);
+                    } else {
+                        builder.set(useSaturation, PhotonCamera.getSettings().socQualcommSaturation);
+                    }
                 }
 
                 var useContrast = new CaptureRequest.Key<>("org.codeaurora.qcamera3.contrast.level", Integer.class);
                 if (isSupported(builder, useContrast)) {
                     PhotonCamera.hasContrastKey = true;
-                    builder.set(useContrast, PhotonCamera.getSettings().socQualcommContrast);
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && PhotonCamera.getSettings().videoHDR) {
+                        builder.set(useContrast, PhotonCamera.getSettings().socQualcommContrastHdrVideo);
+                    } else {
+                        builder.set(useContrast, PhotonCamera.getSettings().socQualcommContrast);
+                    }
                 }
 
                 var enableCinematicMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableCinematicMode", Integer.class);

@@ -102,6 +102,8 @@ public class PreferenceKeys {
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_CONTRAST_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_CONTRAST.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_MFNR_FRAMES.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MANUAL_WB.mValue);
@@ -224,6 +226,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS, resources.getString(R.string.pref_soc_qualcomm_sharpness_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION, resources.getString(R.string.pref_soc_qualcomm_saturation_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_CONTRAST, resources.getString(R.string.pref_soc_qualcomm_contrast_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION_VIDEO, resources.getString(R.string.pref_soc_qualcomm_saturation_video_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_CONTRAST_VIDEO, resources.getString(R.string.pref_soc_qualcomm_contrast_video_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_MFNR_FRAMES, resources.getString(R.string.pref_soc_qualcomm_mfnr_frames_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MANUAL_WB, resources.getString(R.string.pref_soc_qualcomm_manual_wb_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_EIS_MODE, resources.getString(R.string.pref_soc_qualcomm_eis_mode_default));
@@ -797,8 +801,16 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION);
     }
 
+    public static int getSocQualcommSaturationVideo() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION_VIDEO);
+    }
+
     public static int getSocQualcommContrast() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_CONTRAST);
+    }
+
+    public static int getSocQualcommContrastVideo() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_CONTRAST_VIDEO);
     }
 
     public static int getSocQualcommMfnrFrames() {
@@ -1095,7 +1107,9 @@ public class PreferenceKeys {
          */
         KEY_SOC_QUALCOMM_SHARPNESS(R.string.pref_soc_qualcomm_sharpness_key),
         KEY_SOC_QUALCOMM_SATURATION(R.string.pref_soc_qualcomm_saturation_key),
+        KEY_SOC_QUALCOMM_SATURATION_VIDEO(R.string.pref_soc_qualcomm_saturation_video_key),
         KEY_SOC_QUALCOMM_CONTRAST(R.string.pref_soc_qualcomm_contrast_key),
+        KEY_SOC_QUALCOMM_CONTRAST_VIDEO(R.string.pref_soc_qualcomm_contrast_video_key),
         KEY_SOC_QUALCOMM_MANUAL_WB(R.string.pref_soc_qualcomm_manual_wb_key),
         KEY_SOC_QUALCOMM_EIS_MODE(R.string.pref_soc_qualcomm_eis_mode_key),
         KEY_SOC_QUALCOMM_AI_MODE(R.string.pref_soc_qualcomm_ai_mode_key),

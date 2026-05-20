@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orderingFromXml="true"
+    android:title="@string/vendor_keys_settings_screen_title"
+    android:key="vendor_keys_settings_category"
+    android:paddingBottom="56dp">
+
+    <PreferenceCategory
+        app:key="vendor_keys_settings_category"
+        app:title="@string/vendor_keys_settings_screen_title">
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
