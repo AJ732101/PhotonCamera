@@ -465,8 +465,8 @@ public class DngCreator {
     public void setParameters(Parameters parameters) {
         short[] blackLevel = new short[4];
         for (int i = 0; i < 4; i++) {
-            if (PhotonCamera.getSpecific().specificSetting.blackLevelValue >= 0) {
-                blackLevel[i] = (short) PhotonCamera.getSpecific().specificSetting.blackLevelValue;
+            if (PhotonCamera.getSettings().dngBlackLevel >= 0) {
+                blackLevel[i] = (short) PhotonCamera.getSettings().dngBlackLevel;
             } else if (parameters.whiteLevel <= parameters.blackLevel[i]) {
                 blackLevel[i] = 64;
             } else {
@@ -492,7 +492,6 @@ public class DngCreator {
             // G0 channel
             noiseProfile[2] = parameters.noiseModeler.computeModel[1].first;  // G scale
             noiseProfile[3] = parameters.noiseModeler.computeModel[1].second; // G offset
-
             // B channel
             noiseProfile[4] = parameters.noiseModeler.computeModel[2].first;  // B scale
             noiseProfile[5] = parameters.noiseModeler.computeModel[2].second; // B offset
@@ -508,7 +507,11 @@ public class DngCreator {
         setFocalLength(parameters.focalLength);
         setAperture(parameters.aperture);
         setBlackLevel(blackLevel);
-        setWhiteLevel(parameters.whiteLevel);
+        if (PhotonCamera.getSettings().dngWhiteLevel == -1) {
+            setWhiteLevel(parameters.whiteLevel);
+        } else {
+            setWhiteLevel(PhotonCamera.getSettings().dngWhiteLevel);
+        }
         setCalibrationIlluminant1((short) parameters.calibrationIlluminant1);
         setCalibrationIlluminant2((short) parameters.calibrationIlluminant2);
         setColorMatrix1(toDouble(parameters.ColorMatrix1));
@@ -520,7 +523,7 @@ public class DngCreator {
         setAsShotNeutral(toDouble(parameters.whitePoint));
         setCFAPattern(parameters.cfaPattern);
         setOrientation(parameters.cameraRotation/90);
-        if ((PhotonCamera.getSpecific().specificSetting.sessionType != 36875) && (PhotonCamera.getSettings().shadingMode != 0)) {
+        if ((PhotonCamera.getSettings().sessionType != 36875) && (PhotonCamera.getSettings().shadingMode != 0)) {
             setGainMap(parameters.gainMap,
                     parameters.sensorPix.top,
                     parameters.sensorPix.left,

@@ -23,11 +23,8 @@ public class SpecificSetting {
     public int vivoEngineerRemosaicMode = -1;
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
-    public int blackLevelValue = -1;
     public float toneMapGamma = 99;
     public int colorTemperature = 99;
-    public int sessionType = 0;
-    public int sessionTypeVideo = 0;
     public int priorityShutterSpeed = 0;
     public int priorityIsoValue = 0;
     public int priorityMode = 0;

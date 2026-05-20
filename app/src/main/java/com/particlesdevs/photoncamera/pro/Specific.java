@@ -127,24 +127,12 @@ public class Specific {
                     specificSetting.statisticsOisDataMode = Integer.parseInt(caseS[1]);
                     break;
                 }
-                case "blackLevelValue": {
-                    specificSetting.blackLevelValue = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "toneMapGamma": {
                     specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
                     break;
                 }
                 case "colorTemperature": {
                     specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "sessionType": {
-                    specificSetting.sessionType = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "sessionTypeVideo": {
-                    specificSetting.sessionTypeVideo = Integer.parseInt(caseS[1]);
                     break;
                 }
                 case "priorityShutterSpeed": {

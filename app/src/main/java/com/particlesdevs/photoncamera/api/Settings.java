@@ -126,6 +126,10 @@ public class Settings {
     public String lutName = "None";
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
+    public int sessionType = 0;
+    public int sessionTypeVideo = 0;
+    public int dngBlackLevel = -1;
+    public int dngWhiteLevel = -1;
     public String photoRange = "Full";
     public String photoVideoCodec = "HEVC";
     public int audioDirection = 0;
@@ -202,6 +206,10 @@ public class Settings {
         useVirtualHorizonText = PreferenceKeys.useVirtualHorizonText();
         allowNetworkSync = PreferenceKeys.allowNetworkSync();
         gpsLocation = PreferenceKeys.gpsLocation();
+        sessionType = PreferenceKeys.getSessionType();
+        sessionTypeVideo = PreferenceKeys.getSessionTypeVideo();
+        dngBlackLevel = PreferenceKeys.getDngBlackLevel();
+        dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();

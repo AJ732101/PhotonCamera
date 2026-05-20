@@ -78,6 +78,10 @@
     <string name="raw_format">RAW Format</string>
     <string name="function_button_one">Function Button 1</string>
     <string name="function_button_two">Function Button 2</string>
+    <string name="session_type_opcode">Session Type (OpCode)</string>
+    <string name="session_type_opcode_video">Session Type Video (OpCode)</string>
+    <string name="dng_black_level">DNG Black Level</string>
+    <string name="dng_white_level">DNG White Level</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="about">About</string>

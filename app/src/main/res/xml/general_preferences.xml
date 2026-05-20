@@ -79,6 +79,42 @@
             android:entryValues="@array/function_one_entryValues"
             android:defaultValue="@string/pref_function_two_default"/>
 
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_session_type_key"
+            android:title="@string/session_type_opcode"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="0"
+            android:icon="@drawable/settings_night_sight_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_session_type_video_key"
+            android:title="@string/session_type_opcode_video"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="0"
+            android:icon="@drawable/settings_video_camera_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_dng_black_level_key"
+            android:title="@string/dng_black_level"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="-1"
+            android:icon="@drawable/contrast_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_dng_white_level_key"
+            android:title="@string/dng_white_level"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="-1"
+            android:icon="@drawable/contrast_24px"/>
+
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_dng_compression_key"

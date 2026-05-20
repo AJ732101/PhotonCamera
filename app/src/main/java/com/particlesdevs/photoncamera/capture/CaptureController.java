@@ -2530,15 +2530,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             int SessionTypeVideo = 0;
             if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                 if (PhotonCamera.isEisLookAheadOn && (physicalID == logicalID)) {
-                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo | 0xF008;
+                    SessionTypeVideo = PhotonCamera.getSettings().sessionTypeVideo | 0xF008;
                 } else if (PhotonCamera.isEisRealtimeOn && (physicalID == logicalID)) {
-                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo | 0xF004;
+                    SessionTypeVideo = PhotonCamera.getSettings().sessionTypeVideo | 0xF004;
                 } else {
-                    SessionTypeVideo = PhotonCamera.getSpecific().specificSetting.sessionTypeVideo;
+                    SessionTypeVideo = PhotonCamera.getSettings().sessionTypeVideo;
                 }
             }
             else {
-                SessionType = PhotonCamera.getSpecific().specificSetting.sessionType;
+                SessionType = PhotonCamera.getSettings().sessionType;
                 if ((mTargetFormat == ImageFormat.HEIC) || !PhotonCamera.isSessionTypeOn) {
                     SessionType = 0;
                 }

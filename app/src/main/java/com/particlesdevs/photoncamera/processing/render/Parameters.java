@@ -621,8 +621,8 @@ public class Parameters {
             metaData += "\n ADRC=On";
         }
 
-        if (PhotonCamera.isSessionTypeOn && (PhotonCamera.getSpecific().specificSetting.sessionType > 0)) {
-            metaData += "\n OpCode=" + PhotonCamera.getSpecific().specificSetting.sessionType;
+        if (PhotonCamera.isSessionTypeOn && (PhotonCamera.getSettings().sessionType > 0)) {
+            metaData += "\n OpCode=" + PhotonCamera.getSettings().sessionType;
         }
 
         if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {

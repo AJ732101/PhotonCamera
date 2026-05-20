@@ -44,6 +44,10 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AF_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_AE_MODE.mValue);
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_SESSION_TYPE.mValue);
+        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_VIDEO.mValue);
+        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL.mValue);
+        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
         COMMON_KEYS.add(Key.KEY_DEMOSAIC_METHOD.mValue);
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
@@ -157,6 +161,10 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE, 0);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_VIDEO, 0);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL, -1);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BRACKETING_MODE, 0); // Default to disable bracketing
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, resources.getString(R.string.pref_preview_format_default));
@@ -450,6 +458,22 @@ public class PreferenceKeys {
 
     public static int getFrameCountValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_FRAME_COUNT);
+    }
+
+    public static int getSessionType() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE);
+    }
+
+    public static int getSessionTypeVideo() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_VIDEO);
+    }
+
+    public static int getDngBlackLevel() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL);
+    }
+
+    public static int getDngWhiteLevel() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL);
     }
 
     public static float getSharpnessValue() {
@@ -997,6 +1021,10 @@ public class PreferenceKeys {
         KEY_GAIN_SEEKBAR(R.string.pref_gain_seekbar_key),
         KEY_SHADOWS_SEEKBAR(R.string.pref_shadows_seekbar_key),
         KEY_FRAME_COUNT(R.string.pref_frame_count_key),
+        KEY_SESSION_TYPE(R.string.pref_session_type_key),
+        KEY_SESSION_TYPE_VIDEO(R.string.pref_session_type_video_key),
+        KEY_SESSION_TYPE_DNG_BLACK_LEVEL(R.string.pref_dng_black_level_key),
+        KEY_SESSION_TYPE_DNG_WHITE_LEVEL(R.string.pref_dng_white_level_key),
         KEY_CONTRAST_SEEKBAR(R.string.pref_contrast_seekbar_key),
         KEY_SHARPNESS_SEEKBAR(R.string.pref_sharpness_seekbar_key),
         KEY_EXPOCOMPENSATE_SEEKBAR(R.string.pref_expocompensation_seekbar_key),

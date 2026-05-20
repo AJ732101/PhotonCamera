@@ -171,8 +171,8 @@ public class ImageSaver {
         if (PhotonCamera.hasQucommAdrcOff) {
             imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
         }
-        if ((PhotonCamera.isSessionTypeOn) && (PhotonCamera.getSpecific().specificSetting.sessionType > 0)) {
-            imageDescriptionBuilder.append("\n   OpCode: ").append(PhotonCamera.getSpecific().specificSetting.sessionType);
+        if ((PhotonCamera.isSessionTypeOn) && (PhotonCamera.getSettings().sessionType > 0)) {
+            imageDescriptionBuilder.append("\n   OpCode: ").append(PhotonCamera.getSettings().sessionType);
         }
 
         if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
