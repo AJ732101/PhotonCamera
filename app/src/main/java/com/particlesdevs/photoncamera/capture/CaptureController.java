@@ -75,6 +75,7 @@ import com.google.gson.GsonBuilder;
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
+import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
@@ -2502,6 +2503,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
+            createVendorKeysList();
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             // We configure the size of default buffer to be the size of camera preview we want.
@@ -5604,6 +5606,62 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mCameraManager = null;
         mTextureView = null;
         super.finalize();
+    }
+
+    public void createVendorKeysList() {
+        if (PhotonCamera.vendorKeysMap == null) {
+            PhotonCamera.vendorKeysMap = new HashMap<>();
+        } else {
+            PhotonCamera.vendorKeysMap.clear();
+        }
+
+        List<CaptureRequest.Key<?>> requestKeys = CaptureController.mCameraCharacteristics.getAvailableCaptureRequestKeys();
+        if (requestKeys != null) {
+            for (CaptureRequest.Key<?> key : requestKeys) {
+                String keyName = key.getName();
+
+                Class<?> type = null;
+                try {
+                    // Deep search: Check all fields of the Key and its potential internal Key delegate
+                    java.lang.reflect.Field[] fields = key.getClass().getDeclaredFields();
+                    for (java.lang.reflect.Field f : fields) {
+                        f.setAccessible(true);
+                        Object val = f.get(key);
+                        if (val instanceof Class) {
+                            type = (Class<?>) val;
+                            break;
+                        }
+                        // If it's the internal CameraMetadataNative.Key (common in newer Android)
+                        if (val != null && val.getClass().getName().contains("Key")) {
+                            for (java.lang.reflect.Field f2 : val.getClass().getDeclaredFields()) {
+                                f2.setAccessible(true);
+                                Object val2 = f2.get(val);
+                                if (val2 instanceof Class) {
+                                    type = (Class<?>) val2;
+                                    break;
+                                }
+                            }
+                        }
+                        if (type != null) break;
+                    }
+                } catch (Exception ignored) {}
+
+                String keyType = "???";
+                if (type != null) {
+                    keyType = type.getSimpleName()
+                            .replace("Integer", "Int32")
+                            .replace("Long", "Int64");
+
+                    if (type.isArray()) {
+                        keyType = type.getComponentType().getSimpleName()
+                                .replace("Integer", "Int32")
+                                .replace("Long", "Int64") + "[]";
+                    }
+                }
+
+                PhotonCamera.vendorKeysMap.put(keyName, keyType);
+            }
+        }
     }
 
     public void checkTenBitAndHdr() {

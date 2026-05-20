@@ -97,6 +97,14 @@
         <item>38</item>
     </string-array>
 
+    <string-array name="vendor_keys_type_filter_entries">
+        <item></item>
+    </string-array>
+
+    <string-array name="vendor_keys_type_filter_entryValues">
+        <item></item>
+    </string-array>
+
     <string-array name="function_one_entries">
         <item>ISO Priority</item>
         <item>Shutter Priority</item>

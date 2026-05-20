@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -651,7 +652,41 @@ public class SettingsActivity extends BaseActivity implements
             PreferenceScreen screen = getPreferenceScreen();
             Context ctx = getContext();
 
-            //screen.addPreference(new VendorKeyEntry(ctx, "Name", "Type", "Value"));
+            EditTextPreference filterNamePreference = findPreference(getString(R.string.pref_vendor_keys_name_filter_key));
+            ListPreference filterTypePreference = findPreference(getString(R.string.pref_vendor_keys_type_filter_key));
+            if (filterTypePreference != null && PhotonCamera.vendorKeysMap != null) {
+                java.util.Set<String> uniqueTypes = new java.util.HashSet<>(PhotonCamera.vendorKeysMap.values());
+                List<String> sortedTypes = new ArrayList<>(uniqueTypes);
+                java.util.Collections.sort(sortedTypes);
+
+                List<CharSequence> entries = new ArrayList<>();
+                List<CharSequence> entryValues = new ArrayList<>();
+
+                entries.add("All");
+                entryValues.add("");
+
+                for (String type : sortedTypes) {
+                    entries.add(type);
+                    entryValues.add(type);
+                }
+
+                filterTypePreference.setEntries(entries.toArray(new CharSequence[0]));
+                filterTypePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+
+                filterTypePreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (getActivity() != null) {
+                        getActivity().recreate();
+                    }
+                    return true;
+                });
+
+                filterNamePreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (getActivity() != null) {
+                        getActivity().recreate();
+                    }
+                    return true;
+                });
+            }
 
             androidx.preference.PreferenceCategory categoryConfigured = new androidx.preference.PreferenceCategory(ctx);
             categoryConfigured.setTitle("Configured (NoGuiYet.txt)");
@@ -708,58 +743,29 @@ public class SettingsActivity extends BaseActivity implements
             screen.addPreference(header);
 
             int keyNum = 0;
-            List<CaptureRequest.Key<?>> requestKeys = CaptureController.mCameraCharacteristics.getAvailableCaptureRequestKeys();
-            if (requestKeys != null) {
-                for (CaptureRequest.Key<?> key : requestKeys) {
-                    keyNum++;
-                    String keyName = key.getName();
-                    
-                    Class<?> type = null;
-                    try {
-                        // Deep search: Check all fields of the Key and its potential internal Key delegate
-                        java.lang.reflect.Field[] fields = key.getClass().getDeclaredFields();
-                        for (java.lang.reflect.Field f : fields) {
-                            f.setAccessible(true);
-                            Object val = f.get(key);
-                            if (val instanceof Class) {
-                                type = (Class<?>) val;
-                                break;
-                            }
-                            // If it's the internal CameraMetadataNative.Key (common in newer Android)
-                            if (val != null && val.getClass().getName().contains("Key")) {
-                                for (java.lang.reflect.Field f2 : val.getClass().getDeclaredFields()) {
-                                    f2.setAccessible(true);
-                                    Object val2 = f2.get(val);
-                                    if (val2 instanceof Class) {
-                                        type = (Class<?>) val2;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (type != null) break;
-                        }
-                    } catch (Exception ignored) {}
+            if (PhotonCamera.vendorKeysMap != null) {
+                String filterTypeValue = filterTypePreference != null ? filterTypePreference.getValue() : "";
+                String filterNameValue = filterNamePreference != null ? filterNamePreference.getText() : "";
+                if (filterTypeValue == null) filterTypeValue = "";
+                if (filterNameValue == null) filterNameValue = "";
 
-                    String keyType = "???";
-                    if (type != null) {
-                        keyType = type.getSimpleName()
-                                .replace("Integer", "Int32")
-                                .replace("Long", "Int64");
-
-                        if (type.isArray()) {
-                            keyType = type.getComponentType().getSimpleName()
-                                    .replace("Integer", "Int32")
-                                    .replace("Long", "Int64") + "[]";
-                        }
+                // Sort keys alphabetically for better readability
+                List<String> sortedKeys = new ArrayList<>(PhotonCamera.vendorKeysMap.keySet());
+                java.util.Collections.sort(sortedKeys);
+                
+                for (String keyName : sortedKeys) {
+                    String keyType = PhotonCamera.vendorKeysMap.get(keyName);
+                    if ((filterTypeValue.isEmpty() || filterTypeValue.equals(keyType)) &&
+                        (filterNameValue.isEmpty() || keyName.contains(filterNameValue))) {
+                        keyNum++;
+                        screen.addPreference(new VendorKeyDeviceEntry(ctx, keyName, keyType));
                     }
-
-                    screen.addPreference(new VendorKeyDeviceEntry(ctx, keyName, keyType));
                 }
             }
 
             Preference overallKeys = new Preference(ctx);
             overallKeys.setSelectable(false);
-            overallKeys.setTitle(String.valueOf("Number of Capture Request Keys: " + keyNum));
+            overallKeys.setTitle("Capture Request Keys: " + keyNum + " (of " + PhotonCamera.vendorKeysMap.size() + ")");
             screen.addPreference(overallKeys);
 
             Preference bottomSpacer = new Preference(ctx);
@@ -818,10 +824,12 @@ public class SettingsActivity extends BaseActivity implements
         getDelegate().setLocalNightMode(PreferenceKeys.getThemeValue());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.settings_container, new SettingsFragment())
-                .commit();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.settings_container, new SettingsFragment())
+                    .commit();
+        }
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentLifeCycleMonitor(), true);
 
     }
@@ -1128,7 +1136,6 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onDestroy() {
             super.onDestroy();
-            getParentFragmentManager().beginTransaction().remove(SettingsFragment.this).commitAllowingStateLoss();
         }
 
         private void setTelegramPref() {

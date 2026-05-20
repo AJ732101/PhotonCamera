@@ -11,6 +11,24 @@
         app:key="vendor_keys_settings_category"
         app:title="@string/vendor_keys_settings_screen_title">
 
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_vendor_keys_type_filter_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/vendor_keys_type_filter"
+            android:icon="@drawable/filter_alt_24px"
+            android:entries="@array/vendor_keys_type_filter_entries"
+            android:entryValues="@array/vendor_keys_type_filter_entryValues"
+            android:defaultValue=""/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_vendor_keys_name_filter_key"
+            android:title="@string/vendor_keys_name_filter"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="text"
+            android:defaultValue=""
+            android:icon="@drawable/filter_alt_24px"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -191,6 +191,10 @@
     <string name="pref_photo_colorspace_key" translatable="false">pref_photo_colorspace_key</string>
     <string name="pref_photo_range_key" translatable="false">pref_photo_range_key</string>
 
+    <!-- Vendor Keys -->
+    <string name="pref_vendor_keys_type_filter_key" translatable="false">pref_vendor_keys_type_filter_key</string>
+    <string name="pref_vendor_keys_name_filter_key" translatable="false">pref_vendor_keys_name_filter_key</string>
+
     <!-- Photon Camera Merging -->
     <string name="pref_fetch_configurations_key" translatable="false">pref_fetch_configurations_key</string>
     <string name="pref_hide_gallery_icon_key" translatable="false">pref_hide_gallery_icon_key</string>

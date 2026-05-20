@@ -43,6 +43,9 @@ import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.util.SimpleStorageHelper;
 import com.particlesdevs.photoncamera.util.ObjectLoader;
 import com.particlesdevs.photoncamera.util.log.ActivityLifecycleMonitor;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -157,6 +160,7 @@ public class PhotonCamera extends Application {
     public static long userFormatWebpLossySw = 777777777;
     public static long userFormatWebpLosslessSw = 666666666;
     public static String rawVideoPath = "";
+    public static Map<String, String> vendorKeysMap = null;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

@@ -282,4 +282,8 @@
     <string name="shading_mode">Shading Mode</string>
     <string name="alternate_preview_template">Alternate Preview Template</string>
     <string name="ten_bit_surface_target">YCBCR_P010 Target Format</string>
+
+    <!-- Vendor keys settings strings -->
+    <string name="vendor_keys_type_filter">Type Filter (Available)</string>
+    <string name="vendor_keys_name_filter">Name Filter (Available)</string>
 </resources>
