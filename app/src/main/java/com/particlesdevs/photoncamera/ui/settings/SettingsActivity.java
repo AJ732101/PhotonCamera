@@ -756,7 +756,7 @@ public class SettingsActivity extends BaseActivity implements
                 for (String keyName : sortedKeys) {
                     String keyType = PhotonCamera.vendorKeysMap.get(keyName);
                     if ((filterTypeValue.isEmpty() || filterTypeValue.equals(keyType)) &&
-                        (filterNameValue.isEmpty() || keyName.contains(filterNameValue))) {
+                        (filterNameValue.isEmpty() || keyName.toLowerCase().contains(filterNameValue.toLowerCase()))) {
                         keyNum++;
                         screen.addPreference(new VendorKeyDeviceEntry(ctx, keyName, keyType));
                     }
