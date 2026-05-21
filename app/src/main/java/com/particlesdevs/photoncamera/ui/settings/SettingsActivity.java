@@ -710,9 +710,10 @@ public class SettingsActivity extends BaseActivity implements
             }
 
             Preference exportButton = new Preference(ctx);
+            exportButton.setLayoutResource(R.layout.preference_with_margin);
             exportButton.setTitle("Export Filtered List");
             exportButton.setSummary("/DCIM/PhotonVidCam/Tuning/VendorKeysList.txt");
-            exportButton.setIcon(android.R.drawable.ic_menu_save);
+            exportButton.setIcon(R.drawable.save_24px);
             exportButton.setOnPreferenceClickListener(preference -> {
                 exportVendorKeys();
                 return true;
@@ -765,7 +766,7 @@ public class SettingsActivity extends BaseActivity implements
             }
 
             androidx.preference.PreferenceCategory categoryFoundOnDevice = new androidx.preference.PreferenceCategory(ctx);
-            categoryFoundOnDevice.setTitle("Available on this Camera ID");
+            categoryFoundOnDevice.setTitle("Available for this Camera ID");
             screen.addPreference(categoryFoundOnDevice);
 
             Preference header = new Preference(ctx);
