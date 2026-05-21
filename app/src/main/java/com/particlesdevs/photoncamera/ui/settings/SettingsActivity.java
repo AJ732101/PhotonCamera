@@ -658,6 +658,9 @@ public class SettingsActivity extends BaseActivity implements
     public static class VendorKeysSettingsFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            if (PhotonCamera.getCaptureController() != null) {
+                PhotonCamera.getCaptureController().createVendorKeysList();
+            }
             setPreferencesFromResource(R.xml.vendor_keys_preferences, rootKey);
             PreferenceScreen screen = getPreferenceScreen();
             Context ctx = getContext();
@@ -705,6 +708,16 @@ public class SettingsActivity extends BaseActivity implements
                     return true;
                 });
             }
+
+            Preference exportButton = new Preference(ctx);
+            exportButton.setTitle("Export Filtered List");
+            exportButton.setSummary("/DCIM/PhotonVidCam/Tuning/VendorKeysList.txt");
+            exportButton.setIcon(android.R.drawable.ic_menu_save);
+            exportButton.setOnPreferenceClickListener(preference -> {
+                exportVendorKeys();
+                return true;
+            });
+            screen.addPreference(exportButton);
 
             androidx.preference.PreferenceCategory categoryConfigured = new androidx.preference.PreferenceCategory(ctx);
             categoryConfigured.setTitle("Configured (NoGuiYet.txt)");
@@ -804,6 +817,71 @@ public class SettingsActivity extends BaseActivity implements
             bottomSpacer.setSelectable(false);
             bottomSpacer.setTitle("");
             screen.addPreference(bottomSpacer);
+        }
+
+        private void exportVendorKeys() {
+            if (PhotonCamera.vendorKeysMapType == null) return;
+
+            EditTextPreference filterNamePreference = findPreference(getString(R.string.pref_vendor_keys_name_filter_key));
+            ListPreference filterTypePreference = findPreference(getString(R.string.pref_vendor_keys_type_filter_key));
+            ListPreference filterClassPreference = findPreference(getString(R.string.pref_vendor_keys_class_filter_key));
+
+            String filterClassValue = filterClassPreference != null ? filterClassPreference.getValue() : "";
+            String filterTypeValue = filterTypePreference != null ? filterTypePreference.getValue() : "";
+            String filterNameValue = filterNamePreference != null ? filterNamePreference.getText() : "";
+
+            if (filterClassValue == null) filterClassValue = "";
+            if (filterTypeValue == null) filterTypeValue = "";
+            if (filterNameValue == null) filterNameValue = "";
+            filterNameValue = filterNameValue.trim().toLowerCase();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Vendor Keys Export\n");
+            sb.append("Camera ID: ").append(com.particlesdevs.photoncamera.settings.PreferenceKeys.getCameraID()).append("\n");
+            sb.append("Filters: Class=").append(filterClassValue.isEmpty() ? "All" : filterClassValue)
+              .append(", Type=").append(filterTypeValue.isEmpty() ? "All" : filterTypeValue)
+              .append(", Name=").append(filterNameValue.isEmpty() ? "None" : filterNameValue).append("\n\n");
+            
+            sb.append(String.format("%-80s | %-15s | %-10s\n", "Key Name", "Type", "Class"));
+            sb.append("------------------------------------------------------------------------------------------------------------\n");
+
+            List<String> sortedIds = new ArrayList<>(PhotonCamera.vendorKeysMapType.keySet());
+            java.util.Collections.sort(sortedIds);
+
+            int count = 0;
+            for (String uniqueId : sortedIds) {
+                String[] parts = uniqueId.split("@");
+                String originalName = parts[0];
+                String keyType = PhotonCamera.vendorKeysMapType.get(uniqueId);
+                String keyClass = PhotonCamera.vendorKeysMapClass.get(uniqueId);
+
+                if (keyType == null) keyType = "???";
+                if (keyClass == null) keyClass = "???";
+
+                boolean classMatch = filterClassValue.isEmpty() || keyClass.equalsIgnoreCase(filterClassValue);
+                boolean typeMatch = filterTypeValue.isEmpty() || keyType.equalsIgnoreCase(filterTypeValue);
+                boolean nameMatch = filterNameValue.isEmpty() || originalName.toLowerCase().contains(filterNameValue);
+
+                if (classMatch && typeMatch && nameMatch) {
+                    count++;
+                    sb.append(String.format("%-80s | %-15s | %-10s\n", originalName, keyType, keyClass));
+                }
+            }
+
+            sb.append("\nTotal Exported Keys: ").append(count);
+
+            try {
+                File tuningDir = FileManager.sPHOTON_TUNING_DIR;
+                if (!tuningDir.exists()) tuningDir.mkdirs();
+                File outFile = new File(tuningDir, "VendorKeysList.txt");
+                java.io.PrintWriter writer = new java.io.PrintWriter(outFile);
+                writer.print(sb.toString());
+                writer.close();
+                PhotonCamera.showToast("Exported " + count + " keys to " + outFile.getName());
+            } catch (Exception e) {
+                Log.e("VendorKeys", "Export failed", e);
+                PhotonCamera.showToast("Export failed: " + e.getMessage());
+            }
         }
     }
 

@@ -643,6 +643,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mFlashed = state != null && state == CaptureResult.FLASH_STATE_PARTIAL || state == CaptureResult.FLASH_STATE_FIRED;
             mPreviewCaptureResult = result;
             mPreviewCaptureRequest = request;
+            
+            if (wasLogged == 10) {
+                mBackgroundHandler.post(() -> createVendorKeysList());
+            }
+
             process(result);
             cameraEventsListener.onPreviewCaptureCompleted(result);
 
