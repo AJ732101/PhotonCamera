@@ -40,15 +40,8 @@ public class CameraReflectionApi {
             int[] filterTags,
             boolean includeSynthetic) {
         try {
-            Log.d("CameraAPI", "getCameraCharacteristicsKeys called");
-
-            // Get the CameraCharacteristics.Key class
             Class<?> keyClass = Class.forName("android.hardware.camera2.CameraCharacteristics$Key");
-
-            // Use RestrictionBypass to get the protected getKeys method
-            // The method signature is: getKeys(Class<?> type, Class<TKey> keyClass, CameraMetadata<TKey> instance, int[] filterTags, boolean includeSynthetic)
-            Log.d("CameraAPI", "Attempting to get getKeys method from CameraMetadata class");
-            Method getKeysMethod = NativeEngine.getCameraMethod(
+            Method getKeysMethod = RestrictionBypass.getDeclaredMethod(
                     CameraMetadata.class,
                     "getKeys",
                     Class.class,
@@ -58,17 +51,9 @@ public class CameraReflectionApi {
                     boolean.class
             );
 
-            if (getKeysMethod == null) {
-                Log.e("CameraAPI", "Failed to find getKeys method");
-                return null;
-            }
-
-            Log.d("CameraAPI", "Found getKeys method: " + getKeysMethod);
-
-            // Make the method accessible
+            if (getKeysMethod == null) return null;
             getKeysMethod.setAccessible(true);
 
-            // Call the method with proper parameters
             @SuppressWarnings("unchecked")
             ArrayList<Object> result = (ArrayList<Object>) getKeysMethod.invoke(
                     cameraCharacteristics,
@@ -79,10 +64,10 @@ public class CameraReflectionApi {
                     includeSynthetic
             );
 
-            Log.i("CameraAPI", "Successfully called getKeys method");
+            Log.i("CameraAPI", "Successfully called getKeys method using RestrictionBypass");
             return result;
         } catch (Exception e) {
-            Log.e("CameraAPI", "Error calling getCameraCharacteristicsKeys: " + e.getMessage(), e);
+            Log.e("CameraAPI", "Error calling getCameraCharacteristicsKeys: " + e.getMessage());
             return null;
         }
     }
@@ -93,7 +78,7 @@ public class CameraReflectionApi {
             boolean includeSynthetic) {
         try {
             Class<?> keyClass = Class.forName("android.hardware.camera2.CaptureRequest$Key");
-            Method getKeysMethod = NativeEngine.getCameraMethod(
+            Method getKeysMethod = RestrictionBypass.getDeclaredMethod(
                     CameraMetadata.class,
                     "getKeys",
                     Class.class,
@@ -115,6 +100,8 @@ public class CameraReflectionApi {
                     filterTags,
                     includeSynthetic
             );
+
+            Log.i("CameraAPI", "Successfully called getKeys method using RestrictionBypass");
             return result;
         } catch (Exception e) {
             Log.e("CameraAPI", "Error calling getCaptureRequestKeys: " + e.getMessage());
@@ -128,7 +115,7 @@ public class CameraReflectionApi {
             boolean includeSynthetic) {
         try {
             Class<?> keyClass = Class.forName("android.hardware.camera2.CaptureResult$Key");
-            Method getKeysMethod = NativeEngine.getCameraMethod(
+            Method getKeysMethod = RestrictionBypass.getDeclaredMethod(
                     CameraMetadata.class,
                     "getKeys",
                     Class.class,
@@ -150,6 +137,8 @@ public class CameraReflectionApi {
                     filterTags,
                     includeSynthetic
             );
+
+            Log.i("CameraAPI", "Successfully called getKeys method using RestrictionBypass");
             return result;
         } catch (Exception e) {
             Log.e("CameraAPI", "Error calling getCaptureResultKeys: " + e.getMessage());

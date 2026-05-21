@@ -2504,7 +2504,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
-            createVendorKeysList2();
+            createVendorKeysList();
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             // We configure the size of default buffer to be the size of camera preview we want.
@@ -5610,106 +5610,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void createVendorKeysList() {
-        if (PhotonCamera.vendorKeysMapType == null) {
-            PhotonCamera.vendorKeysMapType = new HashMap<>();
-        } else {
-            PhotonCamera.vendorKeysMapType.clear();
-        }
-
-        if (PhotonCamera.vendorKeysMapClass == null) {
-            PhotonCamera.vendorKeysMapClass = new HashMap<>();
-        } else {
-            PhotonCamera.vendorKeysMapClass.clear();
-        }
-
-        List<CaptureRequest.Key<?>> standardKeys = mCameraCharacteristics.getAvailableCaptureRequestKeys();
-        if (standardKeys != null) {
-            for (CaptureRequest.Key<?> key : standardKeys) {
-                addKeyToMap(key, "Req");
-            }
-        }
-
-        // 2. Deep system tag scan (Finds EVERYTHING, also org.codeaurora / com.qti / com.xiaomi)
-        try {
-            Class<?> nativeClazz = Class.forName("android.hardware.camera2.impl.CameraMetadataNative");
-            Class<?> vendorTagDescClazz = Class.forName("android.hardware.camera2.params.VendorTagDescriptor");
-
-            Method getGlobal = vendorTagDescClazz.getDeclaredMethod("getGlobalDescriptor");
-            Object globalDesc = getGlobal.invoke(null);
-
-            if (globalDesc != null) {
-                Method getTagCount = globalDesc.getClass().getDeclaredMethod("getTagCount");
-                int tagCount = (Integer) getTagCount.invoke(globalDesc);
-                int[] tags = new int[tagCount];
-                Method getAllVendorKeys = globalDesc.getClass().getDeclaredMethod("getAllVendorKeys", int[].class);
-                getAllVendorKeys.invoke(globalDesc, (Object) tags);
-
-                Method getTagName = nativeClazz.getDeclaredMethod("getTagName", int.class);
-                getTagName.setAccessible(true);
-                
-                // Find hidden constructor: Key(String name, Class<T> type)
-                Constructor<CaptureRequest.Key> keyConstructor = CaptureRequest.Key.class.getDeclaredConstructor(String.class, Class.class);
-                keyConstructor.setAccessible(true);
-
-                for (int tag : tags) {
-                    String tagName = (String) getTagName.invoke(null, tag);
-                    if (tagName != null) {
-                        // Create a temporary key to pass through our addKeyToMap logic
-                        CaptureRequest.Key<?> hiddenKey = keyConstructor.newInstance(tagName, Object.class);
-                        addKeyToMap(hiddenKey, "Req");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e("HiddenKeyScanner", "System Tag Scan failed: " + e.getMessage());
-        }
-
-        // 3. Scan static fields of common camera classes (manufacturers often mix these)
-        Class<?>[] keyClasses = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
-        for (Class<?> clazz : keyClasses) {
-            String label = "???";
-            if (clazz == CaptureRequest.class) label = "Req";
-            else if (clazz == CaptureResult.class) label = "Res";
-            else if (clazz == CameraCharacteristics.class) label = "Char";
-
-            try {
-                for (Field f : clazz.getDeclaredFields()) {
-                    if (f.getType().getName().endsWith(".Key")) {
-                        f.setAccessible(true);
-                        addKeyToMap(f.get(null), label);
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
-    }
-
-    public void createVendorKeysList2() {
-        if (PhotonCamera.vendorKeysMapType == null) {
-            PhotonCamera.vendorKeysMapType = new HashMap<>();
-        } else {
-            PhotonCamera.vendorKeysMapType.clear();
-        }
-        if (PhotonCamera.vendorKeysMapClass == null) {
-            PhotonCamera.vendorKeysMapClass = new HashMap<>();
-        } else {
-            PhotonCamera.vendorKeysMapClass.clear();
-        }
+        if (PhotonCamera.vendorKeysMapType == null) PhotonCamera.vendorKeysMapType = new HashMap<>();
+        else PhotonCamera.vendorKeysMapType.clear();
+        if (PhotonCamera.vendorKeysMapClass == null) PhotonCamera.vendorKeysMapClass = new HashMap<>();
+        else PhotonCamera.vendorKeysMapClass.clear();
 
         if (mCameraCharacteristics == null) return;
 
-        // 1. Offizielle API Listen (Standard- und gemeldete Vendor-Keys)
-        try {
-            List<CaptureRequest.Key<?>> availReq = mCameraCharacteristics.getAvailableCaptureRequestKeys();
-            if (availReq != null) for (CaptureRequest.Key<?> k : availReq) addKeyToMap(k, "Req");
-            
-            List<CaptureResult.Key<?>> availRes = mCameraCharacteristics.getAvailableCaptureResultKeys();
-            if (availRes != null) for (CaptureResult.Key<?> k : availRes) addKeyToMap(k, "Res");
-            
-            List<CameraCharacteristics.Key<?>> availChar = mCameraCharacteristics.getKeys();
-            if (availChar != null) for (CameraCharacteristics.Key<?> k : availChar) addKeyToMap(k, "Char");
-        } catch (Exception ignored) {}
-
-        // 2. Deep Scan via CameraReflectionApi (Versteckte Vendor-Keys)
         try {
             List<Object> charKeys = CameraReflectionApi.getCameraCharacteristicsKeys(mCameraCharacteristics, null, true);
             if (charKeys != null) for (Object k : charKeys) addKeyToMap(k, "Char");
@@ -5718,24 +5625,108 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 List<Object> reqKeys = CameraReflectionApi.getCaptureRequestKeys(mPreviewRequestBuilder.build(), null, true);
                 if (reqKeys != null) for (Object k : reqKeys) addKeyToMap(k, "Req");
             }
+
+            if (mPreviewCaptureResult != null) {
+                List<Object> resKeys = CameraReflectionApi.getCaptureResultKeys(mPreviewCaptureResult, null, true);
+                if (resKeys != null) for (Object k : resKeys) addKeyToMap(k, "Res");
+            }
         } catch (Exception ignored) {}
 
-        // 3. Statischer Scan der SDK-Klassen (SDK Konstanten)
-        Class<?>[] classes = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
-        for (Class<?> c : classes) {
-            String label = "???";
-            if (c == CaptureRequest.class) label = "Req";
-            else if (c == CaptureResult.class) label = "Res";
-            else if (c == CameraCharacteristics.class) label = "Char";
-            
+        try {
+            Class<?> nativeClazz = Class.forName("android.hardware.camera2.impl.CameraMetadataNative");
+            Class<?> descClazz = Class.forName("android.hardware.camera2.params.VendorTagDescriptor");
+            Class<?> cacheClazz = Class.forName("android.hardware.camera2.params.VendorTagDescriptorCache");
+
+            Object descriptor = null;
+            Method getGlobal = RestrictionBypass.getDeclaredMethod(descClazz, "getGlobalDescriptor");
+            if (getGlobal != null) descriptor = getGlobal.invoke(null);
+            if (descriptor == null) {
+                Method getCache = RestrictionBypass.getDeclaredMethod(cacheClazz, "getGlobalDescriptorCache");
+                if (getCache != null) descriptor = getCache.invoke(null);
+            }
+            if (descriptor == null) {
+                Field propsField = RestrictionBypass.getDeclaredField(CameraCharacteristics.class, "mProperties");
+                Object nativeMetadata = propsField.get(mCameraCharacteristics);
+                Method getDesc = RestrictionBypass.getDeclaredMethod(nativeMetadata.getClass(), "getVendorTagDescriptor");
+                if (getDesc != null) descriptor = getDesc.invoke(nativeMetadata);
+            }
+
+            if (descriptor != null) {
+                Method getTagCount = RestrictionBypass.getDeclaredMethod(descriptor.getClass(), "getTagCount");
+                int tagCount = (Integer) getTagCount.invoke(descriptor);
+                if (tagCount > 0) {
+                    int[] tags = new int[tagCount];
+                    Method getAllVendorKeys = RestrictionBypass.getDeclaredMethod(descriptor.getClass(), "getAllVendorKeys", int[].class);
+                    if (getAllVendorKeys != null) {
+                        getAllVendorKeys.invoke(descriptor, (Object) tags);
+                        Method getTagName = RestrictionBypass.getDeclaredMethod(nativeClazz, "getTagName", int.class);
+
+                        Constructor<CaptureRequest.Key> reqConstructor = CaptureRequest.Key.class.getDeclaredConstructor(String.class, Class.class);
+                        reqConstructor.setAccessible(true);
+                        Constructor<CaptureResult.Key> resConstructor = CaptureResult.Key.class.getDeclaredConstructor(String.class, Class.class);
+                        resConstructor.setAccessible(true);
+                        Constructor<CameraCharacteristics.Key> charConstructor = CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
+                        charConstructor.setAccessible(true);
+
+                        for (int tag : tags) {
+                            String tagName = (String) getTagName.invoke(null, tag);
+                            if (tagName != null && tagName.contains(".")) {
+                                addKeyToMap(reqConstructor.newInstance(tagName, Object.class), "Req");
+                                addKeyToMap(resConstructor.newInstance(tagName, Object.class), "Res");
+                                addKeyToMap(charConstructor.newInstance(tagName, Object.class), "Char");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        Class<?>[] sdkClasses = {
+                CaptureRequest.class, 
+                CaptureResult.class, 
+                CameraCharacteristics.class, 
+                com.particlesdevs.photoncamera.api.VendorTagUtils.class 
+        };
+        for (Class<?> c : sdkClasses) {
+            String label = (c == CaptureResult.class) ? "Res" : (c == CameraCharacteristics.class ? "Char" : "Req");
             for (Field f : c.getDeclaredFields()) {
                 if (f.getType().getSimpleName().equals("Key")) {
                     try {
                         f.setAccessible(true);
-                        addKeyToMap(f.get(null), label);
+                        Object key = f.get(null);
+                        if (key != null) addKeyToMap(key, label);
                     } catch (Exception ignored) {}
                 }
             }
+        }
+
+        try {
+            List<CaptureRequest.Key<?>> availReq = mCameraCharacteristics.getAvailableCaptureRequestKeys();
+            if (availReq != null) for (CaptureRequest.Key<?> k : availReq) addKeyToMap(k, "Req");
+            List<CaptureResult.Key<?>> availRes = mCameraCharacteristics.getAvailableCaptureResultKeys();
+            if (availRes != null) for (CaptureResult.Key<?> k : availRes) addKeyToMap(k, "Res");
+            List<CameraCharacteristics.Key<?>> availChar = mCameraCharacteristics.getKeys();
+            if (availChar != null) for (CameraCharacteristics.Key<?> k : availChar) addKeyToMap(k, "Char");
+        } catch (Exception ignored) {}
+    }
+
+    private void addVirtualKeyToMap(String keyName, String keyType, String keyClassLabel) {
+        String uniqueId = keyName + "@" + keyClassLabel;
+        if (!PhotonCamera.vendorKeysMapType.containsKey(uniqueId)) {
+            PhotonCamera.vendorKeysMapType.put(uniqueId, keyType);
+            PhotonCamera.vendorKeysMapClass.put(uniqueId, keyClassLabel);
+        }
+    }
+
+    private String mapNativeTypeToString(int type) {
+        switch (type) {
+            case 0: return "Byte";
+            case 1: return "Int32";
+            case 2: return "Float";
+            case 3: return "Int64";
+            case 4: return "Double";
+            case 5: return "Rational";
+            default: return "Unknown (" + type + ")";
         }
     }
 
