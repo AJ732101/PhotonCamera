@@ -790,6 +790,19 @@ public class SettingsActivity extends BaseActivity implements
             ((TextView) holder.findViewById(R.id.key_name)).setText(name);
             ((TextView) holder.findViewById(R.id.key_type)).setText(type);
             ((TextView) holder.findViewById(R.id.key_value)).setText(value);
+
+            // Long Press to copy to clipboard
+            holder.itemView.setOnLongClickListener(v -> {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
+                        getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null) {
+                    String textToCopy = name + " [" + type + "] = " + value;
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("Vendor Key", textToCopy);
+                    clipboard.setPrimaryClip(clip);
+                    com.particlesdevs.photoncamera.app.PhotonCamera.showToast("Copied to clipboard");
+                }
+                return true;
+            });
         }
     }
 
@@ -806,6 +819,19 @@ public class SettingsActivity extends BaseActivity implements
             super.onBindViewHolder(holder);
             ((TextView) holder.findViewById(R.id.key_device_name)).setText(name);
             ((TextView) holder.findViewById(R.id.key_device_type)).setText(type);
+
+            // Long Press to copy to clipboard
+            holder.itemView.setOnLongClickListener(v -> {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
+                        getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null) {
+                    String textToCopy = name + " [" + type + "]";
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("Vendor Key Name", textToCopy);
+                    clipboard.setPrimaryClip(clip);
+                    com.particlesdevs.photoncamera.app.PhotonCamera.showToast("Key name copied");
+                }
+                return true;
+            });
         }
     }
 

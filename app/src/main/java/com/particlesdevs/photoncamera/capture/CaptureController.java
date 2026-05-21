@@ -136,6 +136,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -833,18 +834,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isSingleShotJpegOrAvifOrHeic() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
                 ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-                (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
-                (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-                (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
-                (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
@@ -2503,7 +2504,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public void createCameraPreviewSession(boolean isBurstSession) {
         try {
-            createVendorKeysList();
+            createVendorKeysList2();
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             // We configure the size of default buffer to be the size of camera preview we want.
@@ -5615,53 +5616,160 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.vendorKeysMap.clear();
         }
 
-        List<CaptureRequest.Key<?>> requestKeys = CaptureController.mCameraCharacteristics.getAvailableCaptureRequestKeys();
-        if (requestKeys != null) {
-            for (CaptureRequest.Key<?> key : requestKeys) {
-                String keyName = key.getName();
-
-                Class<?> type = null;
-                try {
-                    // Deep search: Check all fields of the Key and its potential internal Key delegate
-                    java.lang.reflect.Field[] fields = key.getClass().getDeclaredFields();
-                    for (java.lang.reflect.Field f : fields) {
-                        f.setAccessible(true);
-                        Object val = f.get(key);
-                        if (val instanceof Class) {
-                            type = (Class<?>) val;
-                            break;
-                        }
-                        // If it's the internal CameraMetadataNative.Key (common in newer Android)
-                        if (val != null && val.getClass().getName().contains("Key")) {
-                            for (java.lang.reflect.Field f2 : val.getClass().getDeclaredFields()) {
-                                f2.setAccessible(true);
-                                Object val2 = f2.get(val);
-                                if (val2 instanceof Class) {
-                                    type = (Class<?>) val2;
-                                    break;
-                                }
-                            }
-                        }
-                        if (type != null) break;
-                    }
-                } catch (Exception ignored) {}
-
-                String keyType = "???";
-                if (type != null) {
-                    keyType = type.getSimpleName()
-                            .replace("Integer", "Int32")
-                            .replace("Long", "Int64");
-
-                    if (type.isArray()) {
-                        keyType = type.getComponentType().getSimpleName()
-                                .replace("Integer", "Int32")
-                                .replace("Long", "Int64") + "[]";
-                    }
-                }
-
-                PhotonCamera.vendorKeysMap.put(keyName, keyType);
+        List<CaptureRequest.Key<?>> standardKeys = mCameraCharacteristics.getAvailableCaptureRequestKeys();
+        if (standardKeys != null) {
+            for (CaptureRequest.Key<?> key : standardKeys) {
+                addKeyToMap(key);
             }
         }
+
+        // 2. Deep system tag scan (Finds EVERYTHING, also org.codeaurora / com.qti / com.xiaomi)
+        try {
+            Class<?> nativeClazz = Class.forName("android.hardware.camera2.impl.CameraMetadataNative");
+            Class<?> vendorTagDescClazz = Class.forName("android.hardware.camera2.params.VendorTagDescriptor");
+
+            Method getGlobal = vendorTagDescClazz.getDeclaredMethod("getGlobalDescriptor");
+            Object globalDesc = getGlobal.invoke(null);
+
+            if (globalDesc != null) {
+                Method getTagCount = globalDesc.getClass().getDeclaredMethod("getTagCount");
+                int tagCount = (Integer) getTagCount.invoke(globalDesc);
+                int[] tags = new int[tagCount];
+                Method getAllVendorKeys = globalDesc.getClass().getDeclaredMethod("getAllVendorKeys", int[].class);
+                getAllVendorKeys.invoke(globalDesc, (Object) tags);
+
+                Method getTagName = nativeClazz.getDeclaredMethod("getTagName", int.class);
+                getTagName.setAccessible(true);
+                
+                // Find hidden constructor: Key(String name, Class<T> type)
+                Constructor<CaptureRequest.Key> keyConstructor = CaptureRequest.Key.class.getDeclaredConstructor(String.class, Class.class);
+                keyConstructor.setAccessible(true);
+
+                for (int tag : tags) {
+                    String tagName = (String) getTagName.invoke(null, tag);
+                    if (tagName != null) {
+                        // Create a temporary key to pass through our addKeyToMap logic
+                        CaptureRequest.Key<?> hiddenKey = keyConstructor.newInstance(tagName, Object.class);
+                        addKeyToMap(hiddenKey);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("HiddenKeyScanner", "System Tag Scan failed: " + e.getMessage());
+        }
+
+        // 3. Scan static fields of common camera classes (manufacturers often mix these)
+        Class<?>[] keyClasses = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
+        for (Class<?> clazz : keyClasses) {
+            try {
+                for (Field f : clazz.getDeclaredFields()) {
+                    if (f.getType() == CaptureRequest.Key.class) {
+                        f.setAccessible(true);
+                        addKeyToMap((CaptureRequest.Key<?>) f.get(null));
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+    }
+
+    public void createVendorKeysList2() {
+        if (PhotonCamera.vendorKeysMap == null) {
+            PhotonCamera.vendorKeysMap = new HashMap<>();
+        } else {
+            PhotonCamera.vendorKeysMap.clear();
+        }
+
+        // 1. Statischer Scan (CaptureRequest, CaptureResult, CameraCharacteristics)
+        Class<?>[] keyClasses = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
+        for (Class<?> clazz : keyClasses) {
+            try {
+                for (Field f : clazz.getDeclaredFields()) {
+                    if (f.getType().getName().endsWith(".Key")) {
+                        f.setAccessible(true);
+                        addKeyToMap(f.get(null));
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 2. Nutzung der projektinternen CameraReflectionApi (Der stabilste Weg)
+        try {
+            if (mCameraCharacteristics != null) {
+                // Characteristics Keys laden
+                List<Object> charKeys = CameraReflectionApi.getCameraCharacteristicsKeys(mCameraCharacteristics, null, true);
+                if (charKeys != null) {
+                    for (Object k : charKeys) addKeyToMap(k);
+                }
+
+                // Request Keys laden (via PreviewRequest falls vorhanden)
+                if (mPreviewRequestBuilder != null) {
+                    List<Object> reqKeys = CameraReflectionApi.getCaptureRequestKeys(mPreviewRequestBuilder.build(), null, true);
+                    if (reqKeys != null) {
+                        for (Object k : reqKeys) addKeyToMap(k);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("DumpScan", "CameraReflectionApi scan failed: " + e.getMessage());
+        }
+    }
+
+    private String mapNativeTypeToString(int type) {
+        switch (type) {
+            case 0: return "Byte";
+            case 1: return "Int32";
+            case 2: return "Float";
+            case 3: return "Int64";
+            case 4: return "Double";
+            case 5: return "Rational";
+            default: return "Unknown (" + type + ")";
+        }
+    }
+
+    private void addKeyToMap(Object keyObj) {
+        if (keyObj == null) return;
+        
+        String keyName = "";
+        try {
+            Method getName = keyObj.getClass().getMethod("getName");
+            keyName = (String) getName.invoke(keyObj);
+        } catch (Exception e) { return; }
+
+        if (PhotonCamera.vendorKeysMap.containsKey(keyName)) return;
+
+        Class<?> type = null;
+        try {
+            // Re-using the robust deep-search logic for the type
+            java.lang.reflect.Field[] fields = keyObj.getClass().getDeclaredFields();
+            for (java.lang.reflect.Field f : fields) {
+                f.setAccessible(true);
+                Object val = f.get(keyObj);
+                if (val instanceof Class) {
+                    type = (Class<?>) val;
+                    break;
+                }
+                if (val != null && val.getClass().getName().contains("Key")) {
+                    for (java.lang.reflect.Field f2 : val.getClass().getDeclaredFields()) {
+                        f2.setAccessible(true);
+                        Object val2 = f2.get(val);
+                        if (val2 instanceof Class) {
+                            type = (Class<?>) val2;
+                            break;
+                        }
+                    }
+                }
+                if (type != null) break;
+            }
+        } catch (Exception ignored) {}
+
+        String keyType = "???";
+        if (type != null) {
+            keyType = type.getSimpleName().replace("Integer", "Int32").replace("Long", "Int64");
+            if (type.isArray()) {
+                keyType = type.getComponentType().getSimpleName().replace("Integer", "Int32").replace("Long", "Int64") + "[]";
+            }
+        }
+        PhotonCamera.vendorKeysMap.put(keyName, keyType);
     }
 
     public void checkTenBitAndHdr() {
