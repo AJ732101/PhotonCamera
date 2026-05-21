@@ -92,12 +92,7 @@ public class CameraReflectionApi {
             int[] filterTags,
             boolean includeSynthetic) {
         try {
-            // Get the CameraCharacteristics.Key class
             Class<?> keyClass = Class.forName("android.hardware.camera2.CaptureRequest$Key");
-
-            // Use RestrictionBypass to get the protected getKeys method
-            // The method signature is: getKeys(Class<?> type, Class<TKey> keyClass, CameraMetadata<TKey> instance, int[] filterTags, boolean includeSynthetic)
-            Log.d("CameraAPI", "Attempting to get getKeys method from CameraMetadata class");
             Method getKeysMethod = NativeEngine.getCameraMethod(
                     CameraMetadata.class,
                     "getKeys",
@@ -108,17 +103,9 @@ public class CameraReflectionApi {
                     boolean.class
             );
 
-            if (getKeysMethod == null) {
-                Log.e("CameraAPI", "Failed to find getKeys method");
-                return null;
-            }
-
-            Log.d("CameraAPI", "Found getKeys method: " + getKeysMethod);
-
-            // Make the method accessible
+            if (getKeysMethod == null) return null;
             getKeysMethod.setAccessible(true);
 
-            // Call the method with proper parameters
             @SuppressWarnings("unchecked")
             ArrayList<Object> result = (ArrayList<Object>) getKeysMethod.invoke(
                     captureRequest,
@@ -128,11 +115,44 @@ public class CameraReflectionApi {
                     filterTags,
                     includeSynthetic
             );
-
-            Log.i("CameraAPI", "Successfully called getKeys method");
             return result;
         } catch (Exception e) {
-            Log.e("CameraAPI", "Error calling getCaptureRequestKeys: " + e.getMessage(), e);
+            Log.e("CameraAPI", "Error calling getCaptureRequestKeys: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static ArrayList<Object> getCaptureResultKeys(
+            CaptureResult captureResult,
+            int[] filterTags,
+            boolean includeSynthetic) {
+        try {
+            Class<?> keyClass = Class.forName("android.hardware.camera2.CaptureResult$Key");
+            Method getKeysMethod = NativeEngine.getCameraMethod(
+                    CameraMetadata.class,
+                    "getKeys",
+                    Class.class,
+                    Class.class,
+                    CameraMetadata.class,
+                    int[].class,
+                    boolean.class
+            );
+
+            if (getKeysMethod == null) return null;
+            getKeysMethod.setAccessible(true);
+
+            @SuppressWarnings("unchecked")
+            ArrayList<Object> result = (ArrayList<Object>) getKeysMethod.invoke(
+                    captureResult,
+                    captureResult.getClass(),
+                    keyClass,
+                    captureResult,
+                    filterTags,
+                    includeSynthetic
+            );
+            return result;
+        } catch (Exception e) {
+            Log.e("CameraAPI", "Error calling getCaptureResultKeys: " + e.getMessage());
             return null;
         }
     }
