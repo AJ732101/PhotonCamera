@@ -160,7 +160,8 @@ public class PhotonCamera extends Application {
     public static long userFormatWebpLossySw = 777777777;
     public static long userFormatWebpLosslessSw = 666666666;
     public static String rawVideoPath = "";
-    public static Map<String, String> vendorKeysMap = null;
+    public static Map<String, String> vendorKeysMapType = null;
+    public static Map<String, String> vendorKeysMapClass = null;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

@@ -5610,16 +5610,22 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void createVendorKeysList() {
-        if (PhotonCamera.vendorKeysMap == null) {
-            PhotonCamera.vendorKeysMap = new HashMap<>();
+        if (PhotonCamera.vendorKeysMapType == null) {
+            PhotonCamera.vendorKeysMapType = new HashMap<>();
         } else {
-            PhotonCamera.vendorKeysMap.clear();
+            PhotonCamera.vendorKeysMapType.clear();
+        }
+
+        if (PhotonCamera.vendorKeysMapClass == null) {
+            PhotonCamera.vendorKeysMapClass = new HashMap<>();
+        } else {
+            PhotonCamera.vendorKeysMapClass.clear();
         }
 
         List<CaptureRequest.Key<?>> standardKeys = mCameraCharacteristics.getAvailableCaptureRequestKeys();
         if (standardKeys != null) {
             for (CaptureRequest.Key<?> key : standardKeys) {
-                addKeyToMap(key);
+                addKeyToMap(key, "Req");
             }
         }
 
@@ -5650,7 +5656,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     if (tagName != null) {
                         // Create a temporary key to pass through our addKeyToMap logic
                         CaptureRequest.Key<?> hiddenKey = keyConstructor.newInstance(tagName, Object.class);
-                        addKeyToMap(hiddenKey);
+                        addKeyToMap(hiddenKey, "Req");
                     }
                 }
             }
@@ -5661,11 +5667,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // 3. Scan static fields of common camera classes (manufacturers often mix these)
         Class<?>[] keyClasses = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
         for (Class<?> clazz : keyClasses) {
+            String label = "???";
+            if (clazz == CaptureRequest.class) label = "Req";
+            else if (clazz == CaptureResult.class) label = "Res";
+            else if (clazz == CameraCharacteristics.class) label = "Char";
+
             try {
                 for (Field f : clazz.getDeclaredFields()) {
-                    if (f.getType() == CaptureRequest.Key.class) {
+                    if (f.getType().getName().endsWith(".Key")) {
                         f.setAccessible(true);
-                        addKeyToMap((CaptureRequest.Key<?>) f.get(null));
+                        addKeyToMap(f.get(null), label);
                     }
                 }
             } catch (Exception ignored) {}
@@ -5673,60 +5684,62 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     public void createVendorKeysList2() {
-        if (PhotonCamera.vendorKeysMap == null) {
-            PhotonCamera.vendorKeysMap = new HashMap<>();
+        if (PhotonCamera.vendorKeysMapType == null) {
+            PhotonCamera.vendorKeysMapType = new HashMap<>();
         } else {
-            PhotonCamera.vendorKeysMap.clear();
+            PhotonCamera.vendorKeysMapType.clear();
+        }
+        if (PhotonCamera.vendorKeysMapClass == null) {
+            PhotonCamera.vendorKeysMapClass = new HashMap<>();
+        } else {
+            PhotonCamera.vendorKeysMapClass.clear();
         }
 
-        // 1. Statischer Scan (CaptureRequest, CaptureResult, CameraCharacteristics)
-        Class<?>[] keyClasses = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
-        for (Class<?> clazz : keyClasses) {
-            try {
-                for (Field f : clazz.getDeclaredFields()) {
-                    if (f.getType().getName().endsWith(".Key")) {
-                        f.setAccessible(true);
-                        addKeyToMap(f.get(null));
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
+        if (mCameraCharacteristics == null) return;
 
-        // 2. Nutzung der projektinternen CameraReflectionApi (Der stabilste Weg)
+        // 1. Offizielle API Listen (Standard- und gemeldete Vendor-Keys)
         try {
-            if (mCameraCharacteristics != null) {
-                // Characteristics Keys laden
-                List<Object> charKeys = CameraReflectionApi.getCameraCharacteristicsKeys(mCameraCharacteristics, null, true);
-                if (charKeys != null) {
-                    for (Object k : charKeys) addKeyToMap(k);
-                }
+            List<CaptureRequest.Key<?>> availReq = mCameraCharacteristics.getAvailableCaptureRequestKeys();
+            if (availReq != null) for (CaptureRequest.Key<?> k : availReq) addKeyToMap(k, "Req");
+            
+            List<CaptureResult.Key<?>> availRes = mCameraCharacteristics.getAvailableCaptureResultKeys();
+            if (availRes != null) for (CaptureResult.Key<?> k : availRes) addKeyToMap(k, "Res");
+            
+            List<CameraCharacteristics.Key<?>> availChar = mCameraCharacteristics.getKeys();
+            if (availChar != null) for (CameraCharacteristics.Key<?> k : availChar) addKeyToMap(k, "Char");
+        } catch (Exception ignored) {}
 
-                // Request Keys laden (via PreviewRequest falls vorhanden)
-                if (mPreviewRequestBuilder != null) {
-                    List<Object> reqKeys = CameraReflectionApi.getCaptureRequestKeys(mPreviewRequestBuilder.build(), null, true);
-                    if (reqKeys != null) {
-                        for (Object k : reqKeys) addKeyToMap(k);
-                    }
+        // 2. Deep Scan via CameraReflectionApi (Versteckte Vendor-Keys)
+        try {
+            List<Object> charKeys = CameraReflectionApi.getCameraCharacteristicsKeys(mCameraCharacteristics, null, true);
+            if (charKeys != null) for (Object k : charKeys) addKeyToMap(k, "Char");
+
+            if (mPreviewRequestBuilder != null) {
+                List<Object> reqKeys = CameraReflectionApi.getCaptureRequestKeys(mPreviewRequestBuilder.build(), null, true);
+                if (reqKeys != null) for (Object k : reqKeys) addKeyToMap(k, "Req");
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Statischer Scan der SDK-Klassen (SDK Konstanten)
+        Class<?>[] classes = {CaptureRequest.class, CaptureResult.class, CameraCharacteristics.class};
+        for (Class<?> c : classes) {
+            String label = "???";
+            if (c == CaptureRequest.class) label = "Req";
+            else if (c == CaptureResult.class) label = "Res";
+            else if (c == CameraCharacteristics.class) label = "Char";
+            
+            for (Field f : c.getDeclaredFields()) {
+                if (f.getType().getSimpleName().equals("Key")) {
+                    try {
+                        f.setAccessible(true);
+                        addKeyToMap(f.get(null), label);
+                    } catch (Exception ignored) {}
                 }
             }
-        } catch (Exception e) {
-            Log.e("DumpScan", "CameraReflectionApi scan failed: " + e.getMessage());
         }
     }
 
-    private String mapNativeTypeToString(int type) {
-        switch (type) {
-            case 0: return "Byte";
-            case 1: return "Int32";
-            case 2: return "Float";
-            case 3: return "Int64";
-            case 4: return "Double";
-            case 5: return "Rational";
-            default: return "Unknown (" + type + ")";
-        }
-    }
-
-    private void addKeyToMap(Object keyObj) {
+    private void addKeyToMap(Object keyObj, String keyClassLabel) {
         if (keyObj == null) return;
         
         String keyName = "";
@@ -5735,7 +5748,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             keyName = (String) getName.invoke(keyObj);
         } catch (Exception e) { return; }
 
-        if (PhotonCamera.vendorKeysMap.containsKey(keyName)) return;
+        // Eindeutiger Identifikator für die Map (Name + Klasse), damit Keys mehrfach gelistet werden können
+        String uniqueId = keyName + "@" + keyClassLabel;
+        if (PhotonCamera.vendorKeysMapType.containsKey(uniqueId)) return;
 
         Class<?> type = null;
         try {
@@ -5769,7 +5784,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 keyType = type.getComponentType().getSimpleName().replace("Integer", "Int32").replace("Long", "Int64") + "[]";
             }
         }
-        PhotonCamera.vendorKeysMap.put(keyName, keyType);
+
+        PhotonCamera.vendorKeysMapType.put(uniqueId, keyType);
+        PhotonCamera.vendorKeysMapClass.put(uniqueId, keyClassLabel);
     }
 
     public void checkTenBitAndHdr() {

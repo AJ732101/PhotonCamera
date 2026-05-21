@@ -371,15 +371,25 @@ public class SettingsActivity extends BaseActivity implements
             }
 
             String saturationKey = getString(R.string.pref_soc_qualcomm_saturation_key);
+            String saturationVideoKey = getString(R.string.pref_soc_qualcomm_saturation_video_key);
             Preference saturationPreference = findPreference(saturationKey);
+            Preference saturationVideoPreference = findPreference(saturationVideoKey);
             if (saturationPreference != null) {
                 saturationPreference.setEnabled(PhotonCamera.hasSaturationKey);
             }
+            if (saturationVideoPreference != null) {
+                saturationVideoPreference.setEnabled(PhotonCamera.hasSaturationKey);
+            }
 
             String contrastKey = getString(R.string.pref_soc_qualcomm_contrast_key);
+            String contrastVideoKey = getString(R.string.pref_soc_qualcomm_contrast_video_key);
             Preference contrastPreference = findPreference(contrastKey);
+            Preference contrastVideoPreference = findPreference(contrastVideoKey);
             if (contrastPreference != null) {
                 contrastPreference.setEnabled(PhotonCamera.hasContrastKey);
+            }
+            if (contrastVideoPreference != null) {
+                contrastVideoPreference.setEnabled(PhotonCamera.hasContrastKey);
             }
 
             String eisKey = getString(R.string.pref_soc_qualcomm_eis_mode_key);
@@ -654,8 +664,9 @@ public class SettingsActivity extends BaseActivity implements
 
             EditTextPreference filterNamePreference = findPreference(getString(R.string.pref_vendor_keys_name_filter_key));
             ListPreference filterTypePreference = findPreference(getString(R.string.pref_vendor_keys_type_filter_key));
-            if (filterTypePreference != null && PhotonCamera.vendorKeysMap != null) {
-                java.util.Set<String> uniqueTypes = new java.util.HashSet<>(PhotonCamera.vendorKeysMap.values());
+            ListPreference filterClassPreference = findPreference(getString(R.string.pref_vendor_keys_class_filter_key));
+            if (filterTypePreference != null && PhotonCamera.vendorKeysMapType != null) {
+                java.util.Set<String> uniqueTypes = new java.util.HashSet<>(PhotonCamera.vendorKeysMapType.values());
                 List<String> sortedTypes = new ArrayList<>(uniqueTypes);
                 java.util.Collections.sort(sortedTypes);
 
@@ -669,9 +680,16 @@ public class SettingsActivity extends BaseActivity implements
                     entries.add(type);
                     entryValues.add(type);
                 }
-
+                
                 filterTypePreference.setEntries(entries.toArray(new CharSequence[0]));
                 filterTypePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+
+                filterClassPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (getActivity() != null) {
+                        getActivity().recreate();
+                    }
+                    return true;
+                });
 
                 filterTypePreference.setOnPreferenceChangeListener((preference, newValue) -> {
                     if (getActivity() != null) {
@@ -743,29 +761,43 @@ public class SettingsActivity extends BaseActivity implements
             screen.addPreference(header);
 
             int keyNum = 0;
-            if (PhotonCamera.vendorKeysMap != null) {
+            if (PhotonCamera.vendorKeysMapType != null) {
+                String filterClassValue = filterClassPreference != null ? filterClassPreference.getValue() : "";
                 String filterTypeValue = filterTypePreference != null ? filterTypePreference.getValue() : "";
                 String filterNameValue = filterNamePreference != null ? filterNamePreference.getText() : "";
+                
+                if (filterClassValue == null) filterClassValue = "";
                 if (filterTypeValue == null) filterTypeValue = "";
                 if (filterNameValue == null) filterNameValue = "";
+                filterNameValue = filterNameValue.trim().toLowerCase();
 
                 // Sort keys alphabetically for better readability
-                List<String> sortedKeys = new ArrayList<>(PhotonCamera.vendorKeysMap.keySet());
-                java.util.Collections.sort(sortedKeys);
+                List<String> sortedIds = new ArrayList<>(PhotonCamera.vendorKeysMapType.keySet());
+                java.util.Collections.sort(sortedIds);
                 
-                for (String keyName : sortedKeys) {
-                    String keyType = PhotonCamera.vendorKeysMap.get(keyName);
-                    if ((filterTypeValue.isEmpty() || filterTypeValue.equals(keyType)) &&
-                        (filterNameValue.isEmpty() || keyName.toLowerCase().contains(filterNameValue.toLowerCase()))) {
+                for (String uniqueId : sortedIds) {
+                    String[] parts = uniqueId.split("@");
+                    String originalName = parts[0];
+                    String keyType = PhotonCamera.vendorKeysMapType.get(uniqueId);
+                    String keyClass = PhotonCamera.vendorKeysMapClass.get(uniqueId);
+                    
+                    if (keyType == null) keyType = "???";
+                    if (keyClass == null) keyClass = "???";
+
+                    boolean classMatch = filterClassValue.isEmpty() || keyClass.equalsIgnoreCase(filterClassValue);
+                    boolean typeMatch = filterTypeValue.isEmpty() || keyType.equalsIgnoreCase(filterTypeValue);
+                    boolean nameMatch = filterNameValue.isEmpty() || originalName.toLowerCase().contains(filterNameValue);
+
+                    if (classMatch && typeMatch && nameMatch) {
                         keyNum++;
-                        screen.addPreference(new VendorKeyDeviceEntry(ctx, keyName, keyType));
+                        screen.addPreference(new VendorKeyDeviceEntry(ctx, originalName, keyType, keyClass));
                     }
                 }
             }
 
             Preference overallKeys = new Preference(ctx);
             overallKeys.setSelectable(false);
-            overallKeys.setTitle("Capture Request Keys: " + keyNum + " (of " + PhotonCamera.vendorKeysMap.size() + ")");
+            overallKeys.setTitle("Vendor Keys: " + keyNum + " (of " + PhotonCamera.vendorKeysMapType.size() + ")");
             screen.addPreference(overallKeys);
 
             Preference bottomSpacer = new Preference(ctx);
@@ -807,11 +839,13 @@ public class SettingsActivity extends BaseActivity implements
     }
 
     private static class VendorKeyDeviceEntry extends Preference {
-        private final String name, type;
-        public VendorKeyDeviceEntry(Context context, String name, String type) {
+        private final String name, type, clazz;
+        public VendorKeyDeviceEntry(Context context, String name, String type, String clazz) {
             super(context);
             this.name = name;
             this.type = type;
+            this.clazz = clazz;
+
             setLayoutResource(R.layout.vendor_key_device_row);
         }
         @Override
@@ -819,13 +853,14 @@ public class SettingsActivity extends BaseActivity implements
             super.onBindViewHolder(holder);
             ((TextView) holder.findViewById(R.id.key_device_name)).setText(name);
             ((TextView) holder.findViewById(R.id.key_device_type)).setText(type);
+            ((TextView) holder.findViewById(R.id.key_device_class)).setText(clazz);
 
             // Long Press to copy to clipboard
             holder.itemView.setOnLongClickListener(v -> {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
                         getContext().getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null) {
-                    String textToCopy = name + " [" + type + "]";
+                    String textToCopy = name + " [" + type + "]" + " [" + clazz + "]";
                     android.content.ClipData clip = android.content.ClipData.newPlainText("Vendor Key Name", textToCopy);
                     clipboard.setPrimaryClip(clip);
                     com.particlesdevs.photoncamera.app.PhotonCamera.showToast("Key name copied");

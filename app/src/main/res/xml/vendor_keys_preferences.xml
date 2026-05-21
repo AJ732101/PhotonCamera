@@ -13,6 +13,16 @@
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_vendor_keys_class_filter_key"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/vendor_keys_class_filter"
+            android:icon="@drawable/filter_alt_24px"
+            android:entries="@array/vendor_keys_class_filter_entries"
+            android:entryValues="@array/vendor_keys_class_filter_entryValues"
+            android:defaultValue=""/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_vendor_keys_type_filter_key"
             app:useSimpleSummaryProvider="true"
             android:title="@string/vendor_keys_type_filter"

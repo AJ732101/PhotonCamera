@@ -105,6 +105,20 @@
         <item></item>
     </string-array>
 
+    <string-array name="vendor_keys_class_filter_entries">
+        <item>All</item>
+        <item>Request</item>
+        <item>Result</item>
+        <item>Characteristics</item>
+    </string-array>
+
+    <string-array name="vendor_keys_class_filter_entryValues">
+        <item></item>
+        <item>Req</item>
+        <item>Res</item>
+        <item>Char</item>
+    </string-array>
+
     <string-array name="function_one_entries">
         <item>ISO Priority</item>
         <item>Shutter Priority</item>

@@ -194,6 +194,7 @@
     <!-- Vendor Keys -->
     <string name="pref_vendor_keys_type_filter_key" translatable="false">pref_vendor_keys_type_filter_key</string>
     <string name="pref_vendor_keys_name_filter_key" translatable="false">pref_vendor_keys_name_filter_key</string>
+    <string name="pref_vendor_keys_class_filter_key" translatable="false">pref_vendor_keys_class_filter_key</string>
 
     <!-- Photon Camera Merging -->
     <string name="pref_fetch_configurations_key" translatable="false">pref_fetch_configurations_key</string>
