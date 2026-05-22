@@ -133,8 +133,14 @@ public final class SimpleStorageHelper {
                 if (paths == null || paths.isEmpty()) continue;
                 String base = paths.iterator().next();
                 if (base == null) continue;
-                if (!base.endsWith("/")) base += "/";
-                String dcimPath = base.contains("DCIM") ? base : base + "DCIM/";
+                
+                String dcimPath = base;
+                if (dcimPath.contains("PhotonVidCam")) {
+                    dcimPath = dcimPath.substring(0, dcimPath.indexOf("PhotonVidCam"));
+                } else if (!dcimPath.contains("DCIM")) {
+                    dcimPath = dcimPath + (dcimPath.endsWith("/") ? "" : "/") + "DCIM/";
+                }
+
                 if (!dcimPath.endsWith("/")) dcimPath += "/";
                 FileManager.sDCIM_CAMERA    = new File(dcimPath + "Camera");
                 FileManager.sPHOTON_DIR     = new File(dcimPath + "PhotonVidCam");
@@ -224,7 +230,8 @@ public final class SimpleStorageHelper {
     }
 
     /**
-     * Resolves the parent directory via SAF, deletes any pre-existing file with the same name,
+     * Resolves the parent directory via SAF, creating it if necessary,
+     * deletes any pre-existing file with the same name,
      * and creates a new {@link DocumentFile} ready for writing.
      *
      * @return the new {@link DocumentFile}, or {@code null} on any failure
@@ -239,10 +246,29 @@ public final class SimpleStorageHelper {
         if (!parentAbs.startsWith(storageRoot)) return null;
         String relativeParent = parentAbs.substring(storageRoot.length()).replaceAll("^/+", "");
 
-        DocumentFile parentDir = DocumentFileCompat.fromSimplePath(
+        // Try to resolve the parent directory via SAF
+        DocumentFile parentDir = DocumentFileCompat.INSTANCE.fromSimplePath(
                 sContext, StorageId.PRIMARY, relativeParent, DocumentFileType.FOLDER, true);
+        
+        // If it doesn't exist, try to create it by walking up
         if (parentDir == null || !parentDir.exists()) {
-            Log.e(TAG, "createDocumentFile: folder not found via SAF: " + relativeParent);
+            String[] parts = relativeParent.split("/");
+            DocumentFile current = DocumentFileCompat.INSTANCE.fromSimplePath(sContext, StorageId.PRIMARY, parts[0], DocumentFileType.FOLDER, true);
+            if (current == null || !current.exists()) return null;
+            
+            for (int i = 1; i < parts.length; i++) {
+                DocumentFile next = current.findFile(parts[i]);
+                if (next == null || !next.exists()) {
+                    next = current.createDirectory(parts[i]);
+                }
+                if (next == null || !next.isDirectory()) return null;
+                current = next;
+            }
+            parentDir = current;
+        }
+
+        if (parentDir == null || !parentDir.exists()) {
+            Log.e(TAG, "createDocumentFile: folder not found and could not be created via SAF: " + relativeParent);
             return null;
         }
 

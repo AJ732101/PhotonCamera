@@ -709,13 +709,33 @@ public class SettingsActivity extends BaseActivity implements
                 });
             }
 
-            Preference exportButton = new Preference(ctx);
+            Preference exportButton = new Preference(ctx) {
+                @Override
+                public void onBindViewHolder(androidx.preference.PreferenceViewHolder holder) {
+                    super.onBindViewHolder(holder);
+                    View widgetFrameView = holder.findViewById(android.R.id.widget_frame);
+                    if (widgetFrameView instanceof ViewGroup) {
+                        ViewGroup widgetFrame = (ViewGroup) widgetFrameView;
+                        widgetFrame.removeAllViews();
+                        widgetFrame.setVisibility(View.VISIBLE);
+
+                        android.widget.CheckBox cb = new android.widget.CheckBox(widgetFrame.getContext());
+                        cb.setText("CSV");
+                        cb.setChecked(PreferenceManager.getDefaultSharedPreferences(widgetFrame.getContext()).getBoolean("pref_vendor_keys_export_csv", false));
+                        cb.setOnCheckedChangeListener((v, isChecked) -> 
+                            PreferenceManager.getDefaultSharedPreferences(v.getContext()).edit().putBoolean("pref_vendor_keys_export_csv", isChecked).apply());
+
+                        widgetFrame.addView(cb);
+                    }
+                }
+            };
             exportButton.setLayoutResource(R.layout.preference_with_margin);
             exportButton.setTitle("Export Filtered List");
-            exportButton.setSummary("/DCIM/PhotonVidCam/Tuning/VendorKeysList.txt");
+            exportButton.setSummary("/DCIM/PhotonVidCam/Tuning/VendorKeysList(.txt)(.csv)");
             exportButton.setIcon(R.drawable.save_24px);
             exportButton.setOnPreferenceClickListener(preference -> {
-                exportVendorKeys();
+                boolean isCsv = PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("pref_vendor_keys_export_csv", false);
+                exportVendorKeys(isCsv);
                 return true;
             });
             screen.addPreference(exportButton);
@@ -820,7 +840,7 @@ public class SettingsActivity extends BaseActivity implements
             screen.addPreference(bottomSpacer);
         }
 
-        private void exportVendorKeys() {
+        private void exportVendorKeys(boolean isCsv) {
             if (PhotonCamera.vendorKeysMapType == null) return;
 
             EditTextPreference filterNamePreference = findPreference(getString(R.string.pref_vendor_keys_name_filter_key));
@@ -837,14 +857,18 @@ public class SettingsActivity extends BaseActivity implements
             filterNameValue = filterNameValue.trim().toLowerCase();
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Vendor Keys Export\n");
-            sb.append("Camera ID: ").append(com.particlesdevs.photoncamera.settings.PreferenceKeys.getCameraID()).append("\n");
-            sb.append("Filters: Class=").append(filterClassValue.isEmpty() ? "All" : filterClassValue)
-              .append(", Type=").append(filterTypeValue.isEmpty() ? "All" : filterTypeValue)
-              .append(", Name=").append(filterNameValue.isEmpty() ? "None" : filterNameValue).append("\n\n");
-            
-            sb.append(String.format("%-80s | %-15s | %-10s\n", "Key Name", "Type", "Class"));
-            sb.append("------------------------------------------------------------------------------------------------------------\n");
+            if (!isCsv) {
+                sb.append("Vendor Keys Export\n");
+                sb.append("Camera ID: ").append(com.particlesdevs.photoncamera.settings.PreferenceKeys.getCameraID()).append("\n");
+                sb.append("Filters: Class=").append(filterClassValue.isEmpty() ? "All" : filterClassValue)
+                  .append(", Type=").append(filterTypeValue.isEmpty() ? "All" : filterTypeValue)
+                  .append(", Name=").append(filterNameValue.isEmpty() ? "None" : filterNameValue).append("\n\n");
+                
+                sb.append(String.format("%-80s | %-35s | %-10s\n", "Key Name", "Type", "Class"));
+                sb.append("--------------------------------------------------------------------------------------------------------------------------------\n");
+            } else {
+                sb.append("Key Name,Type,Class\n");
+            }
 
             List<String> sortedIds = new ArrayList<>(PhotonCamera.vendorKeysMapType.keySet());
             java.util.Collections.sort(sortedIds);
@@ -865,16 +889,22 @@ public class SettingsActivity extends BaseActivity implements
 
                 if (classMatch && typeMatch && nameMatch) {
                     count++;
-                    sb.append(String.format("%-80s | %-15s | %-10s\n", originalName, keyType, keyClass));
+                    if (isCsv) {
+                        sb.append(originalName).append(",").append(keyType).append(",").append(keyClass).append("\n");
+                    } else {
+                        sb.append(String.format("%-80s | %-35s | %-10s\n", originalName, keyType, keyClass));
+                    }
                 }
             }
 
-            sb.append("\nTotal Exported Keys: ").append(count);
+            if (!isCsv) {
+                sb.append("\nTotal Exported Keys: ").append(count);
+            }
 
             try {
                 File tuningDir = FileManager.sPHOTON_TUNING_DIR;
                 if (!tuningDir.exists()) tuningDir.mkdirs();
-                File outFile = new File(tuningDir, "VendorKeysList.txt");
+                File outFile = new File(tuningDir, isCsv ? "VendorKeysList.csv" : "VendorKeysList.txt");
                 java.io.PrintWriter writer = new java.io.PrintWriter(outFile);
                 writer.print(sb.toString());
                 writer.close();

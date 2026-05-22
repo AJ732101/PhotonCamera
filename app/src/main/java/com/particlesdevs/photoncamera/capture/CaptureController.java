@@ -1278,11 +1278,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         setTargetFormat();
 
         Size[] targetSizes = map.getOutputSizes(mTargetFormat);
-        if(targetSizes != null) {
+        if (targetSizes != null) {
             uniqueTargets.addAll(Arrays.asList(targetSizes));
         }
 
-        if(PhotonCamera.getSettings().QuadBayer) {
+        if (PhotonCamera.getSettings().QuadBayer) {
             useMaximumResolutionKey = false;
             int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
             for (int capability : capabilities) {
