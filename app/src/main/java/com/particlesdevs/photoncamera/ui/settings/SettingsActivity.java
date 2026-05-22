@@ -964,8 +964,7 @@ public class SettingsActivity extends BaseActivity implements
             ((TextView) holder.findViewById(R.id.key_device_type)).setText(type);
             ((TextView) holder.findViewById(R.id.key_device_class)).setText(clazz);
 
-            // Long Press to copy to clipboard
-            holder.itemView.setOnLongClickListener(v -> {
+            View.OnLongClickListener longClickListener = v -> {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
                         getContext().getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null) {
@@ -975,7 +974,100 @@ public class SettingsActivity extends BaseActivity implements
                     com.particlesdevs.photoncamera.app.PhotonCamera.showToast("Key name copied");
                 }
                 return true;
-            });
+            };
+
+            // Long Press to copy to clipboard (on the whole row)
+            holder.itemView.setOnLongClickListener(longClickListener);
+
+            // Click on name to show details (if it's a Char key)
+            if ("Char".equals(clazz)) {
+                View nameView = holder.findViewById(R.id.key_device_name);
+                if (nameView != null) {
+                    nameView.setOnClickListener(v -> showKeyDetailsDialog());
+                    // Also attach the long click listener to the nameView so it doesn't block the parent's detector
+                    nameView.setOnLongClickListener(longClickListener);
+                }
+            }
+        }
+
+        private void showKeyDetailsDialog() {
+            String value = getCharacteristicsValue(name);
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext());
+            
+            android.text.SpannableStringBuilder title = new android.text.SpannableStringBuilder("Key Details");
+            title.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, title.length(), 0);
+            title.setSpan(new android.text.style.RelativeSizeSpan(1.25f), 0, title.length(), 0);
+            builder.setTitle(title);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("\nClass:\nCameraCharacteristics\n\n");
+            sb.append("Name:\n").append(name).append("\n\n");
+            sb.append("Type:\n").append(type).append("\n\n");
+            sb.append("Value:\n").append(value);
+            
+            builder.setMessage(sb.toString());
+            builder.setPositiveButton("OK", null);
+            builder.show();
+        }
+
+        private String getCharacteristicsValue(String keyName) {
+            if (com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics == null) return "N/A";
+            try {
+                for (android.hardware.camera2.CameraCharacteristics.Key<?> key : com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.getKeys()) {
+                    if (key.getName().equals(keyName)) {
+                        return formatValue(com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.get(key));
+                    }
+                }
+                Class<?> typeClass = getTypeClass(type);
+                java.lang.reflect.Constructor<android.hardware.camera2.CameraCharacteristics.Key> charConstructor =
+                        android.hardware.camera2.CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
+                charConstructor.setAccessible(true);
+                android.hardware.camera2.CameraCharacteristics.Key<?> hiddenKey = charConstructor.newInstance(keyName, typeClass);
+                return formatValue(com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.get(hiddenKey));
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+        }
+
+        private Class<?> getTypeClass(String typeStr) {
+            if (typeStr == null) return Object.class;
+            switch (typeStr) {
+                case "Int32": return Integer.class;
+                case "Int64": return Long.class;
+                case "Float": return Float.class;
+                case "Byte": return Byte.class;
+                case "Double": return Double.class;
+                case "Rational": return android.util.Rational.class;
+                case "int[]":
+                case "Int32[]": return int[].class;
+                case "long[]":
+                case "Int64[]": return long[].class;
+                case "float[]": return float[].class;
+                case "byte[]":
+                case "Byte[]": return byte[].class;
+                case "double[]": return double[].class;
+                case "Rational[]": return android.util.Rational[].class;
+                case "Rect": return android.graphics.Rect.class;
+                case "Rect[]": return android.graphics.Rect[].class;
+                case "Size": return android.util.Size.class;
+                case "Size[]": return android.util.Size[].class;
+                default: return Object.class;
+            }
+        }
+
+        private String formatValue(Object val) {
+            if (val == null) return "null";
+            if (val.getClass().isArray()) {
+                StringBuilder sb = new StringBuilder("[");
+                int length = java.lang.reflect.Array.getLength(val);
+                for (int i = 0; i < length; i++) {
+                    sb.append(java.lang.reflect.Array.get(val, i));
+                    if (i < length - 1) sb.append(", ");
+                }
+                sb.append("]");
+                return sb.toString();
+            }
+            return val.toString();
         }
     }
 

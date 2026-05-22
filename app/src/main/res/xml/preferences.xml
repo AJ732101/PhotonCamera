@@ -98,7 +98,7 @@
             app:key="vendor_keys_settings_screen"
             app:title="@string/vendor_keys_settings_screen_title"
             app:summary="@string/vendor_keys_screen_summary"
-            android:icon="@drawable/vpn_key_off_24px" />
+            android:icon="@drawable/vpn_key_24px" />
     </PreferenceCategory>
 
     <PreferenceCategory
