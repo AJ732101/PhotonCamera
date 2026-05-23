@@ -242,7 +242,7 @@
     <string name="device_info_screen_title">Device Info</string>
     <string name="single_shot_settings_screen_title">Single Shot and Video Settings</string>
     <string name="sensor_and_more_settings_screen_title">Sensor Settings (and more)</string>
-    <string name="tunable_settings_title">Tunable Settings</string>
+    <string name="tunable_settings_title">Tunable Settings (Settings/Merging)</string>
     <string name="sensor_settings_screen_title">Sensor Settings</string>
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>

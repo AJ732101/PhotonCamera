@@ -67,6 +67,7 @@
     <string name="real_preview_format">Vorschau Format</string>
     <string name="raw_format">RAW Format</string>
     <string name="function_button_one">Funktionsknopf 1</string>
+    <string name="dng_white_level">Weißwert für DNG</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
     <string name="about">Über</string>
@@ -85,6 +86,7 @@
     <string name="Default">Standard</string>
     <string name="backup_restore">Sicherung/Wiederherstellung Einstellungen</string>
     <string name="reset">Alles zurücksetzen</string>
+    <string name="backup_summary_json">Exportiere alle Einstellungen als JSON (inklusive Einstellungen pro Linse)</string>
     <string name="app_will_restart">App startet neu</string>
     <string name="restore">Wiederherstellen</string>
     <string name="show_gradient">Farbverlauf Hintergrund</string>
@@ -99,11 +101,13 @@
     <string name="flash">Blitz/Leuchte</string>
     <string name="color_lut">Farb LUT (Look Up Table)</string>
     <string name="focus_peaking">Fokusbereiche hervorheben</string>
+    <string name="fetch_configurations_summary">Lade gerätespezifische Tuning Einstellungen aus dem Netz</string>
     <string name="this_device">Dein Gerät - %1$s</string>
     <string name="sync_on">Sync. An</string>
     <string name="sync_off">Sync. Aus</string>
     <string name="torch">Taschenlampe</string>
     <string name="unprocessed_raw">Unbearbeitetes RAW</string>
+    <string name="restore_summary_json">Importiere Einstellungen von JSON oder XML</string>
     <string name="empty_file_name_error">Dateiname darf kein Leerstring sein</string>
     <string name="device_unsupport">Warnung: nicht unterstütztes Gerät</string>
     <string name="supported_devices">Unterstützte Geräte</string>
@@ -164,6 +168,7 @@
     <string name="keyframe_interval">Keyframe Intervall</string>
     <string name="video_encoder_name">Video Enkoder Name</string>
     <string name="video_range">Bereich</string>
+    <string name="rawvideo_crop_169">16:9 Zuschnitt</string>
     <string name="audio_processing">Audioverarbeitung</string>
     <string name="audio_codec">Codec</string>
     <string name="audio_channels">Kanäle</string>
@@ -186,11 +191,13 @@
     <string name="video_settings_screen_title">Video Einstellungen</string>
     <string name="audio_settings_screen_title">Audio Einstellungen</string>
     <string name="soc_settings_screen_title">SoC spezifische Einstellungen</string>
+    <string name="device_info_screen_title">Geräteinformation</string>
     <string name="single_shot_settings_screen_title">Einzelbild und Video Einstellungen</string>
     <string name="new_rec_separator_title">Neue Aufnahmemethode</string>
     <string name="new_rec_separator_summary">Neu Aufnahmemethode</string>
     <string name="soc_qualcomm_sharpness">Qualcomm Schärfe</string>
     <string name="soc_qualcomm_saturation">Qualcomm Sättigung</string>
+    <string name="soc_qualcomm_mfnr_frames">Qualcomm MFNR Bilder</string>
     <string name="soc_qualcomm_eis_mode">Qualcomm EIS Modus</string>
     <string name="soc_qualcomm_ai_mode">Qualcomm KI Modus</string>
     <string name="soc_qualcomm_isz">Qualcomm ISZ</string>
@@ -198,6 +205,7 @@
     <string name="digital_zoom_factor">Digitaler Zoom Faktor</string>
     <string name="contrast_curve">Kontrastkurve</string>
     <string name="sensor_and_more_settings_screen_title">Sensor Einstellungen (und mehr)</string>
+    <string name="tunable_settings_title">Tuning Einstellungen (Stacking/Merging)</string>
     <string name="sensor_settings_screen_title">Sensor Einstellungen</string>
     <string name="other_settings_separator_title">Weitere Einstellungen</string>
     <string name="soc_qualcomm_auto_hdr">Qualcomm Auto HDR</string>
@@ -213,11 +221,13 @@
     <string name="transfer_function">Transferfunktion</string>
     <string name="virtual_horizon">Virtueller Horizont</string>
     <string name="beam_forming_separator_title">Aufnahme Charakteristik Formung</string>
+    <string name="raw_video_separator_title">RAW Video</string>
     <string name="general_settings_screen_summary">Keine spezielle Kategorie</string>
     <string name="stacking_settings_screen_summary">Mehrfachbelichtungs bezogene Einstellungen (HDRX)</string>
     <string name="video_settings_screen_summary">Video bezogene Einstellungen</string>
     <string name="audio_settings_screen_summary">Audio bezogene Einstellungen</string>
     <string name="soc_settings_screen_summary">SoC (CPU/GPU/ISP) bezogene Einstellungen</string>
+    <string name="device_info_screen_summary">Geräteinformationen</string>
     <string name="single_shot_settings_screen_summary">Einzelbelichtungs- und Video bezogene Einstellungen</string>
     <string name="sensor_and_more_settings_screen_summary">Sensor bezogene Einstellungen (und mehr)</string>
     <string name="sensor_settings_screen_summary">Sensor bezogene Einstellungen</string>
@@ -225,6 +235,23 @@
     <string name="exposure_compensation">Belichtungskorrektur</string>
     <string name="allow_network_sync">Netzwerk Sync erlauben (GitHub Repo)</string>
     <string name="use_stream_usecase">Stream Usecases verwenden</string>
+    <string name="show_zoom_slider">Zoom Regler Sichtbar</string>
     <string name="photo_transfer_function">Übertragungsfunktion</string>
     <string name="video_codec_based_photo_settings_title">Video Codec basierte Foto Einstellungen</string>
+    <string name="function_button_two">Funktionsknopf 2</string>
+    <string name="session_type_opcode">Sitzungstyp (OpCode)</string>
+    <string name="session_type_opcode_video">Sitzungstyp Video (OpCode)</string>
+    <string name="dng_black_level">Schwarzwert für DNG</string>
+    <string name="rawvideo_downscale_4x">Halbe Auflösung</string>
+    <string name="rawvideo_write_zip">In ZIP Schreiben</string>
+    <string name="rawvideo_compress_zip">ZIP mit Kompression</string>
+    <string name="fetch_configurations">Download Konfigurationen</string>
+    <string name="vendor_keys_settings_screen_title">Hersteller Schlüssel Einstellungen</string>
+    <string name="vendor_keys_screen_summary">Hersteller Schlüssel bezogene Einstellungen</string>
+    <string name="soc_qualcomm_saturation_video">Qualcomm Sättigung HDR Video</string>
+    <string name="soc_qualcomm_contrast">Qualcomm Kontrast</string>
+    <string name="soc_qualcomm_contrast_video">Qualcomm Kontrast HDR Video</string>
+    <string name="vendor_keys_type_filter">Filter Typ (alle Geräteschlüssel)</string>
+    <string name="vendor_keys_name_filter">Filter Name (alle Geräteschlüssel)</string>
+    <string name="vendor_keys_class_filter">Filter Klasse (alle Geräteschlüssel)</string>
 </resources>

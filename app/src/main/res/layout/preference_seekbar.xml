@@ -14,8 +14,8 @@
             android:id="@android:id/icon"
             android:layout_width="@dimen/camera_settings_icon_size"
             android:layout_height="@dimen/camera_settings_icon_size"
-            android:layout_marginTop="@dimen/camera_settings_entry_margin"
-            android:layout_marginStart="@dimen/camera_settings_entry_margin"
+            android:layout_marginTop="@dimen/camera_settings_entry_margin_vertical"
+            android:layout_marginStart="@dimen/camera_settings_entry_margin_horizontal"
             tools:src="@drawable/ic_focus"
             android:contentDescription="@string/icon_string"
     />
@@ -23,11 +23,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="@dimen/camera_settings_entry_margin"
+            android:layout_marginBottom="@dimen/camera_settings_entry_margin_vertical"
             android:layout_weight="1.0"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="@dimen/camera_settings_icon_size"
-            android:layout_marginEnd="@dimen/camera_settings_entry_margin">
+            android:layout_marginEnd="@dimen/camera_settings_entry_margin_horizontal">
         <TextView
                 android:textSize="@dimen/camera_settings_preference_font_size"
                 android:ellipsize="marquee"
@@ -74,8 +74,8 @@
             android:id="@android:id/widget_frame"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:paddingBottom="@dimen/camera_settings_entry_margin"
-            android:paddingEnd="@dimen/camera_settings_entry_margin"
+            android:paddingBottom="@dimen/camera_settings_entry_margin_vertical"
+            android:paddingEnd="@dimen/camera_settings_entry_margin_horizontal"
             android:paddingStart="?android:scrollbarSize">
     </LinearLayout>
 

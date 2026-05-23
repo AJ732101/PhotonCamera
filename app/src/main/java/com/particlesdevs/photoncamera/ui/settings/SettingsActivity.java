@@ -26,8 +26,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
@@ -55,6 +57,8 @@ import java.util.Objects;
 import java.util.TimeZone;
 
 import androidx.preference.ListPreference;
+import androidx.preference.PreferenceViewHolder;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -660,7 +664,7 @@ public class SettingsActivity extends BaseActivity implements
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.device_info_preferences, rootKey);
 
-            androidx.preference.PreferenceCategory photoCategory = new androidx.preference.PreferenceCategory(getContext());
+            PreferenceCategory photoCategory = new androidx.preference.PreferenceCategory(getContext());
             photoCategory.setTitle("Still Image");
             getPreferenceScreen().addPreference(photoCategory);
 
@@ -671,7 +675,7 @@ public class SettingsActivity extends BaseActivity implements
             photoCategory.addPreference(createCompactCheckBox("RAW12", PhotonCamera.mRaw12IsSupported, false));
             photoCategory.addPreference(createCompactCheckBox("RAW_SENSOR", PhotonCamera.mRawSensorIsSupported, false));
 
-            androidx.preference.PreferenceCategory videoCategory = new androidx.preference.PreferenceCategory(getContext());
+            PreferenceCategory videoCategory = new androidx.preference.PreferenceCategory(getContext());
             videoCategory.setTitle("Video");
             getPreferenceScreen().addPreference(videoCategory);
 
@@ -682,10 +686,10 @@ public class SettingsActivity extends BaseActivity implements
             videoCategory.addPreference(createCompactCheckBox("   HDR10+", PhotonCamera.mHdrTenPlusIsSupported, true));
         }
 
-        private androidx.preference.CheckBoxPreference createCompactCheckBox(String title, boolean checked, boolean indent) {
-            androidx.preference.CheckBoxPreference pref = new androidx.preference.CheckBoxPreference(getContext()) {
+        private CheckBoxPreference createCompactCheckBox(String title, boolean checked, boolean indent) {
+            CheckBoxPreference pref = new CheckBoxPreference(getContext()) {
                 @Override
-                public void onBindViewHolder(androidx.preference.PreferenceViewHolder holder) {
+                public void onBindViewHolder(PreferenceViewHolder holder) {
                     super.onBindViewHolder(holder);
                     holder.itemView.setMinimumHeight(0);
                     holder.itemView.setPadding(holder.itemView.getPaddingLeft(), 0, holder.itemView.getPaddingRight(), 0);

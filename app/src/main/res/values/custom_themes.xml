@@ -8,8 +8,6 @@
         <item name="cameraFragmentBackground">@drawable/updatetheme</item>
     </style>
 
-
-
     <style name="BlueTheme" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
         <item name="colorPrimaryContainer">@color/md_blue_600</item>
         <item name="colorPrimary">@color/md_blue_400</item>

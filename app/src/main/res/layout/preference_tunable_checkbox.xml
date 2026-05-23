@@ -7,16 +7,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:listPreferredItemHeight"
-        android:paddingEnd="@dimen/camera_settings_entry_margin"
-        android:paddingStart="@dimen/camera_settings_entry_margin"
+        android:paddingEnd="@dimen/camera_settings_entry_margin_horizontal"
+        android:paddingStart="@dimen/camera_settings_entry_margin_horizontal"
         android:orientation="horizontal">
 
     <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:layout_marginTop="@dimen/camera_settings_entry_margin"
-            android:layout_marginBottom="@dimen/camera_settings_entry_margin"
+            android:layout_marginTop="@dimen/camera_settings_entry_margin_vertical"
+            android:layout_marginBottom="@dimen/camera_settings_entry_margin_vertical"
             android:layout_gravity="center_vertical">
 
         <TextView

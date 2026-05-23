@@ -11,7 +11,6 @@
         app:key="device_info_category"
         app:title="@string/device_info_screen_title">
 
-
     </PreferenceCategory>
 
 </PreferenceScreen>

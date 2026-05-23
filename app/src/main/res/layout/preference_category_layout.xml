@@ -12,8 +12,8 @@
             android:id="@android:id/icon"
             android:layout_width="@dimen/camera_settings_icon_size"
             android:layout_height="@dimen/camera_settings_icon_size"
-            android:layout_marginTop="@dimen/camera_settings_entry_margin"
-            android:layout_marginStart="@dimen/camera_settings_entry_margin"
+            android:layout_marginTop="@dimen/camera_settings_entry_margin_vertical"
+            android:layout_marginStart="@dimen/camera_settings_entry_margin_horizontal"
             tools:src="@drawable/ic_focus"
             android:contentDescription="@string/icon_string" />
 
@@ -22,10 +22,12 @@
             android:textStyle="bold"
             android:textAlignment="gravity"
             android:textColor="?colorAccent"
-            android:gravity="start|center"
+            android:gravity="start|bottom"
             android:id="@android:id/title"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/preference_category_text_height"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"
             android:paddingStart="@dimen/camera_settings_icon_size"
             android:paddingEnd="@dimen/camera_settings_icon_size"
             tools:text="Preference Category" />

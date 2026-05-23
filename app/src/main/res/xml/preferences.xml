@@ -12,6 +12,7 @@
         android:key="pref_category_general_key"
         android:title="@string/general_settings_screen_title">
         <Preference
+            android:layout="@layout/preference_with_margin"
             app:key="general_settings_screen"
             app:title="@string/general_settings_screen_title"
             app:summary="@string/general_settings_screen_summary"
@@ -20,13 +21,14 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
-        android:key="pref_category_soc_key"
-        android:title="@string/soc_settings_screen_title">
+        android:key="pref_category_single_shot_key"
+        android:title="@string/single_shot_settings_screen_title">
         <Preference
-            app:key="soc_settings_screen"
-            app:title="@string/soc_settings_screen_title"
-            app:summary="@string/soc_settings_screen_summary"
-            android:icon="@drawable/settings_photo_camera_24px" />
+            android:layout="@layout/preference_with_margin"
+            app:key="single_shot_settings_screen"
+            app:title="@string/single_shot_settings_screen_title"
+            app:summary="@string/single_shot_settings_screen_summary"
+            android:icon="@drawable/discover_tune_24px" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -34,6 +36,7 @@
         android:key="pref_category_video_key"
         android:title="@string/video_settings_screen_title">
         <Preference
+            android:layout="@layout/preference_with_margin"
             app:key="video_settings_screen"
             app:title="@string/video_settings_screen_title"
             app:summary="@string/video_settings_screen_summary"
@@ -45,6 +48,7 @@
         android:key="pref_category_audio_key"
         android:title="@string/audio_settings_screen_title">
         <Preference
+            android:layout="@layout/preference_with_margin"
             app:key="audio_settings_screen"
             app:title="@string/audio_settings_screen_title"
             app:summary="@string/audio_settings_screen_summary"
@@ -56,6 +60,7 @@
         android:key="pref_category_stacking_key"
         android:title="@string/stacking_settings_screen_title">
         <Preference
+            android:layout="@layout/preference_with_margin"
             app:key="stacking_settings_screen"
             app:title="@string/stacking_settings_screen_title"
             app:summary="@string/stacking_settings_screen_summary"
@@ -70,13 +75,13 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
-        android:key="pref_category_single_shot_key"
-        android:title="@string/single_shot_settings_screen_title">
+        android:key="pref_category_soc_key"
+        android:title="@string/soc_settings_screen_title">
         <Preference
-            app:key="single_shot_settings_screen"
-            app:title="@string/single_shot_settings_screen_title"
-            app:summary="@string/single_shot_settings_screen_summary"
-            android:icon="@drawable/discover_tune_24px" />
+            app:key="soc_settings_screen"
+            app:title="@string/soc_settings_screen_title"
+            app:summary="@string/soc_settings_screen_summary"
+            android:icon="@drawable/settings_photo_camera_24px" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -99,6 +104,17 @@
             app:title="@string/vendor_keys_settings_screen_title"
             app:summary="@string/vendor_keys_screen_summary"
             android:icon="@drawable/vpn_key_24px" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        android:key="pref_en_key"
+        android:title="@string/device_info_screen_title">
+        <Preference
+            app:key="device_info_screen"
+            app:title="@string/device_info_screen_title"
+            app:summary="@string/device_info_screen_summary"
+            android:icon="@drawable/ic_info" />
     </PreferenceCategory>
 
     <PreferenceCategory

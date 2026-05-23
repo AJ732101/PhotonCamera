@@ -15,8 +15,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="@dimen/camera_settings_entry_margin"
-            android:layout_marginEnd="@dimen/camera_settings_entry_margin">
+            android:layout_marginBottom="@dimen/camera_settings_entry_margin_vertical"
+            android:layout_marginEnd="@dimen/camera_settings_entry_margin_horizontal">
         
         <TextView
                 android:textSize="@dimen/camera_settings_preference_font_size"
