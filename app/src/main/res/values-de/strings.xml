@@ -254,4 +254,5 @@
     <string name="vendor_keys_type_filter">Filter Typ (alle Geräteschlüssel)</string>
     <string name="vendor_keys_name_filter">Filter Name (alle Geräteschlüssel)</string>
     <string name="vendor_keys_class_filter">Filter Klasse (alle Geräteschlüssel)</string>
+    <string name="still_image_label">Foto</string>
 </resources>

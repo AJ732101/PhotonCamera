@@ -665,7 +665,7 @@ public class SettingsActivity extends BaseActivity implements
             setPreferencesFromResource(R.xml.device_info_preferences, rootKey);
 
             PreferenceCategory photoCategory = new androidx.preference.PreferenceCategory(getContext());
-            photoCategory.setTitle("Still Image");
+            photoCategory.setTitle(R.string.still_image_label);
             getPreferenceScreen().addPreference(photoCategory);
 
             photoCategory.addPreference(createCompactCheckBox("HEIC", PhotonCamera.mHeicIsSupported, false));
@@ -687,20 +687,11 @@ public class SettingsActivity extends BaseActivity implements
         }
 
         private CheckBoxPreference createCompactCheckBox(String title, boolean checked, boolean indent) {
-            CheckBoxPreference pref = new CheckBoxPreference(getContext()) {
-                @Override
-                public void onBindViewHolder(PreferenceViewHolder holder) {
-                    super.onBindViewHolder(holder);
-                    holder.itemView.setMinimumHeight(0);
-                    holder.itemView.setPadding(holder.itemView.getPaddingLeft(), 0, holder.itemView.getPaddingRight(), 0);
-                }
-            };
+            CheckBoxPreference pref = new CheckBoxPreference(getContext());
+            pref.setLayoutResource(R.layout.preference_compact_item);
             pref.setTitle(title);
             pref.setChecked(checked);
             pref.setEnabled(false);
-            if (indent) {
-                pref.setIconSpaceReserved(true);
-            }
             return pref;
         }
     }

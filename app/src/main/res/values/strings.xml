@@ -289,4 +289,7 @@
     <string name="vendor_keys_type_filter">Type Filter (Available)</string>
     <string name="vendor_keys_name_filter">Name Filter (Available)</string>
     <string name="vendor_keys_class_filter">Class Filter (Available)</string>
+
+    <!-- Other strings -->
+    <string name="still_image_label">Still Image</string>
 </resources>
