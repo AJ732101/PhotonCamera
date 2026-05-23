@@ -655,6 +655,52 @@ public class SettingsActivity extends BaseActivity implements
         }
     }
 
+    public static class DeviceInfoFragment extends PreferenceFragmentCompat {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.device_info_preferences, rootKey);
+
+            androidx.preference.PreferenceCategory photoCategory = new androidx.preference.PreferenceCategory(getContext());
+            photoCategory.setTitle("Still Image");
+            getPreferenceScreen().addPreference(photoCategory);
+
+            photoCategory.addPreference(createCompactCheckBox("HEIC", PhotonCamera.mHeicIsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("JPEG-R (Ultra HDR)", PhotonCamera.mHeicUltraHdrIsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("YCBCR_P010 (YUV RAW)", PhotonCamera.mYuv10IsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("RAW10", PhotonCamera.mRaw10IsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("RAW12", PhotonCamera.mRaw12IsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("RAW_SENSOR", PhotonCamera.mRawSensorIsSupported, false));
+
+            androidx.preference.PreferenceCategory videoCategory = new androidx.preference.PreferenceCategory(getContext());
+            videoCategory.setTitle("Video");
+            getPreferenceScreen().addPreference(videoCategory);
+
+            videoCategory.addPreference(createCompactCheckBox("10 Bit", PhotonCamera.hasTenBit, false));
+            videoCategory.addPreference(createCompactCheckBox("HDR", PhotonCamera.hasHdr, false));
+            videoCategory.addPreference(createCompactCheckBox("   HLG", PhotonCamera.mHlgIsSupported, true));
+            videoCategory.addPreference(createCompactCheckBox("   HDR10", PhotonCamera.mHdrTenIsSupported, true));
+            videoCategory.addPreference(createCompactCheckBox("   HDR10+", PhotonCamera.mHdrTenPlusIsSupported, true));
+        }
+
+        private androidx.preference.CheckBoxPreference createCompactCheckBox(String title, boolean checked, boolean indent) {
+            androidx.preference.CheckBoxPreference pref = new androidx.preference.CheckBoxPreference(getContext()) {
+                @Override
+                public void onBindViewHolder(androidx.preference.PreferenceViewHolder holder) {
+                    super.onBindViewHolder(holder);
+                    holder.itemView.setMinimumHeight(0);
+                    holder.itemView.setPadding(holder.itemView.getPaddingLeft(), 0, holder.itemView.getPaddingRight(), 0);
+                }
+            };
+            pref.setTitle(title);
+            pref.setChecked(checked);
+            pref.setEnabled(false);
+            if (indent) {
+                pref.setIconSpaceReserved(true);
+            }
+            return pref;
+        }
+    }
+
     public static class VendorKeysSettingsFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -1234,6 +1280,17 @@ public class SettingsActivity extends BaseActivity implements
                 vendorKeysSettingsButton.setOnPreferenceClickListener(preference -> {
                     getParentFragmentManager().beginTransaction()
                             .replace(R.id.settings_container, new VendorKeysSettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+
+            Preference deviceInfoButton = findPreference("device_info_screen");
+            if (deviceInfoButton != null) {
+                deviceInfoButton.setOnPreferenceClickListener(preference -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.settings_container, new DeviceInfoFragment())
                             .addToBackStack(null)
                             .commit();
                     return true;
