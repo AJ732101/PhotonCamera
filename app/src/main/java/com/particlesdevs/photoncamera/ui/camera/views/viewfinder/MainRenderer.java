@@ -441,7 +441,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
     public void processYuvImage(final Image image, final int orientation, final Consumer<ByteBuffer> onComplete) {
         mView.queueEvent(() -> {
-            if (hTexLut == null) {
+            if (!PhotonCamera.getSettings().lutName.equals("lut.png") && (hTexLut == null)) {
                 try { image.close(); } catch (Exception ignored) {}
                 onComplete.accept(null);
                 return;

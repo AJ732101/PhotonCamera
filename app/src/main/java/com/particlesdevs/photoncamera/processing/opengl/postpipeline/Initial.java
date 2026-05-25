@@ -212,7 +212,10 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         glProg.setDefine("NOISES",  basePipeline.noiseS);
         glProg.setDefine("EPS", eps);
 
-        File postlut = new File(FileManager.sPHOTON_TUNING_DIR,"lut.png");
+        File postlut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
+        if (!postlut.exists()){
+            postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
+        }
         if(postlut.exists()){
             lutbm = new GLImage(postlut);
             postLut = new GLTexture(lutbm,GL_LINEAR,GL_CLAMP_TO_EDGE,0);

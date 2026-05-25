@@ -132,7 +132,7 @@ public class UnlimitedProcessor extends ProcessorBase {
 
         processingEventsListener.onProcessingFinished("Unlimited JPG Processing Finished");
         imageFile = Paths.get(imageFile.toAbsolutePath() + ".jpg");
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, bitmap,
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, bitmap,
                 PhotonCamera.getSettings().singleFrameQuality, exifData);
 
         processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);

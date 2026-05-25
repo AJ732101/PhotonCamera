@@ -125,7 +125,7 @@ public class Settings {
     public int colorspace = 6;
     public String videoRange = "Full";
     public String videoEncoderName = "Device Default";
-    public String lutName = "None";
+    public String lutName = "lut.png";
     public int exposureCompensation2 = 0;
     public int demosaicMethod = 2;
     public int sessionType = 0;

@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -164,17 +166,17 @@ public class SettingsActivity extends BaseActivity implements
             entryValues.add("999999999");
             entries.add("HEIC/HEIF (SW)");
             entryValues.add("999999991");
-            entries.add("JPEG LUT (SW)");
+            entries.add("JPEG (SW, LUT)");
             entryValues.add("999999992");
             if (PhotonCamera.mYuv10IsSupported) {
                 entries.add("YUV RAW");
                 entryValues.add("888888888");
             }
-            entries.add("PNG (SW)");
+            entries.add("PNG (SW, LUT)");
             entryValues.add("999999993");
-            entries.add("WebP Lossy (SW)");
+            entries.add("WebP Lossy (SW, LUT)");
             entryValues.add("777777777");
-            entries.add("WebP Lossless (SW)");
+            entries.add("WebP Lossless (SW, LUT)");
             entryValues.add("666666666");
             entries.add("JPEG/RAW Stacking");
             entryValues.add("0");
@@ -669,11 +671,42 @@ public class SettingsActivity extends BaseActivity implements
             getPreferenceScreen().addPreference(photoCategory);
 
             photoCategory.addPreference(createCompactCheckBox("HEIC", PhotonCamera.mHeicIsSupported, false));
-            photoCategory.addPreference(createCompactCheckBox("JPEG-R (Ultra HDR)", PhotonCamera.mHeicUltraHdrIsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("JPEG-R (Ultra HDR)", PhotonCamera.mJpegRIsSupported, false));
+            photoCategory.addPreference(createCompactCheckBox("Ultra HEIC", PhotonCamera.mHeicUltraHdrIsSupported, false));
             photoCategory.addPreference(createCompactCheckBox("YCBCR_P010 (YUV RAW)", PhotonCamera.mYuv10IsSupported, false));
             photoCategory.addPreference(createCompactCheckBox("RAW10", PhotonCamera.mRaw10IsSupported, false));
+            Size[] rawSizes = getRawSensorSizes(ImageFormat.RAW10);
+            if (rawSizes != null) {
+                for (Size size : rawSizes) {
+                    Preference p = new Preference(getContext());
+                    p.setLayoutResource(R.layout.preference_compact_item);
+                    p.setTitle("   " + size.getWidth() + " x " + size.getHeight());
+                    p.setEnabled(false);
+                    photoCategory.addPreference(p);
+                }
+            }
             photoCategory.addPreference(createCompactCheckBox("RAW12", PhotonCamera.mRaw12IsSupported, false));
+            rawSizes = getRawSensorSizes(ImageFormat.RAW12);
+            if (rawSizes != null) {
+                for (Size size : rawSizes) {
+                    Preference p = new Preference(getContext());
+                    p.setLayoutResource(R.layout.preference_compact_item);
+                    p.setTitle("   " + size.getWidth() + " x " + size.getHeight());
+                    p.setEnabled(false);
+                    photoCategory.addPreference(p);
+                }
+            }
             photoCategory.addPreference(createCompactCheckBox("RAW_SENSOR", PhotonCamera.mRawSensorIsSupported, false));
+            rawSizes = getRawSensorSizes(ImageFormat.RAW_SENSOR);
+            if (rawSizes != null) {
+                for (Size size : rawSizes) {
+                    Preference p = new Preference(getContext());
+                    p.setLayoutResource(R.layout.preference_compact_item);
+                    p.setTitle("   " + size.getWidth() + " x " + size.getHeight());
+                    p.setEnabled(false);
+                    photoCategory.addPreference(p);
+                }
+            }
 
             PreferenceCategory videoCategory = new androidx.preference.PreferenceCategory(getContext());
             videoCategory.setTitle("Video");
@@ -693,6 +726,37 @@ public class SettingsActivity extends BaseActivity implements
             pref.setChecked(checked);
             pref.setEnabled(false);
             return pref;
+        }
+
+        private Size[] getRawSensorSizes(int imageFormat) {
+            try {
+                int[] capabilities = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+                boolean supportsRaw = false;
+
+                if (capabilities != null) {
+                    for (int capability : capabilities) {
+                        if (capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) {
+                            supportsRaw = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!supportsRaw) {
+                    return null;
+                }
+
+                StreamConfigurationMap map = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+                if (map != null) {
+                    return map.getOutputSizes(imageFormat);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
         }
     }
 
@@ -1050,21 +1114,20 @@ public class SettingsActivity extends BaseActivity implements
             builder.setPositiveButton("OK", null);
             builder.show();
         }
-
+        
         private String getCharacteristicsValue(String keyName) {
-            if (com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics == null) return "N/A";
+            if (CaptureController.mCameraCharacteristics == null) return "N/A";
             try {
-                for (android.hardware.camera2.CameraCharacteristics.Key<?> key : com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.getKeys()) {
+                for (CameraCharacteristics.Key<?> key : CaptureController.mCameraCharacteristics.getKeys()) {
                     if (key.getName().equals(keyName)) {
-                        return formatValue(com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.get(key));
+                        return formatValue(CaptureController.mCameraCharacteristics.get(key));
                     }
                 }
                 Class<?> typeClass = getTypeClass(type);
-                java.lang.reflect.Constructor<android.hardware.camera2.CameraCharacteristics.Key> charConstructor =
-                        android.hardware.camera2.CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
+                java.lang.reflect.Constructor<CameraCharacteristics.Key> charConstructor = CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
                 charConstructor.setAccessible(true);
-                android.hardware.camera2.CameraCharacteristics.Key<?> hiddenKey = charConstructor.newInstance(keyName, typeClass);
-                return formatValue(com.particlesdevs.photoncamera.capture.CaptureController.mCameraCharacteristics.get(hiddenKey));
+                CameraCharacteristics.Key<?> hiddenKey = charConstructor.newInstance(keyName, typeClass);
+                return formatValue(CaptureController.mCameraCharacteristics.get(hiddenKey));
             } catch (Exception e) {
                 return "Error: " + e.getMessage();
             }

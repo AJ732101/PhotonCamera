@@ -304,7 +304,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
         imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
         //Saves the final bitmap
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJPG(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        boolean imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
 
         try {
             processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);

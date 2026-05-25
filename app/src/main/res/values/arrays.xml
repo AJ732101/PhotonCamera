@@ -48,11 +48,11 @@
         <item>HEIC_ULTRA</item>
         <item>AVIF (SW)</item>
         <item>HEIC/HEIF (SW)</item>
-        <item>JPEG LUT (SW)</item>
+        <item>JPEG (SW, LUT)</item>
         <item>YUV RAW</item>
-        <item>PNG (SW)</item>
-        <item>WebP Lossy (SW)</item>
-        <item>WebP Lossless (SW)</item>
+        <item>PNG (SW, LUT)</item>
+        <item>WebP Lossy (SW, LUT)</item>
+        <item>WebP Lossless (SW, LUT)</item>
         <item>JPEG/RAW Stacking</item>
         <item>Video Codec 8 Bit</item>
         <item>Video Codec 10 Bit</item>

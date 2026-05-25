@@ -1,7 +1,6 @@
 package com.particlesdevs.photoncamera.processing;
 
 import android.graphics.Bitmap;
-import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
@@ -9,11 +8,13 @@ import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.particlesdevs.photoncamera.api.CameraEventsListener;
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
@@ -128,10 +129,51 @@ public class ImageSaver {
         implementation.addImage(mImage, orientation, targetFormat, quality, metadata, renderer);
     }
 
+    public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
+                                   Bundle metadata, CameraEventsListener processingEventsListener) {
+        Log.v(TAG, "directSaveImageLut() - Starting quick still image single shot LUT test");
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(imageData);
+        boolean success = false;
+        ParseExif.ExifData exifData = exifDataFromMetadata(metadata, orientation);
+
+        Path exportFilePath = ImagePath.newJPGFilePath();
+        if (targetFormat == PhotonCamera.userFormatJpegLutSw) {
+            exportFilePath = ImagePath.newJPGFilePath();
+            success = Util.saveBitmapAsJpg(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        } else if (targetFormat == PhotonCamera.userFormatPngSw) {
+            exportFilePath = ImagePath.newPNGFilePath();
+            success = Util.saveBitmapAsPng(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        } else if ((targetFormat == PhotonCamera.userFormatWebpLossySw) || (targetFormat == PhotonCamera.userFormatWebpLosslessSw)) {
+            exportFilePath = ImagePath.newWEBPFilePath();
+
+            if (targetFormat == PhotonCamera.userFormatWebpLossySw) {
+                success = Util.saveBitmapAsWebP(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData, false);
+            } else {
+                success = Util.saveBitmapAsWebP(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData, true);
+            }
+        }
+
+        if (success) {
+            Log.d(TAG, "Saving LUT-processed bitmap to: " + exportFilePath);
+            Log.d(TAG, "Quick still image single shot test successful!");
+        } else {
+            Log.e(TAG, "Quick still image single shot test failed!");
+        }
+
+        processingEventsListener.onProcessingFinished("LUT processed JPEG: " + exportFilePath.toAbsolutePath().toString());
+    }
+
     public static String createProcessingString() {
         StringBuilder imageDescriptionBuilder = new StringBuilder();
         imageDescriptionBuilder.append("\n   Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
-        if ((PhotonCamera.getSettings().previewFormat == 999999992)) {
+         if ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) {
             imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
             imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
         }
@@ -229,8 +271,17 @@ public class ImageSaver {
 
             switch (orientation) {
                 case 0:
-                    if (PhotonCamera.getSettings().previewFormat == 999999992) {
-                        exifData.ORIENTATION = "3";
+                    if ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                        /*(PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||*/
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) {
+                        if (CaptureController.mCameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+                            exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_NORMAL);
+                        } else {
+                            exifData.ORIENTATION = "3";
+                        }
                     } else {
                         exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_NORMAL); // "1"
                     }
@@ -254,29 +305,6 @@ public class ImageSaver {
         return exifData;
     }
 
-    public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
-                                   Bundle metadata, CameraEventsListener processingEventsListener) {
-        Log.v(TAG, "directSaveImageLut() - Starting quick JPEG test");
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(imageData);
-        Path jpegFilePath;
-        jpegFilePath = ImagePath.newJPGFilePath();
-
-        ParseExif.ExifData exifData = exifDataFromMetadata(metadata, orientation);
-
-        Log.d(TAG, "Saving LUT-processed bitmap to: " + jpegFilePath);
-        boolean success = Util.saveBitmapAsJPG(jpegFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
-
-        if (success) {
-            Log.d(TAG, "Quick JPEG test successful!");
-        } else {
-            Log.e(TAG, "Quick JPEG test failed!");
-        }
-
-        processingEventsListener.onProcessingFinished("LUT processed JPEG: " + jpegFilePath.toAbsolutePath().toString());
-    }
-
     public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
     	TunableInjector.inject(SETTINGS);
         implementation.runRaw(imageFormat, characteristics, captureResult, captureRequest, burstShakiness, cameraRotation, exposures);
@@ -293,7 +321,7 @@ public class ImageSaver {
     }
 
     public static class Util {
-        public static boolean saveBitmapAsJPG(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
+        public static boolean saveBitmapAsJpg(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
             exifData.COMPRESSION = String.valueOf(jpgQuality);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
@@ -318,7 +346,44 @@ public class ImageSaver {
             }
         }
 
-        public static boolean saveBitmapAsPNG(Path fileToSave, Bitmap img, int pngQuality, ParseExif.ExifData exifData) {
+        public static boolean saveBitmapAsWebP(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData, boolean lossless) {
+            exifData.COMPRESSION = String.valueOf(jpgQuality);
+            exifData.SOFTWARE = "PhotonVidCam";
+            try {
+                OutputStream outputStream = Files.newOutputStream(fileToSave);
+                if (lossless) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        img.compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, outputStream);
+                    } else {
+                        img.compress(Bitmap.CompressFormat.WEBP, jpgQuality, outputStream);
+                    }
+                } else {
+                    img.compress(Bitmap.CompressFormat.WEBP, jpgQuality, outputStream);
+                }
+                outputStream.flush();
+                outputStream.close();
+                img.recycle();
+                ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                }
+                inter.saveAttributes();
+                MediaScannerConnection.scanFile(ContextProvider.getContext(),
+                        new String[]{fileToSave.toFile().getAbsolutePath()},
+                        new String[]{"image/webp"}, null);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        public static boolean saveBitmapAsPng(Path fileToSave, Bitmap img, int pngQuality, ParseExif.ExifData exifData) {
+            exifData.SOFTWARE = "PhotonVidCam";
             try {
                 OutputStream outputStream = Files.newOutputStream(fileToSave);
                 img.compress(Bitmap.CompressFormat.PNG, pngQuality, outputStream);
@@ -326,6 +391,13 @@ public class ImageSaver {
                 outputStream.close();
                 img.recycle();
                 ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+                if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                    inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                    if (PhotonCamera.gpsLocation.hasAltitude()) {
+                        inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                    }
+                }
                 inter.saveAttributes();
                 MediaScannerConnection.scanFile(ContextProvider.getContext(),
                         new String[]{fileToSave.toFile().getAbsolutePath()},

@@ -420,7 +420,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     mMetaData.putString("completeCaptureResult", mLastCaptureResult);
                 }
 
-                if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+                if (!PhotonCamera.getSettings().lutName.equals("lut.png") && (!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
                     mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
@@ -826,7 +826,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     public boolean isSingleShotSwEncoder() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-                (PhotonCamera.getSettings().previewFormat == 999999992) &&
+                ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                 /*(PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||*/
+                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) &&
                 (PhotonCamera.getSettings().rawSaver != 2) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
@@ -2362,26 +2367,27 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         boolean test4 = PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO);
         int test5 = PhotonCamera.getSettings().rawSaver;
 
-        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().lutName.equals("None") && PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().lutName.equals("lut.png") && PhotonCamera.getSpecific().specificSetting.enableVideoLut) {
             File previewLut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
             if (!previewLut.exists()) {
                 previewLut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
             }
             mMainRenderer.setLut(previewLut);
-            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
+            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("lut.png"));
             return true;
         }
 
         if ((!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
-                !(PhotonCamera.getSettings().rawSaver == 2)) {
+                !(PhotonCamera.getSettings().rawSaver == 2) &&
+                !PhotonCamera.getSettings().lutName.equals("lut.png")) {
             File previewLut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
             if (!previewLut.exists()) {
                 previewLut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
             }
             mMainRenderer.setLut(previewLut);
-            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("None"));
+            mMainRenderer.setLutEnabled(!PhotonCamera.getSettings().lutName.equals("lut.png"));
             return true;
         }
         else {

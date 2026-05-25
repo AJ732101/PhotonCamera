@@ -434,17 +434,17 @@ public class CameraFragmentModel extends BaseObservable {
             entryValues.add("999999999");
             entries.add("HEIC/HEIF (SW)");
             entryValues.add("999999991");
-            entries.add("JPEG LUT (SW)");
+            entries.add("JPEG (SW, LUT)");
             entryValues.add("999999992");
             if (PhotonCamera.mYuv10IsSupported) {
                 entries.add("YUV RAW");
                 entryValues.add("888888888");
             }
-            entries.add("PNG (SW)");
+            entries.add("PNG (SW, LUT)");
             entryValues.add("999999993");
-            entries.add("WebP Lossy (SW)");
+            entries.add("WebP Lossy (SW, LUT)");
             entryValues.add("777777777");
-            entries.add("WebP Lossless (SW)");
+            entries.add("WebP Lossless (SW, LUT)");
             entryValues.add("666666666");
             entries.add("JPEG/RAW Stacking");
             entryValues.add("0");
