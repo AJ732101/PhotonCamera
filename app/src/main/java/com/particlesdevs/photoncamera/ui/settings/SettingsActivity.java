@@ -1319,6 +1319,22 @@ public class SettingsActivity extends BaseActivity implements
                 else sb.append("]");
                 return sb.toString();
             }
+            if (val instanceof java.util.Collection) {
+                java.util.Collection<?> col = (java.util.Collection<?>) val;
+                if (col.isEmpty()) return "[]";
+                StringBuilder sb = new StringBuilder("[");
+                boolean first = true;
+                for (Object item : col) {
+                    if (!first) sb.append(", ");
+                    String formatted = formatValue(item);
+                    if (col.size() > 1 && formatted.contains("{")) sb.append("\n  ");
+                    sb.append(formatted);
+                    first = false;
+                }
+                if (sb.toString().contains("\n")) sb.append("\n]");
+                else sb.append("]");
+                return sb.toString();
+            }
             return formatSingleValue(val);
         }
 

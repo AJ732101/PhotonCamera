@@ -207,16 +207,20 @@ public class VendorTagUtils {
 
     @SuppressLint({"NewApi", "LocalSuppress"})
     public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey, boolean isPreview) {
-        PhotonCamera.isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
-        PhotonCamera.isGoogle = Build.BRAND.equalsIgnoreCase("google");
-        PhotonCamera.isZte = Build.BRAND.equalsIgnoreCase("zte");
-        PhotonCamera.isMotorola = Build.BRAND.equalsIgnoreCase("motorola");
-        PhotonCamera.isXiaomi = Build.BRAND.equalsIgnoreCase("xiaomi") || Build.BRAND.equalsIgnoreCase("redmi") || Build.BRAND.equalsIgnoreCase("poco");
-        PhotonCamera.isOppo = Build.BRAND.equalsIgnoreCase("oppo");
-        PhotonCamera.isVivo = Build.BRAND.equalsIgnoreCase("vivo");
-        PhotonCamera.isOnePlus = Build.BRAND.equalsIgnoreCase("oneplus");
-        PhotonCamera.isHonor = Build.BRAND.equalsIgnoreCase("honor");
-        PhotonCamera.isHuawei = Build.BRAND.equalsIgnoreCase("huawei");
+        try {
+            PhotonCamera.isSamsung = Build.BRAND.equalsIgnoreCase("samsung");
+            PhotonCamera.isGoogle = Build.BRAND.equalsIgnoreCase("google");
+            PhotonCamera.isZte = Build.BRAND.equalsIgnoreCase("zte");
+            PhotonCamera.isMotorola = Build.BRAND.equalsIgnoreCase("motorola");
+            PhotonCamera.isXiaomi = Build.BRAND.equalsIgnoreCase("xiaomi") || Build.BRAND.equalsIgnoreCase("redmi") || Build.BRAND.equalsIgnoreCase("poco");
+            PhotonCamera.isOppo = Build.BRAND.equalsIgnoreCase("oppo");
+            PhotonCamera.isVivo = Build.BRAND.equalsIgnoreCase("vivo");
+            PhotonCamera.isOnePlus = Build.BRAND.equalsIgnoreCase("oneplus");
+            PhotonCamera.isHonor = Build.BRAND.equalsIgnoreCase("honor");
+            PhotonCamera.isHuawei = Build.BRAND.equalsIgnoreCase("huawei");
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
 
         resetFlags();
 
@@ -519,13 +523,12 @@ public class VendorTagUtils {
                 var manualWb = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.color_temperature", Integer.class);
                 if (isSupported(builder, manualWb)) {
                     PhotonCamera.hasManualWb = true;
-                    var partialMwbMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.partial_mwb_mode", Integer.class);
-                    if (isSupported(builder, partialMwbMode)) {
-                        // 0 = Off, 1 = CCT (Kelvin) Mode, 2 = Gains Mode
-                        builder.set(partialMwbMode, 1);
-                    }
-
                     if (PhotonCamera.getSettings().socQualcommManualWb > 1500) {
+                        var partialMwbMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.manualWB.partial_mwb_mode", Integer.class);
+                        if (isSupported(builder, partialMwbMode)) {
+                            // 0 = Off, 1 = CCT (Kelvin) Mode, 2 = Gains Mode
+                            builder.set(partialMwbMode, 1);
+                        }
                         builder.set(manualWb, PhotonCamera.getSettings().socQualcommManualWb);
                     }
                 }
@@ -542,19 +545,19 @@ public class VendorTagUtils {
 
                 var useStatsViszualize = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.enableStatsVisualizer", byte.class);
                 if (isSupported(builder, useStatsViszualize)) {
-                    builder.set(useStatsViszualize, (byte) 1);
+                    //builder.set(useStatsViszualize, (byte) 1);
                 }
 
                 var sharpnessStrength = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sharpness.strength", Integer.class);
                 if (isSupported(builder, sharpnessStrength)) {
                     PhotonCamera.hasSharpnessKey = true;
-                    builder.set(sharpnessStrength, (int) PhotonCamera.getSettings().socQualcommSharpness);
+                    builder.set(sharpnessStrength, PhotonCamera.getSettings().socQualcommSharpness);
                 }
 
                 var aiMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.AICameraMode", Integer.class);
                 if (isSupported(builder, aiMode)) {
                     PhotonCamera.hasAiModeKey = true;
-                    builder.set(aiMode, (int) PhotonCamera.getSettings().socQualcommAiMode);
+                    builder.set(aiMode, PhotonCamera.getSettings().socQualcommAiMode);
                 }
 
                 var histMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.enable", byte.class);
@@ -649,25 +652,25 @@ public class VendorTagUtils {
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
                     if (isSupported(builder, hdrMode)) {
                         PhotonCamera.hasSocHdrMode = true;
-                        builder.set(hdrMode, (int) 0);
+                        builder.set(hdrMode, 0);
                     }
 
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
                     if (isSupported(builder, hdrMode)) {
                         PhotonCamera.hasSocHdrMode = true;
-                        builder.set(hdrMode, (int) 0);
+                        builder.set(hdrMode, 0);
                     }
 
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
                     if (isSupported(builder, hdrMode)) {
                         PhotonCamera.hasSocHdrMode = true;
-                        builder.set(hdrMode, (int) 0);
+                        builder.set(hdrMode, 0);
                     }
 
                     hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRMode", Integer.class);
                     if (isSupported(builder, hdrMode)) {
                         PhotonCamera.hasSocHdrMode = true;
-                        builder.set(hdrMode, (int) 0);
+                        builder.set(hdrMode, 0);
                     }
                 }
 
@@ -681,27 +684,27 @@ public class VendorTagUtils {
                     case 1:
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableMFHDR", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            builder.set(hdrMode, (int) 1);
+                            builder.set(hdrMode, 1);
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            //builder.set(hdrMode, (int) 3);
+                            //builder.set(hdrMode, 3);
                         }
                         break;
                     case 2:
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableSHDR", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            builder.set(hdrMode, (int) 1);
+                            builder.set(hdrMode, 1);
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            //builder.set(hdrMode, (int) 3);
+                            //builder.set(hdrMode, 3);
                         }
                         break;
                     case 3:
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.EnableQHDR", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            builder.set(hdrMode, (int) 1);
+                            builder.set(hdrMode, 1);
                         }
                         break;
                    default:
@@ -710,7 +713,7 @@ public class VendorTagUtils {
 
                 var hdrPref = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.HDRModePreference", Integer.class);
                 if (isSupported(builder, hdrPref)) {
-                    builder.set(hdrPref, (int) 1);
+                    //builder.set(hdrPref, 1);
                 }
 
                 if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
@@ -769,18 +772,18 @@ public class VendorTagUtils {
                 if (PhotonCamera.isZte) {
                     /*var enableWatermark = new CaptureRequest.Key<>("com.zte.chi.watermark.enable", Integer.class);
                     if (isSupported(builder, enableWatermark)) {
-                        builder.set(enableWatermark, (int) 1);
+                        builder.set(enableWatermark, 1);
                     }
 
                     var watermarkMode = new CaptureRequest.Key<>("com.zte.chi.watermark.mode", Integer.class);
                     if (isSupported(builder, watermarkMode)) {
-                        builder.set(watermarkMode, (int) 1);
+                        builder.set(watermarkMode, 1);
                     }*/
 
                     if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                         var vidHenceEis = new CaptureRequest.Key<>("com.zte.camera.sessionParameters.vidhance_eis", Integer.class);
                         if (isSupported(builder, vidHenceEis)) {
-                            builder.set(vidHenceEis, (int) 1);
+                            builder.set(vidHenceEis, 1);
                         }
                     }
                 }
@@ -789,7 +792,7 @@ public class VendorTagUtils {
                 if (PhotonCamera.isSamsung) {
                     var enableAIDenoiser = new CaptureRequest.Key<>("samsung.android.control.enableAIDenoiser", Integer.class);
                     if (isSupported(builder, enableAIDenoiser)) {
-                        builder.set(enableAIDenoiser, (int) 1);
+                        builder.set(enableAIDenoiser, 1);
                     }
 
                     /*var liveHdrMode = new CaptureRequest.Key<>("samsung.android.control.liveHdrMode", Integer.class);

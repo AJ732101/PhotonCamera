@@ -57,6 +57,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_FUNCTION_TWO.mValue);
         COMMON_KEYS.add(Key.KEY_LUT_NAME.mValue);
         COMMON_KEYS.add(Key.KEY_THUMBNAIL.mValue);
+        COMMON_KEYS.add(Key.KEY_P3.mValue);
         COMMON_KEYS.add(Key.KEY_TONEMAPPING_MODE_QUALITY.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
@@ -158,6 +159,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REMOSAIC, resources.getBoolean(R.bool.pref_remosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FPS_PREVIEW, resources.getBoolean(R.bool.pref_fps_preview_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_P3, resources.getBoolean(R.bool.pref_p3_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TONEMAPPING_MODE_QUALITY, resources.getBoolean(R.bool.pref_tonemapping_mode_quality_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
@@ -394,6 +396,10 @@ public class PreferenceKeys {
 
     public static boolean isThumbnailOn(){
         return getBool(Key.KEY_THUMBNAIL);
+    }
+
+    public static boolean isP3On(){
+        return getBool(Key.KEY_P3);
     }
 
     public static boolean isToneMappingQualityOn(){
@@ -1020,6 +1026,7 @@ public class PreferenceKeys {
         KEY_BINNING(R.string.pref_binning_key),
         KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
+        KEY_P3(R.string.pref_p3_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),
         KEY_HDRX_NR(R.string.pref_hdrx_nr_key),
         KEY_SHOW_ROUND_EDGE(R.string.pref_show_roundedge_key),

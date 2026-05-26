@@ -159,6 +159,7 @@
     <string name="turn_on_system_nr">System Noise Reduction</string>
     <string name="wide169" translatable="false">16:9</string>
     <string name="thumbnail" translatable="true">Thumbnail</string>
+    <string name="use_p3" translatable="true">P3 (instead of sRGB)</string>
     <string name="tonemapping_mode_quality" translatable="true">Tonemapping Mode Quality</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>

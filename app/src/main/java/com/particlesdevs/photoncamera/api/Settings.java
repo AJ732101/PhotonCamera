@@ -16,8 +16,8 @@ public class Settings {
     public boolean enhancedProcess;
     public boolean watermark;
     public boolean energySaving;
-    public boolean aspect169;
-    public boolean useThumbnail;
+    public boolean aspect169 = false;
+    public boolean useThumbnail = false;
     public boolean binning;
     public boolean DebugData;
     public boolean roundEdge;
@@ -59,18 +59,19 @@ public class Settings {
     public CameraMode selectedMode;
 
     // QualityDoesMatter
-    public boolean useBasicOsd;
-    public boolean useOis;
-    public boolean useDngCompression;
+    public boolean useBasicOsd = true;
+    public boolean useOis = true;
+    public boolean useDngCompression = false;
+    public boolean useP3 = false;
     public int videoBitrate;
     public float apertureToUse;
     public String videoCodec;
     public int videoFramrate;
     public int videoHeight;
     public boolean videoEisInPreview;
-    public boolean videoHDR;
-    public boolean video10bit;
-    public boolean videoNewRec;
+    public boolean videoHDR = false;
+    public boolean video10bit = false;
+    public boolean videoNewRec = false;
     public boolean useExtendIso;
     public boolean useExtendExposure;
     public boolean zoom2X;
@@ -212,6 +213,7 @@ public class Settings {
         sessionTypeVideo = PreferenceKeys.getSessionTypeVideo();
         dngBlackLevel = PreferenceKeys.getDngBlackLevel();
         dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
+        useP3 = PreferenceKeys.isP3On();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
         videoCodec = PreferenceKeys.getVideoCodec();

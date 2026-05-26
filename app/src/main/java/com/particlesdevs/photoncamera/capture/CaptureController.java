@@ -41,6 +41,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.BlackLevelPattern;
+import android.hardware.camera2.params.ColorSpaceProfiles;
 import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.MeteringRectangle;
@@ -2688,11 +2689,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             stateCallback
                     );
                 }
-                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    if (checkColorSpaceProfilesSupport(mCameraManager)) {
-                        configuration.setColorSpace(ColorSpace.Named.SRGB);
+                if (PhotonCamera.getSettings().useP3) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        if (checkColorSpaceProfilesSupport(mCameraManager, ColorSpace.Named.DISPLAY_P3)) {
+                            if ((mTargetFormat == ImageFormat.YUV_420_888) ||
+                                    (mTargetFormat == ImageFormat.JPEG) ||
+                                    (mTargetFormat == ImageFormat.JPEG_R) ||
+                                    (mTargetFormat == ImageFormat.HEIC)) {
+                                configuration.setColorSpace(ColorSpace.Named.DISPLAY_P3);
+                            }
+                        }
                     }
-                }*/
+                }
                 if (configuration != null) {
                     configuration.setSessionParameters(mPreviewRequestBuilder.build());
                     mCameraDevice.createCaptureSession(configuration);
@@ -4667,38 +4675,35 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         return mIsRecordingVideo;
     }
 
-    private boolean checkColorSpaceProfilesSupport(CameraManager manager) {
-        // Diese Capability ist erst ab API 34 (Android 14) verfügbar
+    private boolean checkColorSpaceProfilesSupport(CameraManager manager, ColorSpace.Named colorSpace) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            System.out.println("❌ Device not supporting API 34+");
+            Log.d(TAG, "checkColorSpaceProfilesSupport: Device not supporting API 34+");
             return false;
         }
 
         try {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(PhotonCamera.getSettings().mCameraID);
+            CameraCharacteristics.Key<ColorSpaceProfiles> key = new CameraCharacteristics.Key<>("android.request.availableColorSpaceProfiles", ColorSpaceProfiles.class);
+            ColorSpaceProfiles profiles = characteristics.get(key);
 
-            // Überprüfen, ob die Kamera die Capability unterstützt
-            int[] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-
-            boolean supportsColorSpace = false;
-            if (capabilities != null) {
-                for (int capability : capabilities) {
-                    if (capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES) {
-                        supportsColorSpace = true;
-                        break;
-                    }
-                }
+            if (profiles == null) {
+                Log.d(TAG, "checkColorSpaceProfilesSupport: ColorSpaceProfiles not available for camera " + PhotonCamera.getSettings().mCameraID);
+                return false;
             }
 
-            if (supportsColorSpace) {
-                System.out.println("✅ Camera " + PhotonCamera.getSettings().mCameraID + " supports COLOR_SPACE_PROFILES");
+            java.util.Set<ColorSpace.Named> supportedColorSpaces = profiles.getSupportedColorSpaces(ImageFormat.UNKNOWN);
+            boolean isSupported = supportedColorSpaces.contains(colorSpace);
+
+            if (isSupported) {
+                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + PhotonCamera.getSettings().mCameraID + " supports ColorSpace: " + colorSpace.name());
             } else {
-                System.out.println("❌ Camera " + PhotonCamera.getSettings().mCameraID + " NOT supporting COLOR_SPACE_PROFILES");
+                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + PhotonCamera.getSettings().mCameraID + " DOES NOT support ColorSpace: " + colorSpace.name());
             }
-            return supportsColorSpace;
+
+            return isSupported;
 
         } catch (CameraAccessException e) {
-            e.printStackTrace();
+            Log.e(TAG, "checkColorSpaceProfilesSupport: Error accessing camera characteristics", e);
             return false;
         }
     }
