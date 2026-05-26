@@ -16,6 +16,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -666,10 +668,21 @@ public class SettingsActivity extends BaseActivity implements
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.device_info_preferences, rootKey);
 
+            PreferenceCategory generalCategory = new androidx.preference.PreferenceCategory(getContext());
+            generalCategory.setTitle(R.string.general);
+            getPreferenceScreen().addPreference(generalCategory);
+
+            float[] apertures = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_APERTURES);
+            if (apertures != null && apertures.length > 0) {
+                generalCategory.addPreference(createCompactText(getString(R.string.aperture1) + String.format(Locale.US, ": F%.2f", apertures[0])));
+            }
+            generalCategory.addPreference(createCompactText(getString(R.string.flength35) + String.format(Locale.US, ": %dmm", PhotonCamera.getParameters().current35mmFocalLength)));
+
             PreferenceCategory photoCategory = new androidx.preference.PreferenceCategory(getContext());
             photoCategory.setTitle(R.string.still_image_label);
             getPreferenceScreen().addPreference(photoCategory);
 
+            photoCategory.addPreference(createCompactCheckBox("OIS", isOisSupported(), false));
             photoCategory.addPreference(createCompactCheckBox("HEIC", PhotonCamera.mHeicIsSupported, false));
             photoCategory.addPreference(createCompactCheckBox("JPEG-R (Ultra HDR)", PhotonCamera.mJpegRIsSupported, false));
             photoCategory.addPreference(createCompactCheckBox("Ultra HEIC", PhotonCamera.mHeicUltraHdrIsSupported, false));
@@ -712,6 +725,18 @@ public class SettingsActivity extends BaseActivity implements
             videoCategory.setTitle("Video");
             getPreferenceScreen().addPreference(videoCategory);
 
+            CaptureController.EncoderInfoUtil encoderInfo = new CaptureController.EncoderInfoUtil();
+            encoderInfo.getEncoderInfos();
+            Size maxRes = encoderInfo.getMaxResForMimeType(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
+            boolean hasHwHevc = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            boolean hasHwAv1 = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_AV1);
+            boolean hasHwApv = encoderInfo.getHwSupportForMimeType(MediaFormat.MIMETYPE_VIDEO_APV);
+
+            videoCategory.addPreference(createCompactCheckBox("Dolby Vision", (maxRes == null) ? false : true, false));
+            videoCategory.addPreference(createCompactCheckBox("HW HEVC", hasHwHevc, false));
+            videoCategory.addPreference(createCompactCheckBox("HW AV1", hasHwAv1, false));
+            videoCategory.addPreference(createCompactCheckBox("HW APV", hasHwApv, false));
+            videoCategory.addPreference(createCompactCheckBox("EIS", isEisSupported(), false));
             videoCategory.addPreference(createCompactCheckBox("10 Bit", PhotonCamera.hasTenBit, false));
             videoCategory.addPreference(createCompactCheckBox("HDR", PhotonCamera.hasHdr, false));
             videoCategory.addPreference(createCompactCheckBox("   HLG", PhotonCamera.mHlgIsSupported, true));
@@ -724,6 +749,14 @@ public class SettingsActivity extends BaseActivity implements
             pref.setLayoutResource(R.layout.preference_compact_item);
             pref.setTitle(title);
             pref.setChecked(checked);
+            pref.setEnabled(false);
+            return pref;
+        }
+
+        private Preference createCompactText(String text) {
+            Preference pref = new Preference(getContext());
+            pref.setLayoutResource(R.layout.preference_compact_item);
+            pref.setTitle(text);
             pref.setEnabled(false);
             return pref;
         }
@@ -757,6 +790,31 @@ public class SettingsActivity extends BaseActivity implements
             }
 
             return null;
+        }
+
+        private boolean isOisSupported() {
+            int[] stabilizationModes = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+            if (stabilizationModes != null) {
+                for (int mode : stabilizationModes) {
+                    if (mode == CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean isEisSupported() {
+            int[] stabilizationModes = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
+            if (stabilizationModes != null) {
+                for (int mode : stabilizationModes) {
+                    if ((mode == CameraCharacteristics.CONTROL_VIDEO_STABILIZATION_MODE_ON) ||
+                        (mode == CameraCharacteristics.CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
@@ -1097,20 +1155,51 @@ public class SettingsActivity extends BaseActivity implements
 
         private void showKeyDetailsDialog() {
             String value = getCharacteristicsValue(name);
-            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext());
-            
-            android.text.SpannableStringBuilder title = new android.text.SpannableStringBuilder("Key Details");
+            Context context = getContext();
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+            SpannableStringBuilder title = new SpannableStringBuilder(context.getString(R.string.key_details_label));
             title.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, title.length(), 0);
             title.setSpan(new android.text.style.RelativeSizeSpan(1.25f), 0, title.length(), 0);
             builder.setTitle(title);
-            
-            StringBuilder sb = new StringBuilder();
+
+            SpannableStringBuilder sb = new SpannableStringBuilder();
             sb.append("\nClass:\nCameraCharacteristics\n\n");
             sb.append("Name:\n").append(name).append("\n\n");
             sb.append("Type:\n").append(type).append("\n\n");
-            sb.append("Value:\n").append(value);
-            
-            builder.setMessage(sb.toString());
+            sb.append("Value:\n");
+
+            int start = sb.length();
+            sb.append(value);
+            int end = sb.length();
+
+            sb.setSpan(new android.text.style.ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
+                            context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (clipboard != null) {
+                        android.content.ClipData clip = android.content.ClipData.newPlainText("Vendor Key Value", value);
+                        clipboard.setPrimaryClip(clip);
+                        PhotonCamera.showToast("Value copied to clipboard");
+                    }
+                }
+
+                @Override
+                public void updateDrawState(@NonNull android.text.TextPaint ds) {
+                    // Keep the original text color and remove the underline
+                    ds.setUnderlineText(false);
+                }
+            }, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            TextView textView = new TextView(context);
+            textView.setText(sb);
+            textView.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+            int padding = (int) (16 * context.getResources().getDisplayMetrics().density);
+            textView.setPadding(padding, padding, padding, padding);
+            textView.setTextSize(16);
+
+            builder.setView(textView);
             builder.setPositiveButton("OK", null);
             builder.show();
         }
@@ -1118,16 +1207,26 @@ public class SettingsActivity extends BaseActivity implements
         private String getCharacteristicsValue(String keyName) {
             if (CaptureController.mCameraCharacteristics == null) return "N/A";
             try {
+                // Try to find the key in the officially reported keys first
                 for (CameraCharacteristics.Key<?> key : CaptureController.mCameraCharacteristics.getKeys()) {
                     if (key.getName().equals(keyName)) {
-                        return formatValue(CaptureController.mCameraCharacteristics.get(key));
+                        Object val = CaptureController.mCameraCharacteristics.get(key);
+                        return val == null ? "null" : formatValue(val);
                     }
                 }
+                
+                // If not found in official keys, it might be a hidden/vendor key
                 Class<?> typeClass = getTypeClass(type);
-                java.lang.reflect.Constructor<CameraCharacteristics.Key> charConstructor = CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
+                java.lang.reflect.Constructor<CameraCharacteristics.Key> charConstructor = 
+                        CameraCharacteristics.Key.class.getDeclaredConstructor(String.class, Class.class);
                 charConstructor.setAccessible(true);
                 CameraCharacteristics.Key<?> hiddenKey = charConstructor.newInstance(keyName, typeClass);
-                return formatValue(CaptureController.mCameraCharacteristics.get(hiddenKey));
+                
+                Object val = CaptureController.mCameraCharacteristics.get(hiddenKey);
+                return val == null ? "null" : formatValue(val);
+            } catch (IllegalArgumentException e) {
+                // This happens when the key is known to the vendor tag descriptor but not present for this camera ID
+                return "N/A (Not on this camera)";
             } catch (Exception e) {
                 return "Error: " + e.getMessage();
             }
@@ -1135,43 +1234,118 @@ public class SettingsActivity extends BaseActivity implements
 
         private Class<?> getTypeClass(String typeStr) {
             if (typeStr == null) return Object.class;
-            switch (typeStr) {
-                case "Int32": return Integer.class;
-                case "Int64": return Long.class;
-                case "Float": return Float.class;
-                case "Byte": return Byte.class;
-                case "Double": return Double.class;
-                case "Rational": return android.util.Rational.class;
-                case "int[]":
-                case "Int32[]": return int[].class;
-                case "long[]":
-                case "Int64[]": return long[].class;
-                case "float[]": return float[].class;
-                case "byte[]":
-                case "Byte[]": return byte[].class;
-                case "double[]": return double[].class;
-                case "Rational[]": return android.util.Rational[].class;
-                case "Rect": return android.graphics.Rect.class;
-                case "Rect[]": return android.graphics.Rect[].class;
-                case "Size": return android.util.Size.class;
-                case "Size[]": return android.util.Size[].class;
-                default: return Object.class;
+            try {
+                switch (typeStr) {
+                    case "int":
+                    case "Int32": return Integer.class;
+                    case "long":
+                    case "Int64": return Long.class;
+                    case "float":
+                    case "Float": return Float.class;
+                    case "byte":
+                    case "Byte": return Byte.class;
+                    case "double":
+                    case "Double": return Double.class;
+                    case "Boolean":
+                    case "boolean": return Boolean.class;
+                    case "Rational": return android.util.Rational.class;
+                    case "int[]":
+                    case "Int32[]": return int[].class;
+                    case "long[]":
+                    case "Int64[]": return long[].class;
+                    case "float[]": return float[].class;
+                    case "byte[]":
+                    case "Byte[]": return byte[].class;
+                    case "double[]": return double[].class;
+                    case "Rational[]": return android.util.Rational[].class;
+                    case "Rect": return android.graphics.Rect.class;
+                    case "Rect[]": return android.graphics.Rect[].class;
+                    case "Size": return android.util.Size.class;
+                    case "Size[]": return android.util.Size[].class;
+                    case "StreamConfigurationDuration":
+                        return Class.forName("android.hardware.camera2.params.StreamConfigurationDuration");
+                    case "StreamConfigurationDuration[]":
+                        return Class.forName("[Landroid.hardware.camera2.params.StreamConfigurationDuration;");
+                    case "StreamConfiguration":
+                        return Class.forName("android.hardware.camera2.params.StreamConfiguration");
+                    case "StreamConfiguration[]":
+                        return Class.forName("[Landroid.hardware.camera2.params.StreamConfiguration;");
+                    case "HighSpeedVideoConfiguration":
+                        return Class.forName("android.hardware.camera2.params.HighSpeedVideoConfiguration");
+                    case "HighSpeedVideoConfiguration[]":
+                        return Class.forName("[Landroid.hardware.camera2.params.HighSpeedVideoConfiguration;");
+                    case "DeviceStateSensorOrientationMap":
+                        return Class.forName("android.hardware.camera2.params.DeviceStateSensorOrientationMap");
+                    case "LensShadingMap":
+                        return android.hardware.camera2.params.LensShadingMap.class;
+                    case "MultiResolutionStreamConfigurationMap":
+                        return android.hardware.camera2.params.MultiResolutionStreamConfigurationMap.class;
+                    case "BlackLevelPattern":
+                        return android.hardware.camera2.params.BlackLevelPattern.class;
+                    case "ColorSpaceTransform":
+                        return android.hardware.camera2.params.ColorSpaceTransform.class;
+                    case "TonemapCurve":
+                        return android.hardware.camera2.params.TonemapCurve.class;
+                    case "ReprocessFormatsMap":
+                        return Class.forName("android.hardware.camera2.params.ReprocessFormatsMap");
+                    case "MeteringRectangle":
+                        return android.hardware.camera2.params.MeteringRectangle.class;
+                    case "MeteringRectangle[]":
+                        return android.hardware.camera2.params.MeteringRectangle[].class;
+                    default:
+                        if (typeStr.contains("Range")) return android.util.Range.class;
+                        return Object.class;
+                }
+            } catch (ClassNotFoundException e) {
+                return Object.class;
             }
         }
 
         private String formatValue(Object val) {
             if (val == null) return "null";
             if (val.getClass().isArray()) {
-                StringBuilder sb = new StringBuilder("[");
                 int length = java.lang.reflect.Array.getLength(val);
+                if (length == 0) return "[]";
+                StringBuilder sb = new StringBuilder("[");
                 for (int i = 0; i < length; i++) {
-                    sb.append(java.lang.reflect.Array.get(val, i));
+                    Object item = java.lang.reflect.Array.get(val, i);
+                    String formatted = formatSingleValue(item);
+                    // Add newline for complex objects in arrays
+                    if (length > 1 && formatted.contains("{")) sb.append("\n  ");
+                    sb.append(formatted);
                     if (i < length - 1) sb.append(", ");
                 }
-                sb.append("]");
+                if (sb.toString().contains("\n")) sb.append("\n]");
+                else sb.append("]");
                 return sb.toString();
             }
-            return val.toString();
+            return formatSingleValue(val);
+        }
+
+        private String formatSingleValue(Object val) {
+            if (val == null) return "null";
+            String toString = val.toString();
+            // If it's the default Object.toString(), use reflection to show fields
+            if (toString.startsWith(val.getClass().getName() + "@")) {
+                StringBuilder sb = new StringBuilder(val.getClass().getSimpleName()).append("{");
+                boolean first = true;
+                for (java.lang.reflect.Field f : val.getClass().getDeclaredFields()) {
+                    if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                    try {
+                        f.setAccessible(true);
+                        if (!first) sb.append(", ");
+                        String name = f.getName();
+                        // Clean up internal names like mWidth -> width
+                        if (name.startsWith("m") && name.length() > 1 && Character.isUpperCase(name.charAt(1))) {
+                            name = Character.toLowerCase(name.charAt(1)) + name.substring(2);
+                        }
+                        sb.append(name).append("=").append(formatValue(f.get(val)));
+                        first = false;
+                    } catch (Exception ignored) {}
+                }
+                return sb.append("}").toString();
+            }
+            return toString;
         }
     }
 

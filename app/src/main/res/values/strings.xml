@@ -61,6 +61,8 @@
     <string name="exposure_time">"Exposure "</string>
     <string name="aperture">"Aperture "</string>
     <string name="flength">"Focal Length "</string>
+    <string name="aperture1">"Aperture"</string>
+    <string name="flength35">"35mm Focal Length"</string>
     <string name="info">Info</string>
     <string name="filename">"File Name "</string>
     <string name="turn_on_afdata">Show Debug Data</string>
@@ -292,4 +294,5 @@
 
     <!-- Other strings -->
     <string name="still_image_label">Still Image</string>
+    <string name="key_details_label">Key Details</string>
 </resources>
