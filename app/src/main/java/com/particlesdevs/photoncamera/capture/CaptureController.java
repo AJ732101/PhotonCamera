@@ -4150,8 +4150,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
                         }
                     }
-                    Integer pixelMode = result.get(CaptureResult.SENSOR_PIXEL_MODE);
-                    Log.d(TAG, "Single shot capture completed. Sensor Pixel Mode: " + pixelMode);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Integer pixelMode = result.get(CaptureResult.SENSOR_PIXEL_MODE);
+                        Log.d(TAG, "Single shot capture completed. Sensor Pixel Mode: " + pixelMode);
+                    }
                 }
 
                 @Override
