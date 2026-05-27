@@ -22,6 +22,10 @@ Android Camera with focus on video recording and unprocessed single shot still i
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/04.jpg?raw=true" alt="Screenshot 5" width="100%"></td>
         <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/07.jpg?raw=true" alt="Screenshot 6" width="100%"></td>
       </tr>
+      <tr>
+        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/09.jpg?raw=true" alt="Screenshot 7" width="100%"></td>
+        <td><img src="https://github.com/AJ732101/PhotonVidCam/blob/feature_test/fastlane/metadata/android/en-US/images/phoneScreenshots/10.jpg?raw=true" alt="Screenshot 8" width="100%"></td>
+      </tr>
     </table>
 </p>
 
