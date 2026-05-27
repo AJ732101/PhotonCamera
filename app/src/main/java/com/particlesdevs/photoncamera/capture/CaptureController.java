@@ -1567,7 +1567,18 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mImageReaderPreview.close();
             mImageReaderPreview = null;
         }
-        mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImageReaderImages);
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mImageReaderPreview = new ImageReader.Builder(preview.getWidth(), preview.getHeight())
+                    .setMaxImages(maxImageReaderImages)
+                    .setImageFormat(mPreviewTargetFormat)
+                    //.setDefaultDataSpace(DataSpace.DATASPACE_DISPLAY_P3)
+                    .setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_COMPOSER_OVERLAY)
+                    .build();
+        } else {
+            mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImageReaderImages);
+        }
+
         mImageReaderPreview.setOnImageAvailableListener(mOnYuvImageAvailableListener, mBackgroundHandler);
         mBufferSize = getPreviewOutputSize(mTextureView.getDisplay(), mCameraCharacteristics, PhotonCamera.getSettings().selectedMode);
     }
@@ -1578,22 +1589,38 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mImageReaderRaw.close();
             }
             applyFormatFallback();
+            int targetWidth = target.getWidth();
+            int targetHeight = target.getHeight();
             if (customRawResForCamIdCheck(physicalID)) {
                 Size newSize = customRawResForCamId(physicalID);
-                mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
+                targetWidth = newSize.getWidth();
+                targetHeight = newSize.getHeight();
+                //mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
                 if (target.getHeight() > target.getWidth()) {
-                    mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImageReaderImages);
+                    targetWidth = target.getHeight();
+                    targetHeight = target.getWidth();
+                    //mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImageReaderImages);
                 }
                 else {
-                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImageReaderImages);
+                    targetWidth = target.getWidth();
+                    targetHeight = target.getHeight();
+                    //mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImageReaderImages);
                 }
-                //Log.d(TAG, "create ImageReader " + target.getWidth() + "x" + target.getHeight() + " - orientation: " + mSensorOrientation);
-                /*if (PhotonCamera.getSettings().QuadBayer) {
-                    mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImagerReaderImages);
-                } else {
-                    mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImagerReaderImages);
-                }*/
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                long flags = HardwareBuffer.USAGE_CPU_READ_OFTEN;
+                if (mTargetFormat == ImageFormat.JPEG_R) {
+                    flags = HardwareBuffer.USAGE_CPU_READ_OFTEN | HardwareBuffer.USAGE_COMPOSER_OVERLAY;
+                }
+                mImageReaderRaw = new ImageReader.Builder(targetWidth, targetHeight)
+                        .setMaxImages(maxImageReaderImages)
+                        .setImageFormat(mTargetFormat)
+                        //.setDefaultDataSpace(DataSpace.DATASPACE_DISPLAY_P3)
+                        .setUsage(flags)
+                        .build();
+            } else {
+                mImageReaderRaw = ImageReader.newInstance(targetWidth, targetHeight, mTargetFormat, maxImageReaderImages);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
