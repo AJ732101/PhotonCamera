@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.processing;
 
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.hardware.DataSpace;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
@@ -22,11 +24,69 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.util.concurrent.ExecutionException;
 
 public class AvifEncoder {
 
     private static final String TAG = "AvifEncoder";
+
+    private byte[] createExif(Bundle metadata, int orientation) {
+        try {
+            // 1. Create a real (but tiny) valid JPEG as a base for ExifInterface
+            File tempExifFile = File.createTempFile("temp_exif", ".jpg");
+            Bitmap tiny = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            try (FileOutputStream out = new FileOutputStream(tempExifFile)) {
+                tiny.compress(Bitmap.CompressFormat.JPEG, 95, out);
+            }
+            tiny.recycle();
+
+            // 2. Use ExifInterface to write metadata
+            ExifInterface exif = new ExifInterface(tempExifFile.getAbsolutePath());
+            ParseExif.ExifData exifData = ImageSaver.exifDataFromMetadata(metadata, orientation);
+
+            if (exifData.PHOTOGRAPHIC_SENSITIVITY != null) exif.setAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY, exifData.PHOTOGRAPHIC_SENSITIVITY);
+            if (exifData.F_NUMBER != null) exif.setAttribute(ExifInterface.TAG_F_NUMBER, exifData.F_NUMBER);
+            if (exifData.EXPOSURE_TIME != null) exif.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exifData.EXPOSURE_TIME);
+            if (exifData.FOCAL_LENGTH != null) exif.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exifData.FOCAL_LENGTH);
+            if (exifData.IMAGE_DESCRIPTION != null) exif.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, exifData.IMAGE_DESCRIPTION);
+            if (exifData.MAKE != null) exif.setAttribute(ExifInterface.TAG_MAKE, exifData.MAKE);
+            if (exifData.MODEL != null) exif.setAttribute(ExifInterface.TAG_MODEL, exifData.MODEL);
+            if (exifData.EQUIVALENT_35MM != null) exif.setAttribute(ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM, exifData.EQUIVALENT_35MM);
+
+            // Set the actual orientation in EXIF.
+            // When EXIF bytes are provided, most viewers prioritize the EXIF Orientation tag.
+            if (exifData.ORIENTATION != null) {
+                exif.setAttribute(ExifInterface.TAG_ORIENTATION, exifData.ORIENTATION);
+            }
+
+            exif.saveAttributes();
+
+            // 3. Extract the EXIF APP1 segment from the generated JPEG
+            byte[] fileBytes = Files.readAllBytes(tempExifFile.toPath());
+            tempExifFile.delete();
+
+            // Look for APP1 marker (FF E1)
+            for (int i = 0; i < fileBytes.length - 4; i++) {
+                if (fileBytes[i] == (byte) 0xFF && fileBytes[i + 1] == (byte) 0xE1) {
+                    int length = ((fileBytes[i + 2] & 0xFF) << 8) | (fileBytes[i + 3] & 0xFF);
+                    // The payload of APP1 includes the "Exif\0\0" header.
+                    // ExifInterface writes the APP1 header (FF E1), then the length (2 bytes),
+                    // and then the payload. libavif wants the payload starting with "Exif\0\0".
+                    byte[] exifPayload = new byte[length - 2];
+                    System.arraycopy(fileBytes, i + 4, exifPayload, 0, length - 2);
+                    return exifPayload;
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create EXIF", e);
+            return null;
+        }
+    }
 
     /**
      * Encodes an Image object by first converting it to a Bitmap and then to AVIF.
@@ -35,8 +95,8 @@ public class AvifEncoder {
      * @param outputFile The target file for the AVIF image.
      * @throws IOException If encoding or writing the file fails.
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToAvif(Image image, File outputFile, int orientation, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public void encodeYuvToAvif(Image image, File outputFile, int orientation, int quality, Bundle metadata, MainRenderer renderer) throws IOException, ExecutionException, InterruptedException {
         Log.d(TAG, "Starting AVIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -44,45 +104,45 @@ public class AvifEncoder {
         Bitmap rotatedBitmap = null;
 
         // 1. Convert the YUV Image to a high-precision Bitmap
-        switch (image.getFormat()) {
-            case ImageFormat.YUV_420_888:
-                originalBitmap = ImageUtils.yuv8BitToBitmap(image);
-                break;
-            case ImageFormat.YCBCR_P010:
-                originalBitmap = ImageUtils.p010SdrToBitmap1010102(image);
-                //originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
-            break;
+        if (image.getFormat() == ImageFormat.YUV_420_888) {
+            rotatedBitmap = ImageUtils.yuv8BitToBitmap(image);
         }
-
-        // 2. CORRECT: Physically rotate the Bitmap if needed
-        if (orientation != 0) {
-            Log.d(TAG, "Rotating bitmap by " + orientation + " degrees.");
-            android.graphics.Matrix matrix = new android.graphics.Matrix();
-            matrix.postRotate(orientation);
-            // Create a new, rotated bitmap from the original
-            rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
-            // Important: Free up memory from the original bitmap immediately
-            originalBitmap.recycle();
-        }
-        else {
-            // If no rotation is needed, we just use the original bitmap
-            rotatedBitmap = originalBitmap;
-        }
-
 
         // 2. Create an instance of HeifCoder.
         HeifCoder coder = new HeifCoder();
+        byte[] exifBytes = createExif(metadata, orientation);
 
         try {
             // 3. Encode the Bitmap to AVIF using the correct method signature.
             //    Parameters based on the screenshot. The last 3 are enums.
             //    Let's use reasonable defaults.
             byte[] avifByteArray = null;
-            if (PhotonCamera.getSettings().useLosslessSwEncoding) {
-                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+            // IMPORTANT: Since we are embedding EXIF bytes with the correct orientation tag,
+            // we pass '0' as the rotation parameter to the encoder to avoid double rotation (irot vs EXIF).
+
+            int ds = -1;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ds = DataSpace.DATASPACE_DISPLAY_P3;;
             }
-            else {
-                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420);
+
+            var preciseMode = PreciseMode.LOSSY;
+            if (PhotonCamera.getSettings().useLosslessSwEncoding) {
+                preciseMode = PreciseMode.LOSSLESS;
+            }
+
+            if (image.getFormat() == ImageFormat.YUV_420_888) {
+                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, preciseMode, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420, 0, exifBytes);
+            } else {
+                Image.Plane yPlane = image.getPlanes()[0];
+                Image.Plane uvPlane = image.getPlanes()[1]; // In P010, U and V are interleaved
+
+                ByteBuffer yBuffer = yPlane.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+                ByteBuffer uvBuffer = uvPlane.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+
+                int yRowStride = yPlane.getRowStride();
+                int uvRowStride = uvPlane.getRowStride();
+
+                avifByteArray = coder.encodeAvifP010(yBuffer, yRowStride, uvBuffer, uvRowStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.EIGHT, ds, 0, exifBytes);
             }
 
             // 4. Verify that the encoder returned data.

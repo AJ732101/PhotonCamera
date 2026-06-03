@@ -227,9 +227,9 @@
         <item>48</item>
         <item>50</item>
         <item>60</item>
-        <item>120 Do not Use</item>
-        <item>240 Do not Use</item>
-        <item>480 Do not Use</item>
+        <item>120</item>
+        <item>240</item>
+        <item>480</item>
     </string-array>
 
     <string-array name="video_framerate_entryValues">

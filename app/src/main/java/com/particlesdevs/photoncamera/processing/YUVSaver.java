@@ -81,7 +81,7 @@ public class YUVSaver extends DefaultSaver{
                     case ImageFormat.YCBCR_P010:
                         try {
                             originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
-                            }
+                        }
                         catch (Exception e) {
                             Log.e(TAG, Log.getStackTraceString(e));
                         }
@@ -125,7 +125,6 @@ public class YUVSaver extends DefaultSaver{
                     case ImageFormat.YCBCR_P010:
                         try {
                             originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
-
                         }
                         catch (Exception e) {
                             Log.e(TAG, Log.getStackTraceString(e));
@@ -186,7 +185,7 @@ public class YUVSaver extends DefaultSaver{
                 heicFile = new File(storagePath.toString());
                 HeifEncoder heifEncoder = new HeifEncoder();
                 try {
-                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality, metadata);
+                    heifEncoder.encodeYuvToHeif(image, heicFile, orientation, quality, metadata, renderer);
                 }
                 catch (Exception e) {
                     Log.e(TAG, Log.getStackTraceString(e));

@@ -4,3 +4,4 @@ plugins {
 rootProject.name='PhotonCamera'
 include ':app'
 include ':circularbarlib'
+include ':avif-coder-2.2.1:avif-coder'

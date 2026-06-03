@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
 import com.radzivon.bartoshyk.avif.coder.HeifCoder;
 import com.radzivon.bartoshyk.avif.coder.HeifQualityArg;
@@ -18,6 +19,7 @@ import com.radzivon.bartoshyk.avif.coder.PreciseMode;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class HeifEncoder {
 
@@ -31,7 +33,7 @@ public class HeifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void encodeYuvToHeif(Image image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException {
+    public void encodeYuvToHeif(Image image, File outputFile, int orientation, int quality, Bundle metadata, MainRenderer renderer) throws IOException, ExecutionException, InterruptedException {
         Log.d(TAG, "Starting HEIF encoding for image with resolution: " + image.getWidth() + "x" + image.getHeight());
 
         // 1. Convert the YUV Image to an ARGB Bitmap.
@@ -44,7 +46,8 @@ public class HeifEncoder {
                 originalBitmap = ImageUtils.yuv8BitToBitmap(image);
                 break;
             case ImageFormat.YCBCR_P010:
-                originalBitmap = ImageUtils.p010SdrToBitmap1010102(image);
+                //originalBitmap = ImageUtils.p010SdrToBitmap1010102(image);
+                originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
                 break;
         }
 
