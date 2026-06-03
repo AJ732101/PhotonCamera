@@ -121,9 +121,6 @@ public class AvifEncoder {
             // we pass '0' as the rotation parameter to the encoder to avoid double rotation (irot vs EXIF).
 
             int ds = -1;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ds = DataSpace.DATASPACE_DISPLAY_P3;;
-            }
 
             var preciseMode = PreciseMode.LOSSY;
             if (PhotonCamera.getSettings().useLosslessSwEncoding) {
@@ -131,8 +128,31 @@ public class AvifEncoder {
             }
 
             if (image.getFormat() == ImageFormat.YUV_420_888) {
-                avifByteArray = coder.encodeAvif(rotatedBitmap, quality, AvifSpeed.EIGHT, preciseMode, AvifSurfaceMode.AUTO, AvifChromaSubsampling.YUV420, 0, exifBytes);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ds = DataSpace.DATASPACE_DISPLAY_P3;;
+                }
+
+                Image.Plane yPlane = image.getPlanes()[0];
+                Image.Plane uPlane = image.getPlanes()[1];
+                Image.Plane vPlane = image.getPlanes()[2];
+
+                ByteBuffer yBuffer = yPlane.getBuffer();
+                ByteBuffer uBuffer = uPlane.getBuffer();
+                ByteBuffer vBuffer = vPlane.getBuffer();
+
+                int yRowStride = yPlane.getRowStride();
+                int uRowStride = uPlane.getRowStride();
+                int vRowStride = vPlane.getRowStride();
+
+                int uPixelStride = uPlane.getPixelStride();
+                int vPixelStride = vPlane.getPixelStride();
+
+                avifByteArray = coder.encodeAvif420_888(yBuffer, yRowStride, uBuffer, uRowStride, vBuffer, vRowStride, uPixelStride, vPixelStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.EIGHT, ds, 0, exifBytes);
             } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ds = DataSpace.DATASPACE_BT2020_HLG;
+                }
+
                 Image.Plane yPlane = image.getPlanes()[0];
                 Image.Plane uvPlane = image.getPlanes()[1]; // In P010, U and V are interleaved
 
