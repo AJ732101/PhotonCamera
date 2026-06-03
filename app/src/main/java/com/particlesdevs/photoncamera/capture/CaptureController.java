@@ -1572,7 +1572,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mImageReaderPreview = new ImageReader.Builder(preview.getWidth(), preview.getHeight())
                     .setMaxImages(maxImageReaderImages)
                     .setImageFormat(mPreviewTargetFormat)
-                    //.setDefaultDataSpace(DataSpace.DATASPACE_DISPLAY_P3)
+                    //.setDefaultDataSpace(DataSpace.DATASPACE_BT2020_HLG)
                     .setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_COMPOSER_OVERLAY)
                     .build();
         } else {
@@ -1616,7 +1616,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 mImageReaderRaw = new ImageReader.Builder(targetWidth, targetHeight)
                         .setMaxImages(maxImageReaderImages)
                         .setImageFormat(mTargetFormat)
-                        //.setDefaultDataSpace(DataSpace.DATASPACE_DISPLAY_P3)
+                        //.setDefaultDataSpace(DataSpace.DATASPACE_BT2020_HLG)
                         .setUsage(flags)
                         .build();
             } else {
@@ -2578,6 +2578,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 } else {
                     SessionTypeVideo = PhotonCamera.getSettings().sessionTypeVideo;
                 }
+                if (!PhotonCamera.isSessionTypeOn) {
+                    SessionTypeVideo = 0;
+                }
             }
             else {
                 SessionType = PhotonCamera.getSettings().sessionType;
@@ -3357,7 +3360,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mIsFunctionTwoOn = !mIsFunctionTwoOn;
         PhotonCamera.isFunctionTwoOn = mIsFunctionTwoOn;
 
-        if (PhotonCamera.getSettings().functionOne.equals("Session Type (OpCode) OFF")) {
+        if (PhotonCamera.getSettings().functionTwo.equals("Session Type (OpCode) OFF")) {
             PhotonCamera.isSessionTypeOn = !mIsFunctionOneOn;
             restartCamera();
             return;
