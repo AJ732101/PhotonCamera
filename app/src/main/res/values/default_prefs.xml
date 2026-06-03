@@ -130,6 +130,7 @@
     <string name="pref_color_space_default_value" translatable="false">6</string>
     <string name="pref_video_codec_name_default_value" translatable="false">Device Default</string>
     <string name="pref_video_range_default_value" translatable="false">Full</string>
+    <string name="pref_sw_colorspace_default_value" translatable="false">DISPLAY P3</string>
 
     <!-- Audio settings strings -->
     <string name="pref_audio_codec_default_value" translatable="false">3</string>

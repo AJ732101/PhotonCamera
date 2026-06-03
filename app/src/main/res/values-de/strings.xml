@@ -54,6 +54,7 @@
     <string name="exposure_time">"Belichtungszeit "</string>
     <string name="aperture">"Blende "</string>
     <string name="flength">"Brennweite "</string>
+    <string name="flength35">35mm Brennweite</string>
     <string name="info">Info</string>
     <string name="filename">"Dateiname  "</string>
     <string name="turn_on_afdata">Debug Informationen anzeigen</string>
@@ -131,6 +132,7 @@
     <string name="golden_ratio">Goldener Schnitt</string>
     <string name="diag_triangle">Diagon. Dreiecke</string>
     <string name="thumbnail">Eingebettete Vorschau</string>
+    <string name="use_p3">P3 (statt sRGB)</string>
     <string name="tonemapping_mode_quality">Qualität Tonemapping</string>
     <string name="gallery_folders">Galerie Verzeichnisse</string>
     <string name="options">Optionen</string>
@@ -182,6 +184,7 @@
     <string name="new_settings_global">Zusätzliche Einstellungen global anwenden</string>
     <string name="photo_video_codec">Verwendeter Codec</string>
     <string name="photo_colorspace">Farbraum</string>
+    <string name="sw_colorspace">Farbraum</string>
     <string name="exposure_bracketing">Belichtungsreihe (Bracketing)</string>
     <string name="bracketing_off">Aus (1x)</string>
     <string name="bracketing_normal">Mittel (1x, 4x)</string>
@@ -220,6 +223,7 @@
     <string name="soc_hdr_mode">Qualcomm HDR Modus</string>
     <string name="transfer_function">Transferfunktion</string>
     <string name="virtual_horizon">Virtueller Horizont</string>
+    <string name="sw_codec_based_photo_settings_title">SW basierte Foto Einstellungen</string>
     <string name="beam_forming_separator_title">Aufnahme Charakteristik Formung</string>
     <string name="raw_video_separator_title">RAW Video</string>
     <string name="general_settings_screen_summary">Keine spezielle Kategorie</string>
@@ -255,4 +259,6 @@
     <string name="vendor_keys_name_filter">Filter Name (alle Geräteschlüssel)</string>
     <string name="vendor_keys_class_filter">Filter Klasse (alle Geräteschlüssel)</string>
     <string name="still_image_label">Foto</string>
+    <string name="aperture1">Blende</string>
+    <string name="key_details_label">Schlüssel Details</string>
 </resources>

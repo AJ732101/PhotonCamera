@@ -122,16 +122,62 @@ public class AvifEncoder {
 
             int ds = -1;
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                switch (PhotonCamera.getSettings().swColorSpace) {
+                    case "scRGB LINEAR":
+                        ds = DataSpace.DATASPACE_SCRGB_LINEAR;
+                        break;
+                    case "sRGB":
+                        ds = DataSpace.DATASPACE_SRGB;
+                        break;
+                    case "scRGB":
+                        ds = DataSpace.DATASPACE_SCRGB;
+                        break;
+                    case "DISPLAY P3":
+                        ds = DataSpace.DATASPACE_DISPLAY_P3;
+                        break;
+                    case "BT.2020 HLG":
+                        ds = DataSpace.DATASPACE_BT2020_HLG;
+                        break;
+                    case "BT.2020 PQ":
+                        ds = DataSpace.DATASPACE_BT2020_PQ;
+                        break;
+                    case "ADOBE RGB":
+                        ds = DataSpace.DATASPACE_ADOBE_RGB;
+                        break;
+                    case "JFIF":
+                        ds = DataSpace.DATASPACE_JFIF;
+                        break;
+                    case "BT.601_625":
+                        ds = DataSpace.DATASPACE_BT601_625;
+                        break;
+                    case "BT.601_525":
+                        ds = DataSpace.DATASPACE_BT601_525;
+                        break;
+                    case "BT.2020":
+                        ds = DataSpace.DATASPACE_BT2020;
+                        break;
+                    case "BT.709":
+                        ds = DataSpace.DATASPACE_BT709;
+                        break;
+                    case "DCI P3":
+                        ds = DataSpace.DATASPACE_DCI_P3;
+                        break;
+                    case "sRGB LINEAR":
+                        ds = DataSpace.DATASPACE_SRGB_LINEAR;
+                        break;
+                    case "DISPLAY BT.2020":
+                        ds = 142999552;
+                        break;
+                }
+            }
+
             var preciseMode = PreciseMode.LOSSY;
             if (PhotonCamera.getSettings().useLosslessSwEncoding) {
                 preciseMode = PreciseMode.LOSSLESS;
             }
 
             if (image.getFormat() == ImageFormat.YUV_420_888) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    ds = DataSpace.DATASPACE_DISPLAY_P3;;
-                }
-
                 Image.Plane yPlane = image.getPlanes()[0];
                 Image.Plane uPlane = image.getPlanes()[1];
                 Image.Plane vPlane = image.getPlanes()[2];
@@ -149,10 +195,6 @@ public class AvifEncoder {
 
                 avifByteArray = coder.encodeAvif420_888(yBuffer, yRowStride, uBuffer, uRowStride, vBuffer, vRowStride, uPixelStride, vPixelStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.EIGHT, ds, 0, exifBytes);
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    ds = DataSpace.DATASPACE_BT2020_HLG;
-                }
-
                 Image.Plane yPlane = image.getPlanes()[0];
                 Image.Plane uvPlane = image.getPlanes()[1]; // In P010, U and V are interleaved
 

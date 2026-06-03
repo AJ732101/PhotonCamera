@@ -135,6 +135,7 @@ public class Settings {
     public int dngWhiteLevel = -1;
     public String photoRange = "Full";
     public String photoVideoCodec = "HEVC";
+    public String swColorSpace = "DISPLAY_P3";
     public int audioDirection = 0;
     public float audioZoom = 0.0f;
     public boolean disableVendorKeys = false;
@@ -277,6 +278,7 @@ public class Settings {
         photoRange = PreferenceKeys.getPhotoRange();
         photoVideoCodec = PreferenceKeys.getPhotoVideoCodec();
         showZoomSlider = PreferenceKeys.showZoomSlider();
+        swColorSpace = PreferenceKeys.getSwColorSpace();
     }
 
     public void saveID() {

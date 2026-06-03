@@ -190,6 +190,7 @@
     <string name="pref_photo_video_code_key" translatable="false">pref_photo_video_code_key</string>
     <string name="pref_photo_transfer_function_key" translatable="false">pref_photo_transfer_function_key</string>
     <string name="pref_photo_colorspace_key" translatable="false">pref_photo_colorspace_key</string>
+    <string name="pref_sw_colorspace_key" translatable="false">pref_sw_colorspace_key</string>
     <string name="pref_photo_range_key" translatable="false">pref_photo_range_key</string>
 
     <!-- Vendor Keys -->

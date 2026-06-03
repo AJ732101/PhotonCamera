@@ -132,6 +132,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_PHOTO_TRANSFER_FUNCTION.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_RANGE.mValue);
+        COMMON_KEYS.add(Key.KEY_SW_COLOR_SPACE.mValue);
         // QualityDoesMatter - Sensor Related (and more)
         COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
@@ -213,6 +214,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_VIDEO_CODEC, resources.getString(R.string.pref_photo_video_codec_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_TRANSFER_FUNCTION, resources.getString(R.string.pref_transfer_function_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_RANGE, resources.getString(R.string.pref_video_range_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SW_COLOR_SPACE, resources.getString(R.string.pref_sw_colorspace_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE, resources.getString(R.string.pref_color_space_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME, resources.getString(R.string.pref_video_codec_name_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_RANGE, resources.getString(R.string.pref_video_range_default_value));
@@ -978,6 +980,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_PHOTO_RANGE);
     }
 
+    public static String getSwColorSpace() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_SW_COLOR_SPACE);
+    }
+
     public static int getPhotoColorSpace() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE);
     }
@@ -1154,6 +1160,7 @@ public class PreferenceKeys {
         KEY_PHOTO_TRANSFER_FUNCTION(R.string.pref_photo_transfer_function_key),
         KEY_PHOTO_COLOR_SPACE(R.string.pref_photo_colorspace_key),
         KEY_PHOTO_RANGE(R.string.pref_photo_range_key),
+        KEY_SW_COLOR_SPACE(R.string.pref_sw_colorspace_key),
 
         /**
          * QualityDoesMatter - Sensor Related (and more)

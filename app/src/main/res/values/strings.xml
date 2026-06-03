@@ -227,6 +227,7 @@
     <string name="photo_transfer_function">Transfer Function</string>
     <string name="photo_video_codec">Used Codec</string>
     <string name="photo_colorspace">Color Space</string>
+    <string name="sw_colorspace">Color Space</string>
 
     <!-- Bracketing mode strings -->
     <string name="exposure_bracketing">Exposure Bracketing</string>
@@ -250,6 +251,7 @@
     <string name="other_settings_separator_title">Other Settings</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
     <string name="video_codec_based_photo_settings_title">Video Codec based Photo Settings</string>
+    <string name="sw_codec_based_photo_settings_title">SW Codec based Photo Settings</string>
     <string name="beam_forming_separator_title">Beam Forming</string>
     <string name="raw_video_separator_title">RAW Video</string>
 

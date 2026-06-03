@@ -195,6 +195,23 @@
 
         </PreferenceCategory>
 
+        <PreferenceCategory
+            android:layout="@layout/preference_category_layout"
+            app:key="sw_codec_based_photo_settings_category"
+            app:title="@string/sw_codec_based_photo_settings_title">
+
+            <ListPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_sw_colorspace_key"
+                android:title="@string/sw_colorspace"
+                app:useSimpleSummaryProvider="true"
+                android:icon="@drawable/palette_24px"
+                android:entries="@array/sw_colorspace_entries"
+                android:entryValues="@array/sw_colorspace_entryValues"
+                android:defaultValue="@string/pref_photo_video_codec_default_value" />
+
+        </PreferenceCategory>
+
         <Preference
             android:layout_height="56dp"
             android:selectable="false" />

@@ -544,6 +544,42 @@
         <item>APV</item>
     </string-array>
 
+    <string-array name="sw_colorspace_entries">
+        <item>scRGB LINEAR</item>
+        <item>sRGB</item>
+        <item>scRGB</item>
+        <item>DISPLAY P3</item>
+        <item>BT.2020 HLG</item>
+        <item>BT.2020 PQ</item>
+        <item>ADOBE RGB</item>
+        <item>JFIF</item>
+        <item>BT.601_625</item>
+        <item>BT.601_525</item>
+        <item>BT.2020</item>
+        <item>BT.709</item>
+        <item>DCI P3</item>
+        <item>sRGB LINEAR</item>
+        <item>DISPLAY BT.2020</item>
+    </string-array>
+
+    <string-array name="sw_colorspace_entryValues">
+        <item>scRGB LINEAR</item>
+        <item>sRGB</item>
+        <item>scRGB</item>
+        <item>DISPLAY P3</item>
+        <item>BT.2020 HLG</item>
+        <item>BT.2020 PQ</item>
+        <item>ADOBE RGB</item>
+        <item>JFIF</item>
+        <item>BT.601_625</item>
+        <item>BT.601_525</item>
+        <item>BT.2020</item>
+        <item>BT.709</item>
+        <item>DCI P3</item>
+        <item>sRGB LINEAR</item>
+        <item>DISPLAY BT.2020</item>
+    </string-array>
+
     <string-array name="digital_zoom_factor_entries">
         <item>0.5</item>
         <item>1.5</item>
