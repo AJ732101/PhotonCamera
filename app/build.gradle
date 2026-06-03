@@ -160,7 +160,7 @@ dependencies {
     //Google Material
     implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.core:core-ktx:1.18.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.21'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.0'
     implementation "com.anggrayudi:storage:2.2.0"
     implementation 'me.zhanghai.android.libarchive:library:1.1.6'
     //Leak Canary

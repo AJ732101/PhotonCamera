@@ -118,6 +118,17 @@ public class HeifEncoder {
                 preciseMode = PreciseMode.LOSSLESS;
             }
 
+            // Speeds
+            // 1 = "veryslow"
+            // 2 = "slower"
+            // 3 = "slow"
+            // 4 = "medium"
+            // 5 = "fast"
+            // 6 = "faster"
+            // 7 = "veryfast"
+            // 8 = "superfast"
+            // 9 = "ultrafast"
+
             if (image.getFormat() == ImageFormat.YUV_420_888) {
                 Image.Plane yPlane = image.getPlanes()[0];
                 Image.Plane uPlane = image.getPlanes()[1];
@@ -134,7 +145,7 @@ public class HeifEncoder {
                 int uPixelStride = uPlane.getPixelStride();
                 int vPixelStride = vPlane.getPixelStride();
 
-                heifByteArray = coder.encodeHeic420_888(yBuffer, yRowStride, uBuffer, uRowStride, vBuffer, vRowStride, uPixelStride, vPixelStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.EIGHT, ds, 0, exifBytes);
+                heifByteArray = coder.encodeHeic420_888(yBuffer, yRowStride, uBuffer, uRowStride, vBuffer, vRowStride, uPixelStride, vPixelStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.FOUR, ds, orientation, exifBytes);
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     ds = DataSpace.DATASPACE_BT2020_HLG;
@@ -149,7 +160,7 @@ public class HeifEncoder {
                 int yRowStride = yPlane.getRowStride();
                 int uvRowStride = uvPlane.getRowStride();
 
-                heifByteArray = coder.encodeHeicP010(yBuffer, yRowStride, uvBuffer, uvRowStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.EIGHT, ds, 0, exifBytes);
+                heifByteArray = coder.encodeHeicP010(yBuffer, yRowStride, uvBuffer, uvRowStride, image.getWidth(), image.getHeight(), quality, preciseMode, AvifSpeed.FOUR, ds, orientation, exifBytes);
             }
 
             // 3. Verify that the encoder returned data.
