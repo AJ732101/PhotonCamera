@@ -6,6 +6,7 @@ import static android.opengl.GLES20.GL_CLAMP_TO_EDGE;
 import static android.opengl.GLES20.GL_NEAREST;
 import static android.opengl.GLES30.GL_BYTE;
 import static android.opengl.GLES30.GL_FLOAT;
+import static android.opengl.GLES30.GL_HALF_FLOAT;
 import static android.opengl.GLES30.GL_INT;
 import static android.opengl.GLES30.GL_R16F;
 import static android.opengl.GLES30.GL_R16I;
@@ -102,6 +103,7 @@ public class GLFormat {
             case NONE:
                 break;
             case FLOAT_16:
+                return Bitmap.Config.RGBA_F16;
             case FLOAT_32:
             case UNSIGNED_16:
             case UNSIGNED_8:

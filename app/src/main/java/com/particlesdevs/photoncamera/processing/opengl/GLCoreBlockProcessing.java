@@ -96,11 +96,21 @@ public class GLCoreBlockProcessing extends GLContext implements AutoCloseable {
 
     public void drawBlocksToOutput() {
         glBindFramebuffer(GL_FRAMEBUFFER, bindFB[0]);
+        GLES30.glPixelStorei(GLES30.GL_PACK_ALIGNMENT, 1);
+        
         GLProg program = super.mProgram;
         GLBlockDivider divider = new GLBlockDivider(mOutHeight, GLDrawParams.TileSize);
         int[] row = new int[2];
+        
+        mOutBuffer.order(java.nio.ByteOrder.nativeOrder());
+        mBlockBuffer.order(java.nio.ByteOrder.nativeOrder());
         mOutBuffer.position(0);
-        mBlockBuffer.position(0);
+
+        int readType = mglFormat.getGLType();
+        if (mglFormat.mFormat == GLFormat.DataType.FLOAT_16) {
+            readType = GLES30.GL_HALF_FLOAT;
+        }
+
         while (divider.nextBlock(row)) {
             int y = row[0];
             int height = row[1];
@@ -109,20 +119,19 @@ public class GLCoreBlockProcessing extends GLContext implements AutoCloseable {
             program.setVar("yOffset", y);
             program.draw();
             checkEglError("program");
+            
             mBlockBuffer.position(0);
-            glReadPixels(0, 0, mOutWidth, height, mglFormat.getGLFormatExternal(), mglFormat.getGLType(), mBlockBuffer);
+            glReadPixels(0, 0, mOutWidth, height, mglFormat.getGLFormatExternal(), readType, mBlockBuffer);
             checkEglError("glReadPixels");
-            if (height < GLDrawParams.TileSize) {
-                // This can only happen 2 times at edges
-                byte[] data = new byte[mOutWidth * height * mglFormat.mFormat.mSize * mglFormat.mChannels];
-                mBlockBuffer.get(data);
-                mOutBuffer.put(data);
-            } else {
-                mOutBuffer.put(mBlockBuffer);
-            }
+            
+            int bytesToCopy = mOutWidth * height * mglFormat.mFormat.mSize * mglFormat.mChannels;
+            mBlockBuffer.limit(bytesToCopy);
+            mBlockBuffer.position(0);
+            mOutBuffer.put(mBlockBuffer);
+            mBlockBuffer.limit(mBlockBuffer.capacity());
         }
+        
         mOutBuffer.position(0);
-        mBlockBuffer = null;
         if (mOut != null) mOut.byteBuffer = mOutBuffer;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }

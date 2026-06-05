@@ -326,7 +326,11 @@ public class ImageSaver {
 
     public static class Util {
         public static boolean saveBitmapAsJpg(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
-            img = ensure8Bit(img);
+            Log.d(TAG, "saveBitmapAsJpg() - Bit depth: " + img.getConfig());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && img.getColorSpace() != null) {
+                Log.d(TAG, "saveBitmapAsJpg() - Color space: " + img.getColorSpace().getName());
+            }
+            //img = ensure8Bit(img);
             exifData.COMPRESSION = String.valueOf(jpgQuality);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
@@ -352,17 +356,18 @@ public class ImageSaver {
         }
 
         private static Bitmap ensure8Bit(Bitmap img) {
-            if (img.getConfig() == Bitmap.Config.RGBA_F16) {
-                Log.d(TAG, "Converting RGBA_F16 to ARGB_8888 for compatible saving");
-                Bitmap copy = img.copy(Bitmap.Config.ARGB_8888, false);
-                img.recycle();
-                return copy;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                if (img.getConfig() == Bitmap.Config.RGBA_F16) {
+                    Log.d(TAG, "Converting RGBA_F16 to ARGB_8888 for compatible saving");
+                    Bitmap copy = img.copy(Bitmap.Config.ARGB_8888, false);
+                    img.recycle();
+                    return copy;
+                }
             }
             return img;
         }
 
         public static boolean saveBitmapAsWebP(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData, boolean lossless) {
-            img = ensure8Bit(img);
             exifData.COMPRESSION = String.valueOf(jpgQuality);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
@@ -399,7 +404,6 @@ public class ImageSaver {
         }
 
         public static boolean saveBitmapAsPng(Path fileToSave, Bitmap img, int pngQuality, ParseExif.ExifData exifData) {
-            img = ensure8Bit(img);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
                 OutputStream outputStream = Files.newOutputStream(fileToSave);

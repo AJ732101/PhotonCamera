@@ -688,7 +688,7 @@ public class VendorTagUtils {
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            //builder.set(hdrMode, 3);
+                            builder.set(hdrMode, 3);
                         }
                         break;
                     case 2:
@@ -698,7 +698,7 @@ public class VendorTagUtils {
                         }
                         hdrMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.sessionParameters.numHDRexposure", Integer.class);
                         if (isSupported(builder, hdrMode)) {
-                            //builder.set(hdrMode, 3);
+                            builder.set(hdrMode, 3);
                         }
                         break;
                     case 3:
@@ -1042,7 +1042,7 @@ public class VendorTagUtils {
 
                     var vivoDcgHdr = new CaptureRequest.Key<>("vivo.control.EnableDCGHDR", Integer.class);
                     if (isSupported(builder, vivoDcgHdr)) {
-                        //builder.set(vivoDcgHdr, (int) 2564);
+                        builder.set(vivoDcgHdr, 1);
                     }
 
                     var vivoStreamsUsage = new CaptureRequest.Key<>("vivo.control.streamsUsage", Integer[].class);
@@ -1204,7 +1204,13 @@ public class VendorTagUtils {
             if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
                 var MOFAlignment = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MOFAlignment", byte.class);
                 var frameDelay = new CaptureRequest.Key<>("org.quic.camera.eislookahead.FrameDelay", byte.class);
-                var margin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
+                var requestedMargin = new CaptureRequest.Key<>("org.quic.camera.eislookahead.RequestedMargin", byte.class);
+                var stabilizationMargins = new CaptureRequest.Key<>("org.quic.camera.eislookahead.StabilizationMargins", byte.class);
+                var additionalCropOffset = new CaptureRequest.Key<>("org.quic.camera.eislookahead.AdditionalCropOffset", byte.class);
+                var stabilizedOutputDims = new CaptureRequest.Key<>("org.quic.camera.eislookahead.StabilizedOutputDims", byte.class);
+                var minimalTotalMargins = new CaptureRequest.Key<>("org.quic.camera.eislookahead.MinimalTotalMargins", byte.class);
+                var DISMVStats = new CaptureRequest.Key<>("org.quic.camera.eislookahead.DISMVStats", byte.class);
+                var ExtraHALBuffers = new CaptureRequest.Key<>("org.quic.camera.eislookahead.ExtraHALBuffers", byte.class);
 
                 if (PhotonCamera.isEisLookAheadOn) {
                     builder.set(eislookahead, (byte) 1);
@@ -1215,8 +1221,23 @@ public class VendorTagUtils {
                     if (isSupported(builder, frameDelay)) {
                         builder.set(frameDelay, (byte) 10);
                     }
-                    if (isSupported(builder, margin)) {
-                        builder.set(margin, (byte) 20);
+                    if (isSupported(builder, requestedMargin)) {
+                        builder.set(requestedMargin, (byte) 20);
+                    }
+                    if (isSupported(builder, stabilizationMargins)) {
+                        builder.set(stabilizationMargins, (byte) 20);
+                    }
+                    if (isSupported(builder, minimalTotalMargins)) {
+                        builder.set(minimalTotalMargins, (byte) 8);
+                    }
+                    if (isSupported(builder, additionalCropOffset)) {
+                        builder.set(additionalCropOffset, (byte) 5);
+                    }
+                    if (isSupported(builder, DISMVStats)) {
+                        builder.set(DISMVStats, (byte) 1);
+                    }
+                    if (isSupported(builder, ExtraHALBuffers)) {
+                        builder.set(ExtraHALBuffers, (byte) 10);
                     }
                 } else {
                     builder.set(eislookahead, (byte) 0);

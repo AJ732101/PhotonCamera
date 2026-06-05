@@ -89,7 +89,26 @@ public class AvifEncoder {
     }
 
     /**
-     * Encodes an Image object by first converting it to a Bitmap and then to AVIF.
+     * Encodes an Image object to AVIF.
+     *
+     * @param image      The YUV Image object to encode.
+     * @param outputFile The target file for the AVIF image.
+     * @throws IOException If encoding or writing the file fails.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public void encodeBmpToAvif(Bitmap image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException, ExecutionException, InterruptedException {
+        HeifCoder coder = new HeifCoder();
+        byte[] avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.AUTO, 0, null);
+
+        if (avifByteArray == null || avifByteArray.length == 0) {
+            throw new IOException("AVIF encoder returned null or empty data. Encoding failed.");
+        }
+
+        java.nio.file.Files.write(outputFile.toPath(), avifByteArray);
+    }
+
+    /**
+     * Encodes an Image object to AVIF.
      *
      * @param image      The YUV Image object to encode.
      * @param outputFile The target file for the AVIF image.

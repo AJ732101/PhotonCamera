@@ -5,7 +5,10 @@ import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.os.Build;
 
+import com.particlesdevs.photoncamera.processing.AvifEncoder;
+import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.opengl.scripts.PyramidMerging;
 import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.api.Camera2ApiAutoFix;
@@ -24,6 +27,7 @@ import com.particlesdevs.photoncamera.processing.parameters.IsoExpoSelector;
 import com.particlesdevs.photoncamera.processing.render.Parameters;
 import com.particlesdevs.photoncamera.util.Allocator;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -249,8 +253,6 @@ public class HdrxProcessor extends ProcessorBase {
         }
         selected = 0;
 
-
-
         Log.d(TAG, "White Level:" + processingParameters.whiteLevel);
         Log.d(TAG, "Wrapper.loadFrame");
         //float noiseLevel = (float) Math.sqrt((CaptureController.mCaptureResult.get(CaptureResult.SENSOR_SENSITIVITY)) *
@@ -302,6 +304,19 @@ public class HdrxProcessor extends ProcessorBase {
         catch (Exception e){
             Log.d(TAG,"Error in processingEventsListener.onProcessingFinished:"+Log.getStackTraceString(e));
         }
+
+        Path storagePath = ImagePath.newAVIFFilePath();
+        File heicFile = new File(storagePath.toString());
+        AvifEncoder avifEncoder = new AvifEncoder();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                avifEncoder.encodeBmpToAvif(img, heicFile, 0, 85, null);
+            }
+        }
+        catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+
         imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
         //Saves the final bitmap
         boolean imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
@@ -314,7 +329,6 @@ public class HdrxProcessor extends ProcessorBase {
         }
 
         pipeline.close();
-
 
         Allocator.getMemoryCount();
         callback.onFinished();

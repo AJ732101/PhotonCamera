@@ -105,7 +105,7 @@ public class PostPipeline extends GLBasePipeline {
         } else {
             GLDrawParams.TileSize = 256;
         }
-        GLFormat format = new GLFormat(GLFormat.DataType.SIMPLE_8, 4);
+        GLFormat format = new GLFormat(GLFormat.DataType.FLOAT_16, 4);
         GLImage output = new GLImage(rotatedSize, format, false);
         GLCoreBlockProcessing glproc = new GLCoreBlockProcessing(rotatedSize, output, format, GLDrawParams.Allocate.Direct);
         glint = new GLInterface(glproc);

@@ -65,8 +65,7 @@ public class GLImage implements AutoCloseable {
     }
     public Bitmap getBufferedImage(int channels){
         byteBuffer.position(0);
-        GLFormat bitmapF = new GLFormat(GLFormat.DataType.UNSIGNED_8, channels);
-        Bitmap preview = Bitmap.createBitmap(size.x, size.y, bitmapF.getBufferedImageConfig());
+        Bitmap preview = Bitmap.createBitmap(size.x, size.y, glFormat.getBufferedImageConfig());
         preview.copyPixelsFromBuffer(byteBuffer);
         return preview;
     }

@@ -2729,6 +2729,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             stateCallback
                     );
                 }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    if (checkColorSpaceProfilesSupport(mCameraManager, ColorSpace.Named.BT2020_HLG)) {
+                        if (mTargetFormat == ImageFormat.YCBCR_P010) {
+                            //configuration.setColorSpace(ColorSpace.Named.BT2020_HLG);
+                        }
+                    }
+                }
                 if (PhotonCamera.getSettings().useP3) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                         if (checkColorSpaceProfilesSupport(mCameraManager, ColorSpace.Named.DISPLAY_P3)) {
