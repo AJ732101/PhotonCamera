@@ -18,6 +18,7 @@
     <string name="pref_tonemapping_mode_quality_key" translatable="false">pref_tonemapping_mode_quality_key</string>
     <string name="pref_preview_resolution_key" translatable="false">pref_preview_resolution_key</string>
     <string name="pref_show_afdata_key" translatable="false">pref_show_afdata_key</string>
+    <string name="pref_image_reader_flags_key" translatable="false">pref_image_reader_flags_key</string>
 
     <string name="pref_enable_system_nr_key" translatable="false">pref_enable_system_nr_key</string>
     <string name="pref_save_per_lens_settings" translatable="false">pref_save_per_lens_settings</string>

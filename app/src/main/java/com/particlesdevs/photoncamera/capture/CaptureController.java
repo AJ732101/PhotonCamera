@@ -1569,11 +1569,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            long flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_COMPOSER_OVERLAY;
+            //long flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_VIDEO_ENCODE;
             mImageReaderPreview = new ImageReader.Builder(preview.getWidth(), preview.getHeight())
                     .setMaxImages(maxImageReaderImages)
                     .setImageFormat(mPreviewTargetFormat)
                     //.setDefaultDataSpace(DataSpace.DATASPACE_BT2020_HLG)
-                    .setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_COMPOSER_OVERLAY)
+                    .setUsage(flags)
                     .build();
         } else {
             mImageReaderPreview = ImageReader.newInstance(preview.getWidth(), preview.getHeight(), mPreviewTargetFormat, maxImageReaderImages);
@@ -1612,6 +1614,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 long flags = HardwareBuffer.USAGE_CPU_READ_OFTEN;
                 if (mTargetFormat == ImageFormat.JPEG_R) {
                     flags = HardwareBuffer.USAGE_CPU_READ_OFTEN | HardwareBuffer.USAGE_COMPOSER_OVERLAY;
+                } else if (mTargetFormat == ImageFormat.YCBCR_P010) {
+                    if (PhotonCamera.getSettings().alternateImageReaderFlags) {
+                        flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_VIDEO_ENCODE;
+                    }
+                } else if (mTargetFormat == ImageFormat.RAW_SENSOR) {
+                    if (PhotonCamera.getSettings().alternateImageReaderFlags) {
+                        flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
+                    }
                 }
                 mImageReaderRaw = new ImageReader.Builder(targetWidth, targetHeight)
                         .setMaxImages(maxImageReaderImages)

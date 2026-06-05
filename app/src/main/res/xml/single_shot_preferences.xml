@@ -210,6 +210,14 @@
                 android:entryValues="@array/sw_colorspace_entryValues"
                 android:defaultValue="@string/pref_photo_video_codec_default_value" />
 
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:key="@string/pref_image_reader_flags_key"
+                android:defaultValue="@bool/pref_image_reader_flags_default"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/image_reader_flags"
+                android:summary=""
+                android:icon="@drawable/colors_24px"/>
+
         </PreferenceCategory>
 
         <Preference

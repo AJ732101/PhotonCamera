@@ -59,6 +59,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_THUMBNAIL.mValue);
         COMMON_KEYS.add(Key.KEY_P3.mValue);
         COMMON_KEYS.add(Key.KEY_TONEMAPPING_MODE_QUALITY.mValue);
+        COMMON_KEYS.add(Key.KEY_IMAGE_READER_FLAGS.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
@@ -162,6 +163,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_THUMBNAIL, resources.getBoolean(R.bool.pref_thumbnail_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_P3, resources.getBoolean(R.bool.pref_p3_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TONEMAPPING_MODE_QUALITY, resources.getBoolean(R.bool.pref_tonemapping_mode_quality_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_IMAGE_READER_FLAGS, resources.getBoolean(R.bool.pref_image_reader_flags_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
@@ -406,6 +408,10 @@ public class PreferenceKeys {
 
     public static boolean isToneMappingQualityOn(){
         return getBool(Key.KEY_TONEMAPPING_MODE_QUALITY);
+    }
+
+    public static boolean isAlternateImageReaderFlagsOn(){
+        return getBool(Key.KEY_IMAGE_READER_FLAGS);
     }
 
     public static void setBatterySaver(boolean value) {
@@ -1031,6 +1037,7 @@ public class PreferenceKeys {
         KEY_WIDE169(R.string.pref_wide169_key),
         KEY_BINNING(R.string.pref_binning_key),
         KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
+        KEY_IMAGE_READER_FLAGS(R.string.pref_image_reader_flags_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
         KEY_P3(R.string.pref_p3_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),

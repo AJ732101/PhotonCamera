@@ -143,6 +143,7 @@ public class Settings {
     public boolean isTonnemappingModeQuality = false;
     public int socQualcommMfnrFrames = 5;
     public boolean showZoomSlider = false;
+    public boolean alternateImageReaderFlags = false;
 
 
     public void loadCache() {
@@ -279,6 +280,7 @@ public class Settings {
         photoVideoCodec = PreferenceKeys.getPhotoVideoCodec();
         showZoomSlider = PreferenceKeys.showZoomSlider();
         swColorSpace = PreferenceKeys.getSwColorSpace();
+        alternateImageReaderFlags = PreferenceKeys.isAlternateImageReaderFlagsOn();
     }
 
     public void saveID() {

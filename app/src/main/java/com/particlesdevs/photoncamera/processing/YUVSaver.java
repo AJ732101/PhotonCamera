@@ -37,6 +37,9 @@ public class YUVSaver extends DefaultSaver{
 
     @Override
     public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Log.d(TAG, "DataSpace: " + String.valueOf(image.getDataSpace()));
+        }
         // Check for 10-bit YUV format to encode as HEIC
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && ((image.getFormat() == ImageFormat.YCBCR_P010) || (image.getFormat() == ImageFormat.YUV_420_888))) {
             String usedCodec = PhotonCamera.getSettings().photoVideoCodec; //PhotonCamera.getSettings().tenBitSurfaceTarget;

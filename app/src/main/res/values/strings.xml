@@ -161,6 +161,7 @@
     <string name="thumbnail" translatable="true">Thumbnail</string>
     <string name="use_p3" translatable="true">P3 (instead of sRGB)</string>
     <string name="tonemapping_mode_quality" translatable="true">Tonemapping Mode Quality</string>
+    <string name="image_reader_flags" translatable="true">Alternate ImageReader Flags</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>
