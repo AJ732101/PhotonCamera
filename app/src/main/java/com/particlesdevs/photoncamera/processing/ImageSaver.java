@@ -175,7 +175,11 @@ public class ImageSaver {
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) {
             imageDescriptionBuilder.append("\n   Processing: LUT processed single shot JPEG");
-            imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
+            if (!PhotonCamera.getSettings().lutName.equalsIgnoreCase("lut.png")) {
+                imageDescriptionBuilder.append("\n   LUT Name: ").append(PhotonCamera.getSettings().lutName);
+            } else {
+                imageDescriptionBuilder.append("\n   LUT Name: None");
+            }
         }
         if ((!PhotonCamera.getSettings().contrastCurve.equalsIgnoreCase("off"))) {
             imageDescriptionBuilder.append("\n   Contrast Curve: ").append(PhotonCamera.getSettings().contrastCurve);
@@ -322,6 +326,7 @@ public class ImageSaver {
 
     public static class Util {
         public static boolean saveBitmapAsJpg(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
+            img = ensure8Bit(img);
             exifData.COMPRESSION = String.valueOf(jpgQuality);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
@@ -346,7 +351,18 @@ public class ImageSaver {
             }
         }
 
+        private static Bitmap ensure8Bit(Bitmap img) {
+            if (img.getConfig() == Bitmap.Config.RGBA_F16) {
+                Log.d(TAG, "Converting RGBA_F16 to ARGB_8888 for compatible saving");
+                Bitmap copy = img.copy(Bitmap.Config.ARGB_8888, false);
+                img.recycle();
+                return copy;
+            }
+            return img;
+        }
+
         public static boolean saveBitmapAsWebP(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData, boolean lossless) {
+            img = ensure8Bit(img);
             exifData.COMPRESSION = String.valueOf(jpgQuality);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
@@ -383,6 +399,7 @@ public class ImageSaver {
         }
 
         public static boolean saveBitmapAsPng(Path fileToSave, Bitmap img, int pngQuality, ParseExif.ExifData exifData) {
+            img = ensure8Bit(img);
             exifData.SOFTWARE = "PhotonVidCam";
             try {
                 OutputStream outputStream = Files.newOutputStream(fileToSave);
