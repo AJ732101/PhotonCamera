@@ -144,6 +144,8 @@ public class Settings {
     public int socQualcommMfnrFrames = 5;
     public boolean showZoomSlider = false;
     public boolean alternateImageReaderFlags = false;
+    public boolean useHqSubsampling = false;
+    public boolean useParallelAvif = false;
 
 
     public void loadCache() {
@@ -197,6 +199,7 @@ public class Settings {
         demosaicMethod = PreferenceKeys.getDemosaicMethod();
         disableVendorKeys = PreferenceKeys.disableVendorKeys();
         disableNoGuiYet = PreferenceKeys.disableNoGuiYet();
+        useParallelAvif = PreferenceKeys.isParallelAvifOn();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
@@ -281,6 +284,7 @@ public class Settings {
         showZoomSlider = PreferenceKeys.showZoomSlider();
         swColorSpace = PreferenceKeys.getSwColorSpace();
         alternateImageReaderFlags = PreferenceKeys.isAlternateImageReaderFlagsOn();
+        useHqSubsampling = PreferenceKeys.isHqSubsamplingOn();
     }
 
     public void saveID() {

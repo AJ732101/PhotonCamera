@@ -87,14 +87,6 @@
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_lossless_sw_encoding_key"
-            android:title="@string/lossless_sw_encoding"
-            android:summary=""
-            android:icon="@drawable/high_quality_24px"
-            android:defaultValue="@bool/pref_lossless_sw_encoding_def_value"/>
-
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
-            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_use_stream_usecase_key"
             android:title="@string/use_stream_usecase"
             android:summary=""
@@ -217,6 +209,22 @@
                 android:title="@string/image_reader_flags"
                 android:summary=""
                 android:icon="@drawable/colors_24px"/>
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:layout="@layout/preference_with_margin"
+                android:key="@string/pref_lossless_sw_encoding_key"
+                android:title="@string/lossless_sw_encoding"
+                android:summary=""
+                android:icon="@drawable/high_quality_24px"
+                android:defaultValue="@bool/pref_lossless_sw_encoding_def_value"/>
+
+            <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+                android:key="@string/pref_use_hq_subsampling_key"
+                android:defaultValue="@bool/pref_hq_subsampling_default"
+                android:layout="@layout/preference_with_margin"
+                android:title="@string/hq_subsampling"
+                android:summary=""
+                android:icon="@drawable/high_quality_24px"/>
 
         </PreferenceCategory>
 

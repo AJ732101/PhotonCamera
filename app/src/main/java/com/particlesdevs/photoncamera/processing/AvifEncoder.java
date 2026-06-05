@@ -98,7 +98,15 @@ public class AvifEncoder {
     @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public void encodeBmpToAvif(Bitmap image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException, ExecutionException, InterruptedException {
         HeifCoder coder = new HeifCoder();
-        byte[] avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, AvifChromaSubsampling.AUTO, 0, null);
+        byte[] avifByteArray = null;
+
+        var subSampling = PhotonCamera.getSettings().useHqSubsampling ? AvifChromaSubsampling.YUV422 : AvifChromaSubsampling.YUV420;
+
+        if (PhotonCamera.getSettings().useLosslessSwEncoding) {
+            avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, subSampling, 0, null);
+        } else {
+            avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, subSampling, 0, null);
+        }
 
         if (avifByteArray == null || avifByteArray.length == 0) {
             throw new IOException("AVIF encoder returned null or empty data. Encoding failed.");

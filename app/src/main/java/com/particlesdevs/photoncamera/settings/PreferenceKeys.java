@@ -38,6 +38,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SHOW_GRID.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_WATERMARK.mValue);
         COMMON_KEYS.add(Key.KEY_EXPOSURE_FUSION_METHOD.mValue);
+        COMMON_KEYS.add(Key.KEY_PARALLEL_AVIF.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_ROUND_EDGE.mValue);
         COMMON_KEYS.add(Key.KEY_CAMERA_SOUNDS.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_GRADIENT.mValue);
@@ -60,6 +61,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_P3.mValue);
         COMMON_KEYS.add(Key.KEY_TONEMAPPING_MODE_QUALITY.mValue);
         COMMON_KEYS.add(Key.KEY_IMAGE_READER_FLAGS.mValue);
+        COMMON_KEYS.add(Key.KEY_HQ_SUBSAMPLING.mValue);
         // QualityDoesMatter - General
         COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
@@ -164,7 +166,9 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_P3, resources.getBoolean(R.bool.pref_p3_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TONEMAPPING_MODE_QUALITY, resources.getBoolean(R.bool.pref_tonemapping_mode_quality_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_IMAGE_READER_FLAGS, resources.getBoolean(R.bool.pref_image_reader_flags_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HQ_SUBSAMPLING, resources.getBoolean(R.bool.pref_hq_subsampling_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF, resources.getBoolean(R.bool.pref_parallel_avif_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
@@ -371,6 +375,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD);
     }
 
+    public static boolean isParallelAvifOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF);
+    }
+
     public static boolean isPerLensSettingsOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SAVE_PER_LENS_SETTINGS);
     }
@@ -412,6 +420,10 @@ public class PreferenceKeys {
 
     public static boolean isAlternateImageReaderFlagsOn(){
         return getBool(Key.KEY_IMAGE_READER_FLAGS);
+    }
+
+    public static boolean isHqSubsamplingOn(){
+        return getBool(Key.KEY_HQ_SUBSAMPLING);
     }
 
     public static void setBatterySaver(boolean value) {
@@ -1032,12 +1044,14 @@ public class PreferenceKeys {
         KEY_SAVE_PER_LENS_SETTINGS(R.string.pref_save_per_lens_settings),
         KEY_DISABLE_ALIGNINIG(R.string.pref_disable_aligning_key),
         KEY_SHOW_WATERMARK(R.string.pref_show_watermark_key),
-        KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method),
+        KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method_key),
+        KEY_PARALLEL_AVIF(R.string.pref_parallel_avif_key),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
         KEY_BINNING(R.string.pref_binning_key),
         KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
         KEY_IMAGE_READER_FLAGS(R.string.pref_image_reader_flags_key),
+        KEY_HQ_SUBSAMPLING(R.string.pref_use_hq_subsampling_key),
         KEY_THUMBNAIL(R.string.pref_thumbnail_key),
         KEY_P3(R.string.pref_p3_key),
         KEY_ENHANCED_PROCESSING(R.string.pref_enhanced_processing_key),

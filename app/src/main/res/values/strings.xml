@@ -47,6 +47,7 @@
     <string name="hdrxNR">Noise Reduction</string>
     <string name="turn_on_watermark">Watermark</string>
     <string name="exposure_fusion_method">Exposure Fusion Method 2 (not 3)</string>
+    <string name="parallel_avif">Parallel AVIF</string>
     <string name="sure_delete">Are you sure to delete this image?</string>
     <string name="sure_delete_multiple">Are you sure to delete %1$s image(s)? %2$s will be cleared.</string>
     <string name="cancel">Cancel</string>
@@ -162,6 +163,7 @@
     <string name="use_p3" translatable="true">P3 (instead of sRGB)</string>
     <string name="tonemapping_mode_quality" translatable="true">Tonemapping Mode Quality</string>
     <string name="image_reader_flags" translatable="true">Alternate ImageReader Flags</string>
+    <string name="hq_subsampling" translatable="true">Use 4:2:2 if possible</string>
     <string name="gallery_folders">Gallery Folders</string>
     <string name="options">Options</string>
     <string name="session_on_configure_failed">Session configuration failed try changing parameters</string>

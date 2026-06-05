@@ -19,12 +19,14 @@
     <string name="pref_preview_resolution_key" translatable="false">pref_preview_resolution_key</string>
     <string name="pref_show_afdata_key" translatable="false">pref_show_afdata_key</string>
     <string name="pref_image_reader_flags_key" translatable="false">pref_image_reader_flags_key</string>
+    <string name="pref_use_hq_subsampling_key" translatable="false">pref_use_hq_subsampling_key</string>
 
     <string name="pref_enable_system_nr_key" translatable="false">pref_enable_system_nr_key</string>
     <string name="pref_save_per_lens_settings" translatable="false">pref_save_per_lens_settings</string>
     <string name="pref_disable_aligning_key" translatable="false">pref_disable_aligning_key</string>
     <string name="pref_show_watermark_key" translatable="false">pref_show_watermark_key</string>
-    <string name="pref_exposure_fusion_method" translatable="false">pref_exposure_fusion_method</string>
+    <string name="pref_exposure_fusion_method_key" translatable="false">pref_exposure_fusion_method_key</string>
+    <string name="pref_parallel_avif_key" translatable="false">pref_parallel_avif_key</string>
     <string name="pref_energy_safe_key" translatable="false">pref_energy_safe_key</string>
     <string name="pref_wide169_key" translatable="false">pref_wide169_key</string>
     <string name="pref_binning_key" translatable="false">pref_binning_key</string>
