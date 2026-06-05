@@ -305,12 +305,11 @@ public class HdrxProcessor extends ProcessorBase {
             Log.d(TAG,"Error in processingEventsListener.onProcessingFinished:"+Log.getStackTraceString(e));
         }
 
-        Path storagePath = ImagePath.newAVIFFilePath();
-        File heicFile = new File(storagePath.toString());
+        File heicFile = new File(Paths.get(imageFile.toAbsolutePath() + "avif").toString());
         AvifEncoder avifEncoder = new AvifEncoder();
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                avifEncoder.encodeBmpToAvif(img, heicFile, 0, 85, null);
+                avifEncoder.encodeBmpToAvif(img, heicFile, 0, PhotonCamera.getSettings().singleFrameQuality, null);
             }
         }
         catch (Exception e) {
