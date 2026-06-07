@@ -1,11 +1,17 @@
 package com.particlesdevs.photoncamera.processing;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
 import android.hardware.DataSpace;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
@@ -100,12 +106,101 @@ public class AvifEncoder {
         HeifCoder coder = new HeifCoder();
         byte[] avifByteArray = null;
 
-        var subSampling = PhotonCamera.getSettings().useHqSubsampling ? AvifChromaSubsampling.YUV422 : AvifChromaSubsampling.YUV420;
+        Bitmap processedImage = image;
+        Boolean wasConverted = false;
 
-        if (PhotonCamera.getSettings().useLosslessSwEncoding) {
-            avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, subSampling, 0, null);
-        } else {
-            avifByteArray = coder.encodeAvif(image, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, subSampling, 0, null);
+        try {
+            float boostFactor = 1.0f;
+            ColorSpace targetSpace = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
+            if (processedImage.getConfig() == Bitmap.Config.RGBA_F16) {
+                /*boolean isRealHdr = HeifCoder.hasHdrHighlights(image);
+
+                if (isRealHdr) {
+                    Log.d("HDR_CHECK", "Image contains real HDR-Highlights (> 1.0f).");
+                } else {
+                    Log.w("HDR_CHECK", "Image is F16, but it only contains SDR-Luminance (<= 1.0f).");
+                }*/
+                switch (PhotonCamera.getSettings().swColorSpace) {
+                    case "scRGB LINEAR":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+                        break;
+                    case "sRGB":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+                        break;
+                    case "scRGB":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
+                        break;
+                    case "DISPLAY P3":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
+                        break;
+                    case "BT.2020 HLG":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.BT2020_HLG);
+                        boostFactor = 1.3f;
+                        break;
+                    case "BT.2020 PQ":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.BT2020_PQ);
+                        break;
+                    case "ADOBE RGB":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.ADOBE_RGB);
+                        break;
+                    case "BT.2020":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.BT2020);
+                        break;
+                    case "BT.709":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.BT709);
+                        break;
+                    case "DCI P3":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.DCI_P3);
+                        break;
+                    case "sRGB LINEAR":
+                        targetSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB);
+                        break;
+                }
+            }
+
+            if (!targetSpace.equals(processedImage.getColorSpace())) {
+                Bitmap newBitmap = Bitmap.createBitmap(
+                        processedImage.getWidth(),
+                        processedImage.getHeight(),
+                        Bitmap.Config.RGBA_F16,
+                        processedImage.hasAlpha(),
+                        targetSpace
+                );
+
+                Canvas canvas = new Canvas(newBitmap);
+
+                ColorMatrix boostMatrix = new ColorMatrix(new float[] {
+                        boostFactor, 0,           0,           0, 0,
+                        0,           boostFactor, 0,           0, 0,
+                        0,           0,           boostFactor, 0, 0,
+                        0,           0,           0,           1, 0
+                });
+
+                Paint paint = new Paint();
+                paint.setColorFilter(new ColorMatrixColorFilter(boostMatrix));
+                canvas.drawBitmap(processedImage, 0, 0, paint);
+
+                processedImage = newBitmap;
+                wasConverted = true;
+            }
+
+            var subSampling = PhotonCamera.getSettings().useHqSubsampling ? AvifChromaSubsampling.YUV422 : AvifChromaSubsampling.YUV420;
+
+            if (PhotonCamera.getSettings().singleFrameQuality == 100) {
+                if (PhotonCamera.getSettings().useLosslessSwEncoding) {
+                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, AvifChromaSubsampling.LOSELESS, 0, null);
+                } else {
+                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, subSampling, 0, null);
+                }
+            } else {
+                avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, subSampling, 0, null);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+
+        if (wasConverted) {
+            processedImage.recycle();
         }
 
         if (avifByteArray == null || avifByteArray.length == 0) {

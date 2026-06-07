@@ -27,6 +27,8 @@
     <string name="pref_show_watermark_key" translatable="false">pref_show_watermark_key</string>
     <string name="pref_exposure_fusion_method_key" translatable="false">pref_exposure_fusion_method_key</string>
     <string name="pref_parallel_avif_key" translatable="false">pref_parallel_avif_key</string>
+    <string name="pref_16bit_key" translatable="false">pref_16bit_key</string>
+    <string name="pref_ultra_hdr_key" translatable="false">pref_ultra_hdr_key</string>
     <string name="pref_energy_safe_key" translatable="false">pref_energy_safe_key</string>
     <string name="pref_wide169_key" translatable="false">pref_wide169_key</string>
     <string name="pref_binning_key" translatable="false">pref_binning_key</string>

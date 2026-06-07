@@ -48,6 +48,8 @@
     <string name="turn_on_watermark">Watermark</string>
     <string name="exposure_fusion_method">Exposure Fusion Method 2 (not 3)</string>
     <string name="parallel_avif">Parallel AVIF</string>
+    <string name="use_16bit">Use 16 Bit</string>
+    <string name="ultra_hdr_jpeg">Ultra HDR JPEG</string>
     <string name="sure_delete">Are you sure to delete this image?</string>
     <string name="sure_delete_multiple">Are you sure to delete %1$s image(s)? %2$s will be cleared.</string>
     <string name="cancel">Cancel</string>

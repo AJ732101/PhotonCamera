@@ -280,6 +280,7 @@ class HeifCoder {
     private external fun isAvifImageImpl(byteArray: ByteArray): Boolean
     private external fun isSupportedImageImpl(byteArray: ByteArray): Boolean
     private external fun isSupportedImageImplBB(byteBuffer: ByteBuffer): Boolean
+
     private external fun decodeImpl(
         byteArray: ByteArray,
         scaledWidth: Int,
@@ -390,6 +391,9 @@ class HeifCoder {
 
     @SuppressLint("ObsoleteSdkInt")
     companion object {
+        @JvmStatic
+        external fun hasHdrHighlights(bitmap: Bitmap?): Boolean
+
         init {
             if (Build.VERSION.SDK_INT >= 24) {
                 System.loadLibrary("coder")

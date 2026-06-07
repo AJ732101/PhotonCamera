@@ -1737,3 +1737,32 @@ Java_com_radzivon_bartoshyk_avif_coder_HeifCoder_isSupportedImageImplBB(JNIEnv *
     return false;
   }
 }
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_radzivon_bartoshyk_avif_coder_HeifCoder_hasHdrHighlights(JNIEnv* env, jobject thiz, jobject bitmap) {
+  AndroidBitmapInfo info;
+  void* pixels = nullptr;
+
+  if (AndroidBitmap_getInfo(env, bitmap, &info) < 0 || info.format != ANDROID_BITMAP_FORMAT_RGBA_F16) {
+    return JNI_FALSE;
+  }
+
+  if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
+    return JNI_FALSE;
+  }
+
+  int totalPixels = info.width * info.height;
+  uint16_t* fp16Pixels = reinterpret_cast<uint16_t*>(pixels);
+  bool hasHdr = false;
+
+  for (int i = 0; i < totalPixels * 4; i += 4) {
+    if (fp16Pixels[i] > 0x3C00 || fp16Pixels[i+1] > 0x3C00 || fp16Pixels[i+2] > 0x3C00) {
+      hasHdr = true;
+      break;
+    }
+  }
+
+  AndroidBitmap_unlockPixels(env, bitmap);
+  return hasHdr ? JNI_TRUE : JNI_FALSE;
+}

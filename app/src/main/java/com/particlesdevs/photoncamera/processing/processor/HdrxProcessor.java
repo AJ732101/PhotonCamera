@@ -1,11 +1,20 @@
 package com.particlesdevs.photoncamera.processing.processor;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ColorSpace;
+import android.graphics.Gainmap;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.particlesdevs.photoncamera.processing.AvifEncoder;
 import com.particlesdevs.photoncamera.processing.ImagePath;
@@ -28,7 +37,11 @@ import com.particlesdevs.photoncamera.processing.render.Parameters;
 import com.particlesdevs.photoncamera.util.Allocator;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -105,7 +118,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
     }
 
-    private void ApplyHdrX() {
+    private void ApplyHdrX() throws IOException {
         callback.onStarted();
         processingEventsListener.onProcessingStarted("HDRX");
 
@@ -318,8 +331,15 @@ public class HdrxProcessor extends ProcessorBase {
         }
 
         imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
+        boolean imageSaved = false;
         //Saves the final bitmap
-        boolean imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        if (PhotonCamera.getSettings().use16Bit && PhotonCamera.getSettings().useJpegUltraHdr) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                imageSaved = createUltraHdrFromSdrF16(img, imageFile);
+            }
+        } else {
+            imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+        }
 
         try {
             processingEventsListener.notifyImageSavedStatus(imageSaved, imageFile);
@@ -334,4 +354,53 @@ public class HdrxProcessor extends ProcessorBase {
         callback.onFinished();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public Boolean createUltraHdrFromSdrF16(Bitmap hdrBitmap, Path fileToSave) throws IOException {
+        //hdrBitmap.setColorSpace(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
+
+        Bitmap sdrBase = hdrBitmap.copy(Bitmap.Config.ARGB_8888, false);
+
+        Bitmap gainmapContents = Bitmap.createBitmap(
+                hdrBitmap.getWidth() / 2,
+                hdrBitmap.getHeight() / 2,
+                Bitmap.Config.ALPHA_8
+        );
+
+        Canvas canvas = new Canvas(gainmapContents);
+
+        float threshold = 0.85f;
+        float scale = 1.0f / (1.0f - threshold);
+
+        ColorMatrix simulateHDR = new ColorMatrix(new float[] {
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0.2126f * scale, 0.7152f * scale, 0.0722f * scale, 0, -threshold * scale
+        });
+
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(simulateHDR));
+        canvas.drawBitmap(hdrBitmap, null, new Rect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight()), paint);
+
+        float maxHdrBoost = 2.0f;
+        float hdrGamma = 1.5f;
+        Gainmap gainmap = new Gainmap(gainmapContents);
+        gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
+        gainmap.setRatioMax(maxHdrBoost, maxHdrBoost, maxHdrBoost);
+        gainmap.setGamma(hdrGamma, hdrGamma, hdrGamma);
+
+        sdrBase.setGainmap(gainmap);
+
+        try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
+            sdrBase.compress(Bitmap.CompressFormat.JPEG, PhotonCamera.getSettings().singleFrameQuality, outputStream);
+            outputStream.flush();
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            return false;
+        } finally {
+            sdrBase.recycle();
+            gainmapContents.recycle();
+        }
+        return true;
+    }
 }

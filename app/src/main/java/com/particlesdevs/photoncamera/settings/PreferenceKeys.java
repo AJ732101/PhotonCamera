@@ -39,6 +39,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SHOW_WATERMARK.mValue);
         COMMON_KEYS.add(Key.KEY_EXPOSURE_FUSION_METHOD.mValue);
         COMMON_KEYS.add(Key.KEY_PARALLEL_AVIF.mValue);
+        COMMON_KEYS.add(Key.KEY_16_BIT.mValue);
+        COMMON_KEYS.add(Key.KEY_ULTRA_HDR.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_ROUND_EDGE.mValue);
         COMMON_KEYS.add(Key.KEY_CAMERA_SOUNDS.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_GRADIENT.mValue);
@@ -169,6 +171,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HQ_SUBSAMPLING, resources.getBoolean(R.bool.pref_hq_subsampling_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF, resources.getBoolean(R.bool.pref_parallel_avif_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_16_BIT, resources.getBoolean(R.bool.pref_16bit_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR, resources.getBoolean(R.bool.pref_16bit_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
@@ -377,6 +381,14 @@ public class PreferenceKeys {
 
     public static boolean isParallelAvifOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF);
+    }
+
+    public static boolean is16BitOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_16_BIT);
+    }
+
+    public static boolean isUltraHdrOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR);
     }
 
     public static boolean isPerLensSettingsOn() {
@@ -1046,6 +1058,8 @@ public class PreferenceKeys {
         KEY_SHOW_WATERMARK(R.string.pref_show_watermark_key),
         KEY_EXPOSURE_FUSION_METHOD(R.string.pref_exposure_fusion_method_key),
         KEY_PARALLEL_AVIF(R.string.pref_parallel_avif_key),
+        KEY_16_BIT(R.string.pref_16bit_key),
+        KEY_ULTRA_HDR(R.string.pref_ultra_hdr_key),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
         KEY_BINNING(R.string.pref_binning_key),

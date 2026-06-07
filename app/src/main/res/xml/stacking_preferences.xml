@@ -47,20 +47,36 @@
             android:icon="@drawable/ic_watermark"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
-            android:key="@string/pref_exposure_fusion_method_key"
-            android:defaultValue="@bool/pref_exposure_fusion_method_default"
-            android:layout="@layout/preference_with_margin"
-            android:title="@string/exposure_fusion_method"
-            android:summary=""
-            android:icon="@drawable/join_right_24px"/>
-
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_parallel_avif_key"
             android:defaultValue="@bool/pref_parallel_avif_default"
             android:layout="@layout/preference_with_margin"
             android:title="@string/parallel_avif"
             android:summary=""
             android:icon="@drawable/splitscreen_bottom_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_16bit_key"
+            android:defaultValue="@bool/pref_16bit_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/use_16bit"
+            android:summary=""
+            android:icon="@drawable/high_quality_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_ultra_hdr_key"
+            android:defaultValue="@bool/pref_ultra_hdr_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/ultra_hdr_jpeg"
+            android:summary=""
+            android:icon="@drawable/hdr_on_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_exposure_fusion_method_key"
+            android:defaultValue="@bool/pref_exposure_fusion_method_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/exposure_fusion_method"
+            android:summary=""
+            android:icon="@drawable/join_right_24px"/>
 
         <ListPreference
             android:layout="@layout/preference_with_margin"

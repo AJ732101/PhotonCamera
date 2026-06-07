@@ -146,6 +146,8 @@ public class Settings {
     public boolean alternateImageReaderFlags = false;
     public boolean useHqSubsampling = false;
     public boolean useParallelAvif = false;
+    public boolean use16Bit = false;
+    public boolean useJpegUltraHdr = false;
 
 
     public void loadCache() {
@@ -200,6 +202,8 @@ public class Settings {
         disableVendorKeys = PreferenceKeys.disableVendorKeys();
         disableNoGuiYet = PreferenceKeys.disableNoGuiYet();
         useParallelAvif = PreferenceKeys.isParallelAvifOn();
+        use16Bit = PreferenceKeys.is16BitOn();
+        useJpegUltraHdr = PreferenceKeys.isUltraHdrOn();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
