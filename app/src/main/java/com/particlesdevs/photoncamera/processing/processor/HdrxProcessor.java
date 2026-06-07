@@ -15,6 +15,7 @@ import android.hardware.camera2.CaptureResult;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.processing.AvifEncoder;
 import com.particlesdevs.photoncamera.processing.ImagePath;
@@ -335,7 +336,7 @@ public class HdrxProcessor extends ProcessorBase {
         //Saves the final bitmap
         if (PhotonCamera.getSettings().use16Bit && PhotonCamera.getSettings().useJpegUltraHdr) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                imageSaved = createUltraHdrFromSdrF16(img, imageFile);
+                imageSaved = createUltraHdrFromSdrF16(img, imageFile, exifData);
             }
         } else {
             imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
@@ -355,7 +356,7 @@ public class HdrxProcessor extends ProcessorBase {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    public Boolean createUltraHdrFromSdrF16(Bitmap hdrBitmap, Path fileToSave) throws IOException {
+    public Boolean createUltraHdrFromSdrF16(Bitmap hdrBitmap, Path fileToSave, ParseExif.ExifData exifData) throws IOException {
         //hdrBitmap.setColorSpace(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
 
         Bitmap sdrBase = hdrBitmap.copy(Bitmap.Config.ARGB_8888, false);
@@ -394,6 +395,15 @@ public class HdrxProcessor extends ProcessorBase {
         try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
             sdrBase.compress(Bitmap.CompressFormat.JPEG, PhotonCamera.getSettings().singleFrameQuality, outputStream);
             outputStream.flush();
+            ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+            if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                if (PhotonCamera.gpsLocation.hasAltitude()) {
+                    inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                }
+            }
+            inter.saveAttributes();
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
             return false;

@@ -612,13 +612,22 @@ public class Parameters {
                 "\n Align=" + PhotonCamera.getSettings().alignAlgorithm +
                 "\n Color=" + PhotonCamera.getSettings().colorMethod +
                 "\n PreviewFormat=" + PhotonCamera.getSettings().previewFormat +
-                "\n FocalL=" + FltFormat(focalLength) +
-                "\n LUT=" + PhotonCamera.getSettings().lutName;
+                "\n FocalL=" + FltFormat(focalLength);
+
+        if (!PhotonCamera.getSettings().lutName.equalsIgnoreCase("lut.png")) {
+            metaData += "\n LUT=" + PhotonCamera.getSettings().lutName;
+        }
 
         if (PhotonCamera.isQucommAdrcOff) {
             metaData += "\n ADRC=Off";
         } else {
             metaData += "\n ADRC=On";
+        }
+
+        if (PhotonCamera.getSettings().use16Bit) {
+            metaData += "\n 16 Bit HDRX=On";
+        } else {
+            metaData += "\n 16 Bit HDRX=Off";
         }
 
         if (PhotonCamera.isSessionTypeOn && (PhotonCamera.getSettings().sessionType > 0)) {
