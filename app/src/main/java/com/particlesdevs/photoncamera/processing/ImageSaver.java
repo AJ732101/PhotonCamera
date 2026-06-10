@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Gainmap;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -145,7 +146,7 @@ public class ImageSaver {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.copyPixelsFromBuffer(imageData);
 
-        /*if (PhotonCamera.getSettings().watermark) {
+        if (PhotonCamera.getSettings().watermark) {
             File waterExternal = new File(FileManager.sPHOTON_TUNING_DIR, "watermark.png");
             Bitmap watermark = null;
             try {
@@ -159,17 +160,45 @@ public class ImageSaver {
                     is.close();
                 }
 
-                if (watermark != null) {
+                Matrix matrix = new Matrix();
+                if (orientation == 90) {
+                    matrix.postRotate(270);
+                } else if (orientation == 0) {
+                    matrix.postRotate(180);
+                } else if (orientation == 180) {
+                    matrix.postRotate(0);
+                } else if (orientation == 270) {
+                    matrix.postRotate(90);
+                }
+
+                Bitmap rotatedWatermark = Bitmap.createBitmap(watermark, 0, 0, watermark.getWidth(), watermark.getHeight(), matrix, true);
+
+                if (rotatedWatermark != null) {
                     Canvas canvas = new Canvas(bitmap);
                     float left = 0;
-                    float top = bitmap.getHeight() - watermark.getHeight();
-                    canvas.drawBitmap(watermark, left, top, null);
+                    float top = 0;
+                    if (orientation == 90) {
+                        left = bitmap.getWidth() - watermark.getHeight();
+                        top = bitmap.getHeight() - watermark.getWidth();
+                    } else if (orientation == 0) {
+                        left = bitmap.getWidth() - watermark.getWidth();
+                        top = 0;
+                    } else if (orientation == 180) {
+                        left = 0;
+                        top = bitmap.getWidth() + watermark.getWidth();
+                    } else if (orientation == 270) {
+                        left = 0;
+                        top = bitmap.getHeight() - watermark.getHeight();
+                    }
+
+                    canvas.drawBitmap(rotatedWatermark, left, top, null);
+                    rotatedWatermark.recycle();
                     watermark.recycle();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Error loading watermark", e);
             }
-        }*/
+        }
 
         boolean success = false;
         ParseExif.ExifData exifData = exifDataFromMetadata(metadata, orientation);
@@ -336,7 +365,20 @@ public class ImageSaver {
                     exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_90); // "6"
                     break;
                 case 180:
-                    exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_180); // "3"
+                    if ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                        /*(PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||*/
+                            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) {
+                        if (CaptureController.mCameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+                            exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_180);
+                        } else {
+                            exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_NORMAL);
+                        }
+                    } else {
+                        exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_180); // "1"
+                    } // "3"
                     break;
                 case 270:
                 case -90:
@@ -556,7 +598,7 @@ public class ImageSaver {
 
         Canvas canvas = new Canvas(gainmapContents);
 
-        float threshold = 0.85f;
+        float threshold = PhotonCamera.getSpecific().specificSetting.ultraHdrThreshold;
         float scale = 1.0f / (1.0f - threshold);
 
         ColorMatrix simulateHDR = new ColorMatrix(new float[] {
@@ -570,8 +612,8 @@ public class ImageSaver {
         paint.setColorFilter(new ColorMatrixColorFilter(simulateHDR));
         canvas.drawBitmap(hdrBitmap, null, new Rect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight()), paint);
 
-        float maxHdrBoost = 2.0f;
-        float hdrGamma = 1.5f;
+        float maxHdrBoost = PhotonCamera.getSpecific().specificSetting.ultraHdrMaxBoost;
+        float hdrGamma = PhotonCamera.getSpecific().specificSetting.ultraHdrGamma;
         Gainmap gainmap = new Gainmap(gainmapContents);
         gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
         gainmap.setRatioMax(maxHdrBoost, maxHdrBoost, maxHdrBoost);

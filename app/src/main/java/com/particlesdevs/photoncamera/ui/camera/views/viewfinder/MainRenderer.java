@@ -467,7 +467,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 return;
             }
 
-            final boolean isSideways = (orientation == 90 || orientation == 270);
+            final boolean isSideways = (orientation == 90 || orientation == 270 || orientation == -90);
             mImageWidth = isSideways ? sensorHeight : sensorWidth;
             mImageHeight = isSideways ? sensorWidth : sensorHeight;
 

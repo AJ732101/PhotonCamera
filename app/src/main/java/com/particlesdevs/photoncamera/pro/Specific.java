@@ -296,6 +296,18 @@ public class Specific {
                     specificSetting.sensorModeKey = caseS[1];
                     break;
                 }
+                case "ultraHdrThreshold": {
+                    specificSetting.ultraHdrThreshold = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "ultraHdrMaxBoost": {
+                    specificSetting.ultraHdrMaxBoost = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "ultraHdrGamma": {
+                    specificSetting.ultraHdrGamma = Float.parseFloat(caseS[1]);
+                    break;
+                }
             }
         }
 

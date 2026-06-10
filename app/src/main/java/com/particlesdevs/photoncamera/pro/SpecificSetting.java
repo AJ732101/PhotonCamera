@@ -56,6 +56,9 @@ public class SpecificSetting {
     public long[] customVendorKeyTypeInt64Value;
     public float[] customVendorKeyTypeFloatValue;
     public String networkSyncBaseUrl = "https://raw.githubusercontent.com/eszdman/PhotonCamera/dev/app/";
+    public float ultraHdrThreshold = 0.85f;
+    public float ultraHdrMaxBoost = 2.0f;
+    public float ultraHdrGamma = 1.5f;
     public SpecificSetting(){
     }
 }
