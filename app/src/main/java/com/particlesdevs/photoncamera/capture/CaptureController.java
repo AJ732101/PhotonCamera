@@ -3873,6 +3873,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             Log.e(TAG, "LUT processing failed, renderer returned null data.");
                             cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
                         }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     } finally {
                         mIsProcessingImage.set(false);
                     }

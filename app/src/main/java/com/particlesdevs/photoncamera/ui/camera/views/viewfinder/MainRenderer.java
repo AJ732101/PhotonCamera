@@ -44,7 +44,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
-
     private int[] hTex;
     private GLTexture hTexLut;
     private final FloatBuffer pVertex;
@@ -70,8 +69,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int enablePeak_Normal, enablePeak_Magnify;
     private int resolutionLocation_Normal, resolutionLocation_Magnify;
     private int uPostLutSize, uPostLutSizeTiles;
-
-    // processing for single shot LUT
     private int mScreenWidth;
     private int mScreenHeight;
     private FloatBuffer mOffscreenVertexBuffer;
@@ -94,7 +91,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int uOffscreenTexRotateMatrixHandle_YUV;
     private int uOffscreenTexRotateMatrixHandle_LUT;
 
-    // 10 bit logic
     private int mP010ToF16Program;
     private int mP010_vPosition;
     private int mP010_Ytex, mP010_Utex, mP010_Vtex;
@@ -170,8 +166,8 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             double lutSizeDouble = (double) lutSize;
             float postLutSizeVal = (float) Math.cbrt(lutSizeDouble * lutSizeDouble);
             float postLutSizeTilesVal = (float) (lutSizeDouble / postLutSizeVal);
-            GLES20.glUniform1f(uPostLutSize, postLutSizeVal); // z.B. 64.0f
-            GLES20.glUniform1f(uPostLutSizeTiles, postLutSizeTilesVal); // z.B. 8.0f
+            GLES20.glUniform1f(uPostLutSize, postLutSizeVal);
+            GLES20.glUniform1f(uPostLutSizeTiles, postLutSizeTilesVal);
         }
         GLES20.glUniformMatrix4fv(uTexRotateMatrixHandle, 1, false, mTexRotateMatrix, 0);
         GLES20.glUniformMatrix4fv(uSTMatrixHandle, 1, false, mSTMatrix, 0);
@@ -342,8 +338,9 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         int fshader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fshader, fss);
         GLES20.glCompileShader(fshader);
-        GLES20.glGetShaderiv(fshader, GLES20.GL_COMPILE_STATUS, compiled, 0);
-        if (compiled[0] == 0) {
+        int[] compiledF = new int[1];
+        GLES20.glGetShaderiv(fshader, GLES20.GL_COMPILE_STATUS, compiledF, 0);
+        if (compiledF[0] == 0) {
             Log.e("Shader", "F-Shader Error: " + GLES20.glGetShaderInfoLog(fshader));
             return 0;
         }
@@ -440,24 +437,41 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     }
 
     public void processYuvImage(final Image image, final int orientation, final Consumer<ByteBuffer> onComplete) {
+        if (image == null) {
+            onComplete.accept(null);
+            return;
+        }
+
+        final int sensorWidth = image.getWidth();
+        final int sensorHeight = image.getHeight();
+
+        final ByteBuffer yBuffer;
+        final ByteBuffer uBuffer;
+        final ByteBuffer vBuffer;
+        try {
+            yBuffer = copyPlaneData(image.getPlanes()[0], sensorWidth, sensorHeight);
+            uBuffer = copyPlaneData(image.getPlanes()[1], sensorWidth / 2, sensorHeight / 2);
+            vBuffer = copyPlaneData(image.getPlanes()[2], sensorWidth / 2, sensorHeight / 2);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to copy plane data before queuing", e);
+            image.close();
+            onComplete.accept(null);
+            return;
+        }
+
+        image.close();
+
         mView.queueEvent(() -> {
             if (!PhotonCamera.getSettings().lutName.equals("lut.png") && (hTexLut == null)) {
-                try { image.close(); } catch (Exception ignored) {}
                 onComplete.accept(null);
                 return;
             }
 
-            final int sensorWidth = image.getWidth();
-            final int sensorHeight = image.getHeight();
             final boolean isSideways = (orientation == 90 || orientation == 270);
             mImageWidth = isSideways ? sensorHeight : sensorWidth;
             mImageHeight = isSideways ? sensorWidth : sensorHeight;
 
             setupOffscreenFramebuffer(mImageWidth, mImageHeight);
-
-            ByteBuffer yBuffer = copyPlaneData(image.getPlanes()[0], sensorWidth, sensorHeight);
-            ByteBuffer uBuffer = copyPlaneData(image.getPlanes()[1], sensorWidth / 2, sensorHeight / 2);
-            ByteBuffer vBuffer = copyPlaneData(image.getPlanes()[2], sensorWidth / 2, sensorHeight / 2);
 
             int[] yuvTextureIds = new int[3];
             GLES20.glGenTextures(3, yuvTextureIds, 0);
@@ -476,8 +490,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextureIds[2]);
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, sensorWidth / 2, sensorHeight / 2, 0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, vBuffer);
             setupTextureParameters();
-
-            image.close();
 
             Matrix.setIdentityM(mOffscreenRotationMatrix, 0);
             Matrix.translateM(mOffscreenRotationMatrix, 0, 0.5f, 0.5f, 0.0f);
@@ -548,47 +560,52 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         int rowStride = plane.getRowStride();
         int pixelStride = plane.getPixelStride();
 
-        // The destination buffer that will have the correct, packed data.
+        ByteBuffer src = buffer.duplicate().order(ByteOrder.nativeOrder());
+        src.position(0);
+
         ByteBuffer directBuffer = ByteBuffer.allocateDirect(width * height);
         directBuffer.order(ByteOrder.nativeOrder());
 
-        // If the plane is already tightly packed, we can do a fast copy.
         if (pixelStride == 1 && rowStride == width) {
-            buffer.limit(buffer.position() + width * height);
-            directBuffer.put(buffer);
+            int size = Math.min(width * height, src.remaining());
+            src.limit(size);
+            directBuffer.put(src);
             directBuffer.rewind();
             return directBuffer;
         }
 
-        // Otherwise, we have to copy row by row, de-interleaving as we go.
         byte[] rowData = new byte[rowStride];
-        int readPosition = 0;
+        int bytesNeededInLastRow = (width - 1) * pixelStride + 1;
 
         for (int y = 0; y < height; y++) {
-            // Set the position of the source buffer for each row to read from.
-            buffer.position(readPosition);
+            int remaining = src.remaining();
+            if (remaining <= 0) break;
 
-            // Ensure we don't read past the buffer's limit.
-            if (rowStride > buffer.remaining()) {
-                // This should not happen with valid image data, but it's a safeguard.
+            int bytesToRead = (y == height - 1) ? Math.min(bytesNeededInLastRow, remaining) : Math.min(rowStride, remaining);
+            
+            try {
+                src.get(rowData, 0, bytesToRead);
+            } catch (Exception e) {
                 break;
             }
 
-            // Read a full row (including padding and interleaved data).
-            buffer.get(rowData, 0, rowStride);
-
             if (pixelStride == 1) {
-                // Y-plane: copy the actual width data.
-                directBuffer.put(rowData, 0, width);
+                directBuffer.put(rowData, 0, Math.min(width, bytesToRead));
             } else {
-                // U/V-planes: de-interleave the data.
                 for (int x = 0; x < width; x++) {
-                    directBuffer.put(rowData[x * pixelStride]);
+                    int offset = x * pixelStride;
+                    if (offset < bytesToRead) {
+                        directBuffer.put(rowData[offset]);
+                    }
                 }
             }
 
-            // Advance the read position for the next row.
-            readPosition += rowStride;
+            if (y < height - 1 && bytesToRead < rowStride) {
+                int skip = rowStride - bytesToRead;
+                if (src.remaining() >= skip) {
+                    src.position(src.position() + skip);
+                }
+            }
         }
 
         directBuffer.rewind();
@@ -596,45 +613,55 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     }
 
     public Future<Bitmap> processP010SdrImageGL(final Image image) {
+        if (image == null || image.getFormat() != ImageFormat.YCBCR_P010) {
+            if (image != null) image.close();
+            throw new IllegalArgumentException("Image must be in YCBCR_P010 format");
+        }
+
+        final int width = image.getWidth();
+        final int height = image.getHeight();
+        final Image.Plane[] planes = image.getPlanes();
+
+        final ByteBuffer yBufferCopy = ByteBuffer.allocateDirect(planes[0].getBuffer().remaining());
+        yBufferCopy.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer ySrc = planes[0].getBuffer().duplicate();
+        ySrc.position(0);
+        yBufferCopy.put(ySrc);
+        yBufferCopy.rewind();
+        final int yRowStride = planes[0].getRowStride();
+
+        final ByteBuffer uvBufferCopy = ByteBuffer.allocateDirect(planes[1].getBuffer().remaining());
+        uvBufferCopy.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer uvSrc = planes[1].getBuffer().duplicate();
+        uvSrc.position(0);
+        uvBufferCopy.put(uvSrc);
+        uvBufferCopy.rewind();
+        final int uvRowStride = planes[1].getRowStride();
+
+        image.close();
+
         Callable<Bitmap> task = () -> {
-            // 1. Validierung
-            if (image == null || image.getFormat() != ImageFormat.YCBCR_P010) {
-                if (image != null) image.close();
-                throw new IllegalArgumentException("Image must be in YCBCR_P010 format");
-            }
-
-            final int width = image.getWidth();
-            final int height = image.getHeight();
-            final Image.Plane[] planes = image.getPlanes();
-
-            // 2. Framebuffer Setup (HDR/F16)
             int[] fboId = new int[1];
             int[] rboId = new int[1];
             int[] fboTextureId = new int[1];
             setupGenericFramebuffer(fboId, rboId, fboTextureId, width, height, true);
 
-            // Wir benötigen nur 2 Texturen für P010 (Y und UV-Interleaved)
             int[] yuvTextures = new int[2];
             GLES20.glGenTextures(2, yuvTextures, 0);
 
             try {
                 GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 2);
 
-                ByteBuffer yBuffer = planes[0].getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, planes[0].getRowStride() / 2);
-
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, yRowStride / 2);
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[0]);
-                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_R16UI, width, height, 0, GLES30.GL_RED_INTEGER, GLES30.GL_UNSIGNED_SHORT, yBuffer);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_R16UI, width, height, 0, GLES30.GL_RED_INTEGER, GLES30.GL_UNSIGNED_SHORT, yBufferCopy);
                 setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
 
-
-                ByteBuffer uvBuffer = planes[1].getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, planes[1].getRowStride() / 4);
-
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, uvRowStride / 4);
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[1]);
-                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RG16UI, width / 2, height / 2, 0, GLES30.GL_RG_INTEGER, GLES30.GL_UNSIGNED_SHORT, uvBuffer);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RG16UI, width / 2, height / 2, 0, GLES30.GL_RG_INTEGER, GLES30.GL_UNSIGNED_SHORT, uvBufferCopy);
                 setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
 
                 GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, 0);
@@ -662,7 +689,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 return resultBitmap;
 
             } finally {
-                image.close();
                 GLES20.glDeleteTextures(2, yuvTextures, 0);
                 GLES20.glDeleteFramebuffers(1, fboId, 0);
                 GLES20.glDeleteRenderbuffers(1, rboId, 0);
@@ -704,9 +730,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
     }
 
-
     public void setOrientation(int or) { Matrix.setRotateM(mTexRotateMatrix, 0, or, 0f, 0f, -1f); }
     public void setTransform(@NonNull android.graphics.Matrix matrix) {}
     public void scale(int in_width, int in_height, int out_width, int out_height, int rotation) {}
 }
-

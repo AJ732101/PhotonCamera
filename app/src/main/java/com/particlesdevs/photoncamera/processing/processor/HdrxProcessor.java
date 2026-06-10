@@ -336,7 +336,7 @@ public class HdrxProcessor extends ProcessorBase {
         //Saves the final bitmap
         if (PhotonCamera.getSettings().use16Bit && PhotonCamera.getSettings().useJpegUltraHdr) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                imageSaved = createUltraHdrFromSdrF16(img, imageFile, exifData);
+                imageSaved = ImageSaver.createUltraHdrFromSdr(img, imageFile, exifData);
             }
         } else {
             imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
@@ -353,64 +353,5 @@ public class HdrxProcessor extends ProcessorBase {
 
         Allocator.getMemoryCount();
         callback.onFinished();
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    public Boolean createUltraHdrFromSdrF16(Bitmap hdrBitmap, Path fileToSave, ParseExif.ExifData exifData) throws IOException {
-        //hdrBitmap.setColorSpace(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
-
-        Bitmap sdrBase = hdrBitmap.copy(Bitmap.Config.ARGB_8888, false);
-
-        Bitmap gainmapContents = Bitmap.createBitmap(
-                hdrBitmap.getWidth() / 2,
-                hdrBitmap.getHeight() / 2,
-                Bitmap.Config.ALPHA_8
-        );
-
-        Canvas canvas = new Canvas(gainmapContents);
-
-        float threshold = 0.85f;
-        float scale = 1.0f / (1.0f - threshold);
-
-        ColorMatrix simulateHDR = new ColorMatrix(new float[] {
-                0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0,
-                0.2126f * scale, 0.7152f * scale, 0.0722f * scale, 0, -threshold * scale
-        });
-
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(simulateHDR));
-        canvas.drawBitmap(hdrBitmap, null, new Rect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight()), paint);
-
-        float maxHdrBoost = 2.0f;
-        float hdrGamma = 1.5f;
-        Gainmap gainmap = new Gainmap(gainmapContents);
-        gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
-        gainmap.setRatioMax(maxHdrBoost, maxHdrBoost, maxHdrBoost);
-        gainmap.setGamma(hdrGamma, hdrGamma, hdrGamma);
-
-        sdrBase.setGainmap(gainmap);
-
-        try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
-            sdrBase.compress(Bitmap.CompressFormat.JPEG, PhotonCamera.getSettings().singleFrameQuality, outputStream);
-            outputStream.flush();
-            ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
-            if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
-                inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
-
-                if (PhotonCamera.gpsLocation.hasAltitude()) {
-                    inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
-                }
-            }
-            inter.saveAttributes();
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            return false;
-        } finally {
-            sdrBase.recycle();
-            gainmapContents.recycle();
-        }
-        return true;
     }
 }

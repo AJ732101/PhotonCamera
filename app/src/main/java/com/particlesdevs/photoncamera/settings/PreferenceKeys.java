@@ -172,7 +172,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_FUSION_METHOD, resources.getBoolean(R.bool.pref_exposure_fusion_method_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF, resources.getBoolean(R.bool.pref_parallel_avif_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_16_BIT, resources.getBoolean(R.bool.pref_16bit_default));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR, resources.getBoolean(R.bool.pref_16bit_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR, resources.getBoolean(R.bool.pref_ultra_hdr_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
