@@ -1,7 +1,14 @@
 package com.particlesdevs.photoncamera.processing;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Gainmap;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -19,12 +26,14 @@ import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.control.GyroBurst;
 import com.particlesdevs.photoncamera.processing.render.Parameters;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -130,18 +139,51 @@ public class ImageSaver {
     }
 
     public void directSaveImageLut(ByteBuffer imageData, int width, int height, int orientation, int targetFormat, int quality,
-                                   Bundle metadata, CameraEventsListener processingEventsListener) {
+                                   Bundle metadata, CameraEventsListener processingEventsListener) throws IOException {
         Log.v(TAG, "directSaveImageLut() - Starting quick still image single shot LUT test");
 
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bitmap.copyPixelsFromBuffer(imageData);
+
+        /*if (PhotonCamera.getSettings().watermark) {
+            File waterExternal = new File(FileManager.sPHOTON_TUNING_DIR, "watermark.png");
+            Bitmap watermark = null;
+            try {
+                if (waterExternal.exists()) {
+                    watermark = BitmapFactory.decodeFile(waterExternal.getAbsolutePath());
+                }
+
+                if (watermark == null) {
+                    java.io.InputStream is = PhotonCamera.getAssetLoader().getInputStream("watermark/photoncamera_watermark.png");
+                    watermark = BitmapFactory.decodeStream(is);
+                    is.close();
+                }
+
+                if (watermark != null) {
+                    Canvas canvas = new Canvas(bitmap);
+                    float left = 0;
+                    float top = bitmap.getHeight() - watermark.getHeight();
+                    canvas.drawBitmap(watermark, left, top, null);
+                    watermark.recycle();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Error loading watermark", e);
+            }
+        }*/
+
         boolean success = false;
         ParseExif.ExifData exifData = exifDataFromMetadata(metadata, orientation);
 
         Path exportFilePath = ImagePath.newJPGFilePath();
         if (targetFormat == PhotonCamera.userFormatJpegLutSw) {
             exportFilePath = ImagePath.newJPGFilePath();
-            success = Util.saveBitmapAsJpg(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+            if (PhotonCamera.getSettings().useJpegUltraHdr) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    success = createUltraHdrFromSdr(bitmap, exportFilePath, exifData);
+                }
+            } else {
+                success = ImageSaver.Util.saveBitmapAsJpg(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+            }
         } else if (targetFormat == PhotonCamera.userFormatPngSw) {
             exportFilePath = ImagePath.newPNGFilePath();
             success = Util.saveBitmapAsPng(exportFilePath, bitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
@@ -498,5 +540,64 @@ public class ImageSaver {
             }
             return true;
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static Boolean createUltraHdrFromSdr(Bitmap hdrBitmap, Path fileToSave, ParseExif.ExifData exifData) throws IOException {
+        //hdrBitmap.setColorSpace(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
+
+        Bitmap sdrBase = hdrBitmap.copy(Bitmap.Config.ARGB_8888, false);
+
+        Bitmap gainmapContents = Bitmap.createBitmap(
+                hdrBitmap.getWidth() / 2,
+                hdrBitmap.getHeight() / 2,
+                Bitmap.Config.ALPHA_8
+        );
+
+        Canvas canvas = new Canvas(gainmapContents);
+
+        float threshold = 0.85f;
+        float scale = 1.0f / (1.0f - threshold);
+
+        ColorMatrix simulateHDR = new ColorMatrix(new float[] {
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0.2126f * scale, 0.7152f * scale, 0.0722f * scale, 0, -threshold * scale
+        });
+
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(simulateHDR));
+        canvas.drawBitmap(hdrBitmap, null, new Rect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight()), paint);
+
+        float maxHdrBoost = 2.0f;
+        float hdrGamma = 1.5f;
+        Gainmap gainmap = new Gainmap(gainmapContents);
+        gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
+        gainmap.setRatioMax(maxHdrBoost, maxHdrBoost, maxHdrBoost);
+        gainmap.setGamma(hdrGamma, hdrGamma, hdrGamma);
+
+        sdrBase.setGainmap(gainmap);
+
+        try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
+            sdrBase.compress(Bitmap.CompressFormat.JPEG, PhotonCamera.getSettings().singleFrameQuality, outputStream);
+            outputStream.flush();
+            ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+            if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
+                inter.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
+
+                if (PhotonCamera.gpsLocation.hasAltitude()) {
+                    inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
+                }
+            }
+            inter.saveAttributes();
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            return false;
+        } finally {
+            sdrBase.recycle();
+            gainmapContents.recycle();
+        }
+        return true;
     }
 }
