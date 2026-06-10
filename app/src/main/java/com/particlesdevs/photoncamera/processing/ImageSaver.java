@@ -167,7 +167,7 @@ public class ImageSaver {
                     matrix.postRotate(180);
                 } else if (orientation == 180) {
                     matrix.postRotate(0);
-                } else if (orientation == 270) {
+                } else if ((orientation == 270) || (orientation == -90)) {
                     matrix.postRotate(90);
                 }
 
@@ -186,9 +186,9 @@ public class ImageSaver {
                     } else if (orientation == 180) {
                         left = 0;
                         top = bitmap.getWidth() + watermark.getWidth();
-                    } else if (orientation == 270) {
+                    } else if ((orientation == 270) || (orientation == -90)) {
                         left = 0;
-                        top = bitmap.getHeight() - watermark.getHeight();
+                        top = 0; //bitmap.getHeight() - watermark.getHeight();
                     }
 
                     canvas.drawBitmap(rotatedWatermark, left, top, null);

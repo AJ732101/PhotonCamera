@@ -3855,11 +3855,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             final int sensorWidth = image.getWidth();
             final int sensorHeight = image.getHeight();
-            boolean isSideways = (videoRotation == 90 || videoRotation == 270);
+            boolean isSideways = (videoRotation == 90 || videoRotation == 270 || videoRotation == -90);
             int rotation = getOrientation();
             if (isSideways) {
                 rotation = videoRotation;
             }
+
+            final boolean actuallySideways = (rotation == 90 || rotation == 270 || rotation == -90);
+            final int outWidth = actuallySideways ? sensorHeight : sensorWidth;
+            final int outHeight = actuallySideways ? sensorWidth : sensorHeight;
 
             if (mMainRenderer != null) {
                 Log.d(TAG, "Requesting LUT processing from MainRenderer.");
@@ -3867,7 +3871,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     try {
                         if (processedData != null) {
                             Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                            mImageSaver.directSaveImageLut(processedData, sensorHeight, sensorWidth, videoRotation,
+                            mImageSaver.directSaveImageLut(processedData, outWidth, outHeight, videoRotation,
                                     PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
                         } else {
                             Log.e(TAG, "LUT processing failed, renderer returned null data.");
