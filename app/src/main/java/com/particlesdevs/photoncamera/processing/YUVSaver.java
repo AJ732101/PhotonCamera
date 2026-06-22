@@ -101,6 +101,11 @@ public class YUVSaver extends DefaultSaver{
                 }
                 image.close();
                 boolean success = false;
+                if (orientation == 0) {
+                    orientation = 180;
+                } else if (orientation == 180) {
+                    orientation = 0;
+                }
                 ParseExif.ExifData exifData = ImageSaver.exifDataFromMetadata(metadata, orientation);
                 if (PhotonCamera.getSettings().useJpegUltraHdr) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
