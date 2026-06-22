@@ -1,5 +1,7 @@
 package com.particlesdevs.photoncamera.processing;
 
+import static com.particlesdevs.photoncamera.processing.ImageSaver.createUltraHdrFromSdr;
+
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.media.Image;
@@ -36,7 +38,7 @@ public class YUVSaver extends DefaultSaver{
     }
 
     @Override
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Log.d(TAG, "DataSpace: " + String.valueOf(image.getDataSpace()));
         }
@@ -70,6 +72,45 @@ public class YUVSaver extends DefaultSaver{
                 saveMetaCaptureResult(metaCaptureResultFile, metadata);
                 image.close();
                 processingEventsListener.onProcessingFinished("YCBCR_P010 saved: " + storagePath.toAbsolutePath().toString());
+                return;
+            }
+
+            // SW based LUT JPEG encoder solution
+            if (usedTargetFormat == PhotonCamera.userFormatJpegLutSw) {
+                storagePath = ImagePath.newJPGFilePath();
+
+                Bitmap originalBitmap = null;
+
+                switch (image.getFormat()) {
+                    case ImageFormat.YCBCR_P010:
+                        try {
+                            originalBitmap = ImageUtils.p010SdrToF16BitmapGL(image, renderer);
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                    case ImageFormat.YUV_420_888:
+                        try {
+                            originalBitmap = ImageUtils.yuv8BitToBitmap(image);
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                        break;
+                }
+                image.close();
+                boolean success = false;
+                ParseExif.ExifData exifData = ImageSaver.exifDataFromMetadata(metadata, orientation);
+                if (PhotonCamera.getSettings().useJpegUltraHdr) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        success = createUltraHdrFromSdr(originalBitmap, storagePath, exifData);
+                    }
+                } else {
+                    success = ImageSaver.Util.saveBitmapAsJpg(storagePath, originalBitmap, PhotonCamera.getSettings().singleFrameQuality, exifData);
+                }
+                originalBitmap.recycle();
+                processingEventsListener.onProcessingFinished("LUT processed JPEG: " + storagePath.toAbsolutePath().toString());
                 return;
             }
 

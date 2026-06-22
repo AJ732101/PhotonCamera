@@ -348,7 +348,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-            mImageSaver.initProcess(reader);
+            try {
+                mImageSaver.initProcess(reader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     };
     private final ImageReader.OnImageAvailableListener mOnRawImageAvailableListener
@@ -424,18 +428,33 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 if (!PhotonCamera.getSettings().lutName.equals("lut.png") && (!isSingleShotJpegOrAvifOrHeic() || isSingleShotSwEncoder()) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
                     processImageWithLutAndSave(reader);
                 } else {
-                    mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
+                    try {
+                        mImageSaver.directSaveImage(reader, getOrientation(), PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, mMainRenderer);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 return;
             }
             if (onUnlimited && !unlimitedStarted) {
                 return;
             }
-            if(PhotonCamera.getSettings().frameCount != 1) {
-                mImageSaver.initProcess(reader);
+
+            if (PhotonCamera.getSettings().frameCount != 1) {
+                try {
+                    mImageSaver.initProcess(reader);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
             else {
-                mBackgroundHandler.post(() -> mImageSaver.initProcess(reader));
+                mBackgroundHandler.post(() -> {
+                    try {
+                        mImageSaver.initProcess(reader);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         }
     };

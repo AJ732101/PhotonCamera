@@ -22,7 +22,7 @@ public class JPEGSaver extends DefaultSaver {
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         try {
             byte[] bytes = new byte[buffer.remaining()];

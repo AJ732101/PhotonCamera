@@ -87,7 +87,7 @@ public class ImageSaver {
         TunableInjector.inject(SETTINGS);
     }
 
-    public void initProcess(ImageReader mReader) {
+    public void initProcess(ImageReader mReader) throws IOException {
         Log.v(TAG, "initProcess()");
         if ((frameCounter < desiredFrameCount) || desiredFrameCount == -1) {
             Log.v(TAG, "initProcess() : called from \"" + Thread.currentThread().getName() + "\" Thread");
@@ -120,7 +120,7 @@ public class ImageSaver {
         frameCounter++;
     }
 
-    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+    public void directSaveImage(ImageReader mReader, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         Log.v(TAG, "directSaveImage()");
         Image mImage;
         try {

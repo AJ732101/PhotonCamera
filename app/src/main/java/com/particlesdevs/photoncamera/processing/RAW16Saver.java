@@ -13,13 +13,15 @@ import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 
+import java.io.IOException;
+
 public class RAW16Saver extends DefaultSaver{
     private static final String TAG = "RAW16Saver";
     public RAW16Saver(ProcessingEventsListener processingEventsListener) {
         super(processingEventsListener);
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         switch (PhotonCamera.getSettings().selectedMode) {
             case RAWVIDEO:
                 Log.d(TAG, "rawvideoaddImage: " + this + " " + mRawVideoProcessor);

@@ -5,6 +5,7 @@ import http.server
 import socketserver
 import threading
 import subprocess
+import urllib.parse
 import webview
 from webview import FileDialog
 
@@ -14,14 +15,55 @@ server_httpd = None
 
 def start_local_server(directory):
     global server_httpd
-    class Handler(http.server.SimpleHTTPRequestHandler):
-        def __init__(self, *args, directory=directory, **kwargs):
+    
+    class CustomHDRHandler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=directory, **kwargs)
+            
         def log_message(self, format, *args):
             pass
 
+        def do_GET(self):
+            parsed_url = urllib.parse.urlparse(self.path)
+            clean_path = parsed_url.path
+            
+            # Server-side route to extract the Gain Map on-the-fly
+            if clean_path.startswith("/get_gainmap/"):
+                filename = urllib.parse.unquote(clean_path[13:])
+                img_path = os.path.join(directory, filename)
+                
+                if os.path.exists(img_path):
+                    try:
+                        startupinfo = subprocess.STARTUPINFO()
+                        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                        
+                        # 1. Try native Android 14/15 Gain Map tag
+                        cmd = ["exiftool", "-b", "-GainMapImage", img_path]
+                        res = subprocess.run(cmd, capture_output=True, startupinfo=startupinfo)
+                        
+                        # Fallback for MPF / MPF2 tags
+                        if not res.stdout or len(res.stdout) < 100:
+                            cmd = ["exiftool", "-b", "-mpf2", img_path]
+                            res = subprocess.run(cmd, capture_output=True, startupinfo=startupinfo)
+                            
+                        if res.stdout and len(res.stdout) > 100:
+                            self.send_response(200)
+                            self.send_header("Content-Type", "image/jpeg")
+                            self.send_header("Content-Length", str(len(res.stdout)))
+                            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                            self.end_headers()
+                            self.wfile.write(res.stdout)
+                            return
+                    except Exception as e:
+                        print(f"Server extraction error for {filename}: {e}")
+                
+                self.send_error(404, "Gain Map not found or not extractable")
+                return
+                
+            return super().do_GET()
+
     socketserver.TCPServer.allow_reuse_address = True
-    server_httpd = socketserver.TCPServer(("127.0.0.1", PORT), Handler)
+    server_httpd = socketserver.TCPServer(("127.0.0.1", PORT), CustomHDRHandler)
     server_httpd.serve_forever()
 
 
@@ -34,9 +76,10 @@ def get_all_exif_data(directory, files):
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         
-        # -FocalLengthIn35mmFilm ist das korrekte Exiftool-Tag
+        # New Baseline tags + check tags for Gain Map presence
         cmd = ["exiftool", "-j", "-Make", "-Model", "-ISO", "-FNumber", "-Aperture", 
-               "-ExposureTime", "-ShutterSpeed", "-FocalLengthIn35mmFilm", "-FocalLength", "-ScaleFactor35efl"]
+               "-ExposureTime", "-ShutterSpeed", "-FocalLengthIn35mmFilm", "-FocalLength", "-ScaleFactor35efl",
+               "-GainMapImage", "-mpf2"]
         
         paths = [os.path.join(directory, f) for f in files]
         cmd.extend(paths)
@@ -52,6 +95,9 @@ def get_all_exif_data(directory, files):
             fname = os.path.basename(src_path) if src_path else ""
             if not fname:
                 continue
+
+            # Check if either native GainMapImage or MPF2 fallback tags contain data
+            has_gainmap = "True" if (d.get("GainMapImage") or d.get("mpf2")) else "False"
 
             aperture_val = d.get("FNumber") or d.get("Aperture")
             if aperture_val:
@@ -104,7 +150,6 @@ def get_all_exif_data(directory, files):
                 except:
                     pass
 
-            # Hier splitten wir die Werte sauber auf, damit JS sie einzeln anzeigen kann
             focal_str = f"{focal_len_val:.1f}mm" if focal_len_val else "-"
             focal_35mm_str = f"{f35_val}mm" if f35_val else "-"
 
@@ -116,7 +161,8 @@ def get_all_exif_data(directory, files):
                 "aperture": aperture_str,
                 "shutter": shutter_str,
                 "focal_length": focal_str,
-                "focal_35mm": focal_35mm_str
+                "focal_35mm": focal_35mm_str,
+                "ultra_hdr": has_gainmap
             }
             
     except Exception as e:
@@ -160,47 +206,104 @@ def main():
 
             html_content = f"""
             <!DOCTYPE html>
-            <html lang="de">
+            <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
                     * {{ margin: 0; padding: 0; box-sizing: border-box; user-select: none; }}
                     body {{ background-color: #121212; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; font-family: sans-serif; }}
-                    .viewer-container {{ position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }}
-                    img {{ max-width: 100%; max-height: 100vh; object-fit: contain; color-profile: display-p3; image-rendering: high-quality; dynamic-range-limit: high; }}
-                    img.sdr-mode {{ dynamic-range-limit: standard; }}
+                    
+                    .viewer-container {{ position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }}
+                    
+                    img {{ 
+                        max-width: 100%; 
+                        max-height: 100vh; 
+                        object-fit: contain; 
+                        color-profile: display-p3; 
+                        image-rendering: high-quality; 
+                        dynamic-range-limit: high;
+                        cursor: zoom-in;
+                        transition: transform 0.15s ease-out;
+                    }}
+                    
+                    img.zoomed {{
+                        cursor: zoom-out;
+                    }}
+                    
+                    img.sdr-mode {{ 
+                        dynamic-range-limit: standard !important; 
+                    }}
+                    img.gain-map-mode {{ 
+                        dynamic-range-limit: standard !important; 
+                        filter: grayscale(1) !important; 
+                    }}
+                    
                     .nav-btn {{ position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; background-color: rgba(30, 30, 30, 0.4); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; backdrop-filter: blur(5px); z-index: 10; }}
                     .nav-btn:hover {{ background-color: rgba(60, 60, 60, 0.8); border-color: rgba(255, 255, 255, 0.6); scale: 1.05; }}
                     .nav-btn:active {{ scale: 0.95; }}
                     .prev-btn {{ left: 20px; }}
                     .next-btn {{ right: 20px; }}
-                    .toggle-btn {{ position: absolute; top: 20px; left: 20px; height: 40px; padding: 0 20px; background-color: rgba(30, 30, 30, 0.4); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; backdrop-filter: blur(5px); z-index: 20; }}
+                    
+                    .controls-panel {{
+                        position: absolute;
+                        top: 20px;
+                        left: 20px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        z-index: 20;
+                    }}
+                    
+                    .toggle-btn {{ 
+                        height: 40px; 
+                        padding: 0 20px; 
+                        background-color: rgba(30, 30, 30, 0.4); 
+                        color: #ffffff; 
+                        border: 1px solid rgba(255, 255, 255, 0.2); 
+                        border-radius: 20px; 
+                        font-size: 14px; 
+                        font-weight: bold; 
+                        cursor: pointer; 
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center; 
+                        transition: all 0.2s ease; 
+                        backdrop-filter: blur(5px); 
+                    }}
                     .toggle-btn:hover {{ background-color: rgba(60, 60, 60, 0.8); border-color: rgba(255, 255, 255, 0.6); }}
-                    .toggle-btn.sdr-active {{ background-color: rgba(230, 90, 10, 0.6); border-color: rgba(255, 255, 255, 0.4); }}
+                    .toggle-btn.active {{ background-color: rgba(230, 90, 10, 0.6); border-color: rgba(255, 255, 255, 0.4); }}
+                    .toggle-btn.gain-map-active {{ background-color: rgba(0, 160, 230, 0.6); border-color: rgba(255, 255, 255, 0.4); }}
                     
                     .info-panel {{ position: absolute; top: 20px; right: 20px; background-color: rgba(20, 20, 20, 0.6); color: #e0e0e0; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.5; font-family: monospace; backdrop-filter: blur(6px); z-index: 20; min-width: 320px; pointer-events: none; }}
                     .info-title {{ font-weight: bold; color: #ffffff; margin-bottom: 6px; font-family: sans-serif; word-break: break-all; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 4px; }}
                     .info-row {{ display: flex; justify-content: space-between; margin-top: 2px; }}
                     .info-label {{ color: #888888; margin-right: 15px; }}
                     .info-val {{ color: #ffffff; text-align: right; }}
+                    .info-val.hdr-true {{ color: #00ff66; font-weight: bold; }}
+                    .info-val.hdr-false {{ color: #ff3333; }}
                 </style>
             </head>
             <body>
-                <div class="viewer-container">
-                    <button id="mode-toggle" class="toggle-btn" onclick="toggleMode()">HDR Mode</button>
+                <div class="viewer-container" id="container">
+                    <div class="controls-panel">
+                        <button id="mode-toggle" class="toggle-btn active" onclick="toggleMode()">HDR Mode</button>
+                        <button id="gain-map-toggle" class="toggle-btn" onclick="toggleGainMapMode()">Gain Map</button>
+                    </div>
+                    
                     <button class="nav-btn prev-btn" onclick="prevImage()">&#10094;</button>
                     <img id="hdr-image" src="" alt="Ultra HDR Image">
                     <button class="nav-btn next-btn" onclick="nextImage()">&#10095;</button>
                     
                     <div class="info-panel">
                         <div id="meta-filename" class="info-title">-</div>
-                        <div class="info-row"><span class="info-label">Kamera:</span><span id="meta-cam" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Ultra HDR:</span><span id="meta-uhdr" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Camera:</span><span id="meta-cam" class="info-val">-</span></div>
                         <div class="info-row"><span class="info-label">ISO:</span><span id="meta-iso" class="info-val">-</span></div>
-                        <div class="info-row"><span class="info-label">Blende:</span><span id="meta-aperture" class="info-val">-</span></div>
-                        <div class="info-row"><span class="info-label">Belichtung:</span><span id="meta-shutter" class="info-val">-</span></div>
-                        <div class="info-row"><span class="info-label">Brennweite:</span><span id="meta-focal" class="info-val">-</span></div>
-                        <div class="info-row"><span class="info-label">Brennweite (35mm):</span><span id="meta-focal35" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Aperture:</span><span id="meta-aperture" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Shutter Speed:</span><span id="meta-shutter" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Focal Length:</span><span id="meta-focal" class="info-val">-</span></div>
+                        <div class="info-row"><span class="info-label">Focal Length (35mm):</span><span id="meta-focal35" class="info-val">-</span></div>
                     </div>
                 </div>
                 <script>
@@ -208,16 +311,54 @@ def main():
                     const exifData = {exif_json};
                     let currentIndex = {start_index};
                     let isHDR = true;
+                    let isGainMapMode = false;
+                    let isZoomed = false;
+
+                    const img = document.getElementById('hdr-image');
+                    const hdrBtn = document.getElementById('mode-toggle');
+                    const gmBtn = document.getElementById('gain-map-toggle');
+
+                    // Native 1:1 Zoom-Logik
+                    img.addEventListener('dblclick', function(e) {{
+                        if (!isZoomed) {{
+                            const rect = img.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+                            
+                            img.style.transformOrigin = `${{x}}% ${{y}}%`;
+                            img.style.transform = 'scale(3)';
+                            img.classList.add('zoomed');
+                            isZoomed = true;
+                        }} else {{
+                            resetZoom();
+                        }}
+                    }});
+
+                    function resetZoom() {{
+                        img.style.transform = 'scale(1)';
+                        img.style.transformOrigin = 'center center';
+                        img.classList.remove('zoomed');
+                        isZoomed = false;
+                    }}
 
                     function updateViewer() {{
                         if (images.length > 0 && currentIndex >= 0 && currentIndex < images.length) {{
+                            isGainMapMode = false; 
+                            isHDR = true;
+                            resetZoom();
+
                             const fileName = images[currentIndex];
-                            document.getElementById('hdr-image').src = 'http://127.0.0.1:' + window.location.port + '/' + encodeURIComponent(fileName);
+                            img.src = 'http://127.0.0.1:' + window.location.port + '/' + encodeURIComponent(fileName);
+
                             document.title = "Ultra HDR Viewer - " + fileName;
                             
                             const meta = exifData[fileName] || {{}};
                             document.getElementById('meta-filename').innerText = meta.filename || fileName;
                             
+                            const uhdrEl = document.getElementById('meta-uhdr');
+                            uhdrEl.innerText = meta.ultra_hdr || "False";
+                            uhdrEl.className = "info-val " + (meta.ultra_hdr === "True" ? "hdr-true" : "hdr-false");
+
                             let make = meta.manufacturer || "-";
                             let model = meta.model || "-";
                             if (model.toLowerCase().startsWith(make.toLowerCase())) {{
@@ -231,22 +372,60 @@ def main():
                             document.getElementById('meta-shutter').innerText = meta.shutter || "-";
                             document.getElementById('meta-focal').innerText = meta.focal_length || "-";
                             document.getElementById('meta-focal35').innerText = meta.focal_35mm || "-";
+                            
+                            img.classList.remove('sdr-mode', 'gain-map-mode');
+                            updateButtons();
                         }}
                     }}
 
                     function toggleMode() {{
-                        const img = document.getElementById('hdr-image');
-                        const btn = document.getElementById('mode-toggle');
-                        isHDR = !isHDR;
-                        
-                        if (isHDR) {{
-                            img.classList.remove('sdr-mode');
-                            btn.classList.remove('sdr-active');
-                            btn.innerText = "HDR Mode";
+                        const fileName = images[currentIndex];
+                        if (isGainMapMode) {{
+                            isGainMapMode = false;
+                            isHDR = true;
                         }} else {{
-                            img.classList.add('sdr-mode');
-                            btn.classList.add('sdr-active');
-                            btn.innerText = "SDR Mode";
+                            isHDR = !isHDR;
+                        }}
+                        
+                        img.classList.remove('sdr-mode', 'gain-map-mode');
+                        if (!isHDR) img.classList.add('sdr-mode');
+                        
+                        img.src = 'http://127.0.0.1:' + window.location.port + '/' + encodeURIComponent(fileName) + '?t=' + new Date().getTime();
+                        updateButtons();
+                    }}
+                    
+                    function toggleGainMapMode() {{
+                        const fileName = images[currentIndex];
+                        
+                        if (!isGainMapMode) {{
+                            isGainMapMode = true;
+                            isHDR = false;
+                            
+                            img.classList.remove('sdr-mode');
+                            img.classList.add('gain-map-mode');
+                            
+                            img.src = 'http://127.0.0.1:' + window.location.port + '/get_gainmap/' + encodeURIComponent(fileName) + '?t=' + new Date().getTime();
+                        }} else {{
+                            isGainMapMode = false;
+                            isHDR = true;
+                            img.classList.remove('sdr-mode', 'gain-map-mode');
+                            img.src = 'http://127.0.0.1:' + window.location.port + '/' + encodeURIComponent(fileName) + '?t=' + new Date().getTime();
+                        }}
+                        updateButtons();
+                    }}
+                    
+                    function updateButtons() {{
+                        hdrBtn.classList.remove('active');
+                        gmBtn.classList.remove('gain-map-active');
+                        
+                        if (isGainMapMode) {{
+                            gmBtn.classList.add('gain-map-active');
+                            hdrBtn.innerText = "SDR Mode";
+                        }} else if (isHDR) {{
+                            hdrBtn.classList.add('active');
+                            hdrBtn.innerText = "HDR Mode";
+                        }} else {{
+                            hdrBtn.innerText = "SDR Mode";
                         }}
                     }}
 
@@ -263,6 +442,11 @@ def main():
                             updateViewer();
                         }}
                     }}
+
+                    window.addEventListener('keydown', function(e) {{
+                        if (e.key === "ArrowRight") nextImage();
+                        if (e.key === "ArrowLeft") prevImage();
+                    }});
 
                     updateViewer();
                 </script>

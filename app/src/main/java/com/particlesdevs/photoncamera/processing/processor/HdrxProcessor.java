@@ -334,7 +334,7 @@ public class HdrxProcessor extends ProcessorBase {
         imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
         boolean imageSaved = false;
         //Saves the final bitmap
-        if (PhotonCamera.getSettings().use16Bit && PhotonCamera.getSettings().useJpegUltraHdr) {
+        if (PhotonCamera.getSettings().useJpegUltraHdr) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 imageSaved = ImageSaver.createUltraHdrFromSdr(img, imageFile, exifData);
             }

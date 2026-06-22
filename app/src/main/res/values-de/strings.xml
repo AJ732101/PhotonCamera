@@ -40,6 +40,7 @@
     <string name="hdrxNR">Rauschunterdrückung</string>
     <string name="turn_on_watermark">Wasserzeichen Aktivieren</string>
     <string name="exposure_fusion_method">Belichtungsfusion Methode 2 (nicht 3)</string>
+    <string name="ultra_hdr_jpeg">Ultra HDR JPEG</string>
     <string name="sure_delete">Möchten Sie dieses Bild wirklich löschen?</string>
     <string name="sure_delete_multiple">Sicher, dass Sie %1$s Bild(er) löschen möchten? %2$s werden gelöscht.</string>
     <string name="cancel">Abbrechen</string>
@@ -134,6 +135,7 @@
     <string name="thumbnail">Eingebettete Vorschau</string>
     <string name="use_p3">P3 (statt sRGB)</string>
     <string name="tonemapping_mode_quality">Qualität Tonemapping</string>
+    <string name="hq_subsampling">4:2:2 verwenden (wenn möglich)</string>
     <string name="gallery_folders">Galerie Verzeichnisse</string>
     <string name="options">Optionen</string>
     <string name="session_on_configure_failed">Session Konfiguration fehlerhaft, versuchen Sie ein anderes Vorschauformat</string>
@@ -261,4 +263,7 @@
     <string name="still_image_label">Foto</string>
     <string name="aperture1">Blende</string>
     <string name="key_details_label">Schlüssel Details</string>
+    <string name="parallel_avif">AVIF Parallel Speichern</string>
+    <string name="use_16bit">16 Bit verwenden</string>
+    <string name="image_reader_flags">Alternative ImageReader Flags</string>
 </resources>

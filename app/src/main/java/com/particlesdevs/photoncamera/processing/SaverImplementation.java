@@ -17,6 +17,7 @@ import com.particlesdevs.photoncamera.processing.processor.ProcessorBase;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Allocator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -98,7 +99,7 @@ public class SaverImplementation {
         this.processingEventsListener = processingEventsListener;
     }
 
-    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) {
+    public void addImage(Image image, int orientation, int targetFormat, int quality, Bundle metadata, MainRenderer renderer) throws IOException {
         //image.close();
     }
 
