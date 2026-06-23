@@ -533,31 +533,33 @@ public class ImageSaver {
             Log.d(TAG, "activearr:" + characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE));
             Log.d(TAG, "precorr:" + characteristics.get(CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE));
 
-            try {
-                StringBuilder sb = new StringBuilder();
-                for (CaptureResult.Key<?> key : captureResult.getKeys()) {
-                    Object val = captureResult.get(key);
-                    sb.append(key.getName()).append(" = ");
-                    if (val != null && val.getClass().isArray()) {
-                        if (val instanceof byte[]) sb.append(Arrays.toString((byte[]) val));
-                        else if (val instanceof int[]) sb.append(Arrays.toString((int[]) val));
-                        else if (val instanceof float[]) sb.append(Arrays.toString((float[]) val));
-                        else if (val instanceof double[]) sb.append(Arrays.toString((double[]) val));
-                        else if (val instanceof long[]) sb.append(Arrays.toString((long[]) val));
-                        else if (val instanceof short[]) sb.append(Arrays.toString((short[]) val));
-                        else if (val instanceof boolean[]) sb.append(Arrays.toString((boolean[]) val));
-                        else if (val instanceof Object[]) sb.append(Arrays.deepToString((Object[]) val));
-                        else sb.append(val);
-                    } else {
-                        sb.append(val);
+            if (PhotonCamera.getSettings().writeCaptureResult) {
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    for (CaptureResult.Key<?> key : captureResult.getKeys()) {
+                        Object val = captureResult.get(key);
+                        sb.append(key.getName()).append(" = ");
+                        if (val != null && val.getClass().isArray()) {
+                            if (val instanceof byte[]) sb.append(Arrays.toString((byte[]) val));
+                            else if (val instanceof int[]) sb.append(Arrays.toString((int[]) val));
+                            else if (val instanceof float[]) sb.append(Arrays.toString((float[]) val));
+                            else if (val instanceof double[]) sb.append(Arrays.toString((double[]) val));
+                            else if (val instanceof long[]) sb.append(Arrays.toString((long[]) val));
+                            else if (val instanceof short[]) sb.append(Arrays.toString((short[]) val));
+                            else if (val instanceof boolean[]) sb.append(Arrays.toString((boolean[]) val));
+                            else if (val instanceof Object[]) sb.append(Arrays.deepToString((Object[]) val));
+                            else sb.append(val);
+                        } else {
+                            sb.append(val);
+                        }
+                        sb.append("\n");
                     }
-                    sb.append("\n");
+                    Path resultPath = FileManager.sPHOTON_RAW_DIR.toPath().resolve("CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
+                    Files.write(resultPath, sb.toString().getBytes());
+                    Log.d(TAG, "Saved CaptureResult to: " + resultPath);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to save CaptureResult.txt", e);
                 }
-                Path resultPath = FileManager.sPHOTON_RAW_DIR.toPath().resolve("CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
-                Files.write(resultPath, sb.toString().getBytes());
-                Log.d(TAG, "Saved CaptureResult to: " + resultPath);
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to save CaptureResult.txt", e);
             }
 
             return saveSingleRaw(dngFilePath, image.buffer, parameters);

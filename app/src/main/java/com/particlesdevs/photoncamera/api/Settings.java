@@ -148,6 +148,7 @@ public class Settings {
     public boolean useParallelAvif = false;
     public boolean use16Bit = false;
     public boolean useJpegUltraHdr = false;
+    public boolean writeCaptureResult = false;
 
 
     public void loadCache() {
@@ -204,6 +205,7 @@ public class Settings {
         useParallelAvif = PreferenceKeys.isParallelAvifOn();
         use16Bit = PreferenceKeys.is16BitOn();
         useJpegUltraHdr = PreferenceKeys.isUltraHdrOn();
+        writeCaptureResult = PreferenceKeys.writeCaptureResultOn();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();

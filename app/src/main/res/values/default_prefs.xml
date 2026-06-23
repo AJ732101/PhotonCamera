@@ -111,6 +111,7 @@
     <bool name="pref_gps_default">false</bool>
     <bool name="pref_disable_all_vendor_default">false</bool>
     <bool name="pref_disable_nogui_yet_default">false</bool>
+    <bool name="pref_write_capture_result_default">false</bool>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_default" translatable="false">60</string>

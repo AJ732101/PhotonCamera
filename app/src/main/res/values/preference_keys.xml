@@ -123,6 +123,7 @@
     <string name="pref_gps_key" translatable="false">pref_gps_key</string>
     <string name="pref_disable_all_vendor_key" translatable="false">pref_disable_all_vendor_key</string>
     <string name="pref_disable_nogui_yet_key" translatable="false">pref_disable_nogui_yet_key</string>
+    <string name="pref_write_capture_result_key" translatable="false">pref_write_capture_result_key</string>
 
     <!-- Video settings strings -->
     <string name="pref_bitrate_key" translatable="false">pref_bitrate_key</string>

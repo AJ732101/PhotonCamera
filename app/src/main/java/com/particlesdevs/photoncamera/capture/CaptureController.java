@@ -142,6 +142,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1080,6 +1081,13 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         if (largestSizeArea <= ResolutionSolution.highRes || PhotonCamera.getSettings().QuadBayer) {
             target = sizes[largestSizeIdx];
+            if ((PhotonCamera.getSettings().frameCount == 1) && PhotonCamera.getSettings().aspect169) {
+                if (target.getWidth() > target.getHeight()) {
+                    target = new Size(target.getWidth(), target.getHeight() * 3 / 4);
+                } else {
+                    target = new Size(target.getWidth() * 3 / 4, target.getHeight());
+                }
+            }
             if (PhotonCamera.getSettings().QuadBayer) {
                 Rect preCorrectionActiveArraySize = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE);
                 Rect activeArraySize = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
@@ -4187,6 +4195,36 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
+
+                    if (PhotonCamera.getSettings().writeCaptureResult && (PhotonCamera.getSettings().frameCount == 1)) {
+                        try {
+                            StringBuilder sb = new StringBuilder();
+                            for (CaptureResult.Key<?> key : result.getKeys()) {
+                                Object val = result.get(key);
+                                sb.append(key.getName()).append(" = ");
+                                if (val != null && val.getClass().isArray()) {
+                                    if (val instanceof byte[]) sb.append(Arrays.toString((byte[]) val));
+                                    else if (val instanceof int[]) sb.append(Arrays.toString((int[]) val));
+                                    else if (val instanceof float[]) sb.append(Arrays.toString((float[]) val));
+                                    else if (val instanceof double[]) sb.append(Arrays.toString((double[]) val));
+                                    else if (val instanceof long[]) sb.append(Arrays.toString((long[]) val));
+                                    else if (val instanceof short[]) sb.append(Arrays.toString((short[]) val));
+                                    else if (val instanceof boolean[]) sb.append(Arrays.toString((boolean[]) val));
+                                    else if (val instanceof Object[]) sb.append(Arrays.deepToString((Object[]) val));
+                                    else sb.append(val);
+                                } else {
+                                    sb.append(val);
+                                }
+                                sb.append("\n");
+                            }
+                            Path resultPath = FileManager.sDCIM_CAMERA.toPath().resolve("CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
+                            Files.write(resultPath, sb.toString().getBytes());
+                            Log.d(TAG, "Saved CaptureResult to: " + resultPath);
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to save CaptureResult.txt", e);
+                        }
+                    }
+
                     mCaptureResult = result;
                     mLastCaptureResult = serializeCaptureResult(result);
                     if (PreferenceKeys.isCameraSoundsOn()) {

@@ -81,6 +81,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_GPS_LOCATION.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_VENDOR_KEYS.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_NOGUI_YET.mValue);
+        COMMON_KEYS.add(Key.KEY_WRITE_CAPTURE_RESULT.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -207,6 +208,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION, resources.getBoolean(R.bool.pref_gps_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS, resources.getBoolean(R.bool.pref_disable_all_vendor_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET, resources.getBoolean(R.bool.pref_disable_nogui_yet_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_WRITE_CAPTURE_RESULT, resources.getBoolean(R.bool.pref_write_capture_result_default));
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -967,6 +969,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET);
     }
 
+    public static boolean writeCaptureResultOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_WRITE_CAPTURE_RESULT);
+    }
+
     public static String getContrastCurve() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE);
     }
@@ -1116,6 +1122,7 @@ public class PreferenceKeys {
         KEY_GPS_LOCATION(R.string.pref_gps_key),
         KEY_DISABLE_VENDOR_KEYS(R.string.pref_disable_all_vendor_key),
         KEY_DISABLE_NOGUI_YET(R.string.pref_disable_nogui_yet_key),
+        KEY_WRITE_CAPTURE_RESULT(R.string.pref_write_capture_result_key),
 
         /**
          * QualityDoesMatter - Video settings keys
