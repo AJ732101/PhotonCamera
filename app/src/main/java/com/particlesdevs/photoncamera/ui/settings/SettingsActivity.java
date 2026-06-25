@@ -15,6 +15,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.util.Size;
@@ -594,6 +595,25 @@ public class SettingsActivity extends BaseActivity implements
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.stacking_preferences, rootKey);
+
+            String ultraHdrKey = getString(R.string.pref_ultra_hdr_key);
+            Preference ultraHdrPreference = findPreference(ultraHdrKey);
+            String sixteenBitKey = getString(R.string.pref_16bit_key);
+            Preference sixteenBitPreference = findPreference(sixteenBitKey);
+            if (ultraHdrPreference != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ultraHdrPreference.setEnabled(true);
+                } else {
+                    ultraHdrPreference.setEnabled(false);
+                }
+            }
+            if (sixteenBitPreference != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    sixteenBitPreference.setEnabled(true);
+                } else {
+                    sixteenBitPreference.setEnabled(false);
+                }
+            }
 
             ListPreference lutPreference = findPreference(getString(R.string.pref_lut_key));
 
