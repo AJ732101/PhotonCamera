@@ -9,11 +9,22 @@ public class SettingsManagerExtensions {
     
     /**
      * Get float value with dynamic string key (using native float storage)
+     * Robust version that handles String-encoded values from legacy/restored settings
      */
     public static Float getFloat(SettingsManager manager, String scope, String key, Float defaultValue) {
         SharedPreferences preferences = manager.getDefaultPreferences();
         if (scope.equals(SettingsManager.SCOPE_GLOBAL)) {
-            return preferences.getFloat(key, defaultValue);
+            try {
+                return preferences.getFloat(key, defaultValue);
+            } catch (ClassCastException e) {
+                // Handle legacy String-stored values
+                try {
+                    String value = preferences.getString(key, null);
+                    if (value != null) {
+                        return Float.parseFloat(value);
+                    }
+                } catch (Exception ignored) {}
+            }
         }
         return defaultValue;
     }
@@ -30,11 +41,22 @@ public class SettingsManagerExtensions {
     
     /**
      * Get integer value with dynamic string key (using native int storage)
+     * Robust version that handles String-encoded values
      */
     public static Integer getInteger(SettingsManager manager, String scope, String key, Integer defaultValue) {
         SharedPreferences preferences = manager.getDefaultPreferences();
         if (scope.equals(SettingsManager.SCOPE_GLOBAL)) {
-            return preferences.getInt(key, defaultValue);
+            try {
+                return preferences.getInt(key, defaultValue);
+            } catch (ClassCastException e) {
+                // Handle legacy String-stored values
+                try {
+                    String value = preferences.getString(key, null);
+                    if (value != null) {
+                        return Integer.parseInt(value);
+                    }
+                } catch (Exception ignored) {}
+            }
         }
         return defaultValue;
     }
@@ -51,11 +73,24 @@ public class SettingsManagerExtensions {
     
     /**
      * Get boolean value with dynamic string key (using native boolean storage)
+     * Robust version that handles String-encoded values
      */
     public static boolean getBoolean(SettingsManager manager, String scope, String key, boolean defaultValue) {
         SharedPreferences preferences = manager.getDefaultPreferences();
         if (scope.equals(SettingsManager.SCOPE_GLOBAL)) {
-            return preferences.getBoolean(key, defaultValue);
+            try {
+                return preferences.getBoolean(key, defaultValue);
+            } catch (ClassCastException e) {
+                // Handle legacy String-stored values (often stored as "0" or "1")
+                try {
+                    String value = preferences.getString(key, null);
+                    if (value != null) {
+                        if (value.equals("1") || value.equalsIgnoreCase("true")) return true;
+                        if (value.equals("0") || value.equalsIgnoreCase("false")) return false;
+                        return Integer.parseInt(value) != 0;
+                    }
+                } catch (Exception ignored) {}
+            }
         }
         return defaultValue;
     }

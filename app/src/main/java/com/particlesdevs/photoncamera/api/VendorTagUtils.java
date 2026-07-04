@@ -823,6 +823,11 @@ public class VendorTagUtils {
 
                 // Vivo specific
                 if (PhotonCamera.isVivo) {
+                    var cameraId = new CaptureRequest.Key<>("vivo.control.camera_id", Integer.class);
+                    if (isSupported(builder, cameraId)) {
+                        builder.set(cameraId, Integer.valueOf(PhotonCamera.getSettings().mCameraID));
+                    }
+
                     var vivoIsProMode = new CaptureRequest.Key<>("vivo.control.is_pro_mode", Integer.class);
                     PhotonCamera.hasVivoProMode = true;
                     if (isSupported(builder, vivoIsProMode)) {
@@ -830,11 +835,35 @@ public class VendorTagUtils {
                             builder.set(vivoIsProMode, 1);
                             var vivoProIsoMin = new CaptureRequest.Key<>("vivo.control.pro_isoMin", Integer.class);
                             if (isSupported(builder, vivoProIsoMin)) {
-                                builder.set(vivoProIsoMin, 100);
+                                builder.set(vivoProIsoMin, 72);
                             }
-                            var vivoProIsoMax = new CaptureRequest.Key<>("vivo.control.pro_isoMin", Integer.class);
+                            var vivoProIsoMax = new CaptureRequest.Key<>("vivo.control.pro_isoMax", Integer.class);
                             if (isSupported(builder, vivoProIsoMax)) {
                                 builder.set(vivoProIsoMax, 1600);
+                            }
+                            var vivoProIso = new CaptureRequest.Key<>("vivo.control.iso", Integer.class);
+                            if (isSupported(builder, vivoProIso)) {
+                                builder.set(vivoProIso, 72);
+                            }
+                            var isoAuto = new CaptureRequest.Key<>("vivo.control.isoAuto", Integer.class);
+                            if (isSupported(builder, isoAuto)) {
+                                builder.set(isoAuto, 72);
+                            }
+                            var vivoProShutterMin = new CaptureRequest.Key<>("vivo.control.pro_exptimeMin", Long.class);
+                            if (isSupported(builder, vivoProShutterMin)) {
+                                builder.set(vivoProShutterMin, 1666666L);
+                            }
+                            var vivoProShutterMax = new CaptureRequest.Key<>("vivo.control.pro_exptimeMax", Long.class);
+                            if (isSupported(builder, vivoProShutterMax)) {
+                                builder.set(vivoProShutterMax, 500000000L);
+                            }
+                            var vivoProShutter = new CaptureRequest.Key<>("vivo.control.exptime", Long.class);
+                            if (isSupported(builder, vivoProShutter)) {
+                                builder.set(vivoProShutter, 1666666L);
+                            }
+                            var exptimeAuto = new CaptureRequest.Key<>("vivo.control.exptimeAuto", Long.class);
+                            if (isSupported(builder, exptimeAuto)) {
+                                builder.set(exptimeAuto, 1666666L);
                             }
                         }
                     }
@@ -931,9 +960,11 @@ public class VendorTagUtils {
                         //builder.set(vivoVideoFps, 60);
                     }
 
-                    var vivoVideoMode = new CaptureRequest.Key<>("vivo.control.videoMode", Integer.class);
-                    if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoVideoMode >= 0)) {
-                        builder.set(vivoVideoMode, PhotonCamera.getSpecific().specificSetting.vivoVideoMode);
+                    if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+                        var vivoVideoMode = new CaptureRequest.Key<>("vivo.control.videoMode", Integer.class);
+                        if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoVideoMode >= 0)) {
+                            builder.set(vivoVideoMode, PhotonCamera.getSpecific().specificSetting.vivoVideoMode);
+                        }
                     }
 
                     if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && PhotonCamera.getSpecific().specificSetting.vivoUseSuperEis) {
@@ -946,17 +977,32 @@ public class VendorTagUtils {
 
                         var vivoEisConfig = new CaptureRequest.Key<>("vivo.control.eis.config.enable", Integer.class);
                         if (isSupported(builder, vivoEisConfig)) {
-                            if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoEisConfig >= 0)) {
+                            if (isSupported(builder, vivoEisConfig) && (PhotonCamera.getSpecific().specificSetting.vivoEisConfig >= 0)) {
                                 builder.set(vivoEisConfig, PhotonCamera.getSpecific().specificSetting.vivoEisConfig);
                             }
                         }
 
                         var vivoEisEnhance = new CaptureRequest.Key<>("vivo.control.eis.enhance", Integer.class);
                         if (isSupported(builder, vivoEisEnhance)) {
-                            if (isSupported(builder, vivoVideoMode) && (PhotonCamera.getSpecific().specificSetting.vivoEisEnhance >= 0)) {
+                            if (isSupported(builder, vivoEisEnhance) && (PhotonCamera.getSpecific().specificSetting.vivoEisEnhance >= 0)) {
                                 builder.set(vivoEisEnhance, PhotonCamera.getSpecific().specificSetting.vivoEisEnhance);
                             }
                         }
+                    }
+
+                    var normalSensorGain = new CaptureRequest.Key<>("com.vivo.node.rawshot.NormalSensorGain", Float.class);
+                    if (isSupported(builder, normalSensorGain)) {
+                        //builder.set(normalSensorGain, 3.0f);
+                    }
+
+                    var normalIspGain = new CaptureRequest.Key<>("com.vivo.node.rawshot.NormalIspGain", Float.class);
+                    if (isSupported(builder, normalIspGain)) {
+                        //builder.set(normalIspGain, 3.0f);
+                    }
+
+                    var normalAdrcGain = new CaptureRequest.Key<>("com.vivo.node.rawshot.NormalAdrcGain", Float.class);
+                    if (isSupported(builder, normalAdrcGain)) {
+                        //builder.set(normalAdrcGain, 3.0f);
                     }
 
                     var vivoDisabeHdr = new CaptureRequest.Key<>("vivo.control.disableHDR", byte.class);
@@ -1020,14 +1066,24 @@ public class VendorTagUtils {
                         }
                     }
 
-                    var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", Integer.class);
+                    var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", byte.class);
                     if (isSupported(builder, vivoAiGcOn)) {
-                        //builder.set(vivoAiGcOn, (int) 1);
+                        //builder.set(vivoAiGcOn, (byte) 1);
+                    }
+
+                    var aiaeEnable = new CaptureRequest.Key<>("vivo.control.aiae.enable", Integer.class);
+                    if (isSupported(builder, aiaeEnable)) {
+                        //builder.set(aiaeEnable, 1);
+                    }
+
+                    var lotAlgoEnable = new CaptureRequest.Key<>("vivo.control.lotAlgo.enable", Integer.class);
+                    if (isSupported(builder, lotAlgoEnable)) {
+                        //builder.set(lotAlgoEnable, 1);
                     }
 
                     var vivoEngineer = new CaptureRequest.Key<>("vivo.control.engineer", Integer.class);
                     if (isSupported(builder, vivoEngineer)) {
-                        builder.set(vivoEngineer, (int) 1);
+                        builder.set(vivoEngineer, 1);
                     }
 
                     var vivoProRaw = new CaptureRequest.Key<>("vivo.control.is_ProRaw_on", Integer.class);
@@ -1042,7 +1098,27 @@ public class VendorTagUtils {
 
                     var vivoDcgHdr = new CaptureRequest.Key<>("vivo.control.EnableDCGHDR", Integer.class);
                     if (isSupported(builder, vivoDcgHdr)) {
-                        builder.set(vivoDcgHdr, 1);
+                        //builder.set(vivoDcgHdr, 1);
+                    }
+
+                    var ln2 = new CaptureRequest.Key<>("vivo.control.enableln2", Integer.class);
+                    if (isSupported(builder, ln2)) {
+                        //builder.set(ln2, 1);
+                    }
+
+                    var advanceFullsize = new CaptureRequest.Key<>("vivo.control.advance_fullsize", Integer.class);
+                    if (isSupported(builder, advanceFullsize)) {
+                        //builder.set(advanceFullsize, 1);
+                    }
+
+                    var seamlessControl = new CaptureRequest.Key<>("vivo.control.session.seamlesscontrol", Integer.class);
+                    if (isSupported(builder, seamlessControl)) {
+                        builder.set(seamlessControl, 1);
+                    }
+
+                    var currentModeEx = new CaptureRequest.Key<>("vivo.control.session.currentModeEx", Long.class);
+                    if (isSupported(builder, currentModeEx)) {
+                        //builder.set(currentModeEx, (long) 29);
                     }
 
                     var vivoStreamsUsage = new CaptureRequest.Key<>("vivo.control.streamsUsage", Integer[].class);

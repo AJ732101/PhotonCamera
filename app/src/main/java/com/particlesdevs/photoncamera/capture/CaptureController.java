@@ -1471,6 +1471,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         PhotonCamera.mJpegRIsSupported = false;
         PhotonCamera.mRaw10IsSupported = false;
         PhotonCamera.mRaw12IsSupported = false;
+        PhotonCamera.mRaw14IsSupported = false;
         PhotonCamera.mRawPrivateIsSupported = false;
         PhotonCamera.mRawSensorIsSupported = false;
         PhotonCamera.mYuv10IsSupported = false;
@@ -1490,6 +1491,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
             if (format == ImageFormat.RAW12) {
                 PhotonCamera.mRaw12IsSupported = true;
+            }
+            if (format == ImageFormat.RAW14) {
+                PhotonCamera.mRaw14IsSupported = true;
             }
             if (format == ImageFormat.RAW_PRIVATE) {
                 PhotonCamera.mRawPrivateIsSupported = true;
@@ -1531,6 +1535,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
         else {
             Log.d(TAG, "RAW12 is NOT supported");
+        }
+        if (PhotonCamera.mRaw14IsSupported) {
+            Log.d(TAG, "RAW14 is supported");
+        }
+        else {
+            Log.d(TAG, "RAW14 is NOT supported");
         }
         if (PhotonCamera.mRawPrivateIsSupported) {
             Log.d(TAG, "RAW_PRIVATE is supported");
@@ -1676,6 +1686,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if ((mTargetFormat == ImageFormat.RAW12) && !PhotonCamera.mRaw12IsSupported) {
             mTargetFormat = ImageFormat.RAW_SENSOR;
             Log.w(TAG, "Requested RAW12 but not supported -> fallback to RAW_SENSOR");
+        }
+        if ((mTargetFormat == ImageFormat.RAW14) && !PhotonCamera.mRaw14IsSupported) {
+            mTargetFormat = ImageFormat.RAW_SENSOR;
+            Log.w(TAG, "Requested RAW14 but not supported -> fallback to RAW_SENSOR");
         }
         // Bitmap formats
         if ((mTargetFormat == ImageFormat.HEIC) && !PhotonCamera.mHeicIsSupported) {
@@ -4984,6 +4998,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         } else if (PhotonCamera.getSettings().videoHeight == 1584) {
             vidWidth = 2816;
             vidHeight = 1584;
+        } else if (PhotonCamera.getSettings().videoHeight == 3748) {
+            vidWidth = 8192;
+            vidHeight = 3748;
+        } else if (PhotonCamera.getSettings().videoHeight == 3672) {
+            vidWidth = 8160;
+            vidHeight = 3672;
         } else {
             vidWidth = 1280;
         }
@@ -5498,62 +5518,54 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             //mVidHeight = mPreviewSize.getWidth();
             mVidWidth = 1080;
             mVidHeight = 1080;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 4 * 1080) {
+        } else if (PhotonCamera.getSettings().videoHeight == 4 * 1080) {
             mVidWidth = 4 * 1920;
             mVidHeight = 4 * 1080;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2 * 1080) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2 * 1080) {
             mVidWidth = 2 * 1920;
             mVidHeight = 2 * 1080;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 1080) {
+        } else if (PhotonCamera.getSettings().videoHeight == 1080) {
             mVidWidth = 1920;
             mVidHeight = 1080;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 800) {
+        } else if (PhotonCamera.getSettings().videoHeight == 800) {
             mVidWidth = 1920;
             mVidHeight = 800;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2 *800) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2 *800) {
             mVidWidth = 2 * 1920;
             mVidHeight = 2 * 800;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 9999) {
+        } else if (PhotonCamera.getSettings().videoHeight == 9999) {
             mVidWidth = maxSensorRes.getWidth();
             mVidHeight = maxSensorRes.getHeight();
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 8888) {
+        } else if (PhotonCamera.getSettings().videoHeight == 8888) {
             mVidWidth = 6016;
             mVidHeight = 4512;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 7777) {
+        } else if (PhotonCamera.getSettings().videoHeight == 7777) {
             mVidWidth = 7680;
             mVidHeight = 5760;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 6666) {
+        } else if (PhotonCamera.getSettings().videoHeight == 6666) {
             mVidWidth = 8192;
             mVidHeight = 6144;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2304) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2304) {
             mVidWidth = 4096;
             mVidHeight = 2304;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2296) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2296) {
             mVidWidth = 4080;
             mVidHeight = 2296;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 1836) {
+        } else if (PhotonCamera.getSettings().videoHeight == 1836) {
             mVidWidth = 3264;
             mVidHeight = 1836;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 2608) {
+        } else if (PhotonCamera.getSettings().videoHeight == 2608) {
             mVidWidth = 4624;
             mVidHeight = 2608;
-        }
-        else if (PhotonCamera.getSettings().videoHeight == 1584) {
+        } else if (PhotonCamera.getSettings().videoHeight == 1584) {
             mVidWidth = 2816;
             mVidHeight = 1584;
+        } else if (PhotonCamera.getSettings().videoHeight == 3748) {
+            mVidWidth = 8192;
+            mVidHeight = 3748;
+        } else if (PhotonCamera.getSettings().videoHeight == 3672) {
+            mVidWidth = 8160;
+            mVidHeight = 3672;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);

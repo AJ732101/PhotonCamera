@@ -108,7 +108,7 @@ public class Parameters {
     boolean useDynamicBlackLevel;
 
     @Tunable(title = "Use Dynamic White Level", category = "Parameters", defaultValue = 1, min = 0, max = 1, step = 1,
-            description = "Use dynamic black level from the camera2api capture result if available (may cause instability on some devices)"
+            description = "Use dynamic white level from the camera2api capture result if available (may cause instability on some devices)"
     )
     boolean useDynamicWhiteLevel;
 
@@ -119,7 +119,7 @@ public class Parameters {
 
     @Tunable(title = "White Level Override", category = "Parameters",
             defaultValue = -1, min = -1, max = 65535, step = 1,
-            description = "Override black level for all channels -1 is disabled")
+            description = "Override white level for all channels -1 is disabled")
     int whiteLevelOverride;
 
     @Tunable(title = "Disable front mirror", category = "Parameters", defaultValue = 0, min = 0, max = 1, step = 1,

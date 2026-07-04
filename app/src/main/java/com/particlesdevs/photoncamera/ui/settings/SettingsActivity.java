@@ -101,6 +101,14 @@ public class SettingsActivity extends BaseActivity implements
                 entriesRaw.add("RAW12");
                 entryRawValues.add("38");
             }
+            if (PhotonCamera.mRaw12IsSupported) {
+                entriesRaw.add("RAW14");
+                entryRawValues.add("44");
+            }
+            if (PhotonCamera.mRawPrivateIsSupported) {
+                entriesRaw.add("RAW_PRIVATE");
+                entryRawValues.add("36");
+            }
 
             rawPreference.setEntries(entriesRaw.toArray(new CharSequence[0]));
             rawPreference.setEntryValues(entryRawValues.toArray(new CharSequence[0]));
@@ -720,6 +728,17 @@ public class SettingsActivity extends BaseActivity implements
             }
             photoCategory.addPreference(createCompactCheckBox("RAW12", PhotonCamera.mRaw12IsSupported, false));
             rawSizes = getRawSensorSizes(ImageFormat.RAW12);
+            if (rawSizes != null) {
+                for (Size size : rawSizes) {
+                    Preference p = new Preference(getContext());
+                    p.setLayoutResource(R.layout.preference_compact_item);
+                    p.setTitle("   " + size.getWidth() + " x " + size.getHeight());
+                    p.setEnabled(false);
+                    photoCategory.addPreference(p);
+                }
+            }
+            photoCategory.addPreference(createCompactCheckBox("RAW14", PhotonCamera.mRaw14IsSupported, false));
+            rawSizes = getRawSensorSizes(ImageFormat.RAW14);
             if (rawSizes != null) {
                 for (Size size : rawSizes) {
                     Preference p = new Preference(getContext());

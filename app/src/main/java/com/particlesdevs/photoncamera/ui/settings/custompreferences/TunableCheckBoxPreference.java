@@ -63,7 +63,7 @@ public class TunableCheckBoxPreference extends SwitchPreferenceCompat {
         mTitleView = (TextView) holder.findViewById(android.R.id.title);
         
         // Ensure checkbox state is correct based on persisted int value
-        int currentValue = getPersistedInt(mDefaultValue);
+        int currentValue = getIntValue();
         setChecked(currentValue != 0);
         
         // Update color based on whether value is default or customized
@@ -107,7 +107,7 @@ public class TunableCheckBoxPreference extends SwitchPreferenceCompat {
             Log.d(TAG, "First init - using default (NOT persisting yet): " + currentValue + " (from mDefaultValue: " + mDefaultValue + ")");
         } else {
             // Load existing persisted value
-            currentValue = getPersistedInt(mDefaultValue);
+            currentValue = getIntValue();
             Log.d(TAG, "Loading persisted: " + currentValue);
         }
         
@@ -156,16 +156,29 @@ public class TunableCheckBoxPreference extends SwitchPreferenceCompat {
     @Override
     protected boolean getPersistedBoolean(boolean defaultReturnValue) {
         // Get persisted int value and convert to boolean
-        int intDefault = defaultReturnValue ? 1 : 0;
-        int persistedValue = getPersistedInt(intDefault);
+        int persistedValue = getIntValue();
         return persistedValue != 0;
     }
 
     /**
      * Get the current value as int (0 or 1)
+     * Robust version that handles String-encoded values
      */
     public int getIntValue() {
-        return getPersistedInt(mDefaultValue);
+        try {
+            return getPersistedInt(mDefaultValue);
+        } catch (ClassCastException e) {
+            // Fallback for String-stored values
+            try {
+                String val = getPersistedString(null);
+                if (val != null) {
+                    if (val.equals("1") || val.equalsIgnoreCase("true")) return 1;
+                    if (val.equals("0") || val.equalsIgnoreCase("false")) return 0;
+                    return Integer.parseInt(val) != 0 ? 1 : 0;
+                }
+            } catch (Exception ignored) {}
+            return mDefaultValue;
+        }
     }
     
     /**

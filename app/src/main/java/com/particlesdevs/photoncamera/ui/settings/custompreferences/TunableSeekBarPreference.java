@@ -82,12 +82,7 @@ public class TunableSeekBarPreference extends Preference implements SeekBar.OnSe
             seekBar.setOnSeekBarChangeListener(this);
             
             // Get persisted value as appropriate type
-            float currentValue;
-            if (isFloat) {
-                currentValue = getPersistedFloat(mDefaultValue);
-            } else {
-                currentValue = (float) getPersistedInt((int) mDefaultValue);
-            }
+            float currentValue = getFloatValue();
             
             // Update UI only - don't persist again!
             seekBarProgress = valueToProgress(currentValue);
@@ -248,11 +243,7 @@ public class TunableSeekBarPreference extends Preference implements SeekBar.OnSe
             Log.d(TAG, "First init - using default (NOT persisting yet): " + mDefaultValue);
         } else {
             // Load existing persisted value
-            if (isFloat) {
-                currentValue = getPersistedFloat(mDefaultValue);
-            } else {
-                currentValue = (float) getPersistedInt((int) mDefaultValue);
-            }
+            currentValue = getFloatValue();
             Log.d(TAG, "Loading persisted: " + currentValue);
         }
         
@@ -383,7 +374,29 @@ public class TunableSeekBarPreference extends Preference implements SeekBar.OnSe
     }
 
     public float getFloatValue() {
-        return isFloat ? getPersistedFloat(mDefaultValue) : (float) getPersistedInt((int) mDefaultValue);
+        if (isFloat) {
+            try {
+                return getPersistedFloat(mDefaultValue);
+            } catch (ClassCastException e) {
+                // Fallback for String-stored values (e.g. from legacy or restored settings)
+                try {
+                    String val = getPersistedString(null);
+                    if (val != null) return Float.parseFloat(val);
+                } catch (Exception ignored) {}
+                return mDefaultValue;
+            }
+        } else {
+            try {
+                return (float) getPersistedInt((int) mDefaultValue);
+            } catch (ClassCastException e) {
+                // Fallback for String-stored values
+                try {
+                    String val = getPersistedString(null);
+                    if (val != null) return (float) Integer.parseInt(val);
+                } catch (Exception ignored) {}
+                return mDefaultValue;
+            }
+        }
     }
 }
 

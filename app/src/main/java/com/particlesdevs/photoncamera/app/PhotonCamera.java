@@ -122,6 +122,7 @@ public class PhotonCamera extends Application {
     public static boolean mYuv10IsSupported = false;
     public static boolean mRaw10IsSupported = false;
     public static boolean mRaw12IsSupported = false;
+    public static boolean mRaw14IsSupported = false;
     public static boolean mRawSensorIsSupported = false;
     public static boolean mRawPrivateIsSupported = false;
     public static boolean mHlgIsSupported = false;

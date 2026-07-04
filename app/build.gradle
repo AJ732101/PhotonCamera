@@ -62,7 +62,7 @@ android {
     defaultConfig {
         applicationId 'com.xiaomi.module.evaluation'
         minSdk 29
-        targetSdk 36
+        targetSdk 37
         versionCode versionBuild
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -129,7 +129,8 @@ android {
         includeInApk false
     }
     buildToolsVersion '36.0.0'
-    compileSdk 36
+    compileSdk 37
+    compileSdkMinor 0
 }
 
 
@@ -159,7 +160,7 @@ dependencies {
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     //Google Material
     implementation 'com.google.android.material:material:1.14.0'
-    implementation 'androidx.core:core-ktx:1.18.0'
+    implementation 'androidx.core:core-ktx:1.19.0'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.0'
     implementation "com.anggrayudi:storage:2.2.0"
     implementation 'me.zhanghai.android.libarchive:library:1.1.6'
