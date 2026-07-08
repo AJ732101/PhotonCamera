@@ -331,15 +331,20 @@ public class HdrxProcessor extends ProcessorBase {
             }
         }
 
-        imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
         boolean imageSaved = false;
         //Saves the final bitmap
-        if (PhotonCamera.getSettings().useJpegUltraHdr) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                imageSaved = ImageSaver.createUltraHdrFromSdr(img, imageFile, exifData);
-            }
+        if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
+            imageFile = Paths.get(imageFile.toAbsolutePath() + "avif");
+            imageSaved = ImageSaver.Util.saveBitmapAsAvif(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
         } else {
-            imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+            imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
+            if (PhotonCamera.getSettings().useJpegUltraHdr) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    imageSaved = ImageSaver.createUltraHdrFromSdr(img, imageFile, exifData);
+                }
+            } else {
+                imageSaved = ImageSaver.Util.saveBitmapAsJpg(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+            }
         }
 
         try {

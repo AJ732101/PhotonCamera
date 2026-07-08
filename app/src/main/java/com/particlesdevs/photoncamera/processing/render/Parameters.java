@@ -611,7 +611,7 @@ public class Parameters {
                 "\n Compressor=" + FltFormat(PhotonCamera.getSettings().compressor) +
                 "\n Align=" + PhotonCamera.getSettings().alignAlgorithm +
                 "\n Color=" + PhotonCamera.getSettings().colorMethod +
-                "\n PreviewFormat=" + PhotonCamera.getSettings().previewFormat +
+                //"\n PreviewFormat=" + PhotonCamera.getSettings().previewFormat +
                 "\n FocalL=" + FltFormat(focalLength);
 
         if (!PhotonCamera.getSettings().lutName.equalsIgnoreCase("lut.png")) {
