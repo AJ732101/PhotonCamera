@@ -17,11 +17,16 @@ import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.BufferUtils;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.SplineInterpolator;
+import com.particlesdevs.photoncamera.util.Utilities;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static android.opengl.GLES20.GL_CLAMP_TO_EDGE;
 import static android.opengl.GLES20.GL_LINEAR;
@@ -111,7 +116,9 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
     float[] intenseCurveY;
     float[] intenseHardCurveX;
     float[] intenseHardCurveY;
-    
+
+    private float currentLutSize = 64.0f;
+
     @Override
     public void Run() {
         if (!enable) {
@@ -217,13 +224,27 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
             postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
         }
         if(postlut.exists()){
-            lutbm = new GLImage(postlut);
-            postLut = new GLTexture(lutbm,GL_LINEAR,GL_CLAMP_TO_EDGE,0);
-            glProg.setDefine("POSTLUT",true);
-            int lutBase = (int)(0.1f+Math.pow(lutbm.size.x,1.0/3.0));
-            Log.d(Name,"LutBase:"+lutBase);
-            glProg.setDefine("POSTLUTSIZETILES", (float) lutBase);
-            glProg.setDefine("POSTLUTSIZE", (float) (lutBase*lutBase));
+            if (postlut.getName().toLowerCase().endsWith(".cube")) {
+                try (java.io.FileInputStream fis = new java.io.FileInputStream(postlut)) {
+                    Bitmap bmp = Utilities.parseCubeLut8Bit(fis);
+                    if (bmp != null) {
+                        lutbm = new GLImage(bmp);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                lutbm = new GLImage(postlut);
+            }
+            if (lutbm != null) {
+                postLut = new GLTexture(lutbm, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
+                glProg.setDefine("POSTLUT", true);
+                int lutBase = (int) (0.5f + Math.pow(lutbm.size.x, 1.0 / 3.0));
+                int size = lutbm.size.x / lutBase;
+                Log.d(Name, "LutBase:" + lutBase + " Size:" + size);
+                glProg.setDefine("POSTLUTSIZETILES", (float) lutBase);
+                glProg.setDefine("POSTLUTSIZE", (float) size);
+            }
         }
 
         glProg.setDefine("FUSIONGAIN",((PostPipeline)(basePipeline)).fusionGain);
@@ -288,10 +309,8 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
             double pos = ((float) i) / (gamma.length - 1.f);
             gamma[i] = (float) (Math.pow(pos, 1. / gammaKoefficientGenerator));
         }
-        GammaTexture = new GLTexture(gamma.length,1,
-                new GLFormat(GLFormat.DataType.FLOAT_16),BufferUtils.getFrom(gamma),GL_LINEAR,GL_CLAMP_TO_EDGE);
+        GammaTexture = new GLTexture(gamma.length,1, new GLFormat(GLFormat.DataType.FLOAT_16),BufferUtils.getFrom(gamma),GL_LINEAR,GL_CLAMP_TO_EDGE);
         File customlut = new File(FileManager.sPHOTON_TUNING_DIR,"initial_lut.png");
-        boolean loaded = false;
         if(customlut.exists()){
             lutbm = new GLImage(customlut);
             glProg.setDefine("LUT",true);

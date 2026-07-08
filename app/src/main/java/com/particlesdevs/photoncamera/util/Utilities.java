@@ -12,9 +12,12 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.particlesdevs.photoncamera.processing.ImagePath;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -24,6 +27,87 @@ import static java.lang.Math.min;
 public class Utilities {
     private static final PorterDuffXfermode porterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.ADD);
 
+    public static Bitmap parseCubeLut8Bit(InputStream is) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line;
+        int size = 0;
+        float[] data = null;
+        int dataIndex = 0;
+        int lineCount = 0;
+
+        while ((line = reader.readLine()) != null) {
+            lineCount++;
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("#") || line.startsWith("TITLE")) {
+                if (lineCount > 1000000) break;
+                continue;
+            }
+
+            if (line.startsWith("LUT_3D_SIZE")) {
+                if (data == null) {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length > 1) {
+                        try {
+                            size = Integer.parseInt(parts[1]);
+                            if (size < 2 || size > 128) return null;
+                            data = new float[size * size * size * 3];
+                        } catch (NumberFormatException e) {
+                            return null;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (data != null) {
+                char firstChar = line.charAt(0);
+                if (Character.isDigit(firstChar) || firstChar == '-' || firstChar == '.') {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length >= 3) {
+                        try {
+                            data[dataIndex++] = Float.parseFloat(parts[0]);
+                            data[dataIndex++] = Float.parseFloat(parts[1]);
+                            data[dataIndex++] = Float.parseFloat(parts[2]);
+                            if (dataIndex >= data.length) break;
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+            } else if (lineCount > 2000) {
+                // If size not found in first 2000 lines, abort
+                return null;
+            }
+        }
+
+        if (size == 0 || data == null || dataIndex < data.length) return null;
+
+        int columns = (int) Math.ceil(Math.sqrt(size));
+        int width = size * columns;
+        int height = size * columns; // Make it square for the shader logic
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        byte[] pixelData = new byte[width * height * 4];
+
+        for (int b = 0; b < size; b++) {
+            int cellX = (b % columns) * size;
+            int cellY = (b / columns) * size;
+            for (int g = 0; g < size; g++) {
+                for (int r = 0; r < size; r++) {
+                    int srcIdx = (r + g * size + b * size * size) * 3;
+                    int x = cellX + r;
+                    int y = cellY + g;
+                    int dstIdx = (y * width + x) * 4;
+
+                    pixelData[dstIdx] = (byte) Math.min(255, Math.max(0, (int) (data[srcIdx] * 255.0f)));
+                    pixelData[dstIdx + 1] = (byte) Math.min(255, Math.max(0, (int) (data[srcIdx + 1] * 255.0f)));
+                    pixelData[dstIdx + 2] = (byte) Math.min(255, Math.max(0, (int) (data[srcIdx + 2] * 255.0f)));
+                    pixelData[dstIdx + 3] = (byte) 255;
+                }
+            }
+        }
+
+        bmp.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(pixelData));
+        return bmp;
+    }
     public static Bitmap drawKernels(float[][][] inputKernels, Point kernelSize, Point kernelCount){
         int width = kernelSize.x*kernelCount.x;
         int height = kernelSize.y*kernelCount.y;

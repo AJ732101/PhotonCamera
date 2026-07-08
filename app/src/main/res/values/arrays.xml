@@ -89,12 +89,16 @@
         <item>RAW_SENSOR</item>
         <item>RAW10</item>
         <item>RAW12</item>
+        <item>RAW14</item>
+        <item>RAW_PRIVATE</item>
     </string-array>
 
     <string-array name="raw_format_entryValues">
         <item>32</item>
         <item>37</item>
         <item>38</item>
+        <item>44</item>
+        <item>36</item>
     </string-array>
 
     <string-array name="vendor_keys_type_filter_entries">
@@ -196,6 +200,8 @@
         <item>Custom 3 (3264x1836)</item>
         <item>Custom 4 (4624x2608)</item>
         <item>Custom 5 (2816x1584)</item>
+        <item>Custom 6 (8192x3748)</item>
+        <item>Custom 7 (8160x3672)</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
@@ -214,6 +220,8 @@
         <item>1836</item>
         <item>2308</item>
         <item>1584</item>
+        <item>3748</item>
+        <item>3672</item>
     </string-array>
 
     <string-array name="video_framerate_entries">
@@ -582,6 +590,7 @@
 
     <string-array name="digital_zoom_factor_entries">
         <item>0.5</item>
+        <item>1.0</item>
         <item>1.5</item>
         <item>2</item>
         <item>3</item>
@@ -593,6 +602,7 @@
 
     <string-array name="digital_zoom_factor_entryValues">
         <item>0.5f</item>
+        <item>1.0f</item>
         <item>1.5f</item>
         <item>2.0f</item>
         <item>3.0f</item>

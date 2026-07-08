@@ -24,6 +24,7 @@ import com.particlesdevs.photoncamera.processing.opengl.GLImage;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
+import com.particlesdevs.photoncamera.util.Utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,6 +36,9 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.FileInputStream;
 import java.util.function.Consumer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -164,8 +168,8 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTexLut.mTextureID);
             double lutSizeDouble = (double) lutSize;
-            float postLutSizeVal = (float) Math.cbrt(lutSizeDouble * lutSizeDouble);
-            float postLutSizeTilesVal = (float) (lutSizeDouble / postLutSizeVal);
+            float postLutSizeTilesVal = (float) Math.round(Math.pow(lutSizeDouble, 1.0 / 3.0));
+            float postLutSizeVal = (float) (lutSizeDouble / postLutSizeTilesVal);
             GLES20.glUniform1f(uPostLutSize, postLutSizeVal);
             GLES20.glUniform1f(uPostLutSizeTiles, postLutSizeTilesVal);
         }
@@ -275,10 +279,22 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         lutSize = 0;
         try {
             if (currentLutFile != null && currentLutFile.exists()) {
-                GLImage lutbm = new GLImage(currentLutFile);
-                hTexLut = new GLTexture(lutbm, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE, 0);
-                lutSize = lutbm.size.x;
-                Log.d(TAG, "Successfully loaded LUT: " + currentLutFile.getName() + " with size: " + lutSize);
+                GLImage lutbm = null;
+                if (currentLutFile.getName().toLowerCase().endsWith(".cube")) {
+                    try (FileInputStream fis = new FileInputStream(currentLutFile)) {
+                        Bitmap bmp = Utilities.parseCubeLut8Bit(fis);
+                        if (bmp != null) {
+                            lutbm = new GLImage(bmp);
+                        }
+                    }
+                } else {
+                    lutbm = new GLImage(currentLutFile);
+                }
+                if (lutbm != null) {
+                    hTexLut = new GLTexture(lutbm, GLES20.GL_LINEAR, GLES20.GL_CLAMP_TO_EDGE, 0);
+                    lutSize = lutbm.size.x;
+                    Log.d(TAG, "Successfully loaded LUT: " + currentLutFile.getName() + " with size: " + lutSize);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Failed to load LUT image.", e);
