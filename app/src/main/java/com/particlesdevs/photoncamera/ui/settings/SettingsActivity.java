@@ -636,7 +636,10 @@ public class SettingsActivity extends BaseActivity implements
 
                 File tuningDir = FileManager.sPHOTON_TUNING_DIR;
                 if (tuningDir.exists() && tuningDir.isDirectory()) {
-                    File[] files = tuningDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+                    File[] files = tuningDir.listFiles((dir, name) -> {
+                        String lowerName = name.toLowerCase();
+                        return lowerName.endsWith("_lut.png") || lowerName.endsWith(".cube");
+                    });
 
                     if (files != null) {
                         for (File file : files) {
@@ -651,7 +654,10 @@ public class SettingsActivity extends BaseActivity implements
 
                 File lutDir = FileManager.sPHOTON_LUT_DIR;
                 if (lutDir.exists() && lutDir.isDirectory()) {
-                    File[] files = lutDir.listFiles((dir, name) -> name.toLowerCase().endsWith("_lut.png"));
+                    File[] files = lutDir.listFiles((dir, name) -> {
+                        String lowerName = name.toLowerCase();
+                        return lowerName.endsWith("_lut.png") || lowerName.endsWith(".cube");
+                    });
 
                     if (files != null) {
                         for (File file : files) {

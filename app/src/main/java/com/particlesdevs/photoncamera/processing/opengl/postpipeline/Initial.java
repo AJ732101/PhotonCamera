@@ -223,7 +223,7 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         if (!postlut.exists()){
             postlut = new File(FileManager.sPHOTON_LUT_DIR, PhotonCamera.getSettings().lutName);
         }
-        if(postlut.exists()){
+        if (postlut.exists()){
             if (postlut.getName().toLowerCase().endsWith(".cube")) {
                 try (java.io.FileInputStream fis = new java.io.FileInputStream(postlut)) {
                     Bitmap bmp = Utilities.parseCubeLut8Bit(fis);
