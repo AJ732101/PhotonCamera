@@ -411,15 +411,17 @@ public class ImageSaver {
     public static class Util {
         public static boolean saveBitmapAsAvif(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
             File heicFile = new File(fileToSave.toString());
+            Boolean ret = false;
             AvifEncoder avifEncoder = new AvifEncoder();
             try {
-                avifEncoder.encodeBmpToAvif(img, heicFile, 0, PhotonCamera.getSettings().singleFrameQuality, null);
+                ret = avifEncoder.encodeBmpToAvif(img, heicFile, 0, PhotonCamera.getSettings().singleFrameQuality, null, exifData);
             }
             catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
-            return false;
+            return ret;
         }
+
         public static boolean saveBitmapAsJpg(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
             Log.d(TAG, "saveBitmapAsJpg() - Bit depth: " + img.getConfig());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && img.getColorSpace() != null) {

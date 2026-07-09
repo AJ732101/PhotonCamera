@@ -94,6 +94,59 @@ public class AvifEncoder {
         }
     }
 
+    private byte[] createExif(ParseExif.ExifData exifData) {
+        try {
+            // 1. Create a real (but tiny) valid JPEG as a base for ExifInterface
+            File tempExifFile = File.createTempFile("temp_exif", ".jpg");
+            Bitmap tiny = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            try (FileOutputStream out = new FileOutputStream(tempExifFile)) {
+                tiny.compress(Bitmap.CompressFormat.JPEG, 95, out);
+            }
+            tiny.recycle();
+
+            // 2. Use ExifInterface to write metadata
+            ExifInterface exif = new ExifInterface(tempExifFile.getAbsolutePath());;
+            if (exifData.PHOTOGRAPHIC_SENSITIVITY != null) exif.setAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY, exifData.PHOTOGRAPHIC_SENSITIVITY);
+            if (exifData.F_NUMBER != null) exif.setAttribute(ExifInterface.TAG_F_NUMBER, exifData.F_NUMBER);
+            if (exifData.EXPOSURE_TIME != null) exif.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exifData.EXPOSURE_TIME);
+            if (exifData.FOCAL_LENGTH != null) exif.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exifData.FOCAL_LENGTH);
+            if (exifData.IMAGE_DESCRIPTION != null) exif.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, exifData.IMAGE_DESCRIPTION);
+            if (exifData.MAKE != null) exif.setAttribute(ExifInterface.TAG_MAKE, exifData.MAKE);
+            if (exifData.MODEL != null) exif.setAttribute(ExifInterface.TAG_MODEL, exifData.MODEL);
+            if (exifData.EQUIVALENT_35MM != null) exif.setAttribute(ExifInterface.TAG_FOCAL_LENGTH_IN_35MM_FILM, exifData.EQUIVALENT_35MM);
+
+            // Set the actual orientation in EXIF.
+            // When EXIF bytes are provided, most viewers prioritize the EXIF Orientation tag.
+            if (exifData.ORIENTATION != null) {
+                exif.setAttribute(ExifInterface.TAG_ORIENTATION, exifData.ORIENTATION);
+            }
+
+            exif.saveAttributes();
+
+            // 3. Extract the EXIF APP1 segment from the generated JPEG
+            byte[] fileBytes = Files.readAllBytes(tempExifFile.toPath());
+            tempExifFile.delete();
+
+            // Look for APP1 marker (FF E1)
+            for (int i = 0; i < fileBytes.length - 4; i++) {
+                if (fileBytes[i] == (byte) 0xFF && fileBytes[i + 1] == (byte) 0xE1) {
+                    int length = ((fileBytes[i + 2] & 0xFF) << 8) | (fileBytes[i + 3] & 0xFF);
+                    // The payload of APP1 includes the "Exif\0\0" header.
+                    // ExifInterface writes the APP1 header (FF E1), then the length (2 bytes),
+                    // and then the payload. libavif wants the payload starting with "Exif\0\0".
+                    byte[] exifPayload = new byte[length - 2];
+                    System.arraycopy(fileBytes, i + 4, exifPayload, 0, length - 2);
+                    return exifPayload;
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create EXIF", e);
+            return null;
+        }
+    }
+
     /**
      * Encodes an Image object to AVIF.
      *
@@ -102,12 +155,19 @@ public class AvifEncoder {
      * @throws IOException If encoding or writing the file fails.
      */
     @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    public void encodeBmpToAvif(Bitmap image, File outputFile, int orientation, int quality, Bundle metadata) throws IOException, ExecutionException, InterruptedException {
+    public Boolean encodeBmpToAvif(Bitmap image, File outputFile, int orientation, int quality, Bundle metadata, ParseExif.ExifData exifData) throws IOException, ExecutionException, InterruptedException {
         HeifCoder coder = new HeifCoder();
         byte[] avifByteArray = null;
+        Boolean ret = true;
 
         Bitmap processedImage = image;
         Boolean wasConverted = false;
+        byte[] exifBytes = null;
+        if (metadata != null) {
+            exifBytes = createExif(metadata, orientation);
+        } else if (exifData != null) {
+            exifBytes = createExif(exifData);
+        }
 
         try {
             float boostFactor = 1.0f;
@@ -188,14 +248,15 @@ public class AvifEncoder {
 
             if (PhotonCamera.getSettings().singleFrameQuality == 100) {
                 if (PhotonCamera.getSettings().useLosslessSwEncoding) {
-                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, AvifChromaSubsampling.LOSELESS, 0, null);
+                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, AvifChromaSubsampling.LOSELESS, 0, exifBytes);
                 } else {
-                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, subSampling, 0, null);
+                    avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSLESS, AvifSurfaceMode.AUTO, subSampling, 0, exifBytes);
                 }
             } else {
-                avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, subSampling, 0, null);
+                avifByteArray = coder.encodeAvif(processedImage, PhotonCamera.getSettings().singleFrameQuality, AvifSpeed.EIGHT, PreciseMode.LOSSY, AvifSurfaceMode.AUTO, subSampling, 0, exifBytes);
             }
         } catch (Exception e) {
+            ret = false;
             Log.e(TAG, Log.getStackTraceString(e));
         }
 
@@ -204,10 +265,12 @@ public class AvifEncoder {
         }
 
         if (avifByteArray == null || avifByteArray.length == 0) {
+            ret = false;
             throw new IOException("AVIF encoder returned null or empty data. Encoding failed.");
         }
 
         java.nio.file.Files.write(outputFile.toPath(), avifByteArray);
+        return ret;
     }
 
     /**

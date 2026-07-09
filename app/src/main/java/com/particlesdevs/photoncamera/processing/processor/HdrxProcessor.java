@@ -324,7 +324,7 @@ public class HdrxProcessor extends ProcessorBase {
             AvifEncoder avifEncoder = new AvifEncoder();
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    avifEncoder.encodeBmpToAvif(img, avifFile, 0, PhotonCamera.getSettings().singleFrameQuality, null);
+                    avifEncoder.encodeBmpToAvif(img, avifFile, 0, PhotonCamera.getSettings().singleFrameQuality, null, exifData);
                 }
             } catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
