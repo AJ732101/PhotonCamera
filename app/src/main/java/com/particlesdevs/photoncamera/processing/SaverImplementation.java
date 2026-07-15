@@ -32,7 +32,7 @@ public class SaverImplementation {
 
     public ImageFrame getFrame(Image image) {
         try {
-            image.getFormat();
+            imageFormat = image.getFormat();
         } catch (Exception e) {
             // This image is not valid, skip it
             return null;

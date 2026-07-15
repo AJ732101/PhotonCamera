@@ -6,6 +6,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.ColorSpace;
 import android.graphics.Gainmap;
+import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -101,7 +102,7 @@ public class HdrxProcessor extends ProcessorBase {
     public void Run() {
         try {
             Camera2ApiAutoFix.ApplyRes(captureResult);
-            if (imageFormat == CaptureController.RAW_FORMAT) {
+            if ((imageFormat == ImageFormat.RAW10) || (imageFormat == ImageFormat.RAW12) || (imageFormat == ImageFormat.RAW14) || (imageFormat == ImageFormat.RAW_SENSOR)) {
                 ApplyHdrX();
             } else {
                 Log.d(TAG, "HdrX processing skipped due to unsupported image format: " + imageFormat);

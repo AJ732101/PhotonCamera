@@ -67,16 +67,16 @@ public class DefaultSaver extends SaverImplementation {
         );
         ArrayList<ImageFrame> slicedBuffer = new ArrayList<>();
         ArrayList<ImageFrame> imagebuffer = new ArrayList<>();
-        for(int i =0; i<frameCount;i++){
+        for(int i = 0; i < frameCount; i++){
             slicedBuffer.add(IMAGE_BUFFER.get(i));
         }
-        for(int i = frameCount; i<IMAGE_BUFFER.size();i++){
+        for(int i = frameCount; i<IMAGE_BUFFER.size(); i++){
             imagebuffer.add(IMAGE_BUFFER.get(i));
         }
         IMAGE_BUFFER.clear();
         IMAGE_BUFFER = imagebuffer;
         bufferLock = false;
-        for(int i =0; i<slicedBuffer.size();i++){
+        for(int i = 0; i < slicedBuffer.size(); i++){
             if (slicedBuffer.get(i) == null) {
                 slicedBuffer.remove(i);
                 i--;
