@@ -99,11 +99,12 @@ public class TunableSettingsManager {
     }
     
     /**
-     * Export tunable settings to a map (only values that differ from defaults)
+     * Export tunable settings to a map
      * @param context Context for SharedPreferences
+     * @param onlyChanged If true, only export values that differ from defaults
      * @return Map of tunable settings with format: "ClassName.fieldName" -> value
      */
-    public static Map<String, Object> exportTunableSettings(Context context) {
+    public static Map<String, Object> exportTunableSettings(Context context, boolean onlyChanged) {
         Map<String, Object> tunableSettings = new HashMap<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         
@@ -130,30 +131,37 @@ public class TunableSettingsManager {
                     
                     // Get current value as native type
                     float currentValue;
-                    boolean hasValue;
+                    boolean hasValue = prefs.contains(prefKey);
                     if (isFloat) {
-                        hasValue = prefs.contains(prefKey);
                         currentValue = prefs.getFloat(prefKey, defaultValue);
                     } else {
-                        hasValue = prefs.contains(prefKey);
                         currentValue = (float) prefs.getInt(prefKey, (int) defaultValue);
                     }
                     
-                    // Only export if value differs from default
-                    if (hasValue && Math.abs(currentValue - defaultValue) > 0.0001f) {
+                    // Export if it's either changed or we want everything
+                    boolean isChanged = hasValue && Math.abs(currentValue - defaultValue) > 0.0001f;
+                    
+                    if (!onlyChanged || isChanged) {
                         tunableSettings.put(settingKey, currentValue);
-                        Log.d(TAG, "Exporting tunable: " + settingKey + " = " + currentValue + 
-                            " (default: " + defaultValue + ")");
-                    } else {
-                        Log.d(TAG, "Skipping default: " + settingKey + " (current: " + currentValue + 
-                            ", default: " + defaultValue + ")");
+                        if (isChanged) {
+                            Log.d(TAG, "Exporting tunable (CHANGED): " + settingKey + " = " + currentValue + 
+                                " (default: " + defaultValue + ")");
+                        }
                     }
                 }
             }
         }
         
-        Log.d(TAG, "Exported " + tunableSettings.size() + " non-default tunable settings");
+        Log.d(TAG, "Exported " + tunableSettings.size() + " tunable settings (onlyChanged=" + onlyChanged + ")");
         return tunableSettings;
+    }
+
+    /**
+     * Export tunable settings to a map (only values that differ from defaults)
+     * Backwards compatibility overload
+     */
+    public static Map<String, Object> exportTunableSettings(Context context) {
+        return exportTunableSettings(context, true);
     }
     
     /**
