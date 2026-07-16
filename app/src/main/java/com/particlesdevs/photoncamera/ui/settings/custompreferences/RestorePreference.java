@@ -17,7 +17,7 @@ public class RestorePreference extends ListPreference {
         setPersistent(false);
         setOnPreferenceClickListener(preference -> {
             String[] filesNames = FileManager.sPHOTON_DIR.list((dir, name) ->
-                    FileUtils.getExtension(name).equalsIgnoreCase("xml"));
+                    FileUtils.getExtension(name).equalsIgnoreCase("json"));
 
             filesNames = filesNames != null ? filesNames : new String[0]; //null check
 

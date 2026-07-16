@@ -20,7 +20,6 @@ public class BackupPreferences extends EditTextPreference {
         super(context, attributeSet);
         setPersistent(false);
         setSummary(FileManager.sPHOTON_DIR.toString());
-        setDialogMessage("(Per lens settings are not backed up at the moment)"); //temporary
 
         setOnBindEditTextListener(editText -> {
             editText.setText(getContext().getString(R.string.backup_file_name,

@@ -29,6 +29,7 @@ public class PreferenceKeys {
     private static final String PER_LENS_KEY_PREFIX = "settings_for_camera_";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static PreferenceKeys preferenceKeys;
+    private static boolean mIsLoading = false;
 
     static {
         COMMON_KEYS.add(Key.CAMERA_ID.mValue);
@@ -282,6 +283,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169, true);
 
         settingsManager.addListener((settingsManager1, key) -> {
+            if (mIsLoading) return;
             if (isPerLensSettingsOn()) {
                 if (key.equals(Key.CAMERA_ID.mValue)) {
                     loadSettingsForCamera(getCameraID());
@@ -310,7 +312,7 @@ public class PreferenceKeys {
 
     private static void saveJsonForCamera(String cameraID) {
         SettingsManager settingsManager = preferenceKeys.settingsManager;
-        Map<String, ?> map = settingsManager.getDefaultPreferences().getAll();
+        Map<String, Object> map = new HashMap<>(settingsManager.getDefaultPreferences().getAll());
         map.keySet().removeAll(COMMON_KEYS);
         String hashmapAsJson = GSON.toJson(map);
         String alreadySavedJSON = settingsManager.getString(Key.PER_LENS_FILE_NAME.mValue, PER_LENS_KEY_PREFIX + cameraID, "");
@@ -321,44 +323,45 @@ public class PreferenceKeys {
     }
 
     public static void loadSettingsForCamera(String cameraID) {
-        SettingsManager settingsManager = preferenceKeys.settingsManager;
-        String alreadySavedJSON = settingsManager.getString(Key.PER_LENS_FILE_NAME.mValue, PER_LENS_KEY_PREFIX + cameraID, null);
-        if (alreadySavedJSON == null || alreadySavedJSON.isEmpty()) return;
-        
-        HashMap<String, Object> map = GSON.fromJson(alreadySavedJSON, HashMap.class);
-        SharedPreferences.Editor editor = settingsManager.getDefaultPreferences().edit();
-        
-        for (Map.Entry<String, Object> e : map.entrySet()) {
-            String key = e.getKey();
-            Object value = e.getValue();
-            
-            if (value == null) continue;
-            
-            // For tunable keys, we MUST preserve the native type to avoid ClassCastException
-            if (key.startsWith("pref_tunable_")) {
-                if (value instanceof Number) {
-                    Number num = (Number) value;
-                    // We don't know for sure if it's int or float, but the tunable system 
-                    // is now robust enough to handle either if we restore it.
-                    // However, GSON often restores all numbers as Double.
-                    double dVal = num.doubleValue();
-                    if (dVal == Math.floor(dVal)) {
-                        editor.putInt(key, (int) dVal);
+        mIsLoading = true;
+        try {
+            SettingsManager settingsManager = preferenceKeys.settingsManager;
+            String alreadySavedJSON = settingsManager.getString(Key.PER_LENS_FILE_NAME.mValue, PER_LENS_KEY_PREFIX + cameraID, null);
+            if (alreadySavedJSON == null || alreadySavedJSON.isEmpty()) return;
+
+            HashMap<String, Object> map = GSON.fromJson(alreadySavedJSON, HashMap.class);
+            SharedPreferences.Editor editor = settingsManager.getDefaultPreferences().edit();
+
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+                String key = e.getKey();
+                Object value = e.getValue();
+
+                if (value == null) continue;
+
+                // For tunable keys, we MUST preserve the native type to avoid ClassCastException
+                if (key.startsWith("pref_tunable_")) {
+                    if (value instanceof Number) {
+                        Number num = (Number) value;
+                        double dVal = num.doubleValue();
+                        if (dVal == Math.floor(dVal)) {
+                            editor.putInt(key, (int) dVal);
+                        } else {
+                            editor.putFloat(key, (float) dVal);
+                        }
+                    } else if (value instanceof Boolean) {
+                        editor.putInt(key, (Boolean) value ? 1 : 0);
                     } else {
-                        editor.putFloat(key, (float) dVal);
+                        editor.putString(key, value.toString());
                     }
-                } else if (value instanceof Boolean) {
-                    // Tunable system uses 0/1 for booleans in SharedPreferences
-                    editor.putInt(key, (Boolean) value ? 1 : 0);
                 } else {
+                    // Batch all regular keys into the editor instead of saving immediately
                     editor.putString(key, value.toString());
                 }
-            } else {
-                // For regular keys, follow the old SettingsManager "everything is a String" contract
-                settingsManager.set(SCOPE_GLOBAL, key, value.toString());
             }
+            editor.apply();
+        } finally {
+            mIsLoading = false;
         }
-        editor.apply();
     }
 
     public static void setActivityTheme(Activity activity) {

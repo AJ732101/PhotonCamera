@@ -88,7 +88,7 @@
     <string name="Default">Standard</string>
     <string name="backup_restore">Sicherung/Wiederherstellung Einstellungen</string>
     <string name="reset">Alles zurücksetzen</string>
-    <string name="backup_summary_json">Exportiere alle Einstellungen als JSON (inklusive Einstellungen pro Linse)</string>
+    <string name="backup_summary_json">Exportiere alle Einstellungen als JSON (inklusive Einstellungen pro Kamera Modul)</string>
     <string name="app_will_restart">App startet neu</string>
     <string name="restore">Wiederherstellen</string>
     <string name="show_gradient">Farbverlauf Hintergrund</string>
