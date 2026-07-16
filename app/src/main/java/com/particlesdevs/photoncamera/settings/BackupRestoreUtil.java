@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -31,7 +32,7 @@ public class BackupRestoreUtil {
         }
 
         String pkgName = context.getPackageName();
-        Map<String, Object> unifiedBackup = new HashMap<>();
+        Map<String, Object> unifiedBackup = new LinkedHashMap<>();
 
         try {
             // 1. Global Preferences
@@ -75,6 +76,10 @@ public class BackupRestoreUtil {
             // 4. Devices Data
             SharedPreferences devicesPrefs = context.getSharedPreferences(pkgName + "_devices", Context.MODE_PRIVATE);
             unifiedBackup.put("devices", devicesPrefs.getAll());
+
+            // 5. Tunable Settings
+            TunableSettingsManager.ensureTunableClassesRegistered();
+            unifiedBackup.put("tunable_settings", TunableSettingsManager.exportTunableSettings(context, false));
 
             // Write to JSON file
             File destFile = new File(FileManager.sPHOTON_DIR, fileName + ".json");
@@ -144,6 +149,12 @@ public class BackupRestoreUtil {
             // 4. Restore Devices
             if (unifiedBackup.containsKey("devices")) {
                 restoreMapToPrefs(context, pkgName + "_devices", (Map<String, ?>) unifiedBackup.get("devices"));
+            }
+
+            // 5. Restore Tunable Settings
+            if (unifiedBackup.containsKey("tunable_settings")) {
+                Map<String, Object> tunableMap = (Map<String, Object>) unifiedBackup.get("tunable_settings");
+                TunableSettingsManager.importTunableSettings(context, tunableMap);
             }
 
             PhotonCamera.restartWithDelay(context, 1000);
