@@ -17,10 +17,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class BackupRestoreUtil {
     private static final String TAG = "BackupRestoreUtil";
@@ -118,32 +121,14 @@ public class BackupRestoreUtil {
                 restoreMapToPrefs(context, pkgName + "_preferences", (Map<String, ?>) unifiedBackup.get("global"));
             }
 
-            // 2. Restore Per Lens (Convert back to JSON strings)
+            // 2. Restore Per Lens
             if (unifiedBackup.containsKey("per_lens")) {
-                Map<String, Object> perLensParsed = (Map<String, Object>) unifiedBackup.get("per_lens");
-                Map<String, String> perLensStrings = new HashMap<>();
-                if (perLensParsed != null) {
-                    for (Map.Entry<String, Object> entry : perLensParsed.entrySet()) {
-                        perLensStrings.put(entry.getKey(), GSON.toJson(entry.getValue()));
-                    }
-                }
-                restoreMapToPrefs(context, pkgName + "_per_lens", perLensStrings);
+                restoreMapToPrefs(context, pkgName + "_per_lens", (Map<String, ?>) unifiedBackup.get("per_lens"));
             }
 
             // 3. Restore Cameras
             if (unifiedBackup.containsKey("cameras")) {
-                Map<String, Object> camerasParsed = (Map<String, Object>) unifiedBackup.get("cameras");
-                Map<String, Object> camerasToStore = new HashMap<>();
-                if (camerasParsed != null) {
-                    for (Map.Entry<String, Object> entry : camerasParsed.entrySet()) {
-                        if (entry.getValue() instanceof Map || entry.getValue() instanceof java.util.List) {
-                            camerasToStore.put(entry.getKey(), GSON.toJson(entry.getValue()));
-                        } else {
-                            camerasToStore.put(entry.getKey(), entry.getValue());
-                        }
-                    }
-                }
-                restoreMapToPrefs(context, pkgName + "_cameras", camerasToStore);
+                restoreMapToPrefs(context, pkgName + "_cameras", (Map<String, ?>) unifiedBackup.get("cameras"));
             }
 
             // 4. Restore Devices
@@ -170,21 +155,56 @@ public class BackupRestoreUtil {
         SharedPreferences.Editor editor = context.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit();
         editor.clear();
         for (Map.Entry<String, ?> entry : data.entrySet()) {
+            String key = entry.getKey();
             Object value = entry.getValue();
-            if (value instanceof Boolean) editor.putBoolean(entry.getKey(), (Boolean) value);
-            else if (value instanceof Integer) editor.putInt(entry.getKey(), (Integer) value);
-            else if (value instanceof Long) editor.putLong(entry.getKey(), (Long) value);
-            else if (value instanceof Float) editor.putFloat(entry.getKey(), (Float) value);
-            else if (value instanceof Double) {
+            if (value == null) continue;
+
+            if (value instanceof Boolean) {
+                editor.putBoolean(key, (Boolean) value);
+            } else if (value instanceof Integer) {
+                editor.putInt(key, (Integer) value);
+            } else if (value instanceof Long) {
+                editor.putLong(key, (Long) value);
+            } else if (value instanceof Float) {
+                editor.putFloat(key, (Float) value);
+            } else if (value instanceof Double) {
                 double d = (Double) value;
                 if (d == Math.floor(d) && !Double.isInfinite(d)) {
-                    editor.putInt(entry.getKey(), (int) d);
+                    editor.putInt(key, (int) d);
                 } else {
-                    editor.putFloat(entry.getKey(), (float) d);
+                    editor.putFloat(key, (float) d);
                 }
-            } else if (value instanceof String) editor.putString(entry.getKey(), (String) value);
+            } else if (value instanceof Collection) {
+                if (isStringSetKey(key)) {
+                    Set<String> set = new HashSet<>();
+                    for (Object item : (Collection<?>) value) {
+                        if (item != null) set.add(item.toString());
+                    }
+                    editor.putStringSet(key, set);
+                } else {
+                    // Fallback to JSON string for other collections (e.g. tonemap float array)
+                    editor.putString(key, GSON.toJson(value));
+                }
+            } else if (value instanceof Map) {
+                // Nested objects are always stored as JSON strings
+                editor.putString(key, GSON.toJson(value));
+            } else {
+                editor.putString(key, value.toString());
+            }
         }
         editor.apply();
+    }
+
+    /**
+     * Identifies keys that must be stored as StringSet in SharedPreferences.
+     */
+    private static boolean isStringSetKey(String key) {
+        if (key == null) return false;
+        return key.equals("all_camera_ids") ||
+               key.equals("all_camera_lens") ||
+               key.equals("front_camera_ids") ||
+               key.equals("back_camera_ids") ||
+               key.equals("pref_folders_list");
     }
 
     public static boolean resetPreferences(Context context) {

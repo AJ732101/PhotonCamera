@@ -9,9 +9,9 @@ import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Manager for tunable settings - provides reset functionality
@@ -105,7 +105,7 @@ public class TunableSettingsManager {
      * @return Map of tunable settings with format: "ClassName.fieldName" -> value
      */
     public static Map<String, Object> exportTunableSettings(Context context, boolean onlyChanged) {
-        Map<String, Object> tunableSettings = new HashMap<>();
+        Map<String, Object> tunableSettings = new TreeMap<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         
         for (Class<?> clazz : REGISTERED_CLASSES) {

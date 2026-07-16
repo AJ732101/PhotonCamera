@@ -11,9 +11,9 @@ import com.particlesdevs.photoncamera.ui.settings.custompreferences.TunableCheck
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Automatically generates preference UI from @Tunable annotations.
@@ -63,7 +63,7 @@ public class TunablePreferenceGenerator {
             }
             
             // Group preferences by category
-            Map<String, List<TunableFieldInfo>> categorizedFields = new HashMap<>();
+            Map<String, List<TunableFieldInfo>> categorizedFields = new TreeMap<>();
             
             // Scan all registered classes
             for (Class<?> clazz : TUNABLE_CLASSES) {
@@ -80,8 +80,12 @@ public class TunablePreferenceGenerator {
                 
                 Log.d(TAG, "Processing category: " + categoryName + " with " + fields.size() + " fields");
                 
-                // Sort by order
-                fields.sort((a, b) -> Integer.compare(a.order, b.order));
+                // Sort by className (Node) and then by order
+                fields.sort((a, b) -> {
+                    int classComp = a.className.compareTo(b.className);
+                    if (classComp != 0) return classComp;
+                    return Integer.compare(a.order, b.order);
+                });
                 
                 // Find or create category in the tunable submenu
                 PreferenceCategory category = findOrCreateCategory(context, tunableSubmenu, categoryName);

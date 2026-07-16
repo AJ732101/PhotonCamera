@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -282,18 +283,22 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_COMPRESS_ZIP, false);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169, true);
 
-        settingsManager.addListener((settingsManager1, key) -> {
-            if (mIsLoading) return;
-            if (isPerLensSettingsOn()) {
-                if (key.equals(Key.CAMERA_ID.mValue)) {
-                    loadSettingsForCamera(getCameraID());
+        settingsManager.addListener(new SettingsManager.OnSettingChangedListener() {
+            @Override
+            public void onSettingChanged(SettingsManager settingsManager1, String key) {
+                if (key == null || mIsLoading) return;
+                if (isPerLensSettingsOn()) {
+                    if (Objects.equals(key, Key.CAMERA_ID.mValue)) {
+                        loadSettingsForCamera(getCameraID());
+                    }
+                    if (!COMMON_KEYS.contains(key)) {
+                        saveJsonForCamera(getCameraID());
+                    }
                 }
-                if (!COMMON_KEYS.contains(key)) {
-                    saveJsonForCamera(getCameraID());
+                if (PhotonCamera.getSettings() != null) {
+                    PhotonCamera.getSettings().loadCache();
                 }
             }
-            PhotonCamera.getSettings().loadCache();
-            //Log.d(TAG, key + " : changed!");
         });
     }
     public static void addIds(String[] ids){
@@ -311,12 +316,13 @@ public class PreferenceKeys {
     }
 
     private static void saveJsonForCamera(String cameraID) {
+        if (preferenceKeys == null || preferenceKeys.settingsManager == null) return;
         SettingsManager settingsManager = preferenceKeys.settingsManager;
         Map<String, Object> map = new HashMap<>(settingsManager.getDefaultPreferences().getAll());
         map.keySet().removeAll(COMMON_KEYS);
         String hashmapAsJson = GSON.toJson(map);
         String alreadySavedJSON = settingsManager.getString(Key.PER_LENS_FILE_NAME.mValue, PER_LENS_KEY_PREFIX + cameraID, "");
-        if (!alreadySavedJSON.equals(hashmapAsJson)) {
+        if (!Objects.equals(alreadySavedJSON, hashmapAsJson)) {
             settingsManager.set(Key.PER_LENS_FILE_NAME.mValue, PER_LENS_KEY_PREFIX + getCameraID(), hashmapAsJson);
 //            Log.d(TAG, PER_LENS_KEY_PREFIX + getCameraID() + " : JSON : " + hashmapAsJson);
         }
@@ -395,9 +401,13 @@ public class PreferenceKeys {
      * Helper functions for some keys defined in PreferenceFragment.
      */
     public static boolean isAfDataOn() {
+        if (preferenceKeys == null || preferenceKeys.settingsManager == null) return false;
         boolean isAfOn = preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA);
-        boolean isOverride = (PhotonCamera.getSettings().functionOne.equals("Debug Info") && PhotonCamera.isFunctionOneOn) ||
-                             (PhotonCamera.getSettings().functionTwo.equals("Debug Info") && PhotonCamera.isFunctionTwoOn);
+        if (PhotonCamera.getSettings() == null) return isAfOn;
+        String f1 = PhotonCamera.getSettings().functionOne;
+        String f2 = PhotonCamera.getSettings().functionTwo;
+        boolean isOverride = ("Debug Info".equals(f1) && PhotonCamera.isFunctionOneOn) ||
+                             ("Debug Info".equals(f2) && PhotonCamera.isFunctionTwoOn);
         return isAfOn || isOverride;
     }
 
@@ -430,6 +440,7 @@ public class PreferenceKeys {
     }
 
     public static boolean isPerLensSettingsOn() {
+        if (preferenceKeys == null || preferenceKeys.settingsManager == null) return false;
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SAVE_PER_LENS_SETTINGS);
     }
 

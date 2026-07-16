@@ -247,7 +247,7 @@ public class SettingsManager {
      * are unregistered and a new file is opened.
      */
     private SharedPreferences getPreferencesFromScope(String scope) {
-        if (scope.equals(SCOPE_GLOBAL)) {
+        if (SCOPE_GLOBAL.equals(scope)) {
             return mDefaultPreferences;
         }
         if (mCustomPreferences != null) {
@@ -340,6 +340,7 @@ public class SettingsManager {
         SharedPreferences preferences = getPreferencesFromScope(scope);
         return preferences.getStringSet(key.mValue, defaultValue);
     }
+
     public ArrayList<String> getArrayList(String scope, String key, Set<String> defaultValue) {
         SharedPreferences preferences = getPreferencesFromScope(scope);
         return new ArrayList<>(preferences.getStringSet(key, defaultValue));
@@ -454,7 +455,7 @@ public class SettingsManager {
         }
         String value = getString(scope, key);
         for (int i = 0; i < possibleValues.length; i++) {
-            if (value.equals(possibleValues[i])) {
+            if (possibleValues[i].equals(value)) {
                 return i;
             }
         }
