@@ -241,10 +241,18 @@ public class Parameters {
         if (result != null) {
             boolean isHuawei = Build.BRAND.equals("Huawei");
 
-            float[] dynbl = result.get(CaptureResult.SENSOR_DYNAMIC_BLACK_LEVEL);
-            if (dynbl != null) {
-                System.arraycopy(dynbl, 0, blackLevel, 0, 4);
+            if (PhotonCamera.getSettings().dngBlackLevel >= 0) {
+                blackLevel[0] = PhotonCamera.getSettings().dngBlackLevel;
+                blackLevel[1] = PhotonCamera.getSettings().dngBlackLevel;
+                blackLevel[2] = PhotonCamera.getSettings().dngBlackLevel;
+                blackLevel[3] = PhotonCamera.getSettings().dngBlackLevel;
                 usedDynamic = true;
+            } else {
+                float[] dynbl = result.get(CaptureResult.SENSOR_DYNAMIC_BLACK_LEVEL);
+                if (dynbl != null) {
+                    //System.arraycopy(dynbl, 0, blackLevel, 0, 4);
+                    usedDynamic = true;
+                }
             }
             Object white = result.get(CaptureResult.SENSOR_DYNAMIC_WHITE_LEVEL);
             if (white != null) {
