@@ -43,6 +43,7 @@ android {
         targetSdk 36
     }
     compileSdkMinor 0
+    ndkVersion '29.0.14206865'
 }
 
 dependencies {
