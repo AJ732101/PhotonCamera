@@ -250,7 +250,7 @@ public class Parameters {
             } else {
                 float[] dynbl = result.get(CaptureResult.SENSOR_DYNAMIC_BLACK_LEVEL);
                 if (dynbl != null) {
-                    //System.arraycopy(dynbl, 0, blackLevel, 0, 4);
+                    System.arraycopy(dynbl, 0, blackLevel, 0, 4);
                     usedDynamic = true;
                 }
             }
@@ -289,11 +289,13 @@ public class Parameters {
                 Log.d(TAG, "CaptureResult.STATISTICS_HOT_PIXEL_MAP is null");
             ReCalcColor(false, result);
         }
-        if (!usedDynamic)
+        if (!usedDynamic) {
             if (level != null) {
                 level.copyTo(blarr, 0);
                 for (int i = 0; i < 4; i++) blackLevel[i] = blarr[i];
             }
+        }
+
         Float aperture = result.get(CaptureResult.LENS_APERTURE);
         if (aperture == null) {
             aperture = request.get(CaptureRequest.LENS_APERTURE);
