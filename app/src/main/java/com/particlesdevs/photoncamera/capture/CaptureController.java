@@ -74,9 +74,13 @@ import android.os.SystemClock;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.particlesdevs.photoncamera.app.ContextProvider;
+import com.particlesdevs.photoncamera.processing.ImageFrame;
 import com.particlesdevs.photoncamera.processing.ImagePath;
+import com.particlesdevs.photoncamera.processing.ImageSaverSelector;
+import com.particlesdevs.photoncamera.processing.SaverImplementation;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
 import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
+import com.particlesdevs.photoncamera.util.Allocator;
 import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Range;
@@ -146,6 +150,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -345,6 +350,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
      */
     public ImageSaver mImageSaver;
     public HashMap<Long, Double> mExposures = new HashMap<>();
+
+    private final ArrayDeque<Image> mZslRingBuffer = new ArrayDeque<>();
+    private final Object mZslBufferLock = new Object();
+    private volatile boolean mZslCapturing = false;
+
     private final ImageReader.OnImageAvailableListener mOnYuvImageAvailableListener
             = new ImageReader.OnImageAvailableListener() {
         @Override
@@ -361,6 +371,24 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
+            if (isZslMode()) {
+                Image img = reader.acquireNextImage();
+                if (img == null) return;
+                if (mZslCapturing) {
+                    img.close();
+                    return;
+                }
+                synchronized (mZslBufferLock) {
+                    mZslRingBuffer.addLast(img);
+                    int maxFrames = Math.min(PhotonCamera.getSettings().frameCount, 37);
+                    while (mZslRingBuffer.size() > maxFrames) {
+                        Image old = mZslRingBuffer.pollFirst();
+                        if (old != null) old.close();
+                    }
+                }
+                return;
+            }
+
             Map<String, CameraLensData> lensDataMap = mCameraManager2.getCameraLensDataMap();
             if (lensDataMap != null) {
                 CameraLensData camLensData = lensDataMap.get(PhotonCamera.getSettings().mCameraID);
@@ -1568,6 +1596,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mIsCaptureInProgress = false;
         if (((mTargetFormat == mPreviewTargetFormat) && isDualSession) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) ||
+                PhotonCamera.getSettings().selectedMode.equals(CameraMode.MOTION) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             maxImageReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
         }
@@ -2996,6 +3025,24 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         }
 
+        synchronized (mZslBufferLock) {
+            while (!mZslRingBuffer.isEmpty()) {
+                Image img = mZslRingBuffer.pollFirst();
+                if (img != null) img.close();
+            }
+        }
+        // Drain any frames still queued in the RAW ImageReader to prevent them leaking
+        // into the next non-ZSL capture's IMAGE_BUFFER
+        if (mImageReaderRaw != null) {
+            Image stale;
+            try {
+                while ((stale = mImageReaderRaw.acquireNextImage()) != null) stale.close();
+            } catch (Exception ignored) {}
+        }
+        if (isZslMode()) {
+            mPreviewRequestBuilder.addTarget(mImageReaderRaw.getSurface());
+        }
+
         mPreviewRequestBuilder.addTarget(mTextureSurface);
         mPreviewMeteringAF = mPreviewRequestBuilder.get(CONTROL_AF_REGIONS);
         mPreviewAFMode = PreferenceKeys.getAfMode();
@@ -4289,6 +4336,147 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    private boolean isZslMode() {
+        return PhotonCamera.getSettings().selectedMode == CameraMode.MOTION
+                && !IsoExpoSelector.HDR
+                && !isDualSession;
+    }
+
+    private void triggerZslCapture() {
+        if (mZslCapturing || CaptureController.isProcessing) {
+            Log.w(TAG, "ZSL: capture already in progress, ignoring");
+            return;
+        }
+        mZslCapturing = true;
+        burst = false;
+
+        int frameCount = FrameNumberSelector.getFrames();
+        cameraRotation = PhotonCamera.getGravity().getCameraRotation(mSensorOrientation);
+        BurstShakiness = new ArrayList<>();
+        mExposures = new HashMap<>();
+
+        // Drain raw Image objects from the ring buffer (no copy yet)
+        List<Image> rawImages;
+        synchronized (mZslBufferLock) {
+            rawImages = new ArrayList<>(mZslRingBuffer);
+            mZslRingBuffer.clear();
+        }
+
+        int take = Math.min(rawImages.size(), frameCount);
+        int skip = rawImages.size() - take;
+        for (int i = 0; i < skip; i++) {
+            rawImages.get(i).close();
+        }
+
+        // Populate exposures map from preview capture result — all ZSL frames share preview exposure
+        double previewExpTime = 1.0;
+        double previewISO = 100.0;
+        long exposureTimeNs = 0;
+        if (mPreviewCaptureResult != null) {
+            Long expTimeNs = mPreviewCaptureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+            Integer isoVal = mPreviewCaptureResult.get(CaptureResult.SENSOR_SENSITIVITY);
+            if (expTimeNs != null) {
+                exposureTimeNs = expTimeNs;
+                previewExpTime = expTimeNs / 1_000_000_000.0;
+            }
+            if (isoVal != null) previewISO = isoVal.doubleValue();
+        }
+        final double exposureVal = previewExpTime * previewISO;
+
+        // Copy selected Images to ImageFrames only now (on shutter press)
+        List<ImageFrame> selected = new ArrayList<>();
+        for (int i = skip; i < rawImages.size(); i++) {
+            Image img = rawImages.get(i);
+            int rowStride = img.getPlanes()[0].getRowStride();
+            int pixelStride = img.getPlanes()[0].getPixelStride();
+            int width = (img.getFormat() == ImageFormat.RAW10)
+                    ? img.getWidth()
+                    : (pixelStride > 0 ? rowStride / pixelStride : img.getWidth());
+            int height = img.getHeight();
+            int bufCapacity = img.getPlanes()[0].getBuffer().capacity();
+            int offset = 0;
+            if (PhotonCamera.getSettings().aspect169 && width > height) {
+                height = width * 9 / 16;
+                int offsetH = (img.getHeight() - height) / 2;
+                offsetH -= offsetH % 2;
+                offset = rowStride * offsetH;
+                bufCapacity = rowStride * height;
+            }
+            Allocator.binning = PhotonCamera.getSettings().binning;
+            ImageFrame frame = new ImageFrame(img.getPlanes()[0].getBuffer(), img.getFormat(),
+                    width, rowStride, offset, bufCapacity);
+            frame.timestamp = img.getTimestamp();
+
+            frame.width = width;
+            frame.height = height;
+            if(PhotonCamera.getSettings().binning) {
+                frame.width/= 2;
+                frame.height/= 2;
+            }
+            img.close();
+            mExposures.put(frame.timestamp, exposureVal);
+            selected.add(frame);
+        }
+        int actualCount = selected.size();
+
+        mImageSaver = new ImageSaver(cameraEventsListener);
+        mImageSaver.setFrameCount(actualCount);
+        mImageSaver.setImageFormat(CaptureController.RAW_FORMAT);
+        mImageSaver.implementation = ImageSaverSelector.getImageSaver(CaptureController.RAW_FORMAT, mImageSaver.implementation);
+        mImageSaver.implementation.frameCount = actualCount;
+
+        SaverImplementation.IMAGE_BUFFER.clear();
+        SaverImplementation.IMAGE_BUFFER.addAll(selected);
+
+        mCaptureResult = mPreviewCaptureResult;
+        mMeasuredFrameCnt = actualCount;
+
+        cameraEventsListener.onFrameCountSet(actualCount);
+        cameraEventsListener.onCaptureStillPictureStarted("ZSLCaptureStarted!");
+        cameraEventsListener.onBurstPrepared(null);
+        final double frametime = ExposureIndex.time2sec(IsoExpoSelector.GenerateExpoPair(-1, this).exposure);
+        for (int i = 0; i < actualCount; i++) {
+            cameraEventsListener.onFrameCaptureStarted(null);
+            cameraEventsListener.onFrameCaptureCompleted(
+                    new TimerFrameCountViewModel.FrameCntTime(i, actualCount, frametime));
+        }
+        cameraEventsListener.onCaptureSequenceCompleted(null);
+
+        long[] frameTimestamps = new long[actualCount];
+        for (int i = 0; i < actualCount; i++) {
+            frameTimestamps[i] = selected.get(i).timestamp;
+        }
+        PhotonCamera.getGyro().buildZslBurstShakiness(frameTimestamps, exposureTimeNs, BurstShakiness);
+
+        // Populate fullpairs the same way setExpo() does for a normal burst
+        IsoExpoSelector.fullpairs.clear();
+        for (int i = 0; i < actualCount; i++) {
+            IsoExpoSelector.fullpairs.add(IsoExpoSelector.GenerateExpoPair(i, this));
+        }
+
+        final int capturedCount = actualCount;
+        processExecutor.execute(() -> {
+            try {
+                PhotonCamera.getGyro().CompleteSequence();
+                mBackgroundHandler.post(this::unlockFocus);
+                if (capturedCount == 0) {
+                    Log.w(TAG, "ZSL ring buffer was empty, no frames to process");
+                    cameraEventsListener.onProcessingFinished("ZSL buffer empty");
+                    return;
+                }
+                mImageSaver.implementation.bufferLock = false;
+                mImageSaver.updateFrameCount(capturedCount);
+                mImageSaver.runRaw(mCameraCharacteristics, mPreviewCaptureResult, mPreviewCaptureRequest,
+                        new ArrayList<>(BurstShakiness), cameraRotation, mExposures);
+            } catch (Exception e) {
+                Log.e(TAG, "ZSL runRaw: " + Log.getStackTraceString(e));
+                cameraEventsListener.onProcessingError(e.getLocalizedMessage());
+            } finally {
+                mZslCapturing = false;
+            }
+        });
+    }
+
     private void captureStillPicture() {
         try {
             if (null == mCameraDevice) {
@@ -4300,6 +4488,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (null == mImageReaderRaw) {
                 Log.e(TAG, "ImageReader is null, cannot start still image capture.");
                 cameraEventsListener.onProcessingError("ImageReader is null, cannot start still image capture.");
+                return;
+            }
+
+            if (isZslMode()) {
+                triggerZslCapture();
                 return;
             }
 
