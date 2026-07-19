@@ -465,6 +465,7 @@ public class DngCreator {
     public void setParameters(Parameters parameters) {
         short[] blackLevel = new short[4];
         for (int i = 0; i < 4; i++) {
+            //if ((PhotonCamera.getSettings().dngBlackLevel >= 0) && (PhotonCamera.getSettings().frameCount == 1)) {
             if (PhotonCamera.getSettings().dngBlackLevel >= 0) {
                 blackLevel[i] = (short) PhotonCamera.getSettings().dngBlackLevel;
             } else if (parameters.whiteLevel <= parameters.blackLevel[i]) {

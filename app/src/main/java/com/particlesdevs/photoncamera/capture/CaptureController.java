@@ -1598,7 +1598,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.MOTION) ||
                 PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
-            maxImageReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 30);
+            maxImageReaderImages = Math.min(PhotonCamera.getSettings().frameCount + 3, 32);
         }
         else if (isSingleShotJpegOrAvifOrHeic() && !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
             maxImageReaderImages = 2;
@@ -5001,12 +5001,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
 
         try {
-            CameraCharacteristics characteristics = manager.getCameraCharacteristics(PhotonCamera.getSettings().mCameraID);
+            CameraCharacteristics characteristics = manager.getCameraCharacteristics(physicalID);
             CameraCharacteristics.Key<ColorSpaceProfiles> key = new CameraCharacteristics.Key<>("android.request.availableColorSpaceProfiles", ColorSpaceProfiles.class);
             ColorSpaceProfiles profiles = characteristics.get(key);
 
             if (profiles == null) {
-                Log.d(TAG, "checkColorSpaceProfilesSupport: ColorSpaceProfiles not available for camera " + PhotonCamera.getSettings().mCameraID);
+                Log.d(TAG, "checkColorSpaceProfilesSupport: ColorSpaceProfiles not available for camera " + physicalID);
                 return false;
             }
 
@@ -5014,9 +5014,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             boolean isSupported = supportedColorSpaces.contains(colorSpace);
 
             if (isSupported) {
-                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + PhotonCamera.getSettings().mCameraID + " supports ColorSpace: " + colorSpace.name());
+                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + physicalID + " supports ColorSpace: " + colorSpace.name());
             } else {
-                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + PhotonCamera.getSettings().mCameraID + " DOES NOT support ColorSpace: " + colorSpace.name());
+                Log.d(TAG, "checkColorSpaceProfilesSupport: Camera " + physicalID + " DOES NOT support ColorSpace: " + colorSpace.name());
             }
 
             return isSupported;
