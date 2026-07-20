@@ -19,16 +19,19 @@ import android.util.SizeF;
 
 import androidx.annotation.NonNull;
 
+import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.processing.parameters.ExposureIndex;
 import com.particlesdevs.photoncamera.processing.parameters.FrameNumberSelector;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
+import com.particlesdevs.photoncamera.settings.TunableSettingsManager;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.util.Allocator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -603,6 +606,16 @@ public class Parameters {
         return params;
     }
 
+    private String getTunableSettingsString() {
+        StringBuilder sb = new StringBuilder();
+        TunableSettingsManager.ensureTunableClassesRegistered();
+        Map<String, Object> changedSettings = TunableSettingsManager.exportTunableSettings(ContextProvider.getContext(), true);
+        for (Map.Entry<String, Object> entry : changedSettings.entrySet()) {
+            sb.append("\n ").append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        return sb.toString();
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -671,7 +684,8 @@ public class Parameters {
             }
         }
 
-        metaData += "\n Version=" + PhotonCamera.getVersion();;
+        metaData += getTunableSettingsString();
+        metaData += "\n Version=" + PhotonCamera.getVersion();
 
         return metaData;
     }
