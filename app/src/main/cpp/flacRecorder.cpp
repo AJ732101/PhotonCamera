@@ -41,13 +41,13 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
     // Duplicate the fd so native owns its own copy; Java closes the original
     int dupFd = dup((int)fd);
     if (dupFd < 0) {
-        //FLOGE("dup() failed: %s", strerror(errno));
+        FLOGE("dup() failed: %s", strerror(errno));
         return 0;
     }
 
     FILE *f = fdopen(dupFd, "wb");
     if (!f) {
-        //FLOGE("fdopen() failed: %s", strerror(errno));
+        FLOGE("fdopen() failed: %s", strerror(errno));
         close(dupFd);
         return 0;
     }
@@ -60,7 +60,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
 
     ctx->flac = (technicallyflac *)malloc(technicallyflac_size());
     if (!ctx->flac) {
-        //FLOGE("Cannot allocate flac context");
+        FLOGE("Cannot allocate flac context");
         fclose(f);
         delete ctx;
         return 0;
@@ -68,7 +68,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
 
     if (technicallyflac_init(ctx->flac, (uint32_t)blockSize, (uint32_t)sampleRate,
                              (uint8_t)channels, (uint8_t)bitDepth) != 0) {
-        //FLOGE("technicallyflac_init failed (blockSize=%d sr=%d ch=%d bps=%d)", (int)blockSize, (int)sampleRate, (int)channels, (int)bitDepth);
+        FLOGE("technicallyflac_init failed (blockSize=%d sr=%d ch=%d bps=%d)", (int)blockSize, (int)sampleRate, (int)channels, (int)bitDepth);
         free(ctx->flac);
         fclose(f);
         delete ctx;
@@ -78,7 +78,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
     for (int i = 0; i < channels; i++) {
         ctx->ch[i] = (int32_t *)malloc((size_t)blockSize * sizeof(int32_t));
         if (!ctx->ch[i]) {
-            //FLOGE("Cannot allocate channel buffer %d", i);
+            FLOGE("Cannot allocate channel buffer %d", i);
             for (int j = 0; j < i; j++) free(ctx->ch[j]);
             free(ctx->flac);
             fclose(f);
@@ -92,7 +92,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
                                                  (uint8_t)bitDepth) + 128;
     ctx->encBuf = (uint8_t *)malloc(ctx->encBufSize);
     if (!ctx->encBuf) {
-        //FLOGE("Cannot allocate encode buffer");
+        FLOGE("Cannot allocate encode buffer");
         for (int i = 0; i < channels; i++) free(ctx->ch[i]);
         free(ctx->flac);
         fclose(f);
@@ -113,7 +113,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeOpenFd(
     fwrite(headerBuf, 1, n, f);
 
     fflush(f);
-    //FLOGD("Opened: sampleRate=%d channels=%d blockSize=%d bitDepth=%d", (int)sampleRate, (int)channels, (int)blockSize, (int)bitDepth);
+    FLOGD("Opened: sampleRate=%d channels=%d blockSize=%d bitDepth=%d", (int)sampleRate, (int)channels, (int)blockSize, (int)bitDepth);
 
     return (jlong)(intptr_t)ctx;
 }
@@ -171,7 +171,7 @@ Java_com_particlesdevs_photoncamera_util_FlacAudioRecorder_nativeClose(
     if (ctx->flac) free(ctx->flac);
     delete ctx;
 
-    //FLOGD("Closed");
+    FLOGD("Closed");
 }
 
 } // extern "C"

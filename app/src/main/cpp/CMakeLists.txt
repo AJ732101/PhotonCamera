@@ -60,9 +60,19 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         log
+        dl
 )
 
 target_link_libraries(allocator PRIVATE
         log
+)
+
+target_link_libraries(flacRecorder PRIVATE
+        log
+)
+
+target_link_libraries(camera2native PRIVATE
+        log
+        dl
 )
 
