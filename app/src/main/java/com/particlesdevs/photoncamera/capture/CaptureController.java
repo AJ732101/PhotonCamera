@@ -4339,7 +4339,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private boolean isZslMode() {
         return PhotonCamera.getSettings().selectedMode == CameraMode.MOTION
                 && !IsoExpoSelector.HDR
-                && !isDualSession;
+                && !isDualSession
+                && !isSingleShotJpegOrAvifOrHeic();
     }
 
     private void triggerZslCapture() {

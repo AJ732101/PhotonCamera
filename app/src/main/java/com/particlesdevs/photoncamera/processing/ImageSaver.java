@@ -37,6 +37,7 @@ import com.particlesdevs.photoncamera.processing.render.Parameters;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.particlesdevs.photoncamera.pro.SpecificSetting;
 import com.particlesdevs.photoncamera.settings.TunableInjector;
 
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.getImageSaver;
@@ -236,6 +238,96 @@ public class ImageSaver {
         processingEventsListener.onProcessingFinished("LUT processed JPEG: " + exportFilePath.toAbsolutePath().toString());
     }
 
+    /*public static String createUserCommentString() {
+        StringBuilder userCommentBuilder = new StringBuilder();
+        userCommentBuilder.append("Unicode\0");
+        userCommentBuilder.append("\n   User Comment Test");
+        return userCommentBuilder.toString();
+    }*/
+
+    public static String createSpecificsString() {
+        StringBuilder specificsBuilder = new StringBuilder();
+        SpecificSetting sp = PhotonCamera.getSpecific().specificSetting;
+        specificsBuilder.append("\nSpecifics:");
+        specificsBuilder.append("\n   isDualSessionSupported: ").append(sp.isDualSessionSupported);
+        specificsBuilder.append("\n   isRawColorCorrection: ").append(sp.isRawColorCorrection);
+        specificsBuilder.append("\n   cameraIDS: ").append(Arrays.toString(sp.cameraIDS));
+        specificsBuilder.append("\n   apertureList: ").append(Arrays.toString(sp.apertureList));
+        specificsBuilder.append("\n   statisticsHotPixelMapMode: ").append(sp.statisticsHotPixelMapMode);
+        specificsBuilder.append("\n   useCodeAuroraCinematicMode: ").append(sp.useCodeAuroraCinematicMode);
+        specificsBuilder.append("\n   modeShowUnlimited: ").append(sp.modeShowUnlimited);
+        specificsBuilder.append("\n   modeShowMotion: ").append(sp.modeShowMotion);
+        specificsBuilder.append("\n   modeShowNight: ").append(sp.modeShowNight);
+        specificsBuilder.append("\n   modeShowRawVideo: ").append(sp.modeShowRawVideo);
+        specificsBuilder.append("\n   enableQLL: ").append(sp.enableQLL);
+        specificsBuilder.append("\n   enableVideoLut: ").append(sp.enableVideoLut);
+        specificsBuilder.append("\n   vivoUseSuperEis: ").append(sp.vivoUseSuperEis);
+        specificsBuilder.append("\n   vivoUseProRaw: ").append(sp.vivoUseProRaw);
+        specificsBuilder.append("\n   vivoUseQcomSolution: ").append(sp.vivoUseQcomSolution);
+        specificsBuilder.append("\n   vivoUseUltraHighResolution: ").append(sp.vivoUseUltraHighResolution);
+        specificsBuilder.append("\n   vivoEngineerRemosaicMode: ").append(sp.vivoEngineerRemosaicMode);
+        specificsBuilder.append("\n   statisticsLensShadingMapMode: ").append(sp.statisticsLensShadingMapMode);
+        specificsBuilder.append("\n   statisticsOisDataMode: ").append(sp.statisticsOisDataMode);
+        specificsBuilder.append("\n   toneMapGamma: ").append(sp.toneMapGamma);
+        specificsBuilder.append("\n   colorTemperature: ").append(sp.colorTemperature);
+        specificsBuilder.append("\n   priorityShutterSpeed: ").append(sp.priorityShutterSpeed);
+        specificsBuilder.append("\n   priorityIsoValue: ").append(sp.priorityIsoValue);
+        specificsBuilder.append("\n   priorityMode: ").append(sp.priorityMode);
+        specificsBuilder.append("\n   xiaomiMfnrFrames: ").append(sp.xiaomiMfnrFrames);
+        specificsBuilder.append("\n   xiaomiSupernightMode: ").append(sp.xiaomiSupernightMode);
+        specificsBuilder.append("\n   codeAuroraDCGMode: ").append(sp.codeAuroraDCGMode);
+        specificsBuilder.append("\n   codeAuroraEnableHDRDCGMode: ").append(sp.codeAuroraEnableHDRDCGMode);
+        specificsBuilder.append("\n   qtiDCGMode: ").append(sp.qtiDCGMode);
+        specificsBuilder.append("\n   qtiImageStabilizationMode: ").append(sp.qtiImageStabilizationMode);
+        specificsBuilder.append("\n   xiaomiHdrMode: ").append(sp.xiaomiHdrMode);
+        specificsBuilder.append("\n   sensorModes: ").append(Arrays.toString(sp.sensorModes));
+        specificsBuilder.append("\n   sensorModeKey: ").append(sp.sensorModeKey);
+        specificsBuilder.append("\n   vivoVideoMode: ").append(sp.vivoVideoMode);
+        specificsBuilder.append("\n   vivoEisConfig: ").append(sp.vivoEisConfig);
+        specificsBuilder.append("\n   vivoEisEnhance: ").append(sp.vivoEisEnhance);
+        specificsBuilder.append("\n   androidDemosaicMode: ").append(sp.androidDemosaicMode);
+        specificsBuilder.append("\n   targetFps: ").append(sp.targetFps);
+        specificsBuilder.append("\n   colorTint: ").append(sp.colorTint);
+        specificsBuilder.append("\n   recPrefix: ").append(sp.recPrefix);
+        specificsBuilder.append("\n   newRecSurfaceType: ").append(sp.newRecSurfaceType);
+        specificsBuilder.append("\n   customRawRes: ").append(sp.customRawRes);
+        specificsBuilder.append("\n   hdrMode: ").append(sp.hdrMode);
+        specificsBuilder.append("\n   customVendorKeyTypeByteName: ").append(Arrays.toString(sp.customVendorKeyTypeByteName));
+        specificsBuilder.append("\n   customVendorKeyTypeInt32Name: ").append(Arrays.toString(sp.customVendorKeyTypeInt32Name));
+        specificsBuilder.append("\n   customVendorKeyTypeInt64Name: ").append(Arrays.toString(sp.customVendorKeyTypeInt64Name));
+        specificsBuilder.append("\n   customVendorKeyTypeFloatName: ").append(Arrays.toString(sp.customVendorKeyTypeFloatName));
+        specificsBuilder.append("\n   customVendorKeyTypeByteValue: ").append(Arrays.toString(sp.customVendorKeyTypeByteValue));
+        specificsBuilder.append("\n   customVendorKeyTypeInt32Value: ").append(Arrays.toString(sp.customVendorKeyTypeInt32Value));
+        specificsBuilder.append("\n   customVendorKeyTypeInt64Value: ").append(Arrays.toString(sp.customVendorKeyTypeInt64Value));
+        specificsBuilder.append("\n   customVendorKeyTypeFloatValue: ").append(Arrays.toString(sp.customVendorKeyTypeFloatValue));
+        specificsBuilder.append("\n   networkSyncBaseUrl: ").append(sp.networkSyncBaseUrl);
+        specificsBuilder.append("\n   ultraHdrThreshold: ").append(sp.ultraHdrThreshold);
+        specificsBuilder.append("\n   ultraHdrMaxBoost: ").append(sp.ultraHdrMaxBoost);
+        specificsBuilder.append("\n   ultraHdrGamma: ").append(sp.ultraHdrGamma);
+
+        return specificsBuilder.toString();
+    }
+
+    public static String createUserCommentString() {
+        String commentText = createSpecificsString();
+        byte[] header = new byte[] {
+                'A', 'S', 'C', 'I', 'I', 0x00, 0x00, 0x00
+        };
+
+        try {
+            byte[] textBytes = commentText.getBytes("US-ASCII");
+
+            byte[] payload = new byte[header.length + textBytes.length];
+            System.arraycopy(header, 0, payload, 0, header.length);
+            System.arraycopy(textBytes, 0, payload, header.length, textBytes.length);
+
+            return new String(payload, "ISO-8859-1");
+
+        } catch (UnsupportedEncodingException e) {
+            return commentText;
+        }
+    }
+
     public static String createProcessingString() {
         StringBuilder imageDescriptionBuilder = new StringBuilder();
         imageDescriptionBuilder.append("\n   Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
@@ -261,6 +353,9 @@ public class ImageSaver {
         imageDescriptionBuilder.append("\n   SoC Saturation: ").append(PhotonCamera.getSettings().socQualcommSaturation);
         imageDescriptionBuilder.append("\n   SoC Contrast: ").append(PhotonCamera.getSettings().socQualcommContrast);
         imageDescriptionBuilder.append("\n   SoC Sharpness: ").append(PhotonCamera.getSettings().socQualcommSharpness);
+        if (PhotonCamera.getSettings().socQualcommManualWb > 1500) {
+            imageDescriptionBuilder.append("\n   SoC Temperature: ").append(PhotonCamera.getSettings().socQualcommManualWb).append("K");
+        }
         if (PhotonCamera.getSettings().hotPixelMode == 99) {
             imageDescriptionBuilder.append("\n   Hot Pixel Mode: Device Default");
         }
@@ -329,6 +424,7 @@ public class ImageSaver {
             exifData.F_NUMBER = String.valueOf(metadata.getFloat("aperture"));
             exifData.EXPOSURE_TIME = metadata.getString("exposureTimeStr");
             exifData.IMAGE_DESCRIPTION = createProcessingString();
+            exifData.USER_COMMENT = createUserCommentString();
             exifData.EXIF_VERSION = "0232";
             exifData.COMPRESSION = String.valueOf(PhotonCamera.getSettings().singleFrameQuality);
             exifData.COLOR_SPACE = "sRGB";

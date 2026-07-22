@@ -128,6 +128,7 @@ public class ParseExif {
         inter.setAttribute(TAG_COMPRESSION, data.COMPRESSION);
         inter.setAttribute(TAG_COLOR_SPACE, data.COLOR_SPACE);
         inter.setAttribute(TAG_IMAGE_DESCRIPTION, data.IMAGE_DESCRIPTION);
+        inter.setAttribute(TAG_USER_COMMENT, data.USER_COMMENT);
         inter.setAttribute(TAG_FOCAL_LENGTH_IN_35MM_FILM, data.EQUIVALENT_35MM);
         inter.setAttribute(TAG_ORIENTATION, data.ORIENTATION);
         inter.setAttribute(TAG_SOFTWARE, "PhotonVidCam");
@@ -162,6 +163,7 @@ public class ParseExif {
         public String COLOR_SPACE;
         public String EXIF_VERSION;
         public String IMAGE_DESCRIPTION;
+        public String USER_COMMENT;
         public String DATETIME;
         public String EXPOSURE_TIME;
         public String F_NUMBER;

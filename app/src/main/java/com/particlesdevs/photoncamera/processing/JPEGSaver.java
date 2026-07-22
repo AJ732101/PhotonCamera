@@ -33,6 +33,7 @@ public class JPEGSaver extends DefaultSaver {
                 Files.write(jpgPath, bytes);
                 ExifInterface exif = new ExifInterface(jpgPath.toString());
                 exif.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, ImageSaver.createProcessingString());
+                exif.setAttribute(ExifInterface.TAG_USER_COMMENT, ImageSaver.createUserCommentString());
                 if (PhotonCamera.getSettings().gpsLocation && (PhotonCamera.gpsLocation != null)) {
                     exif.setLatLong(PhotonCamera.gpsLocation.getLatitude(), PhotonCamera.gpsLocation.getLongitude());
 
