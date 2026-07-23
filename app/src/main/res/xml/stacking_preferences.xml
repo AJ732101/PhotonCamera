@@ -31,6 +31,14 @@
             android:defaultValue="@string/pref_lut_name_default"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_binning_key"
+            android:defaultValue="@bool/pref_binning_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/binning"
+            android:summary=""
+            android:icon="@drawable/aspect_ratio_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_hdrx_nr_key"
             android:defaultValue="@bool/pref_hdrx_nr_default"
             android:layout="@layout/preference_with_margin"

@@ -41,6 +41,7 @@
     <string name="turn_on_watermark">Wasserzeichen Aktivieren</string>
     <string name="exposure_fusion_method">Belichtungsfusion Methode 2 (nicht 3)</string>
     <string name="ultra_hdr_jpeg">Ultra HDR JPEG</string>
+    <string name="binning">Halbe Auflösung (Binning)</string>
     <string name="sure_delete">Möchten Sie dieses Bild wirklich löschen?</string>
     <string name="sure_delete_multiple">Sicher, dass Sie %1$s Bild(er) löschen möchten? %2$s werden gelöscht.</string>
     <string name="cancel">Abbrechen</string>

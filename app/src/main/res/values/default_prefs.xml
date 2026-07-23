@@ -16,6 +16,7 @@
     <bool name="pref_parallel_avif_default">false</bool>
     <bool name="pref_16bit_default">false</bool>
     <bool name="pref_ultra_hdr_default">false</bool>
+    <bool name="pref_binning_default">false</bool>
     <bool name="pref_save_per_lens_settings">true</bool>
     <bool name="pref_show_afdata_default">false</bool>
     <bool name="pref_show_roundedge_default">false</bool>

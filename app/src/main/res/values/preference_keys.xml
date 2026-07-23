@@ -29,9 +29,9 @@
     <string name="pref_parallel_avif_key" translatable="false">pref_parallel_avif_key</string>
     <string name="pref_16bit_key" translatable="false">pref_16bit_key</string>
     <string name="pref_ultra_hdr_key" translatable="false">pref_ultra_hdr_key</string>
+    <string name="pref_binning_key" translatable="false">pref_binning_key</string>
     <string name="pref_energy_safe_key" translatable="false">pref_energy_safe_key</string>
     <string name="pref_wide169_key" translatable="false">pref_wide169_key</string>
-    <string name="pref_binning_key" translatable="false">pref_binning_key</string>
     <string name="pref_thumbnail_key" translatable="false">pref_thumbnail_key</string>
     <string name="pref_p3_key" translatable="false">pref_p3_key</string>
     <string name="pref_enhanced_processing_key" translatable="false">pref_enhanced_processing_key</string>
