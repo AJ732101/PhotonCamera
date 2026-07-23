@@ -122,6 +122,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_ISZ.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_AUTO_HDR.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_LTM_OFF.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_HDR_MODE.mValue);
         // QualityDoesMatter - Single Shot & Video Related
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
@@ -254,6 +255,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_ISZ, resources.getBoolean(R.bool.pref_soc_qualcomm_isz_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_MFNR, resources.getBoolean(R.bool.pref_soc_qualcomm_mfnr_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_AUTO_HDR, resources.getBoolean(R.bool.pref_soc_qualcomm_auto_hdr_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_LTM_OFF, resources.getBoolean(R.bool.pref_soc_qualcomm_ltm_off_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_HDR_MODE, resources.getString(R.string.pref_soc_qualcomm_hdr_mode_default));
         // QualityDoesMatter - Single Shot and Video Related
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
@@ -928,6 +930,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_AUTO_HDR);
     }
 
+    public static boolean isSocQualcommLtmOff() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SOC_LTM_OFF);
+    }
+
     public static int getSocQualcommHdrMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SOC_HDR_MODE);
     }
@@ -1218,6 +1224,7 @@ public class PreferenceKeys {
         KEY_SOC_QUALCOMM_ISZ(R.string.pref_soc_qualcomm_isz_key),
         KEY_SOC_QUALCOMM_MFNR(R.string.pref_soc_qualcomm_mfnr_key),
         KEY_SOC_AUTO_HDR(R.string.pref_soc_auto_hdr_key),
+        KEY_SOC_LTM_OFF(R.string.pref_soc_ltm_off_key),
         KEY_SOC_HDR_MODE(R.string.pref_soc_hdr_mode_key),
         KEY_SOC_MFNR_FRAMES(R.string.pref_soc_qualcomm_mfnr_frames_key),
 

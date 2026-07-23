@@ -134,6 +134,7 @@ public class VendorTagUtils {
         PhotonCamera.hasContrastKey = false;
         PhotonCamera.hasSharpnessKey = false;
         PhotonCamera.hasEisModeKey = false;
+        PhotonCamera.hasLtmKey = false;
         PhotonCamera.hasAiModeKey = false;
         PhotonCamera.hasMfnrKey = false;
         PhotonCamera.hasXiaomiNight = false;
@@ -576,24 +577,28 @@ public class VendorTagUtils {
                 }
 
                 // Qualcomm LTM - local tone mapping deactivation
-                if (false) {
+                if (!PhotonCamera.getSettings().socQualcommLtmOff) {
                     var ltmDarkBoostStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmDarkBoostStrength", Float.class);
                     if (isSupported(builder, ltmDarkBoostStrength)) {
+                        PhotonCamera.hasLtmKey = true;
                         builder.set(ltmDarkBoostStrength, (float) -100.0f);
                     }
 
                     var ltmBrightBoostStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmBrightBoostStrength", Float.class);
                     if (isSupported(builder, ltmBrightBoostStrength)) {
+                        PhotonCamera.hasLtmKey = true;
                         builder.set(ltmBrightBoostStrength, (float) -100.0f);
                     }
 
                     var ltmContrastStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmContrastStrength", Float.class);
                     if (isSupported(builder, ltmContrastStrength)) {
+                        PhotonCamera.hasLtmKey = true;
                         builder.set(ltmContrastStrength, (float) -100.0f);
                     }
 
                     var ltmGamma = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmGamma", Float.class);
                     if (isSupported(builder, ltmGamma)) {
+                        PhotonCamera.hasLtmKey = true;
                         builder.set(ltmGamma, (float) 1.0f);
                     }
                 }

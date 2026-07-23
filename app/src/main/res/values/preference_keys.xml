@@ -164,6 +164,7 @@
     <string name="pref_soc_qualcomm_isz_key" translatable="false">pref_soc_qualcomm_isz_key</string>
     <string name="pref_soc_qualcomm_mfnr_key" translatable="false">pref_soc_qualcomm_mfnr_key</string>
     <string name="pref_soc_auto_hdr_key" translatable="false">pref_soc_auto_hdr_key</string>
+    <string name="pref_soc_ltm_off_key" translatable="false">pref_soc_ltm_off_key</string>
     <string name="pref_soc_hdr_mode_key" translatable="false">pref_soc_hdr_mode_key</string>
     <string name="pref_soc_qualcomm_manual_wb_key" translatable="false">pref_soc_qualcomm_manual_wb_key</string>
 

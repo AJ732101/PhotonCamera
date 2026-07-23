@@ -170,6 +170,7 @@
     <bool name="pref_soc_qualcomm_isz_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_mfnr_default" translatable="false">false</bool>
     <bool name="pref_soc_qualcomm_auto_hdr_default" translatable="false">false</bool>
+    <bool name="pref_soc_qualcomm_ltm_off_default" translatable="false">false</bool>
     <string name="pref_soc_qualcomm_hdr_mode_default" translatable="false">0</string>
     <string name="pref_soc_qualcomm_manual_wb_default" translatable="false">0</string>
 

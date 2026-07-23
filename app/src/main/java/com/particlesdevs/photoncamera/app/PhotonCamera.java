@@ -89,6 +89,7 @@ public class PhotonCamera extends Application {
     public static boolean hasContrastKey = false;
     public static boolean hasSharpnessKey = false;
     public static boolean hasEisModeKey = false;
+    public static boolean hasLtmKey = false;
     public static boolean hasAiModeKey = false;
     public static boolean hasMfnrKey = false;
     public static boolean hasHdr = false;

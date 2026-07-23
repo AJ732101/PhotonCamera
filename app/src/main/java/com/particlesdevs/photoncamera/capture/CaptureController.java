@@ -2818,6 +2818,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         }
                     }
                 }
+                VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, true, useMaximumResolutionKey, true);
                 if (configuration != null) {
                     configuration.setSessionParameters(mPreviewRequestBuilder.build());
                     mCameraDevice.createCaptureSession(configuration);

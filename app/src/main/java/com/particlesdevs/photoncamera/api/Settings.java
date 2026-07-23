@@ -97,6 +97,7 @@ public class Settings {
     public int socQualcommHdrMode = 0;
     public int socQualcommManualWb = 0;
     public boolean socQualcommAutoHdr = false;
+    public boolean socQualcommLtmOff = false;
     public boolean useZsl = false;
     public boolean useSceneAndEffectMode = false;
     public boolean useNewSettingsGloabal = false;
@@ -263,6 +264,7 @@ public class Settings {
         socQualcommUseIsz = PreferenceKeys.isSocQualcommIszOn();
         socQualcommUseMfnr = PreferenceKeys.isSocQualcommMfnrOn();
         socQualcommAutoHdr = PreferenceKeys.isSocQualcommAutoHdrOn();
+        socQualcommLtmOff = PreferenceKeys.isSocQualcommLtmOff();
         socQualcommHdrMode = PreferenceKeys.getSocQualcommHdrMode();
         socQualcommManualWb = PreferenceKeys.getSocQualcommManualWb();
         socQualcommMfnrFrames = PreferenceKeys.getSocQualcommMfnrFrames();

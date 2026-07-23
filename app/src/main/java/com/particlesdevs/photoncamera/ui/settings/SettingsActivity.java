@@ -415,6 +415,12 @@ public class SettingsActivity extends BaseActivity implements
                 eisPreference.setEnabled(PhotonCamera.hasEisModeKey);
             }
 
+            String ltmKey = getString(R.string.pref_soc_ltm_off_key);
+            Preference ltmPreference = findPreference(ltmKey);
+            if (ltmPreference != null) {
+                ltmPreference.setEnabled(PhotonCamera.hasLtmKey);
+            }
+
             String aiKey = getString(R.string.pref_soc_qualcomm_ai_mode_key);
             Preference aiPreference = findPreference(aiKey);
             if (aiPreference != null) {
