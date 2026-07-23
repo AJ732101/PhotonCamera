@@ -465,8 +465,13 @@ public class PreferenceKeys {
     public static boolean isBatterySaverOn(){
         return getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
     }
+
     public static boolean isAspect169On(){
         return getBool(Key.KEY_WIDE169);
+    }
+
+    public static boolean isEarlyVendorKeysLoadingOn(){
+        return getBool(Key.KEY_EARLY_VENDOR_KEYS_LOADING);
     }
 
     public static boolean isThumbnailOn(){
@@ -1121,6 +1126,7 @@ public class PreferenceKeys {
         KEY_ULTRA_HDR(R.string.pref_ultra_hdr_key),
         KEY_ENERGY_SAVING(R.string.pref_energy_safe_key),
         KEY_WIDE169(R.string.pref_wide169_key),
+        KEY_EARLY_VENDOR_KEYS_LOADING(R.string.pref_early_vendor_keys_loading_key),
         KEY_BINNING(R.string.pref_binning_key),
         KEY_TONEMAPPING_MODE_QUALITY(R.string.pref_tonemapping_mode_quality_key),
         KEY_IMAGE_READER_FLAGS(R.string.pref_image_reader_flags_key),

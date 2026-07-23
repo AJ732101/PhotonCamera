@@ -6,6 +6,7 @@
     <bool name="pref_energy_safe_default">false</bool>
     <string name="pref_show_grid_default" translatable="false">1</string>
     <bool name="pref_wide169_default">false</bool>
+    <bool name="pref_early_vendor_keys_loading_default">false</bool>
     <bool name="pref_thumbnail_default">false</bool>
     <bool name="pref_p3_default">false</bool>
     <bool name="pref_tonemapping_mode_quality_default">false</bool>

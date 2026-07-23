@@ -17,6 +17,7 @@ public class Settings {
     public boolean watermark;
     public boolean energySaving;
     public boolean aspect169 = false;
+    public boolean earlyVendorKeysLoading = false;
     public boolean useThumbnail = false;
     public boolean binning;
     public boolean DebugData;
@@ -162,6 +163,7 @@ public class Settings {
         watermark = PreferenceKeys.isShowWatermarkOn();
         energySaving = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_ENERGY_SAVING);
         aspect169 = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_WIDE169);
+        earlyVendorKeysLoading = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_EARLY_VENDOR_KEYS_LOADING);
         binning = PreferenceKeys.isBinningOn();
         Allocator.binning = binning;
         useThumbnail = PreferenceKeys.getBool(PreferenceKeys.Key.KEY_THUMBNAIL);

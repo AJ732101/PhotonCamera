@@ -2799,6 +2799,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             stateCallback
                     );
                 }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     if (checkColorSpaceProfilesSupport(mCameraManager, ColorSpace.Named.BT2020_HLG)) {
                         if (mTargetFormat == ImageFormat.YCBCR_P010) {
@@ -2806,6 +2807,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         }
                     }
                 }
+
                 if (PhotonCamera.getSettings().useP3) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                         if (checkColorSpaceProfilesSupport(mCameraManager, ColorSpace.Named.DISPLAY_P3)) {
@@ -2818,7 +2820,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                         }
                     }
                 }
-                VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, true, useMaximumResolutionKey, true);
+
+                if (PhotonCamera.getSettings().earlyVendorKeysLoading) {
+                    VendorTagUtils.builderSessionApply(mCameraCharacteristics, mPreviewRequestBuilder, true, useMaximumResolutionKey, true);
+                }
+
                 if (configuration != null) {
                     configuration.setSessionParameters(mPreviewRequestBuilder.build());
                     mCameraDevice.createCaptureSession(configuration);

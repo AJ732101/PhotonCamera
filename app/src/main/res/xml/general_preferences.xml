@@ -132,6 +132,14 @@
             android:icon="@drawable/aspect_ratio_24px"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_early_vendor_keys_loading_key"
+            android:defaultValue="@bool/pref_early_vendor_keys_loading_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/early_vendor_keys_loading"
+            android:summary=""
+            android:icon="@drawable/vpn_key_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_ois_key"
             android:defaultValue="@bool/pref_ois_default"
