@@ -1977,7 +1977,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // check if CaptureRequest.COLOR_CORRECTION_MODE_CCT is supported
         boolean supportsColorTemperature = false;
         try {
-            int[] availableCorrectionModes = mCameraManager.getCameraCharacteristics(physicalID).get(CameraCharacteristics.COLOR_CORRECTION_AVAILABLE_MODES);
+            CameraCharacteristics.Key<int[]> key = new CameraCharacteristics.Key<>("android.colorCorrection.availableModes", int[].class);
+            int[] availableCorrectionModes = mCameraManager.getCameraCharacteristics(physicalID).get(key);
             Log.d(TAG, "Supported color correction modes:");
             for (int mode : availableCorrectionModes) {
                 if (mode == 0) {
