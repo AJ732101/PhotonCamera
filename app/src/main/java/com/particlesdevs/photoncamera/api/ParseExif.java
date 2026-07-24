@@ -35,6 +35,12 @@ public class ParseExif {
         return out;
     }
 
+    public static String getCurrentDateTime() {
+        synchronized (sFormatter) {
+            return sFormatter.format(new Date(System.currentTimeMillis()));
+        }
+    }
+
     public static String resultget(CaptureResult res, Key<?> key) {
         Object out = res.get(key);
         if (out != null) return out.toString();
@@ -91,7 +97,7 @@ public class ParseExif {
             exposure = requestget(request, CaptureRequest.SENSOR_EXPOSURE_TIME);
             data.EXPOSURE_TIME = getTime(Long.parseLong(exposure));
         }
-        data.DATETIME = sFormatter.format(new Date(System.currentTimeMillis()));
+        data.DATETIME = getCurrentDateTime();
         data.COMPRESSION = "97";
         data.COLOR_SPACE = "sRGB";
         data.EXIF_VERSION = "0231";
@@ -123,6 +129,8 @@ public class ParseExif {
         inter.setAttribute(TAG_APERTURE_VALUE, data.F_NUMBER);
         inter.setAttribute(TAG_EXPOSURE_TIME, data.EXPOSURE_TIME);
         inter.setAttribute(ExifInterface.TAG_DATETIME, data.DATETIME);
+        inter.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, data.DATETIME);
+        inter.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, data.DATETIME);
         inter.setAttribute(TAG_MODEL, data.MODEL);
         inter.setAttribute(TAG_MAKE, data.MAKE);
         inter.setAttribute(TAG_COMPRESSION, data.COMPRESSION);
@@ -164,7 +172,7 @@ public class ParseExif {
         public String EXIF_VERSION;
         public String IMAGE_DESCRIPTION;
         public String USER_COMMENT;
-        public String DATETIME;
+        public String DATETIME = getCurrentDateTime();
         public String EXPOSURE_TIME;
         public String F_NUMBER;
         public String FOCAL_LENGTH;

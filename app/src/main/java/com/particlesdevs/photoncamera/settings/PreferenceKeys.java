@@ -138,6 +138,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_CONTRAST_CURVE.mValue);
         COMMON_KEYS.add(Key.KEY_EFFECT_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_EXPOSURE_COMPENSATION.mValue);
+        COMMON_KEYS.add(Key.KEY_COLOR_TEMPERATURE.mValue);
+        COMMON_KEYS.add(Key.KEY_COLOR_TINT.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_TRANSFER_FUNCTION.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
@@ -271,6 +273,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CONTRAST_CURVE, resources.getString(R.string.pref_contrast_curve_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EFFECT_MODE, resources.getString(R.string.pref_effect_mode_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_COMPENSATION, resources.getString(R.string.pref_exposure_compensation_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_TEMPERATURE, "999");
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_TINT, "0.0");
 
         // QualityDoesMatter - Sensor Related and More
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE, resources.getString(R.string.pref_hot_pixel_mode_default_value));
@@ -1043,6 +1047,14 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EXPOSURE_COMPENSATION);
     }
 
+    public static int getColorTemperature() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_COLOR_TEMPERATURE);
+    }
+
+    public static float getColorTint() {
+        return preferenceKeys.settingsManager.getFloat(SCOPE_GLOBAL, Key.KEY_COLOR_TINT);
+    }
+
     public static int getEffectMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_EFFECT_MODE);
     }
@@ -1257,6 +1269,8 @@ public class PreferenceKeys {
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),
+        KEY_COLOR_TEMPERATURE(R.string.pref_color_temperature_key),
+        KEY_COLOR_TINT(R.string.pref_color_tint_key),
         KEY_EFFECT_MODE(R.string.pref_effect_mode_key),
         KEY_PHOTO_VIDEO_CODEC(R.string.pref_photo_video_code_key),
         KEY_PHOTO_TRANSFER_FUNCTION(R.string.pref_photo_transfer_function_key),

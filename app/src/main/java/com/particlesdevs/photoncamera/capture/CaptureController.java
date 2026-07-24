@@ -1977,9 +1977,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         // check if CaptureRequest.COLOR_CORRECTION_MODE_CCT is supported
         boolean supportsColorTemperature = false;
         try {
-            CameraCharacteristics.Key<int[]> key = new CameraCharacteristics.Key<>("android.colorCorrection.availableModes", int[].class);
-            int[] availableCorrectionModes = mCameraManager.getCameraCharacteristics("0").get(key);
-            Log.d(TAG, "Supported color correction methods:");
+            int[] availableCorrectionModes = mCameraManager.getCameraCharacteristics(physicalID).get(CameraCharacteristics.COLOR_CORRECTION_AVAILABLE_MODES);
+            Log.d(TAG, "Supported color correction modes:");
             for (int mode : availableCorrectionModes) {
                 if (mode == 0) {
                     Log.d(TAG, "   COLOR_CORRECTION_MODE_TRANSFORM_MATRIX");
@@ -1995,26 +1994,65 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Log.d(TAG, "   COLOR_CORRECTION_MODE_CCT");
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
         }
-        catch (Exception e) {
+
+        try {
+            int[] availableAwbModes = mCameraManager.getCameraCharacteristics(physicalID).get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
+            Log.d(TAG, "Supported white balance modes:");
+            if (availableAwbModes != null) {
+                for (int mode : availableAwbModes) {
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_OFF) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_OFF");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_AUTO) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_AUTO");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_DAYLIGHT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_DAYLIGHT");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_FLUORESCENT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_FLUORESCENT");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_INCANDESCENT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_INCANDESCENT");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_CLOUDY_DAYLIGHT");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_SHADE) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_SHADE");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_TWILIGHT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_TWILIGHT");
+                    }
+                    if (mode == CaptureRequest.CONTROL_AWB_MODE_WARM_FLUORESCENT) {
+                        Log.d(TAG, "   CONTROL_AWB_MODE_WARM_FLUORESCENT");
+                    }
+                }
+            }
+        } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
 
         captureBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, FpsRangeDef);
 
-        if (PhotonCamera.getSpecific().specificSetting.colorTemperature > 1000) {
+        if (PhotonCamera.getSettings().colorTemperature > 1000) {
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) && supportsColorTemperature) {
                 captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
                 captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_CCT);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TEMPERATURE, PhotonCamera.getSpecific().specificSetting.colorTemperature);
-                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TINT, (int) PhotonCamera.getSpecific().specificSetting.colorTint);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TEMPERATURE, PhotonCamera.getSettings().colorTemperature);
+                captureBuilder.set(CaptureRequest.COLOR_CORRECTION_COLOR_TINT, (int) PhotonCamera.getSettings().colorTint);
             } else {
-                if (!Build.BRAND.equalsIgnoreCase("vivo")) {
+                //if (!Build.BRAND.equalsIgnoreCase("vivo")) {
+                if (true) {
                     try {
                         captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF);
                         captureBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
-                        android.hardware.camera2.params.RggbChannelVector gains = kelvinAndTintToGains(PhotonCamera.getSpecific().specificSetting.colorTemperature, PhotonCamera.getSpecific().specificSetting.colorTint);
-                        captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, gains);
+                        //RggbChannelVector customGains = kelvinAndTintToGains(PhotonCamera.getSettings().colorTemperature, PhotonCamera.getSettings().colorTint);
+                        RggbChannelVector customGains = CameraColorUtils.calculateGainsFromKelvinAndTint(mCameraManager.getCameraCharacteristics(physicalID), PhotonCamera.getSettings().colorTemperature, PhotonCamera.getSettings().colorTint);
+                        captureBuilder.set(CaptureRequest.COLOR_CORRECTION_GAINS, customGains);
                     } catch (Exception e) {
                         Log.e(TAG, "setCaptureRequestBuilder:" + e);
                     }
@@ -2024,32 +2062,36 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     }
 
     private boolean checkToneMappingModes(int modeToMatch) {
-        int[] availableToneMapModes = mCameraCharacteristics.get(CameraCharacteristics.TONEMAP_AVAILABLE_TONE_MAP_MODES);
         boolean isSupported = false;
-        if (availableToneMapModes != null) {
-            Log.d(TAG, "Supported tone map modes:");
-            for (int mode : availableToneMapModes) {
-                if (mode == modeToMatch) {
-                    isSupported = true;
-                }
-                switch (mode) {
-                    case CameraMetadata.TONEMAP_MODE_CONTRAST_CURVE:
-                        Log.d(TAG, "    TONEMAP_MODE_CONTRAST_CURVE");
-                        break;
-                    case CameraMetadata.TONEMAP_MODE_FAST:
-                        Log.d(TAG, "    TONEMAP_MODE_FAST");
-                        break;
-                    case CameraMetadata.TONEMAP_MODE_HIGH_QUALITY:
-                        Log.d(TAG, "    TONEMAP_MODE_HIGH_QUALITY");
-                        break;
-                    case CameraMetadata.TONEMAP_MODE_GAMMA_VALUE:
-                        Log.d(TAG, "    TONEMAP_MODE_GAMMA_VALUE");
-                        break;
-                    case CameraMetadata.TONEMAP_MODE_PRESET_CURVE:
-                        Log.d(TAG, "    TONEMAP_MODE_PRESET_CURVE");
-                        break;
+        try {
+            int[] availableToneMapModes = mCameraCharacteristics.get(CameraCharacteristics.TONEMAP_AVAILABLE_TONE_MAP_MODES);
+            if (availableToneMapModes != null) {
+                Log.d(TAG, "Supported tone map modes:");
+                for (int mode : availableToneMapModes) {
+                    if (mode == modeToMatch) {
+                        isSupported = true;
+                    }
+                    switch (mode) {
+                        case CameraMetadata.TONEMAP_MODE_CONTRAST_CURVE:
+                            Log.d(TAG, "    TONEMAP_MODE_CONTRAST_CURVE");
+                            break;
+                        case CameraMetadata.TONEMAP_MODE_FAST:
+                            Log.d(TAG, "    TONEMAP_MODE_FAST");
+                            break;
+                        case CameraMetadata.TONEMAP_MODE_HIGH_QUALITY:
+                            Log.d(TAG, "    TONEMAP_MODE_HIGH_QUALITY");
+                            break;
+                        case CameraMetadata.TONEMAP_MODE_GAMMA_VALUE:
+                            Log.d(TAG, "    TONEMAP_MODE_GAMMA_VALUE");
+                            break;
+                        case CameraMetadata.TONEMAP_MODE_PRESET_CURVE:
+                            Log.d(TAG, "    TONEMAP_MODE_PRESET_CURVE");
+                            break;
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
         }
         return isSupported;
     }
@@ -3220,7 +3262,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             });
         }
     }
-
 
     /**
      * Initiate a still image capture.

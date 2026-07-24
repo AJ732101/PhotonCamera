@@ -12,6 +12,8 @@
     <string name="frame_count">HDR Frame Count</string>
     <string name="exposure_compensation">Exposure Compensation</string>
     <string name="contrast_curve_exposure_compensation">Contrast Curve Exposure Compensation</string>
+    <string name="color_temperature">Color Temperature</string>
+    <string name="color_tint">Color Tint</string>
     <string name="single_frame_quality">Still Image Quality</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="audio_bitrate">Bitrate [kBit/s]</string>

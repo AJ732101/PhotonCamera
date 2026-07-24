@@ -151,7 +151,8 @@ public class Settings {
     public boolean use16Bit = false;
     public boolean useJpegUltraHdr = false;
     public boolean writeCaptureResult = false;
-
+    public int colorTemperature = 999;
+    public float colorTint = 0.0f;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -295,6 +296,8 @@ public class Settings {
         swColorSpace = PreferenceKeys.getSwColorSpace();
         alternateImageReaderFlags = PreferenceKeys.isAlternateImageReaderFlagsOn();
         useHqSubsampling = PreferenceKeys.isHqSubsamplingOn();
+        colorTemperature = PreferenceKeys.getColorTemperature();
+        colorTint = PreferenceKeys.getColorTint();
     }
 
     public void saveID() {

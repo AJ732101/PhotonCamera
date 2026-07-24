@@ -130,6 +130,26 @@
             app:minValue="-24"
             android:icon="@drawable/exposure_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_color_temperature_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/color_temperature"
+            android:defaultValue="999"
+            app:maxValue="10000"
+            app:minValue="999"
+            android:icon="@drawable/palette_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_color_tint_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/color_tint"
+            android:defaultValue="0.0"
+            app:maxValue="1.0"
+            app:minValue="-1.0"
+            app:isFloat="true"
+            app:stepPerUnit="20"
+            android:icon="@drawable/palette_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_effect_mode_key"

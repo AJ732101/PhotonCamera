@@ -269,7 +269,6 @@ public class ImageSaver {
         specificsBuilder.append("\n   statisticsLensShadingMapMode: ").append(sp.statisticsLensShadingMapMode);
         specificsBuilder.append("\n   statisticsOisDataMode: ").append(sp.statisticsOisDataMode);
         specificsBuilder.append("\n   toneMapGamma: ").append(sp.toneMapGamma);
-        specificsBuilder.append("\n   colorTemperature: ").append(sp.colorTemperature);
         specificsBuilder.append("\n   priorityShutterSpeed: ").append(sp.priorityShutterSpeed);
         specificsBuilder.append("\n   priorityIsoValue: ").append(sp.priorityIsoValue);
         specificsBuilder.append("\n   priorityMode: ").append(sp.priorityMode);
@@ -287,7 +286,6 @@ public class ImageSaver {
         specificsBuilder.append("\n   vivoEisEnhance: ").append(sp.vivoEisEnhance);
         specificsBuilder.append("\n   androidDemosaicMode: ").append(sp.androidDemosaicMode);
         specificsBuilder.append("\n   targetFps: ").append(sp.targetFps);
-        specificsBuilder.append("\n   colorTint: ").append(sp.colorTint);
         specificsBuilder.append("\n   recPrefix: ").append(sp.recPrefix);
         specificsBuilder.append("\n   newRecSurfaceType: ").append(sp.newRecSurfaceType);
         specificsBuilder.append("\n   customRawRes: ").append(sp.customRawRes);

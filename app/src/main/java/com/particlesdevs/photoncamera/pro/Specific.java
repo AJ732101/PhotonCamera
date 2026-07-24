@@ -131,10 +131,6 @@ public class Specific {
                     specificSetting.toneMapGamma = Float.parseFloat(caseS[1]);
                     break;
                 }
-                case "colorTemperature": {
-                    specificSetting.colorTemperature = Integer.parseInt(caseS[1]);
-                    break;
-                }
                 case "priorityShutterSpeed": {
                     specificSetting.priorityShutterSpeed = Integer.parseInt(caseS[1]);
                     break;
@@ -193,10 +189,6 @@ public class Specific {
                 }
                 case "targetFps": {
                     specificSetting.targetFps = Integer.parseInt(caseS[1]);
-                    break;
-                }
-                case "colorTint": {
-                    specificSetting.colorTint = Float.parseFloat(caseS[1]);
                     break;
                 }
                 case "recPrefix": {

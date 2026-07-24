@@ -39,6 +39,7 @@ struct DngMetadata {
     int cfa = 0;
     unsigned char cfa_pattern[4] = {1, 0, 2, 1}; // Default RGGB
     unsigned short cfa_repeat_pattern_dim[2] = {2, 2};
+    bool quad_bayer = false;
     
     // Flags to track what has been set
     bool has_color_matrix1 = false;
@@ -58,6 +59,7 @@ struct DngMetadata {
     bool binning_uses_average = false;
     int original_width = 0;
     int original_height = 0;
+    bool dcg_16_10_crop = false;
 };
 
 #ifdef __cplusplus
@@ -118,6 +120,9 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setCFAPattern(
     JNIEnv *env, jobject obj, jlong creatorPtr, jint pattern);
 
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setQuadBayer(
+    JNIEnv *env, jobject obj, jlong creatorPtr, jboolean quadBayer);
+
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setGainMap(JNIEnv *env, jobject obj, jlong creatorPtr, jfloatArray gainMap, jint xmin, jint ymin, jint xmax, jint ymax, jint width, jint height);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setDescription(
@@ -160,6 +165,9 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setBinning(
         JNIEnv *env, jobject obj, jlong creatorPtr, jboolean binning);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setDcg1610Crop(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jboolean crop);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(
         JNIEnv *env, jobject obj, jlong creatorPtr);

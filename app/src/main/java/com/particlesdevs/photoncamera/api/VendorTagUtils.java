@@ -913,15 +913,15 @@ public class VendorTagUtils {
 
                     var vivoColorTemp = new CaptureRequest.Key<>("vivo.control.colour.temperature", Integer.class);
                     if (isSupported(builder, vivoColorTemp)) {
-                        if (PhotonCamera.getSpecific().specificSetting.colorTemperature > 1000) {
-                            builder.set(vivoColorTemp, PhotonCamera.getSpecific().specificSetting.colorTemperature);
+                        if (PhotonCamera.getSettings().colorTemperature > 1000) {
+                            builder.set(vivoColorTemp, PhotonCamera.getSettings().colorTemperature);
                         }
                     }
 
                     var vivoColorHue = new CaptureRequest.Key<>("vivo.control.colour.hue", Integer.class);
                     if (isSupported(builder, vivoColorHue)) {
-                        if (PhotonCamera.getSpecific().specificSetting.colorTint > 0) {
-                            builder.set(vivoColorHue, (int) PhotonCamera.getSpecific().specificSetting.colorTint);
+                        if (PhotonCamera.getSettings().colorTint != 0.0) {
+                            builder.set(vivoColorHue, (int) PhotonCamera.getSettings().colorTint);
                         }
                     }
 

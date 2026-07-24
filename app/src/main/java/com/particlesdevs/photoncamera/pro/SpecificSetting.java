@@ -24,7 +24,6 @@ public class SpecificSetting {
     public int statisticsLensShadingMapMode = 99;
     public int statisticsOisDataMode = 99;
     public float toneMapGamma = 99;
-    public int colorTemperature = 99;
     public int priorityShutterSpeed = 0;
     public int priorityIsoValue = 0;
     public int priorityMode = 0;
@@ -42,7 +41,6 @@ public class SpecificSetting {
     public int vivoEisEnhance = -1;
     public int androidDemosaicMode = -1;
     public int targetFps = -1;
-    public float colorTint = 99.0f;
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";
     public String customRawRes = "";

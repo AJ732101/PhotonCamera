@@ -51,6 +51,8 @@
     <string name="pref_shadows_seekbar_key" translatable="false">pref_shadows_seekbar_key</string>
     <string name="pref_frame_count_key" translatable="false">pref_frame_count_key</string>
     <string name="pref_exposure_compensation_key" translatable="false">pref_exposure_compensation_key</string>
+    <string name="pref_color_temperature_key" translatable="false">pref_color_temperature_key</string>
+    <string name="pref_color_tint_key" translatable="false">pref_color_tint_key</string>
     <string name="pref_single_frame_quality_key" translatable="false">pref_single_frame_quality_key</string>
     <string name="pref_contrast_seekbar_key" translatable="false">pref_contrast_seekbar_key</string>
     <string name="pref_sharpness_seekbar_key" translatable="false">pref_sharpness_seekbar_key</string>
