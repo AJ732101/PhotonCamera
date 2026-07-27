@@ -53,6 +53,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 
 import com.particlesdevs.photoncamera.app.ContextProvider;
@@ -1256,6 +1257,8 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     triggerMediaScanner(imageUri = Uri.fromFile(savedFilePath.toFile()));
                     logD("ImageSaved: " + savedFilePath);
                 }
+                long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
+                Log.i(TAG, "Overall capture time: " + elapsedTime + "ms");
                 cameraFragmentViewModel.updateGalleryThumb(imageUri);
             } else {
                 logE("ImageSavingError");

@@ -164,6 +164,8 @@ public class PhotonCamera extends Application {
     public static String rawVideoPath = "";
     public static Map<String, String> vendorKeysMapType = null;
     public static Map<String, String> vendorKeysMapClass = null;
+    public static long timeStart = 0L;
+    public static long timeStop = 0L;
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {

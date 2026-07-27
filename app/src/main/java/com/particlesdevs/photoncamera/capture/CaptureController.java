@@ -4529,6 +4529,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void captureStillPicture() {
         try {
+            PhotonCamera.timeStart = SystemClock.elapsedRealtime();
             if (null == mCameraDevice) {
                 Log.e(TAG, "CameraDevice is null, cannot start still image capture.");
                 cameraEventsListener.onProcessingError("CameraDevice is null, cannot start still image capture.");
