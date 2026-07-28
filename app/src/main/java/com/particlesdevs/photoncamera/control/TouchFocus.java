@@ -123,28 +123,6 @@ public class TouchFocus {
         triggerAutoFocus(rectaf);
     }
 
-    public boolean isSingleShotJpegOrHeic() {
-        if ((PhotonCamera.getSettings().frameCount == 1) &&
-           ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-            (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
-            (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
-            (PhotonCamera.getSettings().rawSaver != 2) &&
-            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
-           return true;
-        }
-        return false;
-    }
-
     private void triggerAutoFocus(MeteringRectangle[] rectaf) {
         if(CaptureController.burst) return;
         CaptureRequest.Builder builder = captureController.mPreviewRequestBuilder;
@@ -154,7 +132,7 @@ public class TouchFocus {
         }
         builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
         //builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-        if (isSingleShotJpegOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
+        if (PhotonCamera.isSingleShotJpegOrHeic() && PhotonCamera.getSettings().useSceneAndEffectMode) {
             if (!captureController.getParamController().isManualMode()) {
                 builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
                 switch (PhotonCamera.getSettings().selectedMode) {

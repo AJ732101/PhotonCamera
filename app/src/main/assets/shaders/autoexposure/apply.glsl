@@ -3,6 +3,7 @@ precision highp sampler2D;
 uniform sampler2D InputBuffer;
 uniform float mpy;
 uniform float whiteMax;
+uniform float applyGammaMix;
 out vec4 Output;
 vec3 reinhard_extended(vec3 v, float max_white){
     vec3 numerator = v * (vec3(1.0f) + (v / vec3(max_white * max_white)));
@@ -47,5 +48,6 @@ void main() {
     ivec2 xy = ivec2(gl_FragCoord.xy);
     vec4 inp = texelFetch(InputBuffer, xy, 0);
     //Output.rgb = reinhard_extended(inp.rgb * mpy, mpy);
-    Output.rgb = tonemap(inp.rgb, mpy);
+    Output.rgb = tonemap(mix(inp.rgb,sqrt(inp.rgb), applyGammaMix), mpy);
+    Output.rgb = mix(Output.rgb,Output.rgb * Output.rgb, applyGammaMix);
 }

@@ -159,6 +159,6 @@ void main() {
         alignedSum = vec4(0.0);
     }*/
     vec4 an = max(abs(alignedSum) - noise, vec4(0.0));
-    alignedSum *= (((noise*noise*4.0)/(noise*noise*4.0 + an*an)));
+    //alignedSum *= (((noise*noise*4.0)/(noise*noise*4.0 + an*an)));
     imageStore(outTexture, xy, clamp(alignedSum, vec4(-1.0), vec4(1.0)));
 }

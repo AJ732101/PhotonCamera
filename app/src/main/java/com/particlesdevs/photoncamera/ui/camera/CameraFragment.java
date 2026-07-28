@@ -47,6 +47,7 @@ import android.hardware.camera2.params.MeteringRectangle;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -1157,6 +1158,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
 
         @Override
         public void onProcessingFinished(Object obj) {
+            logCaptureTime();
             logD("onProcessingFinished: " + obj);
             activity.runOnUiThread(() -> {
                 mCameraUIView.setProcessingProgressBarIndeterminate(false);
@@ -1249,6 +1251,52 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
             }
         }
 
+        private void logCaptureTime() {
+            long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
+            Log.i(TAG, "Overall capture time: " + elapsedTime + "ms");
+
+            String selectedFormat = "JPEG";
+            switch (PhotonCamera.getSettings().previewFormat) {
+                case PhotonCamera.userFormatAvifSw:
+                    selectedFormat = "AVIF";
+                    break;
+                case PhotonCamera.userFormatWebpLosslessSw:
+                case PhotonCamera.userFormatWebpLossySw:
+                    selectedFormat = "WebP";
+                    break;
+                case PhotonCamera.userFormatHeifSw:
+                    selectedFormat = "HEIC_SW";
+                    break;
+                case PhotonCamera.userFormatPngSw:
+                    selectedFormat = "PNG";
+                    break;
+                case PhotonCamera.userFormatJpegLutSw:
+                    selectedFormat = "JPEG_SW";
+                    break;
+                case ImageFormat.HEIC:
+                    selectedFormat = "HEIC";
+                    break;
+                case ImageFormat.YUV_420_888:
+                    selectedFormat = "Codec8";
+                    break;
+                case ImageFormat.YCBCR_P010:
+                    selectedFormat = "Codec10";
+                    break;
+            }
+
+            if (PhotonCamera.getSettings().rawSaver == 2) {
+                selectedFormat = "DNG";
+            }
+            if ((PhotonCamera.getSettings().rawSaver == 1) && !PhotonCamera.isSingleShotJpegOrHeic()) {
+                selectedFormat = "JPEG+DNG";
+            }
+
+            PhotonCamera.captureTimesRingBuffer.addLast(elapsedTime + "ms - " + PhotonCamera.getSettings().selectedMode + " - FrameCount=" + PhotonCamera.getSettings().frameCount + " - " + selectedFormat);
+            while (PhotonCamera.captureTimesRingBuffer.size() > 20) {
+                String old = PhotonCamera.captureTimesRingBuffer.pollFirst();
+            }
+        }
+
         @Override
         public void notifyImageSavedStatus(boolean saved, Path savedFilePath) {
             if (saved) {
@@ -1257,8 +1305,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     triggerMediaScanner(imageUri = Uri.fromFile(savedFilePath.toFile()));
                     logD("ImageSaved: " + savedFilePath);
                 }
-                long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
-                Log.i(TAG, "Overall capture time: " + elapsedTime + "ms");
+                //logCaptureTime();
                 cameraFragmentViewModel.updateGalleryThumb(imageUri);
             } else {
                 logE("ImageSavingError");

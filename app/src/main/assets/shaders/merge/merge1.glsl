@@ -46,7 +46,7 @@ float bayerCoord(ivec2 pos){
 #import gaussian
 void main() {
     ivec2 xy = ivec2(gl_GlobalInvocationID.xy);
-    vec2 uv = vec2(xy) * size;// + vec2(0.5) * size;
+    vec2 uv = vec2(xy) * size + vec2(0.5) * size;
     vec4 base = texture(baseTexture, uv);
 
     vec4 br = texture(brTexture, uv);
@@ -67,13 +67,13 @@ void main() {
     }
     mean /= 9.0;*/
     vec4 variance = vec4(0.0);
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
             vec4 diff = imageLoad(diffTexture, xy+ivec2(i, j));
             variance += ((diff-mean)*(diff-mean));
         }
     }
-    variance /= 8.0;
+    variance /= 24.0;
     /*for (int i = -1; i <= 1; i++) {
         float f0 = pdf(float(i)/SIGMA);
         for (int j = -1; j <= 1; j++) {
@@ -101,7 +101,7 @@ void main() {
     //w = (vec4(1.0) - w);
     if(first){
         //base = vec4(0.0);
-        base *= (w);
+        //base *= (w);
     }
     //w = vec4(1.0);
     //w = robustWeight(w);
@@ -118,5 +118,6 @@ void main() {
 
     //imageStore(outTexture, xy, clamp(base + diffCenter*robustWeight(w), -noise, noise));
     imageStore(outTexture, xy, base + diffCenter*(w));
+    //imageStore(outTexture, xy, clamp(base + diffCenter, -1.0, 1.0));
     //imageStore(outTexture, xy, base + diffCenter);
 }

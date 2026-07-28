@@ -19,6 +19,7 @@ uniform float whiteLevel;
 uniform vec4 blackLevel;
 uniform vec4 analogBalance;
 uniform int cfaPattern;
+#import median
 uint getBayer(ivec2 coords, highp usampler2D tex){
     return texelFetch(tex,coords,0).r;
 }
@@ -39,6 +40,25 @@ void main() {
     vec4 noise = sqrt(max(base * noiseS + noiseO,EPS));
     vec4 diff = imageLoad(diffTexture, xy);
     vec4 bayer = getBayerVec(xy*2, inTex);
+    vec4 mean = vec4(0.0);
+    vec4 medians[9];
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            vec4 diff = getBayerVec((xy+ivec2(i, j))*2, inTex);
+            //mean += diff;
+            medians[(i+1)*3+(j+1)] = diff;
+        }
+    }
+    //mean /= 9.0;
+    mean = median9(medians);
+    vec4 variance = vec4(0.0);
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            vec4 diff = getBayerVec((xy+ivec2(i, j))*2, inTex);
+            variance = max(((diff-mean)*(diff-mean)), variance);
+        }
+    }
+    //variance /= 8.0;
     /*if(length(diff) > 0.1){
         diff = vec4(0.0);
     }*/
@@ -62,10 +82,12 @@ void main() {
     //    diffOrigin = vec4(0.0);
     //}
     //diff = diffOrigin * (diff.x / (dot(diffOrigin, vec4(0.25)) + EPS));
-    diff = clamp(diff, min(diffOrigin, vec4(0.0)), max(diffOrigin, vec4(0.0)));
+    //diff = clamp(diff, min(diffOrigin, vec4(0.0)), max(diffOrigin, vec4(0.0)));
     //diff *= ((((noise*noise)/(noise*noise + diff*diff))));
-    diff = diffOrigin / (length(diffOrigin) + EPS) * length(diff);
-    diff *= ((((noise*noise)/(noise*noise + diff*diff))));
+    float lDiff = clamp(length(diff), EPS, sqrt(length(variance)*1.4826 + EPS));
+    //float lDiff = length(diff);
+    diff = diffOrigin / (length(diffOrigin) + EPS) * lDiff;
+    //diff *= ((((noise*noise)/(noise*noise + diff*diff))));
     imageStore(outTexture, xy, mix(base, diff/analogBalance+bayer, weight));
     //imageStore(outTexture, xy, diff);
 }

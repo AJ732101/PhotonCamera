@@ -793,6 +793,21 @@ public class SettingsActivity extends BaseActivity implements
             videoCategory.addPreference(createCompactCheckBox("   HLG", PhotonCamera.mHlgIsSupported, true));
             videoCategory.addPreference(createCompactCheckBox("   HDR10", PhotonCamera.mHdrTenIsSupported, true));
             videoCategory.addPreference(createCompactCheckBox("   HDR10+", PhotonCamera.mHdrTenPlusIsSupported, true));
+
+            PreferenceCategory captureTimesCategory = new PreferenceCategory(getContext());
+            captureTimesCategory.setTitle("Last Capture Times");
+            getPreferenceScreen().addPreference(captureTimesCategory);
+
+            synchronized (PhotonCamera.captureTimesRingBuffer) {
+                for (String time : PhotonCamera.captureTimesRingBuffer) {
+                    captureTimesCategory.addPreference(createCompactText(time));
+                }
+            }
+
+            Preference spacer = new Preference(getContext());
+            spacer.setSelectable(false);
+            spacer.setTitle("\n\n\n");
+            getPreferenceScreen().addPreference(spacer);
         }
 
         private CheckBoxPreference createCompactCheckBox(String title, boolean checked, boolean indent) {

@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import com.particlesdevs.photoncamera.util.SimpleStorageHelper;
 
@@ -105,6 +107,28 @@ public class Gyro {
     private double averageStamp = 0;
     private int stampIterations = 0;
 
+    // ---- Rotation vector-based orientation with moving average ----
+    private static final int MOVING_AVERAGE_SIZE = 10;
+    private final Sensor mRotationVectorSensor;
+    private final float[] mRotationVector = new float[5]; // Use 5 for compatibility
+    private final Queue<Float> mYawHistory = new LinkedList<>();
+    private final Queue<Float> mPitchHistory = new LinkedList<>();
+    private final Queue<Float> mRollHistory = new LinkedList<>();
+    private float mYawSum = 0f;
+    private float mPitchSum = 0f;
+    private float mRollSum = 0f;
+
+    private final SensorEventListener mRotationVectorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                System.arraycopy(event.values, 0, mRotationVector, 0, event.values.length);
+                updateOrientationHistory();
+            }
+        }
+        @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    };
+
     private final SensorEventListener mGravityTracker = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
@@ -157,17 +181,28 @@ public class Gyro {
     public Gyro(SensorManager sensorManager) {
         mSensorManager = sensorManager;
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mRotationVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
     }
 
     public void register() {
         stampIterations = 0;
         mSensorManager.registerListener(mGravityTracker, mGyroSensor, delayUs);
+        if (mRotationVectorSensor != null) {
+            mSensorManager.registerListener(mRotationVectorListener, mRotationVectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+        mYawHistory.clear();
+        mPitchHistory.clear();
+        mRollHistory.clear();
+        mYawSum = 0f;
+        mPitchSum = 0f;
+        mRollSum = 0f;
     }
 
     public void unregister() {
         if (mAngles != null)
             mAngles = mAngles.clone();
         mSensorManager.unregisterListener(mGravityTracker, mGyroSensor);
+        mSensorManager.unregisterListener(mRotationVectorListener, mRotationVectorSensor);
     }
 
     long[] capturingTimes;
@@ -175,7 +210,6 @@ public class Gyro {
     boolean integrate = false;
     float x,y,z;
     private ArrayList<GyroBurst> BurstShakiness;
-
     public void PrepareGyroBurst(long[] capturingTimes,ArrayList<GyroBurst> burstShakiness) {
         lock = true;
         capturingNumber = 0;
@@ -199,6 +233,7 @@ public class Gyro {
         lock = false;
     }
 
+
     public void CaptureGyroBurst() {
         //Save previous
         if(gyroburst){
@@ -212,7 +247,6 @@ public class Gyro {
         gyroburst = true;
         capturingNumber++;
     }
-
     public void CompleteGyroBurst() {
         if(gyroburst) {
             gyroburst = false;
@@ -333,6 +367,68 @@ public class Gyro {
         return (tripodShakiness < 25) && PhotonCamera.getSettings().selectedMode == CameraMode.NIGHT;
     }
 
+    private void updateOrientationHistory() {
+        float[] rotationMatrix = new float[9];
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, mRotationVector);
+
+        float[] remappedRotationMatrix = new float[9];
+        SensorManager.remapCoordinateSystem(rotationMatrix,
+                SensorManager.AXIS_X, SensorManager.AXIS_Z,
+                remappedRotationMatrix);
+
+        float[] orientationAngles = new float[3];
+        SensorManager.getOrientation(remappedRotationMatrix, orientationAngles);
+
+        float currentYaw = (float) Math.toDegrees(orientationAngles[0]);
+        float currentPitch = (float) Math.toDegrees(orientationAngles[1]);
+        float currentRoll = (float) Math.toDegrees(orientationAngles[2]);
+
+        // Update Yaw history
+        mYawHistory.add(currentYaw);
+        mYawSum += currentYaw;
+        if (mYawHistory.size() > MOVING_AVERAGE_SIZE) {
+            mYawSum -= mYawHistory.poll();
+        }
+
+        // Update Pitch history
+        mPitchHistory.add(currentPitch);
+        mPitchSum += currentPitch;
+        if (mPitchHistory.size() > MOVING_AVERAGE_SIZE) {
+            mPitchSum -= mPitchHistory.poll();
+        }
+
+        // Update Roll history
+        mRollHistory.add(currentRoll);
+        mRollSum += currentRoll;
+        if (mRollHistory.size() > MOVING_AVERAGE_SIZE) {
+            mRollSum -= mRollHistory.poll();
+        }
+    }
+
+    /**
+     * @return The damped Yaw angle (azimuth/compass) in DEGREES.
+     */
+    public float getYaw() {
+        if (mYawHistory.isEmpty()) return 0f;
+        return mYawSum / mYawHistory.size();
+    }
+
+    /**
+     * @return The damped Pitch angle (sky/ground tilt) in DEGREES.
+     */
+    public float getPitch() {
+        if (mPitchHistory.isEmpty()) return 0f;
+        return mPitchSum / mPitchHistory.size();
+    }
+
+    /**
+     * @return The damped Roll angle (steering wheel motion) in DEGREES.
+     */
+    public float getRoll() {
+        if (mRollHistory.isEmpty()) return 0f;
+        return mRollSum / mRollHistory.size();
+    }
+
     // -------------------------------------------------------------------------
     // Gyroscore GCSV recording
     // -------------------------------------------------------------------------
@@ -429,7 +525,7 @@ public class Gyro {
 
     /**
      * Opens a {@link PrintWriter} for the GCSV file.
-     * Primary: SAF-backed OutputStream via {@link SimpleStorageHelper} � required on
+     * Primary: SAF-backed OutputStream via {@link SimpleStorageHelper} — required on
      * Android 11+ to bypass FUSE MediaProvider write restrictions in DCIM directories.
      * Fallback: {@link Files#newOutputStream} for app-specific or test paths.
      */
@@ -478,14 +574,14 @@ public class Gyro {
             p.println("timestamp," + (wallTimeMs / 1000L));
             p.println("vendor,PhotonCamera");
             p.println("videofilename," + outPath.getParent().getFileName());
-            // tscale: timestamps are stored as nanoseconds ? seconds = � 1e-9
+            // tscale: timestamps are stored as nanoseconds → seconds = × 1e-9
             p.println("tscale,1.0e-9");
-            // gscale: Android TYPE_GYROSCOPE already in rad/s ? 1.0
+            // gscale: Android TYPE_GYROSCOPE already in rad/s → 1.0
             p.println("gscale,1.0");
-            // ascale: Android TYPE_ACCELEROMETER in m/s�; Gyroflow expects g
+            // ascale: Android TYPE_ACCELEROMETER in m/s²; Gyroflow expects g
             p.printf("ascale,%.10f%n", 1.0 / 9.80665);
             if (hasMag) {
-                // mscale: Android TYPE_MAGNETIC_FIELD in �T; 1 gauss = 100 �T
+                // mscale: Android TYPE_MAGNETIC_FIELD in µT; 1 gauss = 100 µT
                 p.println("mscale,0.01");
                 p.println("t,gx,gy,gz,ax,ay,az,mx,my,mz");
             } else {
@@ -513,7 +609,7 @@ public class Gyro {
             if (p.checkError()) {
                 Log.e(TAG, "GCSV write error (disk full or SAF fault): " + outPath);
             } else {
-                Log.d(TAG, "GCSV written: " + count + " samples ? " + outPath);
+                Log.d(TAG, "GCSV written: " + count + " samples → " + outPath);
             }
         }
     }

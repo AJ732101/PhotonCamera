@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.ImageFormat;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.location.Location;
+import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +24,7 @@ import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.HandlerCompat;
 
+import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.api.Settings;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.control.Gravity;
@@ -44,6 +47,7 @@ import com.particlesdevs.photoncamera.util.SimpleStorageHelper;
 import com.particlesdevs.photoncamera.util.ObjectLoader;
 import com.particlesdevs.photoncamera.util.log.ActivityLifecycleMonitor;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -154,18 +158,18 @@ public class PhotonCamera extends Application {
     public static boolean isQucommSensorModeOn = false;
     public static SensorManager mSensorManager = null;
     public static Location gpsLocation = null;
-    public static long userFormatAvifSw = 999999999;
-    public static long userFormatHeifSw = 999999991;
-    public static long userFormatJpegLutSw = 999999992;
-    public static long userFormatYuvRaw = 888888888;
-    public static long userFormatPngSw = 999999993;
-    public static long userFormatWebpLossySw = 777777777;
-    public static long userFormatWebpLosslessSw = 666666666;
+    public static final int userFormatAvifSw = 999999999;
+    public static final int userFormatHeifSw = 999999991;
+    public static final int userFormatJpegLutSw = 999999992;
+    public static final int userFormatYuvRaw = 888888888;
+    public static final int userFormatPngSw = 999999993;
+    public static final int userFormatWebpLossySw = 777777777;
+    public static final int userFormatWebpLosslessSw = 666666666;
     public static String rawVideoPath = "";
     public static Map<String, String> vendorKeysMapType = null;
     public static Map<String, String> vendorKeysMapClass = null;
     public static long timeStart = 0L;
-    public static long timeStop = 0L;
+    public static final ArrayDeque<String> captureTimesRingBuffer = new ArrayDeque<>();
 
     @Nullable
     public static PhotonCamera getInstance(Context context) {
@@ -394,6 +398,28 @@ public class PhotonCamera extends Application {
         activityManager.getMemoryInfo(memoryInfo);
         return memoryInfo;
     }*/
+
+    public static boolean isSingleShotJpegOrHeic() {
+        if ((PhotonCamera.getSettings().frameCount == 1) &&
+                ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
+                (PhotonCamera.getSettings().rawSaver != 2) &&
+                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void onTerminate() {

@@ -3,6 +3,8 @@ precision highp int;
 precision highp float;
 uniform sampler2D inTexture;
 uniform vec4 exposure;
+uniform float input1;
+uniform float input2;
 #define COL_R 1
 #define COL_G 1
 #define COL_B 1
@@ -39,7 +41,7 @@ shared uint localAlpha[HISTSIZE];
 #endif
 
 #define CUSTOM_PROGRAM //
-
+#import median
 #define LAYOUT //
 LAYOUT
 

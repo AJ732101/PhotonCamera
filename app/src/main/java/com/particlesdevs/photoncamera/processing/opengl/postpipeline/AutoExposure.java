@@ -29,6 +29,13 @@
     @Tunable(title = "WhitePoint apply level", category = "Auto Exposure", min = 0.0f, max = 1.0f, step = 0.1f, defaultValue = 0.8f, description = "Lower level disables white point, higher level applies full")
     float whiteApply;
 
+    @Tunable(title = "Fill coefficient", category = "Auto Exposure", min = 0.0f, max = 1.0f, step = 0.01f, defaultValue = 0.99f, description = "Lower fill ratio can skip right histogram value peaks for HDR scenarios")
+    float fillCoefficient;
+
+    @Tunable(title = "Apply gamma mix", category = "Auto Exposure", min = 0.0f, max = 1.0f, step = 0.01f, defaultValue = 0.1f, description = "Blend between AE color space sRGB-linear")
+    float applyGammaMix;
+
+
     public AutoExposure() {
         super("", "AutoExposure");
     }
@@ -61,7 +68,11 @@
         }
         float sum = 0.0f;
         int cnt = 0;
-        for (int i = 0; i < histSize; i++) {
+        for (int i = 0; i < histSize-1; i++) {
+            if(cnt > (histNormR + histNormG + histNormB) * fillCoefficient) {
+                Log.d(Name, "Histogram already full, coefficient:" + fillCoefficient);
+                break;
+            }
             sum += result[0][i] * i + result[1][i] * i + result[2][i] * i;
             cnt += result[0][i] + result[1][i] + result[2][i];
         }
@@ -138,6 +149,7 @@
         else {
             glProg.setVar("whiteMax", mpy);
         }
+        glProg.setVar("applyGammaMix", applyGammaMix);
         WorkingTexture = basePipeline.getMain();
         glProg.drawBlocks(WorkingTexture);
         glProg.closed = true;

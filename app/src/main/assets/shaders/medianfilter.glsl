@@ -44,4 +44,15 @@ void main() {
     v[4] = (v[0]+v[1]+v[2]+v[3])/4.0;
     Output = median5(v);
     #endif
+    #if SIZE == 5
+    vec3 v[5];
+    //vec4 c = vec4(texelFetch(InputBuffer, xy, 0));
+    // Add the pixels which make up our window to the pixel array.
+    v[0] = vec3(texelFetch(InputBuffer, xy + ivec2(-1,0)*ivec2(TRANSPOSE), 0).rgb);
+    v[1] = vec3(texelFetch(InputBuffer, xy + ivec2(0,0)*ivec2(TRANSPOSE), 0).rgb);
+    v[2] = vec3(texelFetch(InputBuffer, xy + ivec2(1,0)*ivec2(TRANSPOSE), 0).rgb);
+    v[3] = vec3(texelFetch(InputBuffer, xy + ivec2(0,-1)*ivec2(TRANSPOSE), 0).rgb);
+    v[4] = vec3(texelFetch(InputBuffer, xy + ivec2(0,1)*ivec2(TRANSPOSE), 0).rgb);
+    Output = median5(v);
+    #endif
 }
