@@ -18,6 +18,7 @@ import android.media.ImageReader;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import com.particlesdevs.photoncamera.api.CameraEventsListener;
 import com.particlesdevs.photoncamera.app.ContextProvider;
@@ -384,6 +385,10 @@ public class ImageSaver {
         if ((PhotonCamera.isSessionTypeOn) && (PhotonCamera.getSettings().sessionType > 0)) {
             imageDescriptionBuilder.append("\n   OpCode: ").append(PhotonCamera.getSettings().sessionType);
         }
+
+        long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
+        imageDescriptionBuilder.append("\n   Processing Time: ").append(elapsedTime).append("ms");
+
 
         if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
             String sensorMode = "";

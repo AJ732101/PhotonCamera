@@ -14,6 +14,8 @@ import android.os.Environment;
 
 import com.particlesdevs.photoncamera.settings.annotations.Tunable;
 import com.particlesdevs.photoncamera.util.Log;
+
+import android.os.SystemClock;
 import android.util.Rational;
 import android.util.SizeF;
 
@@ -620,6 +622,7 @@ public class Parameters {
     @Override
     public String toString() {
         String metaData = "parameters:\n" +
+                "\n Version=" + PhotonCamera.getVersion() +
                 "\n hasGainMap=" + hasGainMap +
                 "\n FrameCount=" + FrameNumberSelector.frameCount +
                 "\n CameraID=" + PhotonCamera.getSettings().mCameraID +
@@ -685,7 +688,9 @@ public class Parameters {
         }
 
         metaData += getTunableSettingsString();
-        metaData += "\n Version=" + PhotonCamera.getVersion();
+
+        long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
+        metaData += "\n Capture Time: " + elapsedTime + "ms";
 
         return metaData;
     }

@@ -14,6 +14,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.os.Build;
+import android.os.SystemClock;
 
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
@@ -319,6 +320,9 @@ public class HdrxProcessor extends ProcessorBase {
         catch (Exception e){
             Log.d(TAG,"Error in processingEventsListener.onProcessingFinished:"+Log.getStackTraceString(e));
         }
+
+        long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
+        exifData.IMAGE_DESCRIPTION += "\n Overall Processing Time: " + elapsedTime + "ms";
 
         if (PhotonCamera.getSettings().useParallelAvif) {
             File avifFile = new File(Paths.get(imageFile.toAbsolutePath() + "avif").toString());
