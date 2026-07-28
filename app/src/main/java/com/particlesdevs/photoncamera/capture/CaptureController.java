@@ -3406,6 +3406,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isProVideoLogMovie = mIsFunctionOneOn;
             restartCamera();
             return;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi Cine Look")) {
+            PhotonCamera.isCineLook = mIsFunctionOneOn;
+            restartCamera();
+            return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Xiaomi HDR")) {
             PhotonCamera.isHdrOn = mIsFunctionOneOn;
             restartCamera();
@@ -3540,6 +3544,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Pro Video Movie")) {
             PhotonCamera.isProVideoLogMovie = mIsFunctionTwoOn;
+            restartCamera();
+            return;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi Cine Look")) {
+            PhotonCamera.isCineLook = mIsFunctionTwoOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionTwo.equals("Xiaomi HDR")) {

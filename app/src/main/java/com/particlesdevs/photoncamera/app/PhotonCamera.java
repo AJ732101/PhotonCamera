@@ -105,6 +105,7 @@ public class PhotonCamera extends Application {
     public static boolean hasXiaomiAiAutoSceneDetection = false;
     public static boolean hasXiaomiProVideoLog = false;
     public static boolean hasXiaomiProVideoMovie = false;
+    public static boolean hasXiaomiCineLook = false;
     public static boolean hasXiaomiReMosaic = false;
     public static boolean hasXiaomiQuadCfa = false;
     public static boolean hasEisLookAhead = false;
@@ -143,6 +144,7 @@ public class PhotonCamera extends Application {
     public static boolean isAiAutoSceneDetectionOn = false;
     public static boolean isProVideoLogOn = false;
     public static boolean isProVideoLogMovie = false;
+    public static boolean isCineLook = false;
     public static boolean isHdrOn = false;
     public static boolean isUltraHdrOn = false;
     public static boolean isSuperResOn = false;

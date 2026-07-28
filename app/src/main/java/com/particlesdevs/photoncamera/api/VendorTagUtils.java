@@ -144,6 +144,7 @@ public class VendorTagUtils {
         PhotonCamera.hasXiaomiAiAutoSceneDetection = false;
         PhotonCamera.hasXiaomiProVideoLog = false;
         PhotonCamera.hasXiaomiProVideoMovie = false;
+        PhotonCamera.hasXiaomiCineLook = false;
         PhotonCamera.hasXiaomiReMosaic = false;
         PhotonCamera.hasXiaomiQuadCfa = false;
         PhotonCamera.hasXiaomiSuperResolution = false;
@@ -350,6 +351,14 @@ public class VendorTagUtils {
                         PhotonCamera.hasXiaomiProVideoMovie = true;
                         if (PhotonCamera.isProVideoLogMovie) {
                             builder.set(proVideoMovie, (byte) 1);
+                        }
+                    }
+
+                    var cineLook = new CaptureRequest.Key<>("xiaomi.video.cinelook.enabled", byte.class);
+                    if (isSupported(builder, cineLook)) {
+                        PhotonCamera.hasXiaomiCineLook = true;
+                        if (PhotonCamera.isCineLook) {
+                            builder.set(cineLook, (byte) 1);
                         }
                     }
 

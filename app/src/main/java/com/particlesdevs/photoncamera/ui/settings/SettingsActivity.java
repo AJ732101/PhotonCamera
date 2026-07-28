@@ -262,6 +262,12 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunctionTwo.add("Xiaomi Pro Video Movie");
                 entryValuesFunctionTwo.add("Xiaomi Pro Video Movie");
             }
+            if (PhotonCamera.hasXiaomiCineLook) {
+                entriesFunctionOne.add("Xiaomi Cine Look");
+                entryValuesFunctionOne.add("Xiaomi Cine Look");
+                entriesFunctionTwo.add("Xiaomi Cine Look");
+                entryValuesFunctionTwo.add("Xiaomi Cine Look");
+            }
             if (PhotonCamera.hasXiaomiReMosaic) {
                 entriesFunctionOne.add("Xiaomi Re-Mosaic");
                 entryValuesFunctionOne.add("Xiaomi Re-Mosaic");

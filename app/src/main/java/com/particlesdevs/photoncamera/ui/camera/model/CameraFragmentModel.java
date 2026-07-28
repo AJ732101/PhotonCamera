@@ -548,6 +548,10 @@ public class CameraFragmentModel extends BaseObservable {
             entriesFunction.add("Xiaomi Pro Video Movie");
             entryValuesFunction.add("Xiaomi Pro Video Movie");
         }
+        if (PhotonCamera.hasXiaomiCineLook) {
+            entriesFunction.add("Xiaomi Cine Look");
+            entryValuesFunction.add("Xiaomi Cine Look");
+        }
         if (PhotonCamera.hasXiaomiReMosaic) {
             entriesFunction.add("Xiaomi Re-Mosaic");
             entryValuesFunction.add("Xiaomi Re-Mosaic");
@@ -662,6 +666,10 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.hasXiaomiProVideoMovie) {
             entriesFunction.add("Xiaomi Pro Video Movie");
             entryValuesFunction.add("Xiaomi Pro Video Movie");
+        }
+        if (PhotonCamera.hasXiaomiCineLook) {
+            entriesFunction.add("Xiaomi Cine Look");
+            entryValuesFunction.add("Xiaomi Cine Look");
         }
         if (PhotonCamera.hasXiaomiReMosaic) {
             entriesFunction.add("Xiaomi Re-Mosaic");
