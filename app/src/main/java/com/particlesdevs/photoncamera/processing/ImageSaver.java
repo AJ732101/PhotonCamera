@@ -42,6 +42,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -635,8 +637,10 @@ public class ImageSaver {
                                             CameraCharacteristics characteristics,
                                             CaptureResult captureResult,
                                             int cameraRotation) {
-            Parameters parameters = new Parameters();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'PVC_'yyyyMMdd_HHmmss_");
+            String captureResultName = LocalDateTime.now().format(formatter);
 
+            Parameters parameters = new Parameters();
             parameters.FillConstParameters(characteristics, new Point(image.width, image.height));
             int iso = captureResult.get(CaptureResult.SENSOR_SENSITIVITY);
             parameters.FillDynamicParameters(captureResult, null, iso);
@@ -666,7 +670,7 @@ public class ImageSaver {
                         }
                         sb.append("\n");
                     }
-                    Path resultPath = FileManager.sPHOTON_RAW_DIR.toPath().resolve("CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
+                    Path resultPath = FileManager.sPHOTON_RAW_DIR.toPath().resolve(captureResultName + "CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
                     Files.write(resultPath, sb.toString().getBytes());
                     Log.d(TAG, "Saved CaptureResult to: " + resultPath);
                 } catch (IOException e) {

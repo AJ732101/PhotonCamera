@@ -150,6 +150,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -4335,7 +4337,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 }
                                 sb.append("\n");
                             }
-                            Path resultPath = FileManager.sDCIM_CAMERA.toPath().resolve("CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'PVC_'yyyyMMdd_HHmmss_");
+                            String captureResultName = LocalDateTime.now().format(formatter);
+                            Path resultPath = FileManager.sDCIM_CAMERA.toPath().resolve(captureResultName + "CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
                             Files.write(resultPath, sb.toString().getBytes());
                             Log.d(TAG, "Saved CaptureResult to: " + resultPath);
                         } catch (IOException e) {
