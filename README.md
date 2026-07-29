@@ -5,7 +5,11 @@ Android Camera with focus on video recording and unprocessed single shot still i
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 ## Links
 
-[![Telegram - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonCameraEN)
+Latest Build [![Telegram PhotonVidCam - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonVidCam)
+
+Group Chat PhotonVidCam [![Telegram Photon Camera - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonVidCamAndDngMaster)
+
+Group Chat Photon Camera [![Telegram Photon Camera - ENG](https://img.shields.io/badge/Telegram-ENG-blue)](https://t.me/PhotonCameraEN)
 
 ## Screenshots
 
