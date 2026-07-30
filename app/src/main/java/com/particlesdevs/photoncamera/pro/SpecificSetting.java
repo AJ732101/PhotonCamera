@@ -57,6 +57,9 @@ public class SpecificSetting {
     public float ultraHdrThreshold = 0.85f;
     public float ultraHdrMaxBoost = 2.0f;
     public float ultraHdrGamma = 1.5f;
+    public float ltmDarkBoostStrength = 0.0f;
+    public float ltmBrightSupressStrength = 0.0f;
+    public float ltmDynamicContrastStrength = 0.0f;
     public SpecificSetting(){
     }
 }

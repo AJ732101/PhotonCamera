@@ -300,6 +300,18 @@ public class Specific {
                     specificSetting.ultraHdrGamma = Float.parseFloat(caseS[1]);
                     break;
                 }
+                case "ltmDarkBoostStrength": {
+                    specificSetting.ltmDarkBoostStrength = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "ltmBrightSupressStrength": {
+                    specificSetting.ltmBrightSupressStrength = Float.parseFloat(caseS[1]);
+                    break;
+                }
+                case "ltmDynamicContrastStrength": {
+                    specificSetting.ltmDynamicContrastStrength = Float.parseFloat(caseS[1]);
+                    break;
+                }
             }
         }
 

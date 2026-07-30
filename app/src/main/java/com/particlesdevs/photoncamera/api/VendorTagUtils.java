@@ -586,29 +586,35 @@ public class VendorTagUtils {
                 }
 
                 // Qualcomm LTM - local tone mapping deactivation
-                if (!PhotonCamera.getSettings().socQualcommLtmOff) {
-                    var ltmDarkBoostStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmDarkBoostStrength", Float.class);
-                    if (isSupported(builder, ltmDarkBoostStrength)) {
-                        PhotonCamera.hasLtmKey = true;
-                        builder.set(ltmDarkBoostStrength, (float) -100.0f);
+                var ltmDarkBoostStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmDarkBoostStrength", Float.class);
+                if (isSupported(builder, ltmDarkBoostStrength)) {
+                    PhotonCamera.hasLtmKey = true;
+                    if (!PhotonCamera.getSettings().socQualcommLtmOff) {
+                        builder.set(ltmDarkBoostStrength, PhotonCamera.getSpecific().specificSetting.ltmDarkBoostStrength);
                     }
+                }
 
-                    var ltmBrightBoostStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmBrightBoostStrength", Float.class);
-                    if (isSupported(builder, ltmBrightBoostStrength)) {
-                        PhotonCamera.hasLtmKey = true;
-                        builder.set(ltmBrightBoostStrength, (float) -100.0f);
+                var ltmBrightSupressStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmBrightSupressStrength", Float.class);
+                if (isSupported(builder, ltmBrightSupressStrength)) {
+                    PhotonCamera.hasLtmKey = true;
+                    if (!PhotonCamera.getSettings().socQualcommLtmOff) {
+                        builder.set(ltmBrightSupressStrength, PhotonCamera.getSpecific().specificSetting.ltmBrightSupressStrength);
                     }
+                }
 
-                    var ltmContrastStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmContrastStrength", Float.class);
-                    if (isSupported(builder, ltmContrastStrength)) {
-                        PhotonCamera.hasLtmKey = true;
-                        builder.set(ltmContrastStrength, (float) -100.0f);
+                var ltmDynamicContrastStrength = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmDynamicContrastStrength", Float.class);
+                if (isSupported(builder, ltmDynamicContrastStrength)) {
+                    PhotonCamera.hasLtmKey = true;
+                    if (!PhotonCamera.getSettings().socQualcommLtmOff) {
+                        builder.set(ltmDynamicContrastStrength, PhotonCamera.getSpecific().specificSetting.ltmDynamicContrastStrength);
                     }
+                }
 
-                    var ltmGamma = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmGamma", Float.class);
-                    if (isSupported(builder, ltmGamma)) {
-                        PhotonCamera.hasLtmKey = true;
-                        builder.set(ltmGamma, (float) 1.0f);
+                var ltmGamma = new CaptureRequest.Key<>("org.quic.camera.ltmDynamicContrast.ltmGamma", Float.class);
+                if (isSupported(builder, ltmGamma)) {
+                    PhotonCamera.hasLtmKey = true;
+                    if (!PhotonCamera.getSettings().socQualcommLtmOff) {
+                        builder.set(ltmGamma, 1.0f);
                     }
                 }
 
@@ -756,13 +762,14 @@ public class VendorTagUtils {
                     }
                 }
 
-                /*CaptureRequest.Key perfKey = new CaptureRequest.Key<>("com.qti.chi.enableadrcpath.enableADRCPath", Integer.class);
+                CaptureRequest.Key perfKey = new CaptureRequest.Key<>("com.qti.chi.enableadrcpath.enableADRCPath", Integer.class);
                 if (isSupported(builder, perfKey)) {
-                    PhotonCamera.hasQucommAdrcOff = true;
-                    builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 0: (byte) 1);
-                }*/
+                    //PhotonCamera.hasQucommAdrcOff = true;
+                    //builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? 0: 1);
+                    //builder.set(perfKey, 0);
+                }
 
-                CaptureRequest.Key perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
+                perfKey = new CaptureRequest.Key<>("org.codeaurora.qcamera3.adrc.disable", byte.class);
                 if (isSupported(builder, perfKey)) {
                     PhotonCamera.hasQucommAdrcOff = true;
                     builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 1: (byte) 0);
@@ -773,7 +780,6 @@ public class VendorTagUtils {
                         builder.set(perfKey, PhotonCamera.isQucommAdrcOff ? (byte) 1: (byte) 0);
                     }
                 }
-                //builder.set(perfKey, (byte) 1);
 
                 perfKey = new CaptureRequest.Key<>("org.quic.camera.pipelineControl.isDisableSinkNoBuffer", byte.class);
                 if (isSupported(builder, perfKey)) {
