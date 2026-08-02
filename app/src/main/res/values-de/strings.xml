@@ -6,6 +6,7 @@
     <string name="frame_count">Bilder für Synthese/Stacking </string>
     <string name="frame_count_summary">Anzahl der Bilder für die Synthese (Stacking)</string>
     <string name="contrast_curve_exposure_compensation">Belichtungskorrektur für Kontrastkurven</string>
+    <string name="color_tint">Farbton</string>
     <string name="single_frame_quality">Foto Qualität</string>
     <string name="bitrate">Bitrate [MBit/s]</string>
     <string name="audio_bitrate">Bitrate [kBit/s]</string>
@@ -71,6 +72,7 @@
     <string name="raw_format">RAW Format</string>
     <string name="function_button_one">Funktionsknopf 1</string>
     <string name="dng_white_level">Weißwert für DNG</string>
+    <string name="custom_resolution">Eigene Auflösung</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
     <string name="about">Über</string>
@@ -133,6 +135,7 @@
     <string name="long_press_to_deselect">Lang gedrückt halten um Auswahl aufzuheben</string>
     <string name="golden_ratio">Goldener Schnitt</string>
     <string name="diag_triangle">Diagon. Dreiecke</string>
+    <string name="early_vendor_keys_loading">Frühes Laden von Vendor Keys</string>
     <string name="thumbnail">Eingebettete Vorschau</string>
     <string name="use_p3">P3 (statt sRGB)</string>
     <string name="tonemapping_mode_quality">Qualität Tonemapping</string>
@@ -154,6 +157,7 @@
     <string name="gps_location">GPS Standort</string>
     <string name="disable_all_vendor">ALLE Hersteller Schlüssel deaktivieren</string>
     <string name="disable_nogui_yet">Deaktiviere NoGuiYet.txt Einstellungen</string>
+    <string name="write_capture_result">Capture Results Aufzeichnen</string>
     <string name="codec">Codec</string>
     <string name="video_codec">Video Codec</string>
     <string name="video_resolution">Auflösung</string>
@@ -215,6 +219,7 @@
     <string name="sensor_settings_screen_title">Sensor Einstellungen</string>
     <string name="other_settings_separator_title">Weitere Einstellungen</string>
     <string name="soc_qualcomm_auto_hdr">Qualcomm Auto HDR</string>
+    <string name="soc_qualcomm_ltm_off">LTM Aus</string>
     <string name="soc_qualcomm_manual_wb">Qualcomm Frabtemperatur</string>
     <string name="hot_pixel_mode">Hot Pixel Modus</string>
     <string name="color_correction_aberration_mode">Chromatische Aberrationskorrektur Methode</string>
@@ -248,6 +253,7 @@
     <string name="function_button_two">Funktionsknopf 2</string>
     <string name="session_type_opcode">Sitzungstyp (OpCode)</string>
     <string name="session_type_opcode_video">Sitzungstyp Video (OpCode)</string>
+    <string name="sensor_mode_vendorkey">Vendor Key für Sensor Modus</string>
     <string name="dng_black_level">Schwarzwert für DNG</string>
     <string name="rawvideo_downscale_4x">Halbe Auflösung</string>
     <string name="rawvideo_write_zip">In ZIP Schreiben</string>
@@ -267,4 +273,6 @@
     <string name="parallel_avif">AVIF Parallel Speichern</string>
     <string name="use_16bit">16 Bit verwenden</string>
     <string name="image_reader_flags">Alternative ImageReader Flags</string>
+    <string name="color_temperature">Farbtemperatur</string>
+    <string name="sensor_mode">Sensor Modus</string>
 </resources>

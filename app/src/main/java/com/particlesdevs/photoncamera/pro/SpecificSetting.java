@@ -34,8 +34,6 @@ public class SpecificSetting {
     public int qtiDCGMode = 0;
     public int qtiImageStabilizationMode = 0;
     public int xiaomiHdrMode = 1;
-    public String[] sensorModes;
-    public String sensorModeKey = "vivo.control.forceSensorMode";
     public int vivoVideoMode = -1;
     public int vivoEisConfig = -1;
     public int vivoEisEnhance = -1;
@@ -43,7 +41,6 @@ public class SpecificSetting {
     public int targetFps = -1;
     public String recPrefix = "";
     public String newRecSurfaceType = "COLOR_FormatSurface";
-    public String customRawRes = "";
     public String hdrMode = "HLG10";
     public String[] customVendorKeyTypeByteName;
     public String[] customVendorKeyTypeInt32Name;

@@ -69,8 +69,11 @@
     <string name="pref_function_two_key" translatable="false">pref_function_two_key</string>
     <string name="pref_session_type_key" translatable="false">pref_session_type_key</string>
     <string name="pref_session_type_video_key" translatable="false">pref_session_type_video_key</string>
+    <string name="pref_sensor_mode_key" translatable="false">pref_sensor_mode_key</string>
+    <string name="pref_sensor_mode_vendorkey_key" translatable="false">pref_sensor_mode_vendorkey_key</string>
     <string name="pref_dng_black_level_key" translatable="false">pref_dng_black_level_key</string>
     <string name="pref_dng_white_level_key" translatable="false">pref_dng_white_level_key</string>
+    <string name="pref_custom_resolution_key" translatable="false">pref_custom_resolution_key</string>
     <string name="pref_cfa_key" translatable="false">pref_cfa_key</string>
     <string name="pref_remosaic_key" translatable="false">pref_remosaic_key</string>
     <string name="pref_telegram_channel_key" translatable="false">pref_telegram_channel_key</string>

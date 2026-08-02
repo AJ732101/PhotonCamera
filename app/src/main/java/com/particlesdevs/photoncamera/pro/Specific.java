@@ -199,10 +199,6 @@ public class Specific {
                     specificSetting.newRecSurfaceType = caseS[1];
                     break;
                 }
-                case "customRawRes": {
-                    specificSetting.customRawRes = caseS[1];
-                    break;
-                }
                 case "hdrMode": {
                     specificSetting.hdrMode = caseS[1];
                     break;
@@ -273,19 +269,6 @@ public class Specific {
                     for (int i = 0; i < specificSetting.customVendorKeyTypeFloatValue.length; i++) {
                         specificSetting.customVendorKeyTypeFloatValue[i] = Float.parseFloat(ids[i]);
                     }
-                    break;
-                }
-                case "sensorModes": {
-                    Log.d(TAG, "Sensor Modes Loaded: " + caseS[1]);
-                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                    specificSetting.sensorModes = new String[ids.length];
-                    for (int i = 0; i < specificSetting.sensorModes.length; i++) {
-                        specificSetting.sensorModes[i] = ids[i];
-                    }
-                    break;
-                }
-                case "sensorModeKey": {
-                    specificSetting.sensorModeKey = caseS[1];
                     break;
                 }
                 case "ultraHdrThreshold": {
@@ -405,25 +388,12 @@ public class Specific {
                 case "rawColorCorrection":
                     specificSetting.isRawColorCorrection = Boolean.parseBoolean(caseS[1]);
                     break;
-                case "sensorModeKey": {
-                    specificSetting.sensorModeKey = caseS[1];
-                    break;
-                }
                 case "cameraIDS": {
                     Log.d(TAG, "Camera IDs Loaded: " + caseS[1]);
                     String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
                     specificSetting.cameraIDS = new String[ids.length];
                     for (int i = 0; i < specificSetting.cameraIDS.length; i++) {
                         specificSetting.cameraIDS[i] = ids[i];
-                    }
-                    break;
-                }
-                case "sensorModes": {
-                    Log.d(TAG, "Sensor Modes Loaded: " + caseS[1]);
-                    String[] ids = caseS[1].replace("{", "").replace("}", "").split(",");
-                    specificSetting.sensorModes = new String[ids.length];
-                    for (int i = 0; i < specificSetting.sensorModes.length; i++) {
-                        specificSetting.sensorModes[i] = ids[i];
                     }
                     break;
                 }

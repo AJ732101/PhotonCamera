@@ -115,10 +115,9 @@ public class PhotonCamera extends Application {
     public static boolean hasIdealRaw = false;
     public static boolean hasVivoZeissColor = false;
     public static boolean hasVivoProMode = false;
-    public static boolean hasVivoSensorMode = false;
     public static boolean hasVivoDistortionCorrection = false;
     public static boolean hasQucommAdrcOff = false;
-    public static boolean hasQucommSensorMode = false;
+    public static boolean hasSensorMode = false;
     public static boolean hasAutoHdr = false;
     public static boolean hasSocHdrMode = false;
     public static boolean hasManualWb = false;
@@ -155,9 +154,8 @@ public class PhotonCamera extends Application {
     public static boolean isVivoZeissColorOn = false;
     public static boolean isVivoDistortionCorrectionOn = false;
     public static boolean isVivoProModeOn = false;
-    public static boolean isVivoSensorModeOn = false;
     public static boolean isQucommAdrcOff = false;
-    public static boolean isQucommSensorModeOn = false;
+    public static boolean isSensorModeOn = false;
     public static SensorManager mSensorManager = null;
     public static Location gpsLocation = null;
     public static final int userFormatAvifSw = 999999999;

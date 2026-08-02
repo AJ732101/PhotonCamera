@@ -660,30 +660,9 @@ public class Parameters {
             metaData += "\n OpCode=" + PhotonCamera.getSettings().sessionType;
         }
 
-        if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
-            String sensorMode = "";
-            for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                try {
-                    String camID = "";
-                    if (id.contains("-")) {
-                        camID = id.split("-")[0];
-                        sensorMode = id.split("-")[1];
-                    }
-
-                    if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                        break;
-                    }
-                } catch (Exception ignored) {
-
-                }
-            }
-
-            if (PhotonCamera.isQucommSensorModeOn) {
-                metaData += "\n QcomSensorMode=" + sensorMode;
-            }
-
-            if (PhotonCamera.isVivoSensorModeOn) {
-                metaData += "\n VivoSensorMode=" + sensorMode;
+        if ((PhotonCamera.getSettings().sensorMode != -1) && (!PhotonCamera.getSettings().sensorModeVendorkey.isEmpty())) {
+            if (PhotonCamera.isSensorModeOn) {
+                metaData += "\n SensorMode=" + PhotonCamera.getSettings().sensorMode;
             }
         }
 

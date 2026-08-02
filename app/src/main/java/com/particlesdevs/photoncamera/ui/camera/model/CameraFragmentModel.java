@@ -528,6 +528,32 @@ public class CameraFragmentModel extends BaseObservable {
         List<CharSequence> entriesFunction = new ArrayList<>(Arrays.asList(entries));
         List<CharSequence> entryValuesFunction = new ArrayList<>(Arrays.asList(entryValues));
 
+        if (PhotonCamera.hasIdealRaw) {
+            entriesFunction.add("Ideal RAW");
+            entryValuesFunction.add("Ideal RAW");
+        }
+        if (PhotonCamera.hasEisLookAhead) {
+            entriesFunction.add("EIS Look Ahead");
+            entryValuesFunction.add("EIS Look Ahead");
+        }
+        if (PhotonCamera.hasEisRealtime) {
+            entriesFunction.add("EIS Realtime");
+            entryValuesFunction.add("EIS Realtime");
+        }
+        if (PhotonCamera.hasEisV3) {
+            entriesFunction.add("EIS V3");
+            entryValuesFunction.add("EIS V3");
+        }
+        if (PhotonCamera.hasQucommAdrcOff) {
+            entriesFunction.add("Qualcomm ADRC Off");
+            entryValuesFunction.add("Qualcomm ADRC Off");
+        }
+        if (PhotonCamera.hasSensorMode) {
+            entriesFunction.add("Sensor Mode");
+            entryValuesFunction.add("Sensor Mode");
+        }
+
+        // Xiaomi
         if (PhotonCamera.hasXiaomiNight) {
             entriesFunction.add("Xiaomi Night Mode");
             entryValuesFunction.add("Xiaomi Night Mode");
@@ -572,30 +598,8 @@ public class CameraFragmentModel extends BaseObservable {
             entriesFunction.add("Xiaomi Super Resolution");
             entryValuesFunction.add("Xiaomi Super Resolution");
         }
-        if (PhotonCamera.hasIdealRaw) {
-            entriesFunction.add("Ideal RAW");
-            entryValuesFunction.add("Ideal RAW");
-        }
-        if (PhotonCamera.hasEisLookAhead) {
-            entriesFunction.add("EIS Look Ahead");
-            entryValuesFunction.add("EIS Look Ahead");
-        }
-        if (PhotonCamera.hasEisRealtime) {
-            entriesFunction.add("EIS Realtime");
-            entryValuesFunction.add("EIS Realtime");
-        }
-        if (PhotonCamera.hasEisV3) {
-            entriesFunction.add("EIS V3");
-            entryValuesFunction.add("EIS V3");
-        }
-        if (PhotonCamera.hasQucommAdrcOff) {
-            entriesFunction.add("Qualcomm ADRC Off");
-            entryValuesFunction.add("Qualcomm ADRC Off");
-        }
-        if (PhotonCamera.hasQucommSensorMode) {
-            entriesFunction.add("Qualcomm Sensor Mode");
-            entryValuesFunction.add("Qualcomm Sensor Mode");
-        }
+
+        // Vivo
         if (PhotonCamera.hasVivoZeissColor) {
             entriesFunction.add("Vivo Zeiss Color");
             entryValuesFunction.add("Vivo Zeiss Color");
@@ -603,10 +607,6 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.hasVivoProMode) {
             entriesFunction.add("Vivo Pro Mode");
             entryValuesFunction.add("Vivo Pro Mode");
-        }
-        if (PhotonCamera.hasVivoSensorMode) {
-            entriesFunction.add("Vivo Sensor Mode");
-            entryValuesFunction.add("Vivo Sensor Mode");
         }
         if (PhotonCamera.hasVivoDistortionCorrection) {
             entriesFunction.add("Vivo Distortion Correction");
@@ -647,6 +647,32 @@ public class CameraFragmentModel extends BaseObservable {
         List<CharSequence> entriesFunction = new ArrayList<>(Arrays.asList(entries));
         List<CharSequence> entryValuesFunction = new ArrayList<>(Arrays.asList(entryValues));
 
+        if (PhotonCamera.hasIdealRaw) {
+            entriesFunction.add("Ideal RAW");
+            entryValuesFunction.add("Ideal RAW");
+        }
+        if (PhotonCamera.hasEisLookAhead) {
+            entriesFunction.add("EIS Look Ahead");
+            entryValuesFunction.add("EIS Look Ahead");
+        }
+        if (PhotonCamera.hasEisRealtime) {
+            entriesFunction.add("EIS Realtime");
+            entryValuesFunction.add("EIS Realtime");
+        }
+        if (PhotonCamera.hasEisV3) {
+            entriesFunction.add("EIS V3");
+            entryValuesFunction.add("EIS V3");
+        }
+        if (PhotonCamera.hasQucommAdrcOff) {
+            entriesFunction.add("Qualcomm ADRC Off");
+            entryValuesFunction.add("Qualcomm ADRC Off");
+        }
+        if (PhotonCamera.hasSensorMode) {
+            entriesFunction.add("Sensor Mode");
+            entryValuesFunction.add("Sensor Mode");
+        }
+
+        // Xiaomi
         if (PhotonCamera.hasXiaomiNight) {
             entriesFunction.add("Xiaomi Night Mode");
             entryValuesFunction.add("Xiaomi Night Mode");
@@ -691,30 +717,8 @@ public class CameraFragmentModel extends BaseObservable {
             entriesFunction.add("Xiaomi Super Resolution");
             entryValuesFunction.add("Xiaomi Super Resolution");
         }
-        if (PhotonCamera.hasIdealRaw) {
-            entriesFunction.add("Ideal RAW");
-            entryValuesFunction.add("Ideal RAW");
-        }
-        if (PhotonCamera.hasEisLookAhead) {
-            entriesFunction.add("EIS Look Ahead");
-            entryValuesFunction.add("EIS Look Ahead");
-        }
-        if (PhotonCamera.hasEisRealtime) {
-            entriesFunction.add("EIS Realtime");
-            entryValuesFunction.add("EIS Realtime");
-        }
-        if (PhotonCamera.hasEisV3) {
-            entriesFunction.add("EIS V3");
-            entryValuesFunction.add("EIS V3");
-        }
-        if (PhotonCamera.hasQucommAdrcOff) {
-            entriesFunction.add("Qualcomm ADRC Off");
-            entryValuesFunction.add("Qualcomm ADRC Off");
-        }
-        if (PhotonCamera.hasQucommSensorMode) {
-            entriesFunction.add("Qualcomm Sensor Mode");
-            entryValuesFunction.add("Qualcomm Sensor Mode");
-        }
+
+        // Vivo
         if (PhotonCamera.hasVivoZeissColor) {
             entriesFunction.add("Vivo Zeiss Color");
             entryValuesFunction.add("Vivo Zeiss Color");
@@ -722,10 +726,6 @@ public class CameraFragmentModel extends BaseObservable {
         if (PhotonCamera.hasVivoProMode) {
             entriesFunction.add("Vivo Pro Mode");
             entryValuesFunction.add("Vivo Pro Mode");
-        }
-        if (PhotonCamera.hasVivoSensorMode) {
-            entriesFunction.add("Vivo Sensor Mode");
-            entryValuesFunction.add("Vivo Sensor Mode");
         }
         if (PhotonCamera.hasVivoDistortionCorrection) {
             entriesFunction.add("Vivo Distortion Correction");

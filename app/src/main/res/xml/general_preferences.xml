@@ -97,24 +97,6 @@
             android:defaultValue="0"
             android:icon="@drawable/settings_video_camera_24px"/>
 
-        <EditTextPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_dng_black_level_key"
-            android:title="@string/dng_black_level"
-            app:useSimpleSummaryProvider="true"
-            android:inputType="number"
-            android:defaultValue="-1"
-            android:icon="@drawable/contrast_24px"/>
-
-        <EditTextPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_dng_white_level_key"
-            android:title="@string/dng_white_level"
-            app:useSimpleSummaryProvider="true"
-            android:inputType="number"
-            android:defaultValue="-1"
-            android:icon="@drawable/contrast_24px"/>
-
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_dng_compression_key"
@@ -218,16 +200,6 @@
             android:title="@string/write_capture_result"
             android:summary=""
             android:icon="@drawable/text_ad_24px"/>
-
-        <ListPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_aperture_key"
-            android:title="@string/aperture"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/camera_24px"
-            android:entries="@array/aperture_entries"
-            android:entryValues="@array/aperture_entryValues"
-            android:defaultValue="@string/pref_aperture_default_value" />
 
         <ListPreference
             android:layout="@layout/preference_with_margin"

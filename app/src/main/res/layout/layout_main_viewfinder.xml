@@ -78,6 +78,17 @@
                     app:layout_constraintStart_toStartOf="@+id/texture"
                     app:layout_constraintEnd_toEndOf="@+id/texture" />
 
+            <com.particlesdevs.photoncamera.gallery.views.Histogram
+                    android:id="@+id/histogram_view"
+                    android:layout_width="200dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="@+id/texture"
+                    app:layout_constraintTop_toTopOf="@+id/texture"
+                    tools:visibility="visible" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--Capture Progress circle-->

@@ -31,6 +31,7 @@ public class VendorTagUtils {
     public static CaptureResult.Key<Integer> maxCount = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.max_count", Integer.class);
     public static CaptureResult.Key<Integer> stats_type = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.stats_type",Integer.class);
     public static CaptureResult.Key<int[]> histogramStats = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.stats", int[].class);
+    public static final CaptureResult.Key<byte[]> histogramStatsByte = new CaptureResult.Key<>("org.codeaurora.qcamera3.histogram.stats", byte[].class);
 
     private static final String TAG = "VendorTagUtils";
     public static final HashMap<String, Integer> KEY_ISO_INDEX = new HashMap<String, Integer>();
@@ -150,7 +151,7 @@ public class VendorTagUtils {
         PhotonCamera.hasXiaomiSuperResolution = false;
         PhotonCamera.hasVivoZeissColor = false;
         PhotonCamera.hasVivoProMode = false;
-        PhotonCamera.hasVivoSensorMode = false;
+        PhotonCamera.hasSensorMode = false;
         PhotonCamera.hasVivoDistortionCorrection = false;
         PhotonCamera.hasQucommAdrcOff = false;
         PhotonCamera.hasEisRealtime = false;
@@ -573,6 +574,21 @@ public class VendorTagUtils {
                 var histMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.enable", byte.class);
                 if (isSupported(builder, histMode)) {
                     builder.set(histMode, (byte) 1);
+
+                    var histBuckets = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.buckets", Integer.class);
+                    if (isSupported(builder, histBuckets)) {
+                        //builder.set(histBuckets, 1024);
+                    }
+
+                    var histType = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.stats_type", Integer.class);
+                    if (isSupported(builder, histType)) {
+                        //builder.set(histType, 7);
+                    }
+
+                    var histMaxCount = new CaptureRequest.Key<>("org.codeaurora.qcamera3.histogram.max_count", Integer.class);
+                    if (isSupported(builder, histMaxCount)) {
+                        //builder.set(histMaxCount, 256);
+                    }
                 }
 
                 var gridMode = new CaptureRequest.Key<>("org.codeaurora.qcamera3.bayer_grid.enable", byte.class);
@@ -736,28 +752,12 @@ public class VendorTagUtils {
                     //builder.set(hdrPref, 1);
                 }
 
-                if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
-                    for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                        try {
-                            String camID = "";
-                            String sensorMode = "";
-                            if (id.contains("-")) {
-                                camID = id.split("-")[0];
-                                sensorMode = id.split("-")[1];
-                            }
-
-                            if (PhotonCamera.getSettings().mCameraID.contains(camID)) {
-                                var sensorModeKey = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
-                                if (isSupported(builder, sensorModeKey)) {
-                                    PhotonCamera.hasQucommSensorMode = true;
-                                    if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
-                                        builder.set(sensorModeKey, Integer.valueOf(sensorMode));
-                                    }
-                                }
-                                break;
-                            }
-                        } catch (Exception ignored) {
-
+                if ((PhotonCamera.getSettings().sensorMode != -1) && !PhotonCamera.getSettings().sensorModeVendorkey.isEmpty()) {
+                    var sensorModeKey = new CaptureRequest.Key<>(PhotonCamera.getSettings().sensorModeVendorkey, Integer.class);
+                    if (isSupported(builder, sensorModeKey)) {
+                        PhotonCamera.hasSensorMode = true;
+                        if (PhotonCamera.isSensorModeOn) {
+                            builder.set(sensorModeKey, PhotonCamera.getSettings().sensorMode);
                         }
                     }
                 }
@@ -1058,32 +1058,6 @@ public class VendorTagUtils {
                     var vivoUltraHighRes = new CaptureRequest.Key<>("vivo.control.ultra_highresolution", Integer.class);
                     if (isSupported(builder, vivoUltraHighRes)) {
                         builder.set(vivoUltraHighRes, PhotonCamera.getSpecific().specificSetting.vivoUseUltraHighResolution ? 1: 0);
-                    }
-
-                    if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
-                        for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                            try {
-                                String camID = "";
-                                String sensorMode = "";
-                                if (id.contains("-")) {
-                                    camID = id.split("-")[0];
-                                    sensorMode = id.split("-")[1];
-                                }
-
-                                if (PhotonCamera.getSettings().mCameraID.contains(camID)) {
-                                    var vivoControlForceSensorMode = new CaptureRequest.Key<>(PhotonCamera.getSpecific().specificSetting.sensorModeKey, Integer.class);
-                                    if (isSupported(builder, vivoControlForceSensorMode)) {
-                                        PhotonCamera.hasVivoSensorMode = true;
-                                        if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
-                                            builder.set(vivoControlForceSensorMode, Integer.valueOf(sensorMode));
-                                        }
-                                    }
-                                    break;
-                                }
-                            } catch (Exception ignored) {
-
-                            }
-                        }
                     }
 
                     var vivoAiGcOn = new CaptureRequest.Key<>("vivo.control.aigcOn", byte.class);

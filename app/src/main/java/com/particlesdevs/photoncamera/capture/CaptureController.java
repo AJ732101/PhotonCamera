@@ -1661,10 +1661,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             applyFormatFallback();
             int targetWidth = target.getWidth();
             int targetHeight = target.getHeight();
-            if (customRawResForCamIdCheck(physicalID)) {
-                Size newSize = customRawResForCamId(physicalID);
-                targetWidth = newSize.getWidth();
-                targetHeight = newSize.getHeight();
+            String customRes = PhotonCamera.getSettings().customResolution;
+            if (!customRes.equals("OFF") && customRes.contains("x")) {
+                String[] parts = customRes.split("x");
+                targetWidth = Integer.parseInt(parts[0].trim());
+                targetHeight= Integer.parseInt(parts[1].trim());
                 //mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
                 if (target.getHeight() > target.getWidth()) {
@@ -2436,51 +2437,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         else if(FpsRangeDef == null || FpsRangeDef.getLower() > def) {
             FpsRangeDef = new Range<>(7, 30);
         }
-    }
-
-    public boolean customRawResForCamIdCheck(String camId) {
-        String customResStr = PhotonCamera.getSpecific().specificSetting.customRawRes;
-        if (customResStr == null || customResStr.isBlank() || !customResStr.startsWith("{") || !customResStr.endsWith("}")) {
-            return false;
-        }
-        // Remove brackets {} and split by comma
-        String[] entries = customResStr.substring(1, customResStr.length() - 1).split(",");
-        for (String entry : entries) {
-            // Entry format is "id-widthxheight"
-            String[] parts = entry.split("-");
-            if (parts.length > 0 && parts[0].trim().equals(camId)) {
-                return true; // Found the camera ID
-            }
-        }
-        return false; // Did not find the camera ID
-    }
-
-    public Size customRawResForCamId(String camId) {
-        String customResStr = PhotonCamera.getSpecific().specificSetting.customRawRes;
-        if (customResStr == null || customResStr.isBlank() || !customResStr.startsWith("{") || !customResStr.endsWith("}")) {
-            return null;
-        }
-        // Remove brackets {} and split by comma
-        String[] entries = customResStr.substring(1, customResStr.length() - 1).split(",");
-        for (String entry : entries) {
-            try {
-                // Entry format is "id-widthxheight"
-                String[] parts = entry.split("-");
-                if (parts.length == 2 && parts[0].trim().equals(camId)) {
-                    String[] resolution = parts[1].split("x");
-                    if (resolution.length == 2) {
-                        int width = Integer.parseInt(resolution[0].trim());
-                        int height = Integer.parseInt(resolution[1].trim());
-                        Log.d(TAG, "Found custom resolution for camId " + camId + ": " + width + "x" + height);
-                        return new Size(width, height);
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to parse custom resolution entry: '" + entry + "'", e);
-                // Continue to the next entry in case of a malformed one
-            }
-        }
-        return null; // Return zero size if not found
     }
 
     public void UpdateCameraCharacteristics(String cameraId) {
@@ -3436,8 +3392,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isQucommAdrcOff = mIsFunctionOneOn;
             restartCamera();
             return;
-        } else if (PhotonCamera.getSettings().functionOne.equals("Qualcomm Sensor Mode")) {
-            PhotonCamera.isQucommSensorModeOn = mIsFunctionOneOn;
+        } else if (PhotonCamera.getSettings().functionOne.equals("Sensor Mode")) {
+            PhotonCamera.isSensorModeOn = mIsFunctionOneOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("EIS Look Ahead")) {
@@ -3458,10 +3414,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Pro Mode")) {
             PhotonCamera.isVivoProModeOn = mIsFunctionOneOn;
-            restartCamera();
-            return;
-        } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Sensor Mode")) {
-            PhotonCamera.isVivoSensorModeOn = mIsFunctionOneOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionOne.equals("Vivo Distortion Correction")) {
@@ -3576,8 +3528,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             PhotonCamera.isQucommAdrcOff = mIsFunctionTwoOn;
             restartCamera();
             return;
-        } else if (PhotonCamera.getSettings().functionTwo.equals("Qualcomm Sensor Mode")) {
-            PhotonCamera.isQucommSensorModeOn = mIsFunctionTwoOn;
+        } else if (PhotonCamera.getSettings().functionTwo.equals("Sensor Mode")) {
+            PhotonCamera.isSensorModeOn = mIsFunctionTwoOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionTwo.equals("EIS Look Ahead")) {
@@ -3598,10 +3550,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             return;
         } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Pro Mode")) {
             PhotonCamera.isVivoProModeOn = mIsFunctionTwoOn;
-            restartCamera();
-            return;
-        } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Sensor Mode")) {
-            PhotonCamera.isVivoSensorModeOn = mIsFunctionTwoOn;
             restartCamera();
             return;
         } else if (PhotonCamera.getSettings().functionTwo.equals("Vivo Distortion Correction")) {
@@ -4203,6 +4151,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (histData != null) {
                 histDataArray = (int[]) histData;
                 statsSize = histDataArray.length;
+            } else  {
+                histData = result.get(VendorTagUtils.histogramStatsByte);
+                if (histData != null) {
+                    histDataArray = (int[]) histData;
+                    statsSize = histDataArray.length;
+                }
             }
 
             if (wasLogged == 100) {

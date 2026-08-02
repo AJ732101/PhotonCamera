@@ -133,6 +133,8 @@ public class Settings {
     public int demosaicMethod = 2;
     public int sessionType = 0;
     public int sessionTypeVideo = 0;
+    public int sensorMode = -1;
+    public String sensorModeVendorkey = "org.codeaurora.qcamera3.sensor_meta_data.current_mode";
     public int dngBlackLevel = -1;
     public int dngWhiteLevel = -1;
     public String photoRange = "Full";
@@ -153,6 +155,7 @@ public class Settings {
     public boolean writeCaptureResult = false;
     public int colorTemperature = 999;
     public float colorTint = 0.0f;
+    public String customResolution = "OFF";
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -226,8 +229,6 @@ public class Settings {
         gpsLocation = PreferenceKeys.gpsLocation();
         sessionType = PreferenceKeys.getSessionType();
         sessionTypeVideo = PreferenceKeys.getSessionTypeVideo();
-        dngBlackLevel = PreferenceKeys.getDngBlackLevel();
-        dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
         useP3 = PreferenceKeys.isP3On();
         // QualityDoesMatter - Video
         videoBitrate = PreferenceKeys.getVideoBitrate();
@@ -279,10 +280,6 @@ public class Settings {
         edgeProcessing = PreferenceKeys.getEdgeProcessing();
         zoom2X = PreferenceKeys.isZoomOn();
         digitalZoomFactor = PreferenceKeys.getDigitalZoomFactorValue();
-        hotPixelMode = PreferenceKeys.getHotPixelMode();
-        colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
-        distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
-        shadingMode = PreferenceKeys.getShadingMode();
         useAlternatePreviewTemplate = PreferenceKeys.useAlternatePreviewTemplate();
         contrastCurve = PreferenceKeys.getContrastCurve();
         effectMode = PreferenceKeys.getEffectMode();
@@ -298,6 +295,16 @@ public class Settings {
         useHqSubsampling = PreferenceKeys.isHqSubsamplingOn();
         colorTemperature = PreferenceKeys.getColorTemperature();
         colorTint = PreferenceKeys.getColorTint();
+        // QualityDoesMatter - Sensor and more
+        customResolution = PreferenceKeys.getCustomResolution();
+        hotPixelMode = PreferenceKeys.getHotPixelMode();
+        colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
+        distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();
+        shadingMode = PreferenceKeys.getShadingMode();
+        sensorMode = PreferenceKeys.getSensorMode();
+        sensorModeVendorkey = PreferenceKeys.getSensorModeVendorkey();
+        dngBlackLevel = PreferenceKeys.getDngBlackLevel();
+        dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
     }
 
     public void saveID() {

@@ -14,6 +14,16 @@
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_aperture_key"
+            android:title="@string/aperture"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/camera_24px"
+            android:entries="@array/aperture_entries"
+            android:entryValues="@array/aperture_entryValues"
+            android:defaultValue="@string/pref_aperture_default_value" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_hot_pixel_mode_key"
             android:title="@string/hot_pixel_mode"
             app:useSimpleSummaryProvider="true"
@@ -51,6 +61,51 @@
             android:entries="@array/shading_mode_entries"
             android:entryValues="@array/shading_mode_entryValues"
             android:defaultValue="@string/pref_shading_mode_default_value" />
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_dng_black_level_key"
+            android:title="@string/dng_black_level"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="-1"
+            android:icon="@drawable/contrast_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_dng_white_level_key"
+            android:title="@string/dng_white_level"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="-1"
+            android:icon="@drawable/contrast_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_custom_resolution_key"
+            android:title="@string/custom_resolution"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="text"
+            android:defaultValue="OFF"
+            android:icon="@drawable/aspect_ratio_24px"/>
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_sensor_mode_key"
+            android:title="@string/sensor_mode"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number"
+            android:defaultValue="-1"
+            android:icon="@drawable/view_comfy_alt_24px" />
+
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_sensor_mode_vendorkey_key"
+            android:title="@string/sensor_mode_vendorkey"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="text"
+            android:defaultValue="org.codeaurora.qcamera3.sensor_meta_data.current_mode"
+            android:icon="@drawable/vpn_key_24px" />
 
     </PreferenceCategory>
 

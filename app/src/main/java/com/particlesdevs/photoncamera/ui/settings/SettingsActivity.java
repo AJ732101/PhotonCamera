@@ -232,6 +232,44 @@ public class SettingsActivity extends BaseActivity implements
                 Collections.addAll(entryValuesFunctionTwo, functionTwoPreference.getEntryValues());
             }
 
+            if (PhotonCamera.hasIdealRaw) {
+                entriesFunctionOne.add("Ideal RAW");
+                entryValuesFunctionOne.add("Ideal RAW");
+                entriesFunctionTwo.add("Ideal RAW");
+                entryValuesFunctionTwo.add("Ideal RAW");
+            }
+            if (PhotonCamera.hasEisLookAhead) {
+                entriesFunctionOne.add("EIS Look Ahead");
+                entryValuesFunctionOne.add("EIS Look Ahead");
+                entriesFunctionTwo.add("EIS Look Ahead");
+                entryValuesFunctionTwo.add("EIS Look Ahead");
+            }
+            if (PhotonCamera.hasEisRealtime) {
+                entriesFunctionOne.add("EIS Realtime");
+                entryValuesFunctionOne.add("EIS Realtime");
+                entriesFunctionTwo.add("EIS Realtime");
+                entryValuesFunctionTwo.add("EIS Realtime");
+            }
+            if (PhotonCamera.hasEisV3) {
+                entriesFunctionOne.add("EIS V3");
+                entryValuesFunctionOne.add("EIS V3");
+                entriesFunctionTwo.add("EIS V3");
+                entryValuesFunctionTwo.add("EIS V3");
+            }
+            if (PhotonCamera.hasQucommAdrcOff) {
+                entriesFunctionOne.add("Qualcomm ADRC Off");
+                entryValuesFunctionOne.add("Qualcomm ADRC Off");
+                entriesFunctionTwo.add("Qualcomm ADRC Off");
+                entryValuesFunctionTwo.add("Qualcomm ADRC Off");
+            }
+            if (PhotonCamera.hasSensorMode) {
+                entriesFunctionOne.add("Sensor Mode");
+                entryValuesFunctionOne.add("Sensor Mode");
+                entriesFunctionTwo.add("Sensor Mode");
+                entryValuesFunctionTwo.add("Sensor Mode");
+            }
+
+            // Xiaomi
             if (PhotonCamera.hasXiaomiNight) {
                 entriesFunctionOne.add("Xiaomi Night Mode");
                 entryValuesFunctionOne.add("Xiaomi Night Mode");
@@ -298,42 +336,8 @@ public class SettingsActivity extends BaseActivity implements
                 entriesFunctionTwo.add("Xiaomi Super Resolution");
                 entryValuesFunctionTwo.add("Xiaomi Super Resolution");
             }
-            if (PhotonCamera.hasIdealRaw) {
-                entriesFunctionOne.add("Ideal RAW");
-                entryValuesFunctionOne.add("Ideal RAW");
-                entriesFunctionTwo.add("Ideal RAW");
-                entryValuesFunctionTwo.add("Ideal RAW");
-            }
-            if (PhotonCamera.hasEisLookAhead) {
-                entriesFunctionOne.add("EIS Look Ahead");
-                entryValuesFunctionOne.add("EIS Look Ahead");
-                entriesFunctionTwo.add("EIS Look Ahead");
-                entryValuesFunctionTwo.add("EIS Look Ahead");
-            }
-            if (PhotonCamera.hasEisRealtime) {
-                entriesFunctionOne.add("EIS Realtime");
-                entryValuesFunctionOne.add("EIS Realtime");
-                entriesFunctionTwo.add("EIS Realtime");
-                entryValuesFunctionTwo.add("EIS Realtime");
-            }
-            if (PhotonCamera.hasEisV3) {
-                entriesFunctionOne.add("EIS V3");
-                entryValuesFunctionOne.add("EIS V3");
-                entriesFunctionTwo.add("EIS V3");
-                entryValuesFunctionTwo.add("EIS V3");
-            }
-            if (PhotonCamera.hasQucommAdrcOff) {
-                entriesFunctionOne.add("Qualcomm ADRC Off");
-                entryValuesFunctionOne.add("Qualcomm ADRC Off");
-                entriesFunctionTwo.add("Qualcomm ADRC Off");
-                entryValuesFunctionTwo.add("Qualcomm ADRC Off");
-            }
-            if (PhotonCamera.hasQucommSensorMode) {
-                entriesFunctionOne.add("Qualcomm Sensor Mode");
-                entryValuesFunctionOne.add("Qualcomm Sensor Mode");
-                entriesFunctionTwo.add("Qualcomm Sensor Mode");
-                entryValuesFunctionTwo.add("Qualcomm Sensor Mode");
-            }
+
+            // Vivo
             if (PhotonCamera.hasVivoZeissColor) {
                 entriesFunctionOne.add("Vivo Zeiss Color");
                 entryValuesFunctionOne.add("Vivo Zeiss Color");
@@ -345,12 +349,6 @@ public class SettingsActivity extends BaseActivity implements
                 entryValuesFunctionOne.add("Vivo Pro Mode");
                 entriesFunctionTwo.add("Vivo Pro Mode");
                 entryValuesFunctionTwo.add("Vivo Pro Mode");
-            }
-            if (PhotonCamera.hasVivoSensorMode) {
-                entriesFunctionOne.add("Vivo Sensor Mode");
-                entryValuesFunctionOne.add("Vivo Sensor Mode");
-                entriesFunctionTwo.add("Vivo Sensor Mode");
-                entryValuesFunctionTwo.add("Vivo Sensor Mode");
             }
             if (PhotonCamera.hasVivoDistortionCorrection) {
                 entriesFunctionOne.add("Vivo Distortion Correction");

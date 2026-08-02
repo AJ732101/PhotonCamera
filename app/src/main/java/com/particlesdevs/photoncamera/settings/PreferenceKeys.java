@@ -50,10 +50,10 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AF_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_AE_MODE.mValue);
         COMMON_KEYS.add(Key.CAMERA_MODE.mValue);
-        COMMON_KEYS.add(Key.KEY_SESSION_TYPE.mValue);
-        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_VIDEO.mValue);
-        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL.mValue);
-        COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL.mValue);
+        //COMMON_KEYS.add(Key.KEY_SESSION_TYPE.mValue);
+        //COMMON_KEYS.add(Key.KEY_SESSION_TYPE_VIDEO.mValue);
+        //COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL.mValue);
+        //COMMON_KEYS.add(Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL.mValue);
         COMMON_KEYS.add(Key.KEY_SAVE_RAW.mValue);
         COMMON_KEYS.add(Key.KEY_DEMOSAIC_METHOD.mValue);
         COMMON_KEYS.add(Key.KEY_PREVIEW_FORMAT.mValue);
@@ -68,7 +68,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_IMAGE_READER_FLAGS.mValue);
         COMMON_KEYS.add(Key.KEY_HQ_SUBSAMPLING.mValue);
         // QualityDoesMatter - General
-        COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
+        //COMMON_KEYS.add(Key.KEY_APERTURE.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_ISO.mValue);
         COMMON_KEYS.add(Key.KEY_EXTEND_EXPOSURE.mValue);
         COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
@@ -85,6 +85,8 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_DISABLE_VENDOR_KEYS.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_NOGUI_YET.mValue);
         COMMON_KEYS.add(Key.KEY_WRITE_CAPTURE_RESULT.mValue);
+        COMMON_KEYS.add(Key.KEY_EARLY_VENDOR_KEYS_LOADING.mValue);
+        COMMON_KEYS.add(Key.KEY_WIDE169.mValue);
         // QualityDoesMatter - Video
         COMMON_KEYS.add(Key.KEY_HDR_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_EIS_VIDEO.mValue);
@@ -101,6 +103,10 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_COLORSPACE.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_ENCODER_NAME.mValue);
         COMMON_KEYS.add(Key.KEY_VIDEO_RANGE.mValue);
+        COMMON_KEYS.add(Key.KEY_RAWVIDEO_WRITE_ZIP.mValue);
+        COMMON_KEYS.add(Key.KEY_RAWVIDEO_COMPRESS_ZIP.mValue);
+        COMMON_KEYS.add(Key.KEY_RAWVIDEO_DOWNSCALE_4X.mValue);
+        COMMON_KEYS.add(Key.KEY_RAWVIDEO_CROP_169.mValue);
         // QualityDoesMatter - Audio
         COMMON_KEYS.add(Key.KEY_AUDIO_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_CODEC.mValue);
@@ -110,7 +116,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_AUDIO_DIRECTION.mValue);
         COMMON_KEYS.add(Key.KEY_AUDIO_ZOOM.mValue);
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
-        COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
+        /*COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SHARPNESS.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_CONTRAST_VIDEO.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_SATURATION_VIDEO.mValue);
@@ -123,7 +129,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_SOC_QUALCOMM_MFNR.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_AUTO_HDR.mValue);
         COMMON_KEYS.add(Key.KEY_SOC_LTM_OFF.mValue);
-        COMMON_KEYS.add(Key.KEY_SOC_HDR_MODE.mValue);
+        COMMON_KEYS.add(Key.KEY_SOC_HDR_MODE.mValue);*/
         // QualityDoesMatter - Single Shot & Video Related
         COMMON_KEYS.add(Key.KEY_USE_ZSL.mValue);
         COMMON_KEYS.add(Key.KEY_USE_SCENE_AND_EFFECT_MODE.mValue);
@@ -137,20 +143,20 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_DIGITAL_ZOOM_FACTOR.mValue);
         COMMON_KEYS.add(Key.KEY_CONTRAST_CURVE.mValue);
         COMMON_KEYS.add(Key.KEY_EFFECT_MODE.mValue);
-        COMMON_KEYS.add(Key.KEY_EXPOSURE_COMPENSATION.mValue);
-        COMMON_KEYS.add(Key.KEY_COLOR_TEMPERATURE.mValue);
-        COMMON_KEYS.add(Key.KEY_COLOR_TINT.mValue);
+        //COMMON_KEYS.add(Key.KEY_EXPOSURE_COMPENSATION.mValue);
+        //COMMON_KEYS.add(Key.KEY_COLOR_TEMPERATURE.mValue);
+        //COMMON_KEYS.add(Key.KEY_COLOR_TINT.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_VIDEO_CODEC.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_TRANSFER_FUNCTION.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_RANGE.mValue);
         COMMON_KEYS.add(Key.KEY_SW_COLOR_SPACE.mValue);
         // QualityDoesMatter - Sensor Related (and more)
-        COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
+        /*COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_DISTORTION_CORRECTION_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_SHADING_MODE.mValue);
-        COMMON_KEYS.add(Key.KEY_ALTERNATE_PREVIEW_TEMPLATE.mValue);
+        COMMON_KEYS.add(Key.KEY_ALTERNATE_PREVIEW_TEMPLATE.mValue);*/
     }
 
     private final SettingsManager settingsManager;
@@ -185,8 +191,11 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_VIDEO, 0);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE, -1);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_VENDORKEY, "org.codeaurora.qcamera3.sensor_meta_data.current_mode");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL, -1);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION, "OFF");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BRACKETING_MODE, 0); // Default to disable bracketing
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, resources.getString(R.string.pref_preview_format_default));
@@ -198,6 +207,7 @@ public class PreferenceKeys {
         settingsManager.setDefaults(Key.TONEMAP, resources.getString(R.string.tonemap_default), new String[]{resources.getString(R.string.tonemap_default)});
         settingsManager.setDefaults(Key.GAMMA, resources.getString(R.string.gamma_default), new String[]{resources.getString(R.string.gamma_default)});
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LUT_NAME, resources.getString(R.string.pref_lut_name_default));
+
         // QualityDoesMatter - General
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_OIS_ON, resources.getBoolean(R.bool.pref_ois_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON, resources.getBoolean(R.bool.pref_dng_compression_default));
@@ -215,6 +225,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS, resources.getBoolean(R.bool.pref_disable_all_vendor_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET, resources.getBoolean(R.bool.pref_disable_nogui_yet_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_WRITE_CAPTURE_RESULT, resources.getBoolean(R.bool.pref_write_capture_result_default));
+
         // QualityDoesMatter - Video
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_VIDEO, resources.getBoolean(R.bool.pref_eis_video_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDR_VIDEO, resources.getBoolean(R.bool.pref_hdr_video_def_value));
@@ -236,6 +247,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PHOTO_COLOR_SPACE, resources.getString(R.string.pref_color_space_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_ENCODER_NAME, resources.getString(R.string.pref_video_codec_name_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIDEO_RANGE, resources.getString(R.string.pref_video_range_default_value));
+
         // QualityDoesMatter - Audio
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_PROCESSING, resources.getString(R.string.pref_audio_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_CODEC, resources.getString(R.string.pref_audio_codec_default_value));
@@ -244,6 +256,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_ZOOM, resources.getString(R.string.pref_audio_zoom_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_SPS, resources.getString(R.string.pref_sps_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AUDIO_DIRECTION, resources.getString(R.string.pref_audio_direction_default_value));
+
         // QualityDoesMatter - SoC - Qualcomm/Snapdragon
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SHARPNESS, resources.getString(R.string.pref_soc_qualcomm_sharpness_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_QUALCOMM_SATURATION, resources.getString(R.string.pref_soc_qualcomm_saturation_default));
@@ -259,6 +272,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_AUTO_HDR, resources.getBoolean(R.bool.pref_soc_qualcomm_auto_hdr_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_LTM_OFF, resources.getBoolean(R.bool.pref_soc_qualcomm_ltm_off_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SOC_HDR_MODE, resources.getString(R.string.pref_soc_qualcomm_hdr_mode_default));
+
         // QualityDoesMatter - Single Shot and Video Related
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_ZSL, resources.getBoolean(R.bool.pref_zsl_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_SCENE_AND_EFFECT_MODE, resources.getBoolean(R.bool.pref_scene_and_effect_mode_def_value));
@@ -570,12 +584,24 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_VIDEO);
     }
 
+    public static int getSensorMode() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE);
+    }
+
+    public static String getSensorModeVendorkey() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_VENDORKEY);
+    }
+
     public static int getDngBlackLevel() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL);
     }
 
     public static int getDngWhiteLevel() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL);
+    }
+
+    public static String getCustomResolution() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION);
     }
 
     public static float getSharpnessValue() {
@@ -1160,8 +1186,11 @@ public class PreferenceKeys {
         KEY_FRAME_COUNT(R.string.pref_frame_count_key),
         KEY_SESSION_TYPE(R.string.pref_session_type_key),
         KEY_SESSION_TYPE_VIDEO(R.string.pref_session_type_video_key),
+        KEY_SENSOR_MODE(R.string.pref_sensor_mode_key),
+        KEY_SENSOR_MODE_VENDORKEY(R.string.pref_sensor_mode_vendorkey_key),
         KEY_SESSION_TYPE_DNG_BLACK_LEVEL(R.string.pref_dng_black_level_key),
         KEY_SESSION_TYPE_DNG_WHITE_LEVEL(R.string.pref_dng_white_level_key),
+        KEY_CUSTOM_RESOLUTION(R.string.pref_custom_resolution_key),
         KEY_CONTRAST_SEEKBAR(R.string.pref_contrast_seekbar_key),
         KEY_SHARPNESS_SEEKBAR(R.string.pref_sharpness_seekbar_key),
         KEY_EXPOCOMPENSATE_SEEKBAR(R.string.pref_expocompensation_seekbar_key),

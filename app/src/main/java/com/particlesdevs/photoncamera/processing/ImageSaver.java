@@ -282,8 +282,6 @@ public class ImageSaver {
         specificsBuilder.append("\n   qtiDCGMode: ").append(sp.qtiDCGMode);
         specificsBuilder.append("\n   qtiImageStabilizationMode: ").append(sp.qtiImageStabilizationMode);
         specificsBuilder.append("\n   xiaomiHdrMode: ").append(sp.xiaomiHdrMode);
-        specificsBuilder.append("\n   sensorModes: ").append(Arrays.toString(sp.sensorModes));
-        specificsBuilder.append("\n   sensorModeKey: ").append(sp.sensorModeKey);
         specificsBuilder.append("\n   vivoVideoMode: ").append(sp.vivoVideoMode);
         specificsBuilder.append("\n   vivoEisConfig: ").append(sp.vivoEisConfig);
         specificsBuilder.append("\n   vivoEisEnhance: ").append(sp.vivoEisEnhance);
@@ -291,7 +289,6 @@ public class ImageSaver {
         specificsBuilder.append("\n   targetFps: ").append(sp.targetFps);
         specificsBuilder.append("\n   recPrefix: ").append(sp.recPrefix);
         specificsBuilder.append("\n   newRecSurfaceType: ").append(sp.newRecSurfaceType);
-        specificsBuilder.append("\n   customRawRes: ").append(sp.customRawRes);
         specificsBuilder.append("\n   hdrMode: ").append(sp.hdrMode);
         specificsBuilder.append("\n   customVendorKeyTypeByteName: ").append(Arrays.toString(sp.customVendorKeyTypeByteName));
         specificsBuilder.append("\n   customVendorKeyTypeInt32Name: ").append(Arrays.toString(sp.customVendorKeyTypeInt32Name));
@@ -354,6 +351,7 @@ public class ImageSaver {
         imageDescriptionBuilder.append("\n   SoC Saturation: ").append(PhotonCamera.getSettings().socQualcommSaturation);
         imageDescriptionBuilder.append("\n   SoC Contrast: ").append(PhotonCamera.getSettings().socQualcommContrast);
         imageDescriptionBuilder.append("\n   SoC Sharpness: ").append(PhotonCamera.getSettings().socQualcommSharpness);
+        imageDescriptionBuilder.append("\n   SoC LTM Control: ").append(PhotonCamera.getSettings().socQualcommLtmOff ? "Enabled" : "Disabled");
         if (PhotonCamera.getSettings().socQualcommManualWb > 1500) {
             imageDescriptionBuilder.append("\n   SoC Temperature: ").append(PhotonCamera.getSettings().socQualcommManualWb).append("K");
         }
@@ -382,7 +380,7 @@ public class ImageSaver {
             imageDescriptionBuilder.append("\n   Vignette Correction: ").append(PhotonCamera.getSettings().shadingMode);
         }
         if (PhotonCamera.hasQucommAdrcOff) {
-            imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Off": "On");
+            imageDescriptionBuilder.append("\n   Qualcomm ADRC: ").append(PhotonCamera.isQucommAdrcOff ? "Disabled": "Enabled");
         }
         if ((PhotonCamera.isSessionTypeOn) && (PhotonCamera.getSettings().sessionType > 0)) {
             imageDescriptionBuilder.append("\n   OpCode: ").append(PhotonCamera.getSettings().sessionType);
@@ -391,30 +389,8 @@ public class ImageSaver {
         long elapsedTime = SystemClock.elapsedRealtime() - PhotonCamera.timeStart;
         imageDescriptionBuilder.append("\n   Processing Time: ").append(elapsedTime).append("ms");
 
-
-        if (PhotonCamera.getSpecific().specificSetting.sensorModes != null) {
-            String sensorMode = "";
-            for (String id : PhotonCamera.getSpecific().specificSetting.sensorModes) {
-                try {
-                    String camID = "";
-                    if (id.contains("-")) {
-                        camID = id.split("-")[0];
-                        sensorMode = id.split("-")[1];
-                    }
-
-                    if (PhotonCamera.getSettings().mCameraID.equals(camID)) {
-                        break;
-                    }
-                } catch (Exception ignored) {
-
-                }
-            }
-            if (PhotonCamera.isVivoSensorModeOn && !sensorMode.equals("x")) {
-                imageDescriptionBuilder.append("\n   Vivo Sensor Mode: ").append(sensorMode);
-            }
-            if (PhotonCamera.isQucommSensorModeOn && !sensorMode.equals("x")) {
-                imageDescriptionBuilder.append("\n   Qualcomm Sensor Mode: ").append(sensorMode);
-            }
+        if (PhotonCamera.isSensorModeOn) {
+            imageDescriptionBuilder.append("\n   Sensor Mode: ").append(PhotonCamera.getSettings().sensorMode);
         }
 
         imageDescriptionBuilder.append("\n   Version: ").append(PhotonCamera.getVersion());
