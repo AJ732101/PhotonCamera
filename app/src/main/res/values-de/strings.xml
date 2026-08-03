@@ -66,6 +66,7 @@
     <string name="import_settings">Einstellungen importieren</string>
     <string name="pref_show_grid_title">Gitterlinien anzeigen</string>
     <string name="cfa">Color Filter Array / Bayer Farbfilter</string>
+    <string name="sensor_mode_cfa">Sensor CFA Muster</string>
     <string name="align_method">Ausrichtungs Methode</string>
     <string name="preview_format">Ziel Format</string>
     <string name="real_preview_format">Vorschau Format</string>
@@ -75,6 +76,7 @@
     <string name="custom_resolution">Eigene Auflösung</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
+    <string name="dcg_16_10_crop_summary">Beschneidet Foto DNGs immer auf 16:10, Video nicht betroffen</string>
     <string name="about">Über</string>
     <string name="camera_sounds">Kamera Töne</string>
     <string name="energy_saving">Stromsparen</string>
@@ -275,4 +277,5 @@
     <string name="image_reader_flags">Alternative ImageReader Flags</string>
     <string name="color_temperature">Farbtemperatur</string>
     <string name="sensor_mode">Sensor Modus</string>
+    <string name="dcg_16_10_crop">Sensor Modus DNG 16:10</string>
 </resources>

@@ -400,22 +400,28 @@ public class PhotonCamera extends Application {
     }*/
 
     public static boolean isSingleShotJpegOrHeic() {
+        if (isSensorModeOn && (getSettings().sensorModeCfaPattern == -2)) {
+            return false;
+        }
+
         if ((PhotonCamera.getSettings().frameCount == 1) &&
-                ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
-                        (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
-                        (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
-                (PhotonCamera.getSettings().rawSaver != 2) &&
-                !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO)) {
+            ((PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
+             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
+             (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
+             (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC_ULTRAHDR) ||
+             (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) ||
+             (PhotonCamera.getSettings().previewFormat == ImageFormat.YUV_420_888) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
+             (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
+            (PhotonCamera.getSettings().rawSaver != 2) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
+            !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
             return true;
         }
         return false;

@@ -144,23 +144,6 @@ public class PostPipeline extends GLBasePipeline {
                 break;
             }
             default: {
-                //if (nightMode)
-                //    add(new HotPixelFilter());
-                //if(PhotonCamera.getSettings().hdrxNR) {
-                //add(new ESD3DBayerCS());
-                //}
-
-                if (PhotonCamera.getSettings().hdrxNR) {
-
-                    //add(new BayerFilter());
-                    /*if (nightMode) {
-                        add(new BayerConcat(true));
-                        add(new BayerFilter());
-                        add(new BayerConcat(false));
-                    }*/
-                    //add(new BayerMoire());
-
-                }
 
                 if (mSettings.alignAlgorithm != 2) {
                     //add(new HotPixelFilter());
@@ -184,36 +167,11 @@ public class PostPipeline extends GLBasePipeline {
             }
         }
         add(new ABLC());
-        /*
-         * * * All filters after demosaicing * * *
-         */
-
-        //if (PhotonCamera.getSettings().hdrxNR) {
-            //if (nightMode)
-            //    add(new Wavelet());
-            //add(new ESD3D(true));
-            //add(new ESD3D(true));
-        //}
-
-        //add(new AWB());
-        //add(new Equalization());
-
         add(new Initial());
-
         add(new AutoExposure());
-
-
-        //add(new GlobalToneMapping());
-
         add(new CaptureSharpening());
-
         add(new CorrectingFlow());
-
-        //add(new ChromaticFlow());
-
         add(new Sharpen2());
-        //add(new Sharpen("sharpen33"));
-
         add(new RotateWatermark(getRotation()));
     }
 }

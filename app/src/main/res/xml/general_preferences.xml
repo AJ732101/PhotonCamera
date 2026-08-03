@@ -221,16 +221,6 @@
             android:entryValues="@array/focuspeakset_entryValues"
             android:defaultValue="@string/pref_focus_peak_default"/>
 
-        <ListPreference
-            android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_cfa_key"
-            android:title="@string/cfa"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_bayer"
-            android:entries="@array/cfapat_entries"
-            android:entryValues="@array/cfapat_entryValues"
-            android:defaultValue="@string/pref_cfa_default_value"/>
-
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_energy_safe_key"
             android:defaultValue="@bool/pref_energy_safe_default"

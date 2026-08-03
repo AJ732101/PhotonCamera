@@ -75,6 +75,8 @@
     <string name="pref_dng_white_level_key" translatable="false">pref_dng_white_level_key</string>
     <string name="pref_custom_resolution_key" translatable="false">pref_custom_resolution_key</string>
     <string name="pref_cfa_key" translatable="false">pref_cfa_key</string>
+    <string name="pref_sensor_mode_cfa_key" translatable="false">pref_sensor_mode_cfa_key</string>
+    <string name="pref_sensor_mode_dcg_16_10_crop_key" translatable="false">pref_sensor_mode_dcg_16_10_crop_key</string>
     <string name="pref_remosaic_key" translatable="false">pref_remosaic_key</string>
     <string name="pref_telegram_channel_key" translatable="false">pref_telegram_channel_key</string>
     <string name="pref_contributors_key" translatable="false">pref_contributors_key</string>

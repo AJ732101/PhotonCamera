@@ -294,7 +294,12 @@ public class CameraUIViewImpl implements CameraUIView {
         public void reConfigureModeViews(CameraMode mode) {
             var frameCount = PhotonCamera.getSettings().frameCount;
             var previewFormat = PhotonCamera.getSettings().previewFormat;
-            if ((PhotonCamera.getSettings().frameCount == 1) &&
+
+            if (PhotonCamera.isSensorModeOn && (PhotonCamera.getSettings().sensorModeCfaPattern == -2)) {
+                topbar.setZoomVisible(false);
+                topbar.setNoiseVisible(false);
+                topbar.setEdgeVisible(false);;
+            } else if ((PhotonCamera.getSettings().frameCount == 1) &&
                ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||
@@ -339,7 +344,11 @@ public class CameraUIViewImpl implements CameraUIView {
     public class NightModeState implements CameraModeState {
         @Override
         public void reConfigureModeViews(CameraMode mode) {
-            if ((PhotonCamera.getSettings().frameCount == 1) &&
+            if (PhotonCamera.isSensorModeOn && (PhotonCamera.getSettings().sensorModeCfaPattern == -2)) {
+                topbar.setZoomVisible(false);
+                topbar.setNoiseVisible(false);
+                topbar.setEdgeVisible(false);;
+            } else if ((PhotonCamera.getSettings().frameCount == 1) &&
                ((PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.JPEG_R) ||
                 (PhotonCamera.getSettings().previewFormat == ImageFormat.HEIC) ||

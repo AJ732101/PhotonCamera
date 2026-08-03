@@ -38,6 +38,7 @@ public class Settings {
     public int rawSaver;
     public boolean QuadBayer;
     public int cfaPattern;
+    public int sensorModeCfaPattern;
     public int theme;
     public boolean remosaic;//TODO
     public boolean eisPhoto;
@@ -156,6 +157,7 @@ public class Settings {
     public int colorTemperature = 999;
     public float colorTint = 0.0f;
     public String customResolution = "OFF";
+    public boolean isSensorModeDcg1610CropOn = false;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -186,6 +188,7 @@ public class Settings {
         shadows = PreferenceKeys.getFloat(PreferenceKeys.Key.KEY_SHADOWS_SEEKBAR);
         hdrx = PreferenceKeys.isHdrxNrOn();
         cfaPattern = PreferenceKeys.getCFAValue();
+        sensorModeCfaPattern = PreferenceKeys.getSensorModeCFAValue();
         rawSaver = PreferenceKeys.isSaveRaw();
         remosaic = PreferenceKeys.isRemosaicOn();
         eisPhoto = PreferenceKeys.isEisPhotoOn();
@@ -305,6 +308,7 @@ public class Settings {
         sensorModeVendorkey = PreferenceKeys.getSensorModeVendorkey();
         dngBlackLevel = PreferenceKeys.getDngBlackLevel();
         dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
+        isSensorModeDcg1610CropOn = isDcg1610CropOn();
     }
 
     public void saveID() {
@@ -335,4 +339,7 @@ public class Settings {
         return finalArray;
     }
 
+    public boolean isDcg1610CropOn() {
+        return (sensorMode != -1) && PreferenceKeys.isSensorModeDcg1610CropOn();
+    }
 }

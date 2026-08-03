@@ -77,6 +77,7 @@
     <string name="import_settings">Import Settings</string>
     <string name="pref_show_grid_title">Show Grid</string>
     <string name="cfa">Bayer Filter Pattern</string>
+    <string name="sensor_mode_cfa">Sensor CFA Pattern</string>
     <string name="align_method">Align Method</string>
     <string name="color_method">Color Method</string>
     <string name="color_lut">Color LUT (Look Up Table)</string>
@@ -95,6 +96,8 @@
     <string name="custom_resolution">Custom Resolution</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
+    <string name="dcg_16_10_crop">Sensor Mode Photo DNG 16:10 Crop</string>
+    <string name="dcg_16_10_crop_summary">Always crops photo DNG output to 16:10; does not affect RAW video</string>
     <string name="about">About</string>
     <string name="camera_sounds">Camera Sounds</string>
     <string name="energy_saving">Battery Saver</string>
@@ -262,6 +265,7 @@
     <string name="tunable_settings_title">Tunable Settings (Settings/Merging)</string>
     <string name="sensor_settings_screen_title">Sensor Settings</string>
     <string name="other_settings_separator_title">Other Settings</string>
+    <string name="sensor_mode_settings_separator_title">Sensor Mode</string>
     <string name="new_rec_separator_title">New Recording Pipeline</string>
     <string name="video_codec_based_photo_settings_title">Video Codec based Photo Settings</string>
     <string name="sw_codec_based_photo_settings_title">SW Codec based Photo Settings</string>

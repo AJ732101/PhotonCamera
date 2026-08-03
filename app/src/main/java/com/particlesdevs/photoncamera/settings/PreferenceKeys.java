@@ -672,6 +672,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_CFA);
     }
 
+    public static int getSensorModeCFAValue() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_CFA);
+    }
+
     public static int getThemeValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_THEME);
     }
@@ -1152,6 +1156,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169);
     }
 
+    public static boolean isSensorModeDcg1610CropOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_DCG_16_10_CROP);
+    }
+
     public enum Key {
         KEY_PREF_VERSION(R.string._pref_version),
         KEY_ENABLE_SYSTEM_NR(R.string.pref_enable_system_nr_key),
@@ -1315,6 +1323,7 @@ public class PreferenceKeys {
         KEY_DISTORTION_CORRECTION_MODE(R.string.pref_distortion_correction_mode_key),
         KEY_SHADING_MODE(R.string.pref_shading_mode_key),
         KEY_ALTERNATE_PREVIEW_TEMPLATE(R.string.pref_alternate_preview_template_key),
+        KEY_SENSOR_MODE_DCG_16_10_CROP(R.string.pref_sensor_mode_dcg_16_10_crop_key),
 
         /**
          * Enhanced settings keys
@@ -1328,6 +1337,7 @@ public class PreferenceKeys {
         KEY_SAVE_RAW(R.string.pref_save_raw_key),
         KEY_DEMOSAIC_METHOD(R.string.pref_demosaic_key),
         KEY_CFA(R.string.pref_cfa_key),
+        KEY_SENSOR_MODE_CFA(R.string.pref_sensor_mode_cfa_key),
         KEY_REMOSAIC(R.string.pref_remosaic_key),////TODO
 
         /**

@@ -14,6 +14,16 @@
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_cfa_key"
+            android:title="@string/cfa"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_bayer"
+            android:entries="@array/cfapat_entries"
+            android:entryValues="@array/cfapat_entryValues"
+            android:defaultValue="@string/pref_cfa_default_value"/>
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_aperture_key"
             android:title="@string/aperture"
             app:useSimpleSummaryProvider="true"
@@ -89,6 +99,13 @@
             android:defaultValue="OFF"
             android:icon="@drawable/aspect_ratio_24px"/>
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_layout"
+        app:key="sensor_and_more_settings_category"
+        app:title="@string/sensor_mode_settings_separator_title">
+
         <EditTextPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_sensor_mode_key"
@@ -106,6 +123,24 @@
             android:inputType="text"
             android:defaultValue="org.codeaurora.qcamera3.sensor_meta_data.current_mode"
             android:icon="@drawable/vpn_key_24px" />
+
+        <ListPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_sensor_mode_cfa_key"
+            android:title="@string/sensor_mode_cfa"
+            app:useSimpleSummaryProvider="true"
+            android:icon="@drawable/ic_bayer"
+            android:entries="@array/cfapat_entries"
+            android:entryValues="@array/cfapat_entryValues"
+            android:defaultValue="@string/pref_cfa_default_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_sensor_mode_dcg_16_10_crop_key"
+            android:defaultValue="false"
+            android:title="@string/dcg_16_10_crop"
+            android:summary="@string/dcg_16_10_crop_summary"
+            android:icon="@drawable/aspect_ratio_24px" />
 
     </PreferenceCategory>
 
