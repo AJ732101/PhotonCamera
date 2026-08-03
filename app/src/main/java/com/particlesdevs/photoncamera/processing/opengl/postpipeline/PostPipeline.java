@@ -126,15 +126,16 @@ public class PostPipeline extends GLBasePipeline {
     }
 
     private void BuildDefaultPipeline() {
-        boolean nightMode = PhotonCamera.getSettings().selectedMode == CameraMode.NIGHT;
         add(new Bayer2Float());
-        if (PhotonCamera.getSettings().useExposureFusionMethod2) {
-            add(new ExposureFusionBayer2());
+        if (PhotonCamera.getSettings().frameCount > 1) {
+            if (PhotonCamera.getSettings().useExposureFusionMethod2) {
+                add(new ExposureFusionBayer2());
+            } else {
+                add(new ExposureFusionBayer3());
+            }
         }
-        else {
-            add(new ExposureFusionBayer3());
-        }
-        switch (PhotonCamera.getSettings().cfaPattern) {
+        int cfaPattern = PhotonCamera.isSensorModeOn ? PhotonCamera.getSettings().sensorModeCfaPattern : PhotonCamera.getSettings().cfaPattern;
+        switch (cfaPattern) {
             case -2: {
                 add(new DemosaicQUAD());
                 break;
@@ -144,7 +145,6 @@ public class PostPipeline extends GLBasePipeline {
                 break;
             }
             default: {
-
                 if (mSettings.alignAlgorithm != 2) {
                     //add(new HotPixelFilter());
                     switch (PhotonCamera.getSettings().demosaicMethod){
@@ -159,12 +159,12 @@ public class PostPipeline extends GLBasePipeline {
                             break;
                     }
                 }
-                if (PhotonCamera.getSettings().hdrxNR) {
-                    add(new ESD3D2(true));
-                }
                 //add(new ImpulsePixelFilter());
                 break;
             }
+        }
+        if (PhotonCamera.getSettings().hdrxNR) {
+            add(new ESD3D2(true));
         }
         add(new ABLC());
         add(new Initial());

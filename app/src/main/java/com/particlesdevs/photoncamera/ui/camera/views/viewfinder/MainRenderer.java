@@ -73,8 +73,12 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int enablePeak_Normal, enablePeak_Magnify;
     private int resolutionLocation_Normal, resolutionLocation_Magnify;
     private int uPostLutSize, uPostLutSizeTiles;
+    private int uBinning_Normal;
+    private int uCameraResolution_Normal;
     private int mScreenWidth;
     private int mScreenHeight;
+    private int mCameraWidth = 1920;
+    private int mCameraHeight = 1080;
     private FloatBuffer mOffscreenVertexBuffer;
     private FloatBuffer mOffscreenTexCoordBuffer;
     private FloatBuffer mOffscreenTexCoordBufferRotated;
@@ -162,6 +166,11 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         }
         if (currentProgram == 0) return;
         GLES20.glUseProgram(currentProgram);
+        if (currentProgram == mNormalProgram) {
+            int isQuad = ((PhotonCamera.getSettings().sensorModeCfaPattern == -2) && PhotonCamera.isSensorModeOn) ? 1 : 0;
+            GLES20.glUniform1i(uBinning_Normal, isQuad);
+            GLES20.glUniform2f(uCameraResolution_Normal, (float) mCameraWidth, (float) mCameraHeight);
+        }
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, hTex[0]);
         if (mIsLutEnabled && !mIsMagnifyEnabled && hTexLut != null) {
@@ -258,9 +267,13 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         vTexCoord_Lut = GLES20.glGetAttribLocation(mLutProgram, "vTexCoord");
         uPostLutSize = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZE");
         uPostLutSizeTiles = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZETILES");
+        uBinning_Normal = GLES20.glGetUniformLocation(mNormalProgram, "binning");
+        uCameraResolution_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uCameraResolution");
         setupOffscreenRendering();
         GLES20.glUseProgram(mNormalProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mNormalProgram, "sTexture"), 0);
+        int isQuad = ((PhotonCamera.getSettings().sensorModeCfaPattern == -2) && PhotonCamera.isSensorModeOn) ? 1 : 0;
+        GLES20.glUniform1i(uBinning_Normal, isQuad);
         GLES20.glUseProgram(mMagnifyProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mMagnifyProgram, "sTexture"), 0);
         GLES20.glUseProgram(mLutProgram);
@@ -313,6 +326,11 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     public void setLutEnabled(boolean enabled) { mIsLutEnabled = enabled; mView.requestRender(); }
     public void setLut(File lutFile) { this.currentLutFile = lutFile; this.lutUpdateNeeded = true; mView.requestRender(); }
     public SurfaceTexture getmSTexture() { return mSTexture; }
+
+    public void setCameraResolution(int width, int height) {
+        this.mCameraWidth = width;
+        this.mCameraHeight = height;
+    }
 
     private void initTex() {
         hTex = new int[1];

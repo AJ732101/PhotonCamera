@@ -2610,6 +2610,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             Log.d(TAG, "previewSize:" + mPreviewSize);
             Log.d(TAG, "ID:" + PhotonCamera.getSettings().mCameraID + " deviceID:" + mCameraDevice.getId() + " logicalID:" + logicalID + " physicalID:" + physicalID);
 
+            if (mTextureView != null && mTextureView.getRenderer() != null) {
+                mTextureView.getRenderer().setCameraResolution(mBufferSize.getWidth(), mBufferSize.getHeight());
+            }
+
             //Camera output
             texture.setDefaultBufferSize(mBufferSize.getHeight(), mBufferSize.getWidth());
 
@@ -4656,6 +4660,31 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     if (mCaptureResult == null) {
                         mCaptureResult = partialResult;
                     }
+
+                    /*if ((partialResult != null) && (PhotonCamera.getSettings().rawSaver == 2)) {
+                        for (CaptureResult.Key<?> key : partialResult.getKeys()) {
+                            String keyName = key.getName();
+                            String lowerName = keyName.toLowerCase();
+
+                            if (lowerName.contains("cfa") ||
+                                    lowerName.contains("bayer") ||
+                                    lowerName.contains("sensor") ||
+                                    lowerName.contains("mode") ||
+                                    lowerName.contains("exif") ||
+                                    lowerName.contains("remosaic") ||
+                                    lowerName.contains("pattern") ||
+                                    lowerName.contains("quad")) {
+
+                                Object value = partialResult.get(key);
+                                String valueStr;
+                                if (value instanceof byte[]) valueStr = Arrays.toString((byte[]) value);
+                                else if (value instanceof int[]) valueStr = Arrays.toString((int[]) value);
+                                else if (value instanceof float[]) valueStr = Arrays.toString((float[]) value);
+                                else valueStr = String.valueOf(value);
+                                Log.i("CaptureController", "Found Sensor Tag: " + keyName + " = " + valueStr);
+                            }
+                        }
+                    }*/
                 }
 
                 @Override
@@ -4668,6 +4697,32 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Log.v("BurstCounter", "CaptureCompleted! FrameCount:" + frameCount);
                     Object time = result.get(CaptureResult.SENSOR_TIMESTAMP);
                     Log.d(TAG, "Timestamp:" + time);
+
+                    /*if ((result != null) && (PhotonCamera.getSettings().rawSaver == 2)) {
+                        for (CaptureResult.Key<?> key : result.getKeys()) {
+                            String keyName = key.getName();
+                            String lowerName = keyName.toLowerCase();
+
+                            if (lowerName.contains("cfa") ||
+                                    lowerName.contains("bayer") ||
+                                    lowerName.contains("sensor") ||
+                                    lowerName.contains("mode") ||
+                                    lowerName.contains("exif") ||
+                                    lowerName.contains("remosaic") ||
+                                    lowerName.contains("pattern") ||
+                                    lowerName.contains("quad")) {
+
+                                Object value = result.get(key);
+                                String valueStr;
+                                if (value instanceof byte[]) valueStr = Arrays.toString((byte[]) value);
+                                else if (value instanceof int[]) valueStr = Arrays.toString((int[]) value);
+                                else if (value instanceof float[]) valueStr = Arrays.toString((float[]) value);
+                                else valueStr = String.valueOf(value);
+                                Log.i("CaptureController", "Found Sensor Tag: " + keyName + " = " + valueStr);
+                            }
+                        }
+                    }*/
+
                     if (time != null) {
                         // get exposure multiply ISO and exposure time
                         Object isoKey = result.get(CaptureResult.SENSOR_SENSITIVITY);

@@ -40,6 +40,7 @@ public class Bayer2Float extends Node {
     public void Run() {
         PostPipeline postPipeline = (PostPipeline) basePipeline;
         Point rawSize = basePipeline.mParameters.rawSize;
+        int cfaPattern = PhotonCamera.isSensorModeOn ? PhotonCamera.getSettings().sensorModeCfaPattern : PhotonCamera.getSettings().cfaPattern;
 
         GLTexture in;
         if(basePipeline.mSettings.alignAlgorithm != 2) {
@@ -64,7 +65,7 @@ public class Bayer2Float extends Node {
         glProg.setDefine("BLR", BL[0]);
         glProg.setDefine("BLG", BL[1]);
         glProg.setDefine("BLB", BL[2]);
-        glProg.setDefine("QUAD", basePipeline.mSettings.cfaPattern == -2);
+        glProg.setDefine("QUAD", cfaPattern == -2);
         glProg.setDefine("RGBLAYOUT",basePipeline.mSettings.alignAlgorithm == 2);
         glProg.setDefine("TESTPATTERN",testPattern);
         glProg.useAssetProgram("tofloat");
