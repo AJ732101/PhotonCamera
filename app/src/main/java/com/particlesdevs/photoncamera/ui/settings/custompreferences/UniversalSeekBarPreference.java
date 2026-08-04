@@ -24,10 +24,12 @@ import java.util.Locale;
 public class UniversalSeekBarPreference extends Preference implements SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "UnivSeekBarPref";
     private static final boolean isLoggingOn = false;
-    private final Vibration vibration;
-    private final float mMin, mMax;
-    private final boolean isFloat, showSeekBarValue;
-    private float mStepPerUnit;
+    private Vibration vibration;
+    private float mMin = 0.0f;
+    private float mMax = 100.0f;
+    private boolean isFloat = false;
+    private boolean showSeekBarValue = true;
+    private float mStepPerUnit = 1.0f;
     private int seekBarProgress;
     private TextView seekBarValue;
     private SeekBar seekBar;
@@ -35,29 +37,45 @@ public class UniversalSeekBarPreference extends Preference implements SeekBar.On
 
     public UniversalSeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.UniversalSeekBarPreference, defStyleAttr, defStyleRes);
-        vibration = PhotonCamera.getVibration();
-        mMax = a.getFloat(R.styleable.UniversalSeekBarPreference_maxValue, 100.0f);
-        mMin = a.getFloat(R.styleable.UniversalSeekBarPreference_minValue, 0.0f);
-        mStepPerUnit = a.getFloat(R.styleable.UniversalSeekBarPreference_stepPerUnit, 1.0f);
-        showSeekBarValue = a.getBoolean(R.styleable.UniversalSeekBarPreference_showSeekBarValue, true);
-        isFloat = a.getBoolean(R.styleable.UniversalSeekBarPreference_isFloat, false);
-        if (!isFloat && mStepPerUnit > 1)
-            mStepPerUnit = 1.0f;
-        a.recycle();
+        init(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public UniversalSeekBarPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        super(context, attrs, defStyleAttr);
+        init(context, attrs, defStyleAttr, 0);
     }
 
     public UniversalSeekBarPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        init(context, attrs, 0, 0);
     }
 
     public UniversalSeekBarPreference(Context context) {
-        this(context, null);
+        super(context);
+        init(context, null, 0, 0);
+    }
+
+    private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(
+                    attrs, R.styleable.UniversalSeekBarPreference, defStyleAttr, defStyleRes);
+
+            mMax = a.getFloat(R.styleable.UniversalSeekBarPreference_maxValue, 100.0f);
+            mMin = a.getFloat(R.styleable.UniversalSeekBarPreference_minValue, 0.0f);
+            mStepPerUnit = a.getFloat(R.styleable.UniversalSeekBarPreference_stepPerUnit, 1.0f);
+            showSeekBarValue = a.getBoolean(R.styleable.UniversalSeekBarPreference_showSeekBarValue, true);
+            isFloat = a.getBoolean(R.styleable.UniversalSeekBarPreference_isFloat, false);
+            if (!isFloat && mStepPerUnit > 1)
+                mStepPerUnit = 1.0f;
+            a.recycle();
+        }
+
+        try {
+            PhotonCamera pc = PhotonCamera.getInstance(context);
+            if (pc != null) {
+                vibration = PhotonCamera.getVibration();
+            }
+        } catch (Throwable ignored) {}
     }
 
     private void log(String msg) {
@@ -67,19 +85,24 @@ public class UniversalSeekBarPreference extends Preference implements SeekBar.On
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-//        log("onBindViewHolder");
         super.onBindViewHolder(holder);
         holder.setDividerAllowedAbove(false);
         seekBar = (SeekBar) holder.findViewById(R.id.seekbar);
         seekBarValue = (TextView) holder.findViewById(R.id.seekbar_value);
-        seekBar.setMax((int) ((mMax - mMin) * mStepPerUnit));
-        seekBar.setOnSeekBarChangeListener(this);
+        if (seekBar != null) {
+            seekBar.setMax((int) ((mMax - mMin) * mStepPerUnit));
+            seekBar.setOnSeekBarChangeListener(this);
+        }
         set(convertToProgress(fallback_value));
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if(fromUser) vibration.Tick();
+        if (fromUser && vibration != null) {
+            try {
+                vibration.Tick();
+            } catch (Exception ignored) {}
+        }
         if (fromUser) {
             set(progress);
         }
@@ -97,11 +120,10 @@ public class UniversalSeekBarPreference extends Preference implements SeekBar.On
 
     @Override
     protected void onSetInitialValue(Object defaultValue) {
-//        log("onSetInitialValue : " + defaultValue);
-        if (defaultValue == null) {
-            defaultValue = fallback_value;
+        String valStr = (defaultValue != null) ? defaultValue.toString() : fallback_value;
+        if (valStr != null) {
+            set(convertToProgress(valStr));
         }
-        set(convertToProgress(defaultValue.toString()));
     }
 
     @Override
@@ -116,7 +138,9 @@ public class UniversalSeekBarPreference extends Preference implements SeekBar.On
         String valueToPersist = convertToValue(progress);
         updateLabel(valueToPersist);
         updateSeekbar(progress);
-        persistString(valueToPersist);
+        try {
+            persistString(valueToPersist);
+        } catch (Exception ignored) {}
         log("set : " + valueToPersist);
     }
 
@@ -136,7 +160,14 @@ public class UniversalSeekBarPreference extends Preference implements SeekBar.On
     }
 
     private int convertToProgress(String defValue) {
-        return (int) ((Float.parseFloat(getPersistedString(defValue)) - mMin) * mStepPerUnit);
+        try {
+            String val = getPersistedString(defValue);
+            if (val == null) val = defValue;
+            if (val == null) return 0;
+            return (int) ((Float.parseFloat(val) - mMin) * mStepPerUnit);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     private String convertToValue(int progress) {

@@ -40,7 +40,11 @@ public class Log {
     private static final int BUFFER_FLUSH_INTERVAL = 1000; // Flush every 1 second
 
     static {
-        initLogThread();
+        try {
+            initLogThread();
+        } catch (Throwable ignored) {
+            logHandler = null;
+        }
     }
 
     private static void initLogThread() {
@@ -53,10 +57,12 @@ public class Log {
     }
 
     private static void schedulePeriodicFlush() {
-        logHandler.postDelayed(() -> {
-            flushBuffer();
-            schedulePeriodicFlush();
-        }, BUFFER_FLUSH_INTERVAL);
+        if (logHandler != null) {
+            logHandler.postDelayed(() -> {
+                flushBuffer();
+                schedulePeriodicFlush();
+            }, BUFFER_FLUSH_INTERVAL);
+        }
     }
 
     /**
@@ -67,7 +73,9 @@ public class Log {
         if (context != null) {
             logContext = context.getApplicationContext();
             logDir = null;
+            if (logHandler != null) {
             logHandler.post(() -> cleanupOldLogs());
+        }
         } else {
             logContext = null;
             closeWriter();
@@ -80,7 +88,9 @@ public class Log {
         if (folder != null && folder.isDirectory()) {
             logDir = folder;
             logContext = null;
+            if (logHandler != null) {
             logHandler.post(() -> cleanupOldLogs());
+        }
         } else {
             logDir = null;
             closeWriter();
@@ -206,32 +216,34 @@ public class Log {
 
         long timestamp = System.currentTimeMillis();
 
-        logHandler.post(() -> {
-            try {
-                if (useSimpleStorage) {
-                    DocumentFile file = getLogFileDocumentFile();
-                    if (file == null || !file.exists()) return;
-                    if (bufferedWriter == null) {
-                        java.io.OutputStream os = DocumentFileUtils.openOutputStream(file, logContext, true);
-                        if (os == null) return;
-                        bufferedWriter = new BufferedWriter(new OutputStreamWriter(os), 8192);
+        if (logHandler != null) {
+            logHandler.post(() -> {
+                try {
+                    if (useSimpleStorage) {
+                        DocumentFile file = getLogFileDocumentFile();
+                        if (file == null || !file.exists()) return;
+                        if (bufferedWriter == null) {
+                            java.io.OutputStream os = DocumentFileUtils.openOutputStream(file, logContext, true);
+                            if (os == null) return;
+                            bufferedWriter = new BufferedWriter(new OutputStreamWriter(os), 8192);
+                        }
+                    } else {
+                        java.io.File file = getLogFile();
+                        if (file == null) return;
+                        if (bufferedWriter == null) {
+                            bufferedWriter = new BufferedWriter(new FileWriter(file, true), 8192);
+                        }
                     }
-                } else {
-                    java.io.File file = getLogFile();
-                    if (file == null) return;
-                    if (bufferedWriter == null) {
-                        bufferedWriter = new BufferedWriter(new FileWriter(file, true), 8192);
-                    }
-                }
-                if (bufferedWriter == null) return;
+                    if (bufferedWriter == null) return;
 
-                String time = timeFormatter.get().format(new java.util.Date(timestamp));
-                String logEntry = time + " " + level + "/" + tag + ": " + message + "\n";
-                bufferedWriter.write(logEntry);
-            } catch (Exception e) {
-                closeWriter();
-            }
-        });
+                    String time = timeFormatter.get().format(new java.util.Date(timestamp));
+                    String logEntry = time + " " + level + "/" + tag + ": " + message + "\n";
+                    bufferedWriter.write(logEntry);
+                } catch (Exception e) {
+                    closeWriter();
+                }
+            });
+        }
     }
 
     public static void d(String tag, String message) {
