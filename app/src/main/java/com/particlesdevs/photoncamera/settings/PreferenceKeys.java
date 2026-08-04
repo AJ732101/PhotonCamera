@@ -196,6 +196,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION, "OFF");
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION_QB, "OFF");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COUNTDOWN_TIMER, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BRACKETING_MODE, 0); // Default to disable bracketing
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PREVIEW_FORMAT, resources.getString(R.string.pref_preview_format_default));
@@ -602,6 +603,10 @@ public class PreferenceKeys {
 
     public static String getCustomResolution() {
         return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION);
+    }
+
+    public static String getCustomResolutionQb() {
+        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_CUSTOM_RESOLUTION_QB);
     }
 
     public static float getSharpnessValue() {
@@ -1199,6 +1204,7 @@ public class PreferenceKeys {
         KEY_SESSION_TYPE_DNG_BLACK_LEVEL(R.string.pref_dng_black_level_key),
         KEY_SESSION_TYPE_DNG_WHITE_LEVEL(R.string.pref_dng_white_level_key),
         KEY_CUSTOM_RESOLUTION(R.string.pref_custom_resolution_key),
+        KEY_CUSTOM_RESOLUTION_QB(R.string.pref_custom_resolution_qb_key),
         KEY_CONTRAST_SEEKBAR(R.string.pref_contrast_seekbar_key),
         KEY_SHARPNESS_SEEKBAR(R.string.pref_sharpness_seekbar_key),
         KEY_EXPOCOMPENSATE_SEEKBAR(R.string.pref_expocompensation_seekbar_key),

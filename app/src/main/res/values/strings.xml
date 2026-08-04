@@ -94,6 +94,7 @@
     <string name="dng_black_level">DNG Black Level</string>
     <string name="dng_white_level">DNG White Level</string>
     <string name="custom_resolution">Custom Resolution</string>
+    <string name="custom_resolution_qb">Custom Resolution Quad Bayer</string>
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="dcg_16_10_crop">Sensor Mode Photo DNG 16:10 Crop</string>

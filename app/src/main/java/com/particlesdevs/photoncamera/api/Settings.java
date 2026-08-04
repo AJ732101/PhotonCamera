@@ -157,6 +157,7 @@ public class Settings {
     public int colorTemperature = 999;
     public float colorTint = 0.0f;
     public String customResolution = "OFF";
+    public String customResolutionQb = "OFF";
     public boolean isSensorModeDcg1610CropOn = false;
 
     public void loadCache() {
@@ -300,6 +301,7 @@ public class Settings {
         colorTint = PreferenceKeys.getColorTint();
         // QualityDoesMatter - Sensor and more
         customResolution = PreferenceKeys.getCustomResolution();
+        customResolutionQb = PreferenceKeys.getCustomResolutionQb();
         hotPixelMode = PreferenceKeys.getHotPixelMode();
         colorCorrectionAberrationMode = PreferenceKeys.getColorCorrectionAberrationMode();
         distortionCorrectionMode = PreferenceKeys.getDistortionCorrectionMode();

@@ -1637,22 +1637,19 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             applyFormatFallback();
             int targetWidth = target.getWidth();
             int targetHeight = target.getHeight();
-            String customRes = PhotonCamera.getSettings().customResolution;
+            String customRes = PhotonCamera.getSettings().QuadBayer ? PhotonCamera.getSettings().customResolutionQb : PhotonCamera.getSettings().customResolution;
             if (!customRes.equals("OFF") && customRes.contains("x")) {
                 String[] parts = customRes.split("x");
                 targetWidth = Integer.parseInt(parts[0].trim());
                 targetHeight= Integer.parseInt(parts[1].trim());
-                //mImageReaderRaw = ImageReader.newInstance(newSize.getHeight(), newSize.getWidth(), mTargetFormat, maxImageReaderImages/*, HardwareBuffer.USAGE_SENSOR_DIRECT_DATA*/);
             } else {
                 if (target.getHeight() > target.getWidth()) {
                     targetWidth = target.getHeight();
                     targetHeight = target.getWidth();
-                    //mImageReaderRaw = ImageReader.newInstance(target.getHeight(), target.getWidth(), mTargetFormat, maxImageReaderImages);
                 }
                 else {
                     targetWidth = target.getWidth();
                     targetHeight = target.getHeight();
-                    //mImageReaderRaw = ImageReader.newInstance(target.getWidth(), target.getHeight(), mTargetFormat, maxImageReaderImages);
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

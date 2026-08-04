@@ -99,6 +99,15 @@
             android:defaultValue="OFF"
             android:icon="@drawable/aspect_ratio_24px"/>
 
+        <EditTextPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_custom_resolution_qb_key"
+            android:title="@string/custom_resolution_qb"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="text"
+            android:defaultValue="OFF"
+            android:icon="@drawable/aspect_ratio_24px"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
