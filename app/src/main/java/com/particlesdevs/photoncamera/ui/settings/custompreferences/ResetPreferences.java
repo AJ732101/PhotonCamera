@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
 
+import androidx.annotation.Keep;
 import androidx.preference.DialogPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceDialogFragmentCompat;
@@ -13,9 +14,29 @@ import com.particlesdevs.photoncamera.R;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.settings.BackupRestoreUtil;
 
+@Keep
 public class ResetPreferences extends DialogPreference {
+    public ResetPreferences(Context context, AttributeSet attributeSet, int defStyleAttr, int defStyleRes) {
+        super(context, attributeSet, defStyleAttr, defStyleRes);
+        init();
+    }
+
+    public ResetPreferences(Context context, AttributeSet attributeSet, int defStyleAttr) {
+        super(context, attributeSet, defStyleAttr);
+        init();
+    }
+
     public ResetPreferences(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
+        init();
+    }
+
+    public ResetPreferences(Context context) {
+        super(context);
+        init();
+    }
+
+    private void init() {
         setPersistent(false);
         setDialogTitle(android.R.string.dialog_alert_title);
         setDialogMessage(R.string.reset_preferences_warning);

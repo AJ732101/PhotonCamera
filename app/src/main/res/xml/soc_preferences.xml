@@ -4,12 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/soc_settings_screen_title"
-    android:key="soc_settings_category"
-    android:paddingBottom="56dp">
+    android:key="soc_settings_category">
 
     <PreferenceCategory
-        app:key="soc_settings_category"
-        app:title="@string/soc_settings_screen_title">
+        android:key="soc_settings_category"
+        android:title="@string/soc_settings_screen_title">
 
         <ListPreference
             android:key="@string/pref_soc_hdr_mode_key"

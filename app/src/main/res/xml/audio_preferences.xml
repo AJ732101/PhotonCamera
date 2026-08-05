@@ -4,12 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/audio_settings_screen_title"
-    android:key="audio_settings_category"
-    android:paddingBottom="56dp">
+    android:key="audio_settings_category">
 
     <PreferenceCategory
-        app:key="audio_settings_category"
-        app:title="@string/audio_settings_screen_title">
+        android:key="audio_settings_category"
+        android:title="@string/audio_settings_screen_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_audio_bitrate_key"
@@ -62,8 +61,8 @@
 
         <PreferenceCategory
             android:layout="@layout/preference_category_layout"
-            app:key="audio_settings_category"
-            app:title="@string/beam_forming_separator_title">
+            android:key="audio_settings_category"
+            android:title="@string/beam_forming_separator_title">
 
             <ListPreference
                 android:layout="@layout/preference_with_margin"

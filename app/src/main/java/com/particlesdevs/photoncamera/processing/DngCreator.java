@@ -64,6 +64,7 @@ public class DngCreator {
     private native void setBitsPerSample(long nativePtr, int bps);
     private native void setBinning(long nativePtr, boolean binning);
     private native void setDcg1610Crop(long nativePtr, boolean crop);
+    private native void setDcg169Crop(long nativePtr, boolean crop);
     private native void setGpsLatitude(long nativePtr, double degree, double minute, double second, char ref);
     private native void setGpsLongitude(long nativePtr, double degree, double minute, double second, char ref);
     private native void setGpsAltitude(long nativePtr, double altitude, char ref);
@@ -534,7 +535,7 @@ public class DngCreator {
         setCameraCalibration2(toDouble(parameters.calibrationTransform2));
         setAsShotNeutral(toDouble(parameters.whitePoint));
         setCFAPattern(parameters.cfaPattern);
-        setQuadBayer(PhotonCamera.getSettings().sensorModeCfaPattern == -2 && PhotonCamera.isSensorModeOn);
+        setQuadBayer((PhotonCamera.getSettings().sensorModeCfaPattern == -2) && PhotonCamera.isSensorModeOn);
         setOrientation(parameters.cameraRotation/90);
         if ((PhotonCamera.getSettings().sessionType != 36875) && (PhotonCamera.getSettings().shadingMode != 0)) {
             setGainMap(parameters.gainMap,
@@ -552,7 +553,12 @@ public class DngCreator {
         }
 
         boolean isRawVideo = PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO);
-        setDcg1610Crop(nativePtr, !isRawVideo && PhotonCamera.getSettings().isDcg1610CropOn());
+        if (PhotonCamera.getSettings().sensorModeDcgCropMode == 2) {
+            setDcg169Crop(nativePtr, !isRawVideo);
+        }
+        if (PhotonCamera.getSettings().sensorModeDcgCropMode == 1) {
+            setDcg1610Crop(nativePtr, !isRawVideo);
+        }
 
         /*if (PhotonCamera.getSettings().gpsLocation && PhotonCamera.gpsLocation != null) {
             double lat = PhotonCamera.gpsLocation.getLatitude();

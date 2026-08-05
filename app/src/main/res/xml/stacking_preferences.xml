@@ -4,10 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/stacking_settings_screen_title"
-    android:key="stacking_settings_category"
-    android:paddingBottom="56dp">>
+    android:key="stacking_settings_category">>
 
-    <PreferenceCategory app:key="stacking_settings_category" app:title="@string/stacking_settings_screen_title">
+    <PreferenceCategory android:key="stacking_settings_category" android:title="@string/stacking_settings_screen_title">
 
         <ListPreference
             android:layout="@layout/preference_with_margin"

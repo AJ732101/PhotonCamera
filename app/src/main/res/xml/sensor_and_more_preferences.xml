@@ -4,13 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/sensor_and_more_settings_screen_title"
-    android:key="sensor_and_more_settings_category"
-    android:paddingBottom="56dp">>
+    android:key="sensor_and_more_settings_category">
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
-        app:key="sensor_and_more_settings_category"
-        app:title="@string/sensor_settings_screen_title">
+        android:key="sensor_and_more_settings_category"
+        android:title="@string/sensor_settings_screen_title">
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
@@ -50,7 +49,7 @@
             android:icon="@drawable/invert_colors_24px"
             android:entries="@array/color_correction_aberration_mode_entries"
             android:entryValues="@array/color_correction_aberration_mode_entryValues"
-            android:defaultValue="@string/pref_color_correction_aberration_mode_key" />
+            android:defaultValue="@string/pref_color_correction_aberration_mode_default_value" />
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
@@ -112,8 +111,8 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
-        app:key="sensor_and_more_settings_category"
-        app:title="@string/sensor_mode_settings_separator_title">
+        android:key="sensor_and_more_settings_category"
+        android:title="@string/sensor_mode_settings_separator_title">
 
         <EditTextPreference
             android:layout="@layout/preference_with_margin"
@@ -143,20 +142,22 @@
             android:entryValues="@array/cfapat_entryValues"
             android:defaultValue="@string/pref_cfa_default_value"/>
 
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+        <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_sensor_mode_dcg_16_10_crop_key"
-            android:defaultValue="false"
             android:title="@string/dcg_16_10_crop"
             android:summary="@string/dcg_16_10_crop_summary"
-            android:icon="@drawable/aspect_ratio_24px" />
+            android:icon="@drawable/aspect_ratio_24px"
+            android:entries="@array/crop_entries"
+            android:entryValues="@array/crop_entryValues"
+            android:defaultValue="@string/pref_crop_default_value"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
-        app:key="sensor_and_more_settings_category"
-        app:title="@string/other_settings_separator_title">
+        android:key="sensor_and_more_settings_category"
+        android:title="@string/other_settings_separator_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"

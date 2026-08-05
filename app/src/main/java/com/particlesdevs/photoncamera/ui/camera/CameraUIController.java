@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CountDownTimer;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import com.particlesdevs.photoncamera.gallery.files.GalleryFileOperations;
 import com.particlesdevs.photoncamera.gallery.files.ImageFile;
@@ -422,6 +422,7 @@ final public class CameraUIController implements CameraUIEventsListener,
                         break;
                     case RAW:
                         PreferenceKeys.setSaveRaw((Integer) value);
+                        this.restartCamera();
                         break;
                     case BATTERY_SAVER:
                         PreferenceKeys.setBatterySaver(value.equals(1));

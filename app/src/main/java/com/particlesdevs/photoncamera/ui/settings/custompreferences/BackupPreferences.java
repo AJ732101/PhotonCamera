@@ -6,6 +6,7 @@ import android.text.SpannableStringBuilder;
 import android.util.AttributeSet;
 import android.widget.Toast;
 
+import androidx.annotation.Keep;
 import androidx.preference.EditTextPreference;
 
 import com.particlesdevs.photoncamera.R;
@@ -15,9 +16,29 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+@Keep
 public class BackupPreferences extends EditTextPreference {
+    public BackupPreferences(Context context, AttributeSet attributeSet, int defStyleAttr, int defStyleRes) {
+        super(context, attributeSet, defStyleAttr, defStyleRes);
+        init();
+    }
+
+    public BackupPreferences(Context context, AttributeSet attributeSet, int defStyleAttr) {
+        super(context, attributeSet, defStyleAttr);
+        init();
+    }
+
     public BackupPreferences(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
+        init();
+    }
+
+    public BackupPreferences(Context context) {
+        super(context);
+        init();
+    }
+
+    private void init() {
         setPersistent(false);
         setSummary(FileManager.sPHOTON_DIR.toString());
 

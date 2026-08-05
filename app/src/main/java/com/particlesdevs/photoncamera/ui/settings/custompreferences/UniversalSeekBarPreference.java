@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -21,6 +22,7 @@ import java.util.Locale;
 /**
  * Created by vibhorSrv on 12/09/2020
  */
+@Keep
 public class UniversalSeekBarPreference extends Preference implements SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "UnivSeekBarPref";
     private static final boolean isLoggingOn = false;

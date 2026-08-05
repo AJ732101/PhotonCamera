@@ -8,8 +8,8 @@
     android:paddingBottom="56dp">
 
     <PreferenceCategory
-        app:key="device_info_category"
-        app:title="@string/device_info_screen_title">
+        android:key="device_info_category"
+        android:title="@string/device_info_screen_title">
 
     </PreferenceCategory>
 

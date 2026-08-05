@@ -36,7 +36,7 @@ public class DefaultSaver extends SaverImplementation {
         Log.d(TAG, "Acquired:" + IMAGE_BUFFER.size());
         bufferLock = true;
         Log.d(TAG,"Size:"+IMAGE_BUFFER.size());
-        if ((PhotonCamera.getSettings().frameCount == 1) &&
+        if (PhotonCamera.isSingleShotJpegOrHeic() &&
             !(PhotonCamera.isSensorModeOn && (PhotonCamera.getSettings().sensorModeCfaPattern == -2))) {
             Path dngFile = ImagePath.newDNGFilePath();
             Log.d(TAG, "Size:" + IMAGE_BUFFER.size());

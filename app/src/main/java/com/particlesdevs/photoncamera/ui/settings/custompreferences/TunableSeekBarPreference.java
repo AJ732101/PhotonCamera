@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -27,6 +28,7 @@ import java.util.Locale;
  * Seekbar preference that can be created programmatically.
  * Uses native float/int storage instead of strings for perfect precision.
  */
+@Keep
 public class TunableSeekBarPreference extends Preference implements SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "TunableSeekBarPref";
     private final Vibration vibration;

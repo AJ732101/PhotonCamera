@@ -77,7 +77,7 @@
     <string name="custom_resolution_qb">Eigene Auflösung Quad Bayer</string>
     <string name="pref_save_per_lens_string">Einstellungen pro Kameramodul</string>
     <string name="compressor">Kompression</string>
-    <string name="dcg_16_10_crop_summary">Beschneidet Foto DNGs immer auf 16:10, Video nicht betroffen</string>
+    <string name="dcg_16_10_crop_summary">%s\nBeschneidet Foto DNGs immer auf ausgewählten Crop Faktor (Video nicht betroffen)</string>
     <string name="about">Über</string>
     <string name="camera_sounds">Kamera Töne</string>
     <string name="energy_saving">Stromsparen</string>
@@ -229,7 +229,7 @@
     <string name="color_correction_aberration_mode">Chromatische Aberrationskorrektur Methode</string>
     <string name="distortion_correction_mode">Verzerrungskorrektur Modus</string>
     <string name="shading_mode">Shading Modus</string>
-    <string name="alternate_preview_template">Alternatives Vorschau Vorlage</string>
+    <string name="alternate_preview_template">Alternative Vorschau Vorlage</string>
     <string name="ten_bit_surface_target">YCBCR_P010 Zielformat</string>
     <string name="hdr_mode">HDR Modus</string>
     <string name="soc_hdr_mode">Qualcomm HDR Modus</string>
@@ -279,5 +279,5 @@
     <string name="image_reader_flags">Alternative ImageReader Flags</string>
     <string name="color_temperature">Farbtemperatur</string>
     <string name="sensor_mode">Sensor Modus</string>
-    <string name="dcg_16_10_crop">Sensor Modus DNG 16:10</string>
+    <string name="dcg_16_10_crop">Sensor Modus DNG Crop</string>
 </resources>

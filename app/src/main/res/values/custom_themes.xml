@@ -2,6 +2,7 @@
 <resources>
 
     <style name="EszdmanTheme" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="colorAccent">#9F39B9</item>
         <item name="colorPrimary">#9F39B9</item>
         <item name="colorPrimaryContainer">#7B2D8F</item>
@@ -9,12 +10,14 @@
     </style>
 
     <style name="BlueTheme" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="colorPrimaryContainer">@color/md_blue_600</item>
         <item name="colorPrimary">@color/md_blue_400</item>
         <item name="colorAccent">@color/md_blue_400</item>
     </style>
 
     <style name="RedTheme" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="colorPrimaryContainer">@color/md_red_400_dark</item>
         <item name="colorPrimary">@color/md_red_400</item>
         <item name="colorAccent">@color/md_red_400</item>

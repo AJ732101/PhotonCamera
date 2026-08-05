@@ -883,7 +883,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) &&
-                (PhotonCamera.getSettings().rawSaver != 2) &&
+                (PhotonCamera.getSettings().rawSaver == 0) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
@@ -2462,7 +2462,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         if ((!PhotonCamera.isSingleShotJpegOrHeic() || isSingleShotSwEncoder()) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
                 !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO) &&
-                !(PhotonCamera.getSettings().rawSaver == 2) &&
+                (PhotonCamera.getSettings().rawSaver == 0) &&
                 !PhotonCamera.getSettings().lutName.equals("lut.png")) {
             File previewLut = new File(FileManager.sPHOTON_TUNING_DIR, PhotonCamera.getSettings().lutName);
             if (!previewLut.exists()) {

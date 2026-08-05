@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreferenceCompat;
@@ -21,6 +22,7 @@ import com.particlesdevs.photoncamera.util.Log;
  * - Green color indicator when value differs from default
  * - Long press to reset to default
  */
+@Keep
 public class TunableCheckBoxPreference extends SwitchPreferenceCompat {
     private static final String TAG = "TunableCheckBoxPref";
     private int mDefaultValue = 0;

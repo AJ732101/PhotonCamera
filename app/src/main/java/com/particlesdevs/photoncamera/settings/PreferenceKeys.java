@@ -151,6 +151,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_PHOTO_COLOR_SPACE.mValue);
         COMMON_KEYS.add(Key.KEY_PHOTO_RANGE.mValue);
         COMMON_KEYS.add(Key.KEY_SW_COLOR_SPACE.mValue);
+        COMMON_KEYS.add(Key.KEY_TELEGRAM.mValue);
         // QualityDoesMatter - Sensor Related (and more)
         /*COMMON_KEYS.add(Key.KEY_HOT_PIXEL_MODE.mValue);
         COMMON_KEYS.add(Key.KEY_COLOR_CORRECTION_ABERRATION_MODE.mValue);
@@ -172,7 +173,39 @@ public class PreferenceKeys {
         SettingsManager settingsManager = preferenceKeys.settingsManager;
         Resources resources = context.getResources();
 
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_TELEGRAM, "https://t.me/photon_camera_channel");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDRX, resources.getBoolean(R.bool.pref_hdrx_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SAVE_PER_LENS_SETTINGS, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_ALIGNINIG, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_WATERMARK, true);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ENERGY_SAVING, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_WIDE169, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EARLY_VENDOR_KEYS_LOADING, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_BINNING, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_ROUND_EDGE, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_AF_DATA, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_GRID, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FOCUS_PEAK, false);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SAVE_RAW, resources.getBoolean(R.bool.pref_save_raw_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CAMERA_SOUNDS, resources.getBoolean(R.bool.pref_camera_sounds_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HDRX_NR, resources.getBoolean(R.bool.pref_hdrx_nr_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CHROMA_NR_SEEKBAR, resources.getString(R.string.pref_chroma_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LUMA_NR_SEEKBAR, resources.getString(R.string.pref_luma_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COMPRESSOR_SEEKBAR, resources.getString(R.string.pref_compressor_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISESTR_SEEKBAR, resources.getString(R.string.pref_noise_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_MERGE_SEEKBAR, resources.getString(R.string.pref_noise_merge_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GAIN_SEEKBAR, resources.getString(R.string.pref_gain_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHADOWS_SEEKBAR, resources.getString(R.string.pref_shadow_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CONTRAST_SEEKBAR, resources.getString(R.string.pref_contrast_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SATURATION_SEEKBAR, resources.getString(R.string.pref_saturation_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHARPNESS_SEEKBAR, resources.getString(R.string.pref_sharpness_seekbar_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOCOMPENSATE_SEEKBAR, resources.getString(R.string.pref_exposure_compensation_orig_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALIGN_METHOD, resources.getString(R.string.pref_align_method_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_METHOD, "1");
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AF_MODE, resources.getString(R.string.pref_af_mode_default_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_FRAME_COUNT, resources.getString(R.string.pref_framecount_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ENHANCED_PROCESSING, resources.getBoolean(R.bool.pref_enhanced_processing_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EIS_PHOTO, resources.getBoolean(R.bool.pref_eis_photo_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_QUAD_BAYER, resources.getBoolean(R.bool.pref_quad_bayer_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_REMOSAIC, resources.getBoolean(R.bool.pref_remosaic_default));
@@ -186,12 +219,13 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_PARALLEL_AVIF, resources.getBoolean(R.bool.pref_parallel_avif_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_16_BIT, resources.getBoolean(R.bool.pref_16bit_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR, resources.getBoolean(R.bool.pref_ultra_hdr_default));
-        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_AE_MODE, resources.getString(R.string.pref_ae_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DEMOSAIC_METHOD, resources.getString(R.string.pref_demosaic_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.CAMERA_MODE, resources.getString(R.string.pref_camera_mode_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_VIDEO, 0);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE, -1);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CFA, -1);
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_CFA, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_VENDORKEY, "org.codeaurora.qcamera3.sensor_meta_data.current_mode");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_BLACK_LEVEL, -1);
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SESSION_TYPE_DNG_WHITE_LEVEL, -1);
@@ -290,6 +324,8 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXPOSURE_COMPENSATION, resources.getString(R.string.pref_exposure_compensation_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_TEMPERATURE, "999");
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_COLOR_TINT, "0.0");
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_DCG_16_10_CROP, resources.getString(R.string.pref_crop_default_value));
+
 
         // QualityDoesMatter - Sensor Related and More
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE, resources.getString(R.string.pref_hot_pixel_mode_default_value));
@@ -545,12 +581,8 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_VIDEO_LOGICAL_WORKAROUND);
     }
 
-    public static boolean isNeRecVideoOn() {
+    public static boolean isNewRecVideoOn() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_NEW_REC_VIDEO);
-    }
-
-    public static String getMode() {
-        return preferenceKeys.settingsManager.getString(SCOPE_GLOBAL, Key.KEY_SHOW_ROUND_EDGE);
     }
 
     public static int getGridValue() {
@@ -1161,8 +1193,8 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_RAWVIDEO_CROP_169);
     }
 
-    public static boolean isSensorModeDcg1610CropOn() {
-        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_DCG_16_10_CROP);
+    public static int getModeDcgCrop() {
+        return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_SENSOR_MODE_DCG_16_10_CROP);
     }
 
     public enum Key {
@@ -1334,7 +1366,6 @@ public class PreferenceKeys {
         /**
          * Enhanced settings keys
          */
-        KEY_PREVIEW_RESOLUTION(R.string.pref_preview_resolution_key),////TODO add preview resolution selector
         KEY_RAWVIDEO_DOWNSCALE_4X(R.string.pref_rawvideo_downscale_4x_key),
         KEY_RAWVIDEO_WRITE_ZIP(R.string.pref_rawvideo_write_zip_key),
         KEY_RAWVIDEO_COMPRESS_ZIP(R.string.pref_rawvideo_compress_zip_key),
@@ -1351,7 +1382,6 @@ public class PreferenceKeys {
          */
         KEY_HDRX(R.string.pref_hdrx_key),
         KEY_EIS_PHOTO(R.string.pref_eis_photo_key),
-        KEY_MODE(R.string.pref_eis_photo_key),
         KEY_QUAD_BAYER(R.string.pref_quad_bayer_key),
         KEY_FPS_PREVIEW(R.string.pref_fps_preview_key),
         CAMERA_ID(R.string.camera_id),

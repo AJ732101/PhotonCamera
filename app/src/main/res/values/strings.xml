@@ -98,7 +98,7 @@
     <string name="pref_save_per_lens_string">Per Lens Settings</string>
     <string name="compressor">Compressor</string>
     <string name="dcg_16_10_crop">Sensor Mode Photo DNG 16:10 Crop</string>
-    <string name="dcg_16_10_crop_summary">Always crops photo DNG output to 16:10; does not affect RAW video</string>
+    <string name="dcg_16_10_crop_summary">%s\nAlways crops photo DNG output selected factor (does not affect RAW video)</string>
     <string name="about">About</string>
     <string name="camera_sounds">Camera Sounds</string>
     <string name="energy_saving">Battery Saver</string>

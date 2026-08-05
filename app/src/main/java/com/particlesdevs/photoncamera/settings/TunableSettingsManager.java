@@ -125,17 +125,13 @@ public class TunableSettingsManager {
                         defaultValue = annotation.min();
                     }
                     
-                    // Auto-detect if float based on step value
-                    float step = annotation.step();
-                    boolean isFloat = (step != Math.floor(step));
                     
-                    // Get current value as native type
-                    float currentValue;
-                    boolean hasValue = prefs.contains(prefKey);
-                    if (isFloat) {
-                        currentValue = prefs.getFloat(prefKey, defaultValue);
-                    } else {
-                        currentValue = (float) prefs.getInt(prefKey, (int) defaultValue);
+                    // Get current value from preferences safely
+                    float currentValue = defaultValue;
+                    Object val = prefs.getAll().get(prefKey);
+                    boolean hasValue = val != null;
+                    if (hasValue && val instanceof Number) {
+                        currentValue = ((Number) val).floatValue();
                     }
                     
                     // Export if it's either changed or we want everything

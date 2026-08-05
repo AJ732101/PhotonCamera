@@ -10,25 +10,25 @@ public class Settings {
     private final String TAG = "Settings";
     //Preferences
 
-    public int frameCount;
-    public int lumenCount;
-    public int chromaCount;
+    public int frameCount = 1;
+    public int lumenCount = 12;
+    public int chromaCount = 12;
     public boolean enhancedProcess;
-    public boolean watermark;
-    public boolean energySaving;
+    public boolean watermark = true;
+    public boolean energySaving = false;
     public boolean aspect169 = false;
     public boolean earlyVendorKeysLoading = false;
     public boolean useThumbnail = false;
-    public boolean binning;
+    public boolean binning = false;
     public boolean DebugData;
-    public boolean roundEdge;
+    public boolean roundEdge = false;
     public boolean align;
     public boolean hdrx;
     public boolean hdrxNR;
     public boolean videoLogicalWorkaround = false;
-    public double exposureCompensation;
-    public double saturation;
-    public double sharpness;
+    public double exposureCompensation = 0.0f;
+    public double saturation = 5;
+    public double sharpness = 0;
     public double contrastMpy = 1.0;
     public double noiseRstr;
     public double mergeStrength;
@@ -36,9 +36,9 @@ public class Settings {
     public double gain;
     public double shadows;
     public int rawSaver;
-    public boolean QuadBayer;
-    public int cfaPattern;
-    public int sensorModeCfaPattern;
+    public boolean QuadBayer = false;
+    public int cfaPattern = -1;
+    public int sensorModeCfaPattern = -1;
     public int theme;
     public boolean remosaic;//TODO
     public boolean eisPhoto;
@@ -67,25 +67,25 @@ public class Settings {
     public boolean useP3 = false;
     public int videoBitrate;
     public float apertureToUse;
-    public String videoCodec;
+    public String videoCodec = "HEVC";
     public int videoFramrate;
-    public int videoHeight;
-    public boolean videoEisInPreview;
+    public int videoHeight = 2160;
+    public boolean videoEisInPreview = false;
     public boolean videoHDR = false;
     public boolean video10bit = false;
     public boolean videoNewRec = false;
-    public boolean useExtendIso;
-    public boolean useExtendExposure;
-    public boolean zoom2X;
-    public int noiseProcessing;
-    public int edgeProcessing;
+    public boolean useExtendIso = false;
+    public boolean useExtendExposure = false;
+    public boolean zoom2X = false;
+    public int noiseProcessing = 0;
+    public int edgeProcessing = 0;
     public int audioProcessing;
     public int audioCodec;
     public String audioCodecStr;
     public String audioProcessingStr;
     public int audioSps;
     public int audioBitrate;
-    public int audioChannels;
+    public int audioChannels = 2;
     public int singleFrameQuality;
     public int socQualcommSharpness;
     public int socQualcommSaturation;
@@ -158,7 +158,7 @@ public class Settings {
     public float colorTint = 0.0f;
     public String customResolution = "OFF";
     public String customResolutionQb = "OFF";
-    public boolean isSensorModeDcg1610CropOn = false;
+    public int sensorModeDcgCropMode = 0;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -242,7 +242,7 @@ public class Settings {
         videoEisInPreview = PreferenceKeys.isEisInPreviewVideoOn();
         videoHDR = PreferenceKeys.isHdrVideoOn();
         video10bit = PreferenceKeys.is10bitVideoOn();
-        videoNewRec = PreferenceKeys.isNeRecVideoOn();
+        videoNewRec = PreferenceKeys.isNewRecVideoOn();
         keyframeInterval = PreferenceKeys.getKeyframeInterval();
         hdrMode = PreferenceKeys.getHdrMode();
         transferFunction = PreferenceKeys.getTransferFunction();
@@ -310,7 +310,7 @@ public class Settings {
         sensorModeVendorkey = PreferenceKeys.getSensorModeVendorkey();
         dngBlackLevel = PreferenceKeys.getDngBlackLevel();
         dngWhiteLevel = PreferenceKeys.getDngWhiteLevel();
-        isSensorModeDcg1610CropOn = isDcg1610CropOn();
+        sensorModeDcgCropMode = dcgCropMode();
     }
 
     public void saveID() {
@@ -341,7 +341,7 @@ public class Settings {
         return finalArray;
     }
 
-    public boolean isDcg1610CropOn() {
-        return (sensorMode != -1) && PreferenceKeys.isSensorModeDcg1610CropOn();
+    public int dcgCropMode() {
+        return (sensorMode != -1) ? PreferenceKeys.getModeDcgCrop() : 0;
     }
 }

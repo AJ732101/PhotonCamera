@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import androidx.annotation.Keep;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -31,6 +32,7 @@ import com.particlesdevs.photoncamera.settings.SettingsManager;
  * {@link SettingsManager} stores all settings as Strings we need to ensure we
  * get and set boolean settings through the manager.
  */
+@Keep
 public class ManagedSwitchPreference extends SwitchPreferenceCompat {
     private boolean fallback_value;
 

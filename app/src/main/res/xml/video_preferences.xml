@@ -4,10 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/video_settings_screen_title"
-    android:key="video_settings_category"
-    android:paddingBottom="56dp">>
+    android:key="video_settings_category">>
 
-    <PreferenceCategory app:key="video_settings_category" app:title="@string/video_settings_screen_title">
+    <PreferenceCategory android:key="video_settings_category" android:title="@string/video_settings_screen_title">
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:layout="@layout/preference_seekbar"
@@ -90,8 +89,8 @@
 
         <PreferenceCategory
             android:layout="@layout/preference_category_layout"
-            app:key="sensor_and_more_settings_category"
-            app:title="@string/new_rec_separator_title">
+            android:key="sensor_and_more_settings_category"
+            android:title="@string/new_rec_separator_title">
 
             <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
                 android:layout="@layout/preference_seekbar"
@@ -156,8 +155,8 @@
 
         <PreferenceCategory
             android:layout="@layout/preference_category_layout"
-            app:key="sensor_and_more_settings_category"
-            app:title="@string/raw_video_separator_title">
+            android:key="sensor_and_more_settings_category"
+            android:title="@string/raw_video_separator_title">
 
             <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
                 android:key="@string/pref_rawvideo_downscale_4x_key"

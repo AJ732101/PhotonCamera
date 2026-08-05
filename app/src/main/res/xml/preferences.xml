@@ -2,10 +2,11 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.settings.SettingsActivity$SettingsFragment"
     android:orderingFromXml="true"
     android:title="@string/settings"
-    android:key="prefscreen"
-    android:paddingBottom="56dp">>
+    android:key="prefscreen">
 
     <PreferenceCategory
         android:layout="@layout/preference_category_layout"
@@ -13,9 +14,9 @@
         android:title="@string/general_settings_screen_title">
         <Preference
             android:layout="@layout/preference_with_margin"
-            app:key="general_settings_screen"
-            app:title="@string/general_settings_screen_title"
-            app:summary="@string/general_settings_screen_summary"
+            android:key="general_settings_screen"
+            android:title="@string/general_settings_screen_title"
+            android:summary="@string/general_settings_screen_summary"
             android:icon="@drawable/settings_24px" />
     </PreferenceCategory>
 
@@ -25,9 +26,9 @@
         android:title="@string/single_shot_settings_screen_title">
         <Preference
             android:layout="@layout/preference_with_margin"
-            app:key="single_shot_settings_screen"
-            app:title="@string/single_shot_settings_screen_title"
-            app:summary="@string/single_shot_settings_screen_summary"
+            android:key="single_shot_settings_screen"
+            android:title="@string/single_shot_settings_screen_title"
+            android:summary="@string/single_shot_settings_screen_summary"
             android:icon="@drawable/discover_tune_24px" />
     </PreferenceCategory>
 
@@ -37,9 +38,9 @@
         android:title="@string/video_settings_screen_title">
         <Preference
             android:layout="@layout/preference_with_margin"
-            app:key="video_settings_screen"
-            app:title="@string/video_settings_screen_title"
-            app:summary="@string/video_settings_screen_summary"
+            android:key="video_settings_screen"
+            android:title="@string/video_settings_screen_title"
+            android:summary="@string/video_settings_screen_summary"
             android:icon="@drawable/settings_video_camera_24px" />
     </PreferenceCategory>
 
@@ -49,9 +50,9 @@
         android:title="@string/audio_settings_screen_title">
         <Preference
             android:layout="@layout/preference_with_margin"
-            app:key="audio_settings_screen"
-            app:title="@string/audio_settings_screen_title"
-            app:summary="@string/audio_settings_screen_summary"
+            android:key="audio_settings_screen"
+            android:title="@string/audio_settings_screen_title"
+            android:summary="@string/audio_settings_screen_summary"
             android:icon="@drawable/genres_24px" />
     </PreferenceCategory>
 
@@ -61,9 +62,9 @@
         android:title="@string/stacking_settings_screen_title">
         <Preference
             android:layout="@layout/preference_with_margin"
-            app:key="stacking_settings_screen"
-            app:title="@string/stacking_settings_screen_title"
-            app:summary="@string/stacking_settings_screen_summary"
+            android:key="stacking_settings_screen"
+            android:title="@string/stacking_settings_screen_title"
+            android:summary="@string/stacking_settings_screen_summary"
             android:icon="@drawable/burst_mode_24px" />
     </PreferenceCategory>
 
@@ -78,9 +79,9 @@
         android:key="pref_category_soc_key"
         android:title="@string/soc_settings_screen_title">
         <Preference
-            app:key="soc_settings_screen"
-            app:title="@string/soc_settings_screen_title"
-            app:summary="@string/soc_settings_screen_summary"
+            android:key="soc_settings_screen"
+            android:title="@string/soc_settings_screen_title"
+            android:summary="@string/soc_settings_screen_summary"
             android:icon="@drawable/settings_photo_camera_24px" />
     </PreferenceCategory>
 
@@ -89,9 +90,9 @@
         android:key="pref_category_sensor_and_more_key"
         android:title="@string/sensor_and_more_settings_screen_title">
         <Preference
-            app:key="sensor_and_more_settings_screen"
-            app:title="@string/sensor_settings_screen_title"
-            app:summary="@string/sensor_and_more_settings_screen_summary"
+            android:key="sensor_and_more_settings_screen"
+            android:title="@string/sensor_settings_screen_title"
+            android:summary="@string/sensor_and_more_settings_screen_summary"
             android:icon="@drawable/vrpano_24px" />
     </PreferenceCategory>
 
@@ -100,9 +101,9 @@
         android:key="pref_en_key"
         android:title="@string/vendor_keys_settings_screen_title">
         <Preference
-            app:key="vendor_keys_settings_screen"
-            app:title="@string/vendor_keys_settings_screen_title"
-            app:summary="@string/vendor_keys_screen_summary"
+            android:key="vendor_keys_settings_screen"
+            android:title="@string/vendor_keys_settings_screen_title"
+            android:summary="@string/vendor_keys_screen_summary"
             android:icon="@drawable/vpn_key_24px" />
     </PreferenceCategory>
 
@@ -111,9 +112,9 @@
         android:key="pref_en_key"
         android:title="@string/device_info_screen_title">
         <Preference
-            app:key="device_info_screen"
-            app:title="@string/device_info_screen_title"
-            app:summary="@string/device_info_screen_summary"
+            android:key="device_info_screen"
+            android:title="@string/device_info_screen_title"
+            android:summary="@string/device_info_screen_summary"
             android:icon="@drawable/ic_info" />
     </PreferenceCategory>
 

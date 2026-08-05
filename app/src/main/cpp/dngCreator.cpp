@@ -557,6 +557,39 @@ public:
         metadata.dcg_16_10_crop = crop;
     }
 
+    void setDcg169Crop(bool crop) {
+        metadata.dcg_16_9_crop = crop;
+    }
+
+    /**
+     * Calculates a top-left 16:9 crop while keeping both dimensions even so the
+     * Bayer phase is preserved. Only one dimension is shortened.
+     */
+    bool calculate169Crop(int srcWidth, int srcHeight, int& cropWidth, int& cropHeight) {
+        if (srcWidth <= 0 || srcHeight <= 0) return false;
+
+        cropWidth = srcWidth;
+        cropHeight = srcHeight;
+        if (srcWidth >= srcHeight) {
+            if (static_cast<int64_t>(srcWidth) * 9 > static_cast<int64_t>(srcHeight) * 16) {
+                cropWidth = static_cast<int>(static_cast<int64_t>(srcHeight) * 16 / 9);
+            } else if (static_cast<int64_t>(srcWidth) * 9 < static_cast<int64_t>(srcHeight) * 16) {
+                cropHeight = static_cast<int>(static_cast<int64_t>(srcWidth) * 9 / 16);
+            }
+        } else {
+            if (static_cast<int64_t>(srcHeight) * 9 > static_cast<int64_t>(srcWidth) * 16) {
+                cropHeight = static_cast<int>(static_cast<int64_t>(srcWidth) * 16 / 9);
+            } else if (static_cast<int64_t>(srcHeight) * 9 < static_cast<int64_t>(srcWidth) * 16) {
+                cropWidth = static_cast<int>(static_cast<int64_t>(srcHeight) * 9 / 16);
+            }
+        }
+
+        cropWidth &= ~1;
+        cropHeight &= ~1;
+        return cropWidth > 0 && cropHeight > 0 &&
+               (cropWidth < srcWidth || cropHeight < srcHeight);
+    }
+
     /**
      * Calculates a top-left 16:10 crop while keeping both dimensions even so the
      * Bayer phase is preserved. Only one dimension is shortened.
@@ -686,6 +719,19 @@ public:
             int cropWidth;
             int cropHeight;
             if (calculate1610Crop(width, height, cropWidth, cropHeight)) {
+                croppedData = cropTopLeft(imageData, width, cropWidth, cropHeight);
+                dataToProcess = croppedData;
+                actualWidth = cropWidth;
+                actualHeight = cropHeight;
+                LOGD("DNG 16:10 crop applied: %dx%d -> %dx%d",
+                     width, height, cropWidth, cropHeight);
+            }
+        }
+
+        if (metadata.dcg_16_9_crop) {
+            int cropWidth;
+            int cropHeight;
+            if (calculate169Crop(width, height, cropWidth, cropHeight)) {
                 croppedData = cropTopLeft(imageData, width, cropWidth, cropHeight);
                 dataToProcess = croppedData;
                 actualWidth = cropWidth;
@@ -1274,6 +1320,13 @@ public:
         DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
         if (creator) {
             creator->setDcg1610Crop(crop);
+        }
+    }
+
+    JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setDcg169Crop(JNIEnv *env, jobject obj, jlong creatorPtr, jboolean crop) {
+        DngCreator* creator = reinterpret_cast<DngCreator*>(creatorPtr);
+        if (creator) {
+            creator->setDcg169Crop(crop);
         }
     }
 

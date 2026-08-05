@@ -1284,11 +1284,16 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     break;
             }
 
-            if (PhotonCamera.getSettings().rawSaver == 2) {
-                selectedFormat = "DNG";
-            }
-            if ((PhotonCamera.getSettings().rawSaver == 1) && !PhotonCamera.isSingleShotJpegOrHeic()) {
-                selectedFormat = "JPEG+DNG";
+            switch (PhotonCamera.getSettings().rawSaver) {
+                case 0:
+                    selectedFormat = "JPEG";
+                    break;
+                case 1:
+                    selectedFormat = "JPEG+DNG";
+                    break;
+                case 2:
+                    selectedFormat = "DNG";
+                    break;
             }
 
             PhotonCamera.captureTimesRingBuffer.addLast(elapsedTime + "ms - " + PhotonCamera.getSettings().selectedMode + " - FrameCount=" + PhotonCamera.getSettings().frameCount + " - " + selectedFormat);

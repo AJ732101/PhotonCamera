@@ -164,7 +164,6 @@ public class VendorTagUtils {
     }
 
     public static void applyIdealRaw(CaptureRequest.Builder builder, int bitDepth) {
-        // Diese Keys sind die Qualcomm-Basis für das, was Xiaomi als URAW nutzt
         var qtiIdealRaw = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.IdealRaw", byte[].class);
         var qtiIdealRawSize = new CaptureRequest.Key<>("com.qti.chi.rawcbinfo.RawSize", byte[].class);
 
@@ -172,20 +171,17 @@ public class VendorTagUtils {
             byte mode;
             byte depth;
 
-            // Bit-Tiefe Mapping für Xiaomi/Qualcomm
             switch (bitDepth) {
                 case 14: mode = 0x03; depth = 14; break;
                 case 12: mode = 0x02; depth = 12; break;
                 default: mode = 0x01; depth = 10; break;
             }
 
-            // Der "URAW"-Trigger: Type 1 (Ideal), Mode (Bit-Depth)
             byte[] rawType = new byte[]{
                     0x01, 0x00, 0x00, 0x00,
                     mode, 0x00, 0x00, 0x00
             };
 
-            // Der Buffer-Size-Enforcer (Input/Output gleich setzen für URAW)
             byte[] rawSize = new byte[]{
                     depth, 0x00, 0x00, 0x00,
                     depth, 0x00, 0x00, 0x00
@@ -194,9 +190,7 @@ public class VendorTagUtils {
             builder.set(qtiIdealRaw, rawType);
             builder.set(qtiIdealRawSize, rawSize);
 
-            // WICHTIG: Auf Xiaomi Geräten oft zusätzlich nötig für echten URAW-Pfad:
             if (PhotonCamera.isXiaomi) {
-                // Falls Xiaomi-spezifische URAW-Keys existieren (Vendor-Abhängig)
                 var xiaomiUraw = new CaptureRequest.Key<>("com.xiaomi.stats.enableUraw", byte.class);
                 if (isSupported(builder, xiaomiUraw)) {
                     builder.set(xiaomiUraw, (byte) 1);

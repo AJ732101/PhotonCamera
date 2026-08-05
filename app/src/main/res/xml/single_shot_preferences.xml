@@ -4,10 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orderingFromXml="true"
     android:title="@string/single_shot_settings_screen_title"
-    android:key="single_shot_settings_category"
-    android:paddingBottom="56dp">>
+    android:key="single_shot_settings_category">
 
-    <PreferenceCategory app:key="single_shot_settings_category" app:title="@string/single_shot_settings_screen_title">
+    <PreferenceCategory android:key="single_shot_settings_category" android:title="@string/single_shot_settings_screen_title">
 
         <ListPreference
             android:layout="@layout/preference_with_margin"
@@ -162,8 +161,8 @@
 
         <PreferenceCategory
             android:layout="@layout/preference_category_layout"
-            app:key="video_codec_based_photo_settings_category"
-            app:title="@string/video_codec_based_photo_settings_title">
+            android:key="video_codec_based_photo_settings_category"
+            android:title="@string/video_codec_based_photo_settings_title">
 
             <ListPreference
                 android:layout="@layout/preference_with_margin"
@@ -209,8 +208,8 @@
 
         <PreferenceCategory
             android:layout="@layout/preference_category_layout"
-            app:key="sw_codec_based_photo_settings_category"
-            app:title="@string/sw_codec_based_photo_settings_title">
+            android:key="sw_codec_based_photo_settings_category"
+            android:title="@string/sw_codec_based_photo_settings_title">
 
             <ListPreference
                 android:layout="@layout/preference_with_margin"

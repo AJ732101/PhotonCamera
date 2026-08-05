@@ -60,6 +60,7 @@ struct DngMetadata {
     int original_width = 0;
     int original_height = 0;
     bool dcg_16_10_crop = false;
+    bool dcg_16_9_crop = false;
 };
 
 #ifdef __cplusplus
@@ -167,6 +168,9 @@ JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator
         JNIEnv *env, jobject obj, jlong creatorPtr, jboolean binning);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setDcg1610Crop(
+        JNIEnv *env, jobject obj, jlong creatorPtr, jboolean crop);
+
+JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_setDcg169Crop(
         JNIEnv *env, jobject obj, jlong creatorPtr, jboolean crop);
 
 JNIEXPORT void JNICALL Java_com_particlesdevs_photoncamera_processing_DngCreator_destroy(

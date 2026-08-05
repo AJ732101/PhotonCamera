@@ -418,7 +418,7 @@ public class PhotonCamera extends Application {
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatYuvRaw)) &&
-            (PhotonCamera.getSettings().rawSaver != 2) &&
+            (PhotonCamera.getSettings().rawSaver == 0) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.UNLIMITED) &&
             !PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
