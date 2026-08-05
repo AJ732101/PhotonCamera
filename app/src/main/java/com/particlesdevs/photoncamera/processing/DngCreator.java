@@ -553,11 +553,13 @@ public class DngCreator {
         }
 
         boolean isRawVideo = PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO);
-        if (PhotonCamera.getSettings().sensorModeDcgCropMode == 2) {
-            setDcg169Crop(nativePtr, !isRawVideo);
-        }
-        if (PhotonCamera.getSettings().sensorModeDcgCropMode == 1) {
-            setDcg1610Crop(nativePtr, !isRawVideo);
+        if (PhotonCamera.isSensorModeOn) {
+            if (PhotonCamera.getSettings().sensorModeDcgCropMode == 2) {
+                setDcg169Crop(nativePtr, !isRawVideo);
+            }
+            if (PhotonCamera.getSettings().sensorModeDcgCropMode == 1) {
+                setDcg1610Crop(nativePtr, !isRawVideo);
+            }
         }
 
         /*if (PhotonCamera.getSettings().gpsLocation && PhotonCamera.gpsLocation != null) {
