@@ -122,6 +122,7 @@ import com.particlesdevs.photoncamera.ui.camera.CameraFragment;
 import com.particlesdevs.photoncamera.ui.camera.viewmodel.TimerFrameCountViewModel;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.AutoFitPreviewView;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.GLPreview;
+import com.particlesdevs.photoncamera.util.SensorModeInfoParser;
 import com.particlesdevs.photoncamera.util.log.Logger;
 import android.media.MediaFormat;
 import android.media.MediaCodec;
@@ -276,10 +277,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private Map<String, CameraCharacteristics> mCameraCharacteristicsMap = new HashMap<>();
     public static CameraCharacteristics mCameraCharacteristics;
     public static int maxImageReaderImages = 3;
-    public static CaptureResult mCaptureResult;
+    public static TotalCaptureResult mCaptureResult;
     public static CaptureRequest mCaptureRequest;
 
-    public static CaptureResult mPreviewCaptureResult;
+    public static TotalCaptureResult mPreviewCaptureResult;
     public static CaptureRequest mPreviewCaptureRequest;
     public static int mPreviewTargetFormat = ImageFormat.JPEG;
     public static float mDigitalZoom = 1.0f;
@@ -694,7 +695,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mFlashed = state != null && state == CaptureResult.FLASH_STATE_PARTIAL || state == CaptureResult.FLASH_STATE_FIRED;
             mPreviewCaptureResult = result;
             mPreviewCaptureRequest = request;
-            
+
             if (wasLogged == 10) {
                 mBackgroundHandler.post(() -> createVendorKeysList());
             }
@@ -1611,7 +1612,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             mImageReaderPreview.close();
             mImageReaderPreview = null;
         }
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             long flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_COMPOSER_OVERLAY;
             //long flags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_VIDEO_ENCODE;
@@ -3749,7 +3750,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 @Override
                 public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
                                                 @NonNull CaptureResult partialResult) {
-                    //mCaptureResult = partialResult;
                 }
 
                 @Override
@@ -3766,7 +3766,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                     Object time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
                     if(time != null) frametime = (long)time;
                     cameraEventsListener.onFrameCaptureCompleted(new TimerFrameCountViewModel.FrameCntTime(frameCount, maxFrameCount[0], frametime));
-                    mCaptureResult = result;
                 }
 
                 @Override
@@ -4654,9 +4653,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
                     int frameCount = (int) (partialResult.getFrameNumber() - baseFrameNumber[0]);
                     Log.v("BurstCounter", "CaptureProgressed! FrameCount:" + frameCount);
-                    if (mCaptureResult == null) {
-                        mCaptureResult = partialResult;
-                    }
 
                     /*if ((partialResult != null) && (PhotonCamera.getSettings().rawSaver == 2)) {
                         for (CaptureResult.Key<?> key : partialResult.getKeys()) {
@@ -4719,6 +4715,26 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             }
                         }
                     }*/
+
+                    byte[] modeInfo = SensorModeInfoParser.getSensorModeInfoByteArray(result);
+                    if (modeInfo != null) {
+                        int highestConfidence =  0;
+                        int highestConfidenceIndex =  0;
+                        List<SensorModeInfoParser.SensorMode> sensorModes = SensorModeInfoParser.parseSensorModeInfo(modeInfo);
+                        StringBuilder sb = new StringBuilder("Qualcomm Sensor Information:\n");
+                        for (SensorModeInfoParser.SensorMode mode : sensorModes) {
+                            sb.append(mode.toString());
+                            if (mode.confidence > highestConfidence) {
+                                highestConfidence = mode.confidence;
+                                highestConfidenceIndex = sensorModes.indexOf(mode);
+                            }
+                        }
+                        Log.i(TAG, sb.toString());
+                        Log.i(TAG, "Most likely true resolution:\n" + sensorModes.get(highestConfidenceIndex).toString());
+                        if ((mImageReaderRaw.getHeight() != sensorModes.get(highestConfidenceIndex).rawHeight) || (mImageReaderRaw.getWidth() != sensorModes.get(highestConfidenceIndex).rawWidth)) {
+                            Log.i(TAG, "Black bar detected, ImageReader resolution does not match captured usable data!!!!");
+                        }
+                    }
 
                     if (time != null) {
                         // get exposure multiply ISO and exposure time
@@ -6060,10 +6076,10 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         } catch (Exception ignored) {}
 
         Class<?>[] sdkClasses = {
-                CaptureRequest.class, 
-                CaptureResult.class, 
-                CameraCharacteristics.class, 
-                com.particlesdevs.photoncamera.api.VendorTagUtils.class 
+                CaptureRequest.class,
+                CaptureResult.class,
+                CameraCharacteristics.class,
+                com.particlesdevs.photoncamera.api.VendorTagUtils.class
         };
         for (Class<?> c : sdkClasses) {
             String label = (c == CaptureResult.class) ? "Res" : (c == CameraCharacteristics.class ? "Char" : "Req");
@@ -6110,7 +6126,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
     private void addKeyToMap(Object keyObj, String keyClassLabel) {
         if (keyObj == null) return;
-        
+
         String keyName = "";
         try {
             Method getName = keyObj.getClass().getMethod("getName");

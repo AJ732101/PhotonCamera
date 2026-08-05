@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaScannerConnection;
@@ -470,12 +471,12 @@ public class ImageSaver {
         return exifData;
     }
 
-    public void runRaw(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
+    public void runRaw(CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
     	TunableInjector.inject(SETTINGS);
         implementation.runRaw(imageFormat, characteristics, captureResult, captureRequest, burstShakiness, cameraRotation, exposures);
     }
 
-    public void processStart(CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
+    public void processStart(CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
     	TunableInjector.inject(SETTINGS);
         implementation = ImageSaverSelector.getImageSaver(PhotonCamera.getSettings().rawFormat, implementation);
         implementation.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
@@ -604,7 +605,38 @@ public class ImageSaver {
             }
         }
 
-        public static boolean saveStackedRaw(Path dngFilePath, ByteBuffer buffer, Parameters parameters) {
+        public static boolean saveStackedRaw(Path dngFilePath, ByteBuffer buffer, Parameters parameters, CaptureResult captureResult) {
+            if (PhotonCamera.getSettings().writeCaptureResult && (captureResult != null)) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("'PVC_'yyyyMMdd_HHmmss_");
+                String captureResultName = LocalDateTime.now().format(formatter);
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    for (CaptureResult.Key<?> key : captureResult.getKeys()) {
+                        Object val = captureResult.get(key);
+                        sb.append(key.getName()).append(" = ");
+                        if (val != null && val.getClass().isArray()) {
+                            if (val instanceof byte[]) sb.append(Arrays.toString((byte[]) val));
+                            else if (val instanceof int[]) sb.append(Arrays.toString((int[]) val));
+                            else if (val instanceof float[]) sb.append(Arrays.toString((float[]) val));
+                            else if (val instanceof double[]) sb.append(Arrays.toString((double[]) val));
+                            else if (val instanceof long[]) sb.append(Arrays.toString((long[]) val));
+                            else if (val instanceof short[]) sb.append(Arrays.toString((short[]) val));
+                            else if (val instanceof boolean[]) sb.append(Arrays.toString((boolean[]) val));
+                            else if (val instanceof Object[]) sb.append(Arrays.deepToString((Object[]) val));
+                            else sb.append(val);
+                        } else {
+                            sb.append(val);
+                        }
+                        sb.append("\n");
+                    }
+                    Path resultPath = FileManager.sPHOTON_RAW_DIR.toPath().resolve(captureResultName + "CaptureResult_ID" + PhotonCamera.getSettings().mCameraID + ".txt");
+                    Files.write(resultPath, sb.toString().getBytes());
+                    Log.d(TAG, "Saved CaptureResult to: " + resultPath);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to save CaptureResult.txt", e);
+                }
+            }
+
             return saveSingleRaw(dngFilePath, buffer, parameters);
         }
 
@@ -661,6 +693,7 @@ public class ImageSaver {
             DngCreator dngCreator = new DngCreator();
             dngCreator.setParameters(parameters);
             dngCreator.setCompression(PhotonCamera.getSettings().useDngCompression);
+
             //dngCreator.setBitsPerSample(10);
             try {
                 OutputStream outputStream = Files.newOutputStream(dngFilePath);

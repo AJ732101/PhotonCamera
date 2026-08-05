@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.os.Build;
 import android.os.SystemClock;
 
@@ -81,7 +82,7 @@ public class HdrxProcessor extends ProcessorBase {
                       int imageFormat,
                       int cameraRotation,
                       CameraCharacteristics characteristics,
-                      CaptureResult captureResult,
+                      TotalCaptureResult captureResult,
                       CaptureRequest captureRequest,
                       ProcessingCallback callback) {
         this.imageFile = imageFile;
@@ -294,8 +295,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
         Log.d(TAG, "HDRX Alignment elapsed:" + (System.currentTimeMillis() - startTime) + " ms");
         if ((saveRAW >= 1) && alignAlgorithm != 2) {
-            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, output,
-                    processingParameters);
+            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, output, processingParameters, captureResult);
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
             if (saveRAW == 2) {
                 processingEventsListener.onProcessingFinished("HdrX RAW Processing Finished");

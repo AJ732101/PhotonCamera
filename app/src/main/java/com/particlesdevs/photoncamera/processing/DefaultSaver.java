@@ -3,6 +3,7 @@ package com.particlesdevs.photoncamera.processing;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 
 import com.particlesdevs.photoncamera.processing.processor.RawVideoProcessor;
 import com.particlesdevs.photoncamera.util.Log;
@@ -28,7 +29,7 @@ public class DefaultSaver extends SaverImplementation {
         this.mRawVideoProcessor = new RawVideoProcessor(processingEventsListener);
     }
 
-    public void runRaw(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
+    public void runRaw(int imageFormat, CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
         super.runRaw(imageFormat, characteristics, captureResult,captureRequest, burstShakiness, cameraRotation, exposures);
         //Wait for one frame at least.
         Log.d(TAG, "Acquiring:" + IMAGE_BUFFER.size());
@@ -36,12 +37,10 @@ public class DefaultSaver extends SaverImplementation {
         Log.d(TAG, "Acquired:" + IMAGE_BUFFER.size());
         bufferLock = true;
         Log.d(TAG,"Size:"+IMAGE_BUFFER.size());
-        if (PhotonCamera.isSingleShotJpegOrHeic() &&
-            !(PhotonCamera.isSensorModeOn && (PhotonCamera.getSettings().sensorModeCfaPattern == -2))) {
+        if ((PhotonCamera.isSingleShotJpegOrHeic() || (PhotonCamera.getSettings().rawSaver == 2)) && !(PhotonCamera.isSensorModeOn && (PhotonCamera.getSettings().sensorModeCfaPattern == -2))) {
             Path dngFile = ImagePath.newDNGFilePath();
             Log.d(TAG, "Size:" + IMAGE_BUFFER.size());
-            boolean imageSaved = ImageSaver.Util.saveSingleRaw(dngFile, IMAGE_BUFFER.get(0),
-                    characteristics, captureResult, cameraRotation);
+            boolean imageSaved = ImageSaver.Util.saveSingleRaw(dngFile, IMAGE_BUFFER.get(0), characteristics, captureResult, cameraRotation);
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
             processingEventsListener.onProcessingFinished("Saved Unprocessed RAW");
             IMAGE_BUFFER.clear();
@@ -104,7 +103,7 @@ public class DefaultSaver extends SaverImplementation {
         slicedBuffer.clear();
     }
 
-    public void processStart(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
+    public void processStart(int imageFormat, CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
         super.processStart(imageFormat, characteristics, captureResult, captureRequest, cameraRotation);
         Path dngFile = ImagePath.newDNGFilePath();
         Path jpgFile = ImagePath.newImageFilePath();

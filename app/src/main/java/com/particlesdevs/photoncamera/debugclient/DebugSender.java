@@ -3,6 +3,7 @@ package com.particlesdevs.photoncamera.debugclient;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.media.ImageReader;
 import com.particlesdevs.photoncamera.util.Log;
 
@@ -27,7 +28,7 @@ public class DebugSender extends SaverImplementation {
         image.close();
     }
 
-    public void runRaw(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
+    public void runRaw(int imageFormat, CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
         super.runRaw(imageFormat,characteristics,captureResult, captureRequest,burstShakiness,cameraRotation, exposures);
         Log.d("DebugSender","RunDebug sender");
         PhotonCamera.getDebugger().debugClient.sendRaw(IMAGE_BUFFER.get(0));

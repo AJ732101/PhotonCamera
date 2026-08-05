@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 
 import com.particlesdevs.photoncamera.api.ParseExif;
@@ -74,7 +75,7 @@ public class RawVideoProcessor extends ProcessorBase {
     @SuppressLint("DefaultLocale")
     public void videoStart(Path outputFolder, ParseExif.ExifData exifData,
                            CameraCharacteristics characteristics,
-                           CaptureResult captureResult,
+                           TotalCaptureResult captureResult,
                            CaptureRequest captureRequest,
                            int cameraRotation,
                            ProcessingCallback callback) {

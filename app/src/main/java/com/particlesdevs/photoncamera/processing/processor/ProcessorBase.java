@@ -23,6 +23,7 @@ import android.graphics.Matrix;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 
 import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -40,7 +41,7 @@ public abstract class ProcessorBase {
     protected Path dngFile;
     protected Path imageFile;
     protected CameraCharacteristics characteristics;
-    protected CaptureResult captureResult;
+    protected TotalCaptureResult captureResult;
     protected CaptureRequest captureRequest;
     protected ProcessingCallback callback;
     protected ParseExif.ExifData exifData;

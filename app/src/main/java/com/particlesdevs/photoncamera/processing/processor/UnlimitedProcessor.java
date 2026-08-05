@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
@@ -45,7 +46,7 @@ public class UnlimitedProcessor extends ProcessorBase {
 
     public void unlimitedStart(Path dngFile, Path jpgFile, ParseExif.ExifData exifData,
                                CameraCharacteristics characteristics,
-                               CaptureResult captureResult,
+                               TotalCaptureResult captureResult,
                                CaptureRequest captureRequest,
                                int cameraRotation,
                                ProcessingCallback callback) {
@@ -116,7 +117,7 @@ public class UnlimitedProcessor extends ProcessorBase {
             processingEventsListener.onProcessingFinished("Unlimited rawSaver Processing Finished");
             unlimitedBuffer.position(0);
 
-            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, unlimitedBuffer, parameters);
+            boolean imageSaved = ImageSaver.Util.saveStackedRaw(dngFile, unlimitedBuffer, parameters, null);
 
             processingEventsListener.notifyImageSavedStatus(imageSaved, dngFile);
             if (saveRAW == 2) {

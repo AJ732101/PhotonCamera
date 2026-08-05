@@ -4,6 +4,7 @@ import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
@@ -117,10 +118,10 @@ public class SaverImplementation {
         //reader.close();
     }
 
-    public void runRaw(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
+    public void runRaw(int imageFormat, CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, ArrayList<GyroBurst> burstShakiness, int cameraRotation, HashMap<Long, Double> exposures) {
         this.imageFormat = imageFormat;
     }
-    public void processStart(int imageFormat, CameraCharacteristics characteristics, CaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
+    public void processStart(int imageFormat, CameraCharacteristics characteristics, TotalCaptureResult captureResult, CaptureRequest captureRequest, int cameraRotation) {
         this.imageFormat = imageFormat;
     }
     public void processEnd(){
