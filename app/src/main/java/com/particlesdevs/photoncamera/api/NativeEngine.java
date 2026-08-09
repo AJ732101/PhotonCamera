@@ -111,4 +111,10 @@ public class NativeEngine {
      * Native method to resolve camera metadata fields
      */
     private static native Field nativeGetCameraField(Class<?> clazz, String fieldName);
+
+    /**
+     * Analyze P010 buffer to check if it's truly 10-bit
+     * @return bitwise OR of all 16-bit words in the buffer
+     */
+    public static native int nativeAnalyzeP010(java.nio.ByteBuffer buffer, int width, int height, int rowStride);
 }

@@ -483,3 +483,28 @@ Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeGetCameraField(
     
     return result;
 }
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeAnalyzeP010(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jobject buffer,
+        jint width,
+        jint height,
+        jint rowStride) {
+
+    uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(buffer);
+    if (!data) {
+        return 0;
+    }
+
+    uint16_t combined_or = 0;
+    for (int y = 0; y < height; y++) {
+        uint16_t* row = (uint16_t*)(data + y * rowStride);
+        for (int x = 0; x < width; x++) {
+            combined_or |= row[x];
+        }
+    }
+
+    return (jint)combined_or;
+}

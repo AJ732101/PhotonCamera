@@ -28,6 +28,7 @@ import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.ui.camera.views.viewfinder.MainRenderer;
 import com.particlesdevs.photoncamera.util.Log;
+import com.particlesdevs.photoncamera.util.Utilities;
 
 import com.particlesdevs.photoncamera.BuildConfig;
 

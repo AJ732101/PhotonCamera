@@ -172,8 +172,8 @@ public class VendorTagUtils {
             byte depth;
 
             switch (bitDepth) {
-                case 14: mode = 0x03; depth = 14; break;
-                case 12: mode = 0x02; depth = 12; break;
+                case 14: mode = 0x01; depth = 14; break;
+                case 12: mode = 0x01; depth = 12; break;
                 default: mode = 0x01; depth = 10; break;
             }
 
@@ -200,7 +200,6 @@ public class VendorTagUtils {
             PhotonCamera.hasIdealRaw = true;
         }
     }
-
 
     @SuppressLint({"NewApi", "LocalSuppress"})
     public static void builderSessionApply(CameraCharacteristics cameraCharacteristics, CaptureRequest.Builder builder, boolean burst, boolean useMaximumResolutionKey, boolean isPreview) {
@@ -512,8 +511,8 @@ public class VendorTagUtils {
                 if (isSupported(builder, enableIdealRAW1)) {
                     PhotonCamera.hasIdealRaw = true;
                     if (PhotonCamera.isIdealRawOn) {
-                        builder.set(enableIdealRAW1, (byte) 2);
-                        applyIdealRaw(builder, 14);
+                        builder.set(enableIdealRAW1, (byte) 1);
+                        applyIdealRaw(builder, 10);
                     }
                 }
 

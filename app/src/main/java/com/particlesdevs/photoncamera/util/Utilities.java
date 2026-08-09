@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.util.TypedValue;
 
 import androidx.annotation.ColorInt;
@@ -18,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -374,5 +376,34 @@ public class Utilities {
 
     public static int dpToPx(float dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
+    }
+
+    public static void testP010Validity(Image image) {
+        final String TAG = "Utilities";
+        try {
+            Image.Plane yPlane = image.getPlanes()[0];
+            ByteBuffer buffer = yPlane.getBuffer();
+            if (!buffer.isDirect()) {
+                Log.w(TAG, "testP010Validity: Buffer is not direct, cannot analyze via JNI");
+                return;
+            }
+            int combinedOr = com.particlesdevs.photoncamera.api.NativeEngine.nativeAnalyzeP010(buffer, image.getWidth(), image.getHeight(), yPlane.getRowStride());
+
+            boolean hasMsb = (combinedOr & 0xC000) != 0;
+            boolean hasLsb = (combinedOr & 0x00C0) != 0;
+
+            Log.d(TAG, "P010 Bit Analysis: OR mask = 0x" + Integer.toHexString(combinedOr).toUpperCase());
+            if (!hasMsb) {
+                Log.w(TAG, "P010 Analysis Warning: 2 MSBs of 10-bit data are always 0!");
+            }
+            if (!hasLsb) {
+                Log.w(TAG, "P010 Analysis Warning: 2 LSBs of 10-bit data are always 0 (Effectively 8-bit)!");
+            }
+            if (hasMsb && hasLsb) {
+                Log.i(TAG, "P010 Analysis: Data appears to be true 10-bit.");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "P010 Analysis failed", e);
+        }
     }
 }

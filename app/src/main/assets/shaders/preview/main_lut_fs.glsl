@@ -44,4 +44,3 @@ void main() {
     vec3 finalColor = applyLut(hdrColor);
     Output = vec4(finalColor, 1.0);
 }
-

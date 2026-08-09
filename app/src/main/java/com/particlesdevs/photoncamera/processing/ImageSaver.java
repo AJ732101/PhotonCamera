@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Gainmap;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 
 import com.particlesdevs.photoncamera.pro.SpecificSetting;
 import com.particlesdevs.photoncamera.settings.TunableInjector;
+import com.particlesdevs.photoncamera.util.Utilities;
 
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.getImageSaver;
 import static com.particlesdevs.photoncamera.processing.ImageSaverSelector.init;
