@@ -332,7 +332,7 @@ public class ImageSaver {
     public static String createProcessingString() {
         StringBuilder imageDescriptionBuilder = new StringBuilder();
         imageDescriptionBuilder.append("\n   Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
-         if ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+        if ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||
              (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
@@ -344,6 +344,7 @@ public class ImageSaver {
             } else {
                 imageDescriptionBuilder.append("\n   LUT Name: None");
             }
+            imageDescriptionBuilder.append("\n   Input Format: ").append((PhotonCamera.getSettings().realPreviewFormat == ImageFormat.YUV_420_888) ? "YUV_420_888" : "YCBCR_P010");
         }
         if ((!PhotonCamera.getSettings().contrastCurve.equalsIgnoreCase("off"))) {
             imageDescriptionBuilder.append("\n   Contrast Curve: ").append(PhotonCamera.getSettings().contrastCurve);
