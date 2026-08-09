@@ -570,8 +570,8 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutProgram, "PostLut"), 1);
 
             double lutSizeDouble = (double) lutSize;
-            float postLutSizeVal = (float) Math.cbrt(lutSizeDouble * lutSizeDouble);
-            float postLutSizeTilesVal = (float) (lutSizeDouble / postLutSizeVal);
+            float postLutSizeTilesVal = (float) Math.round(Math.pow(lutSizeDouble, 1.0 / 3.0));
+            float postLutSizeVal = (float) (lutSizeDouble / postLutSizeTilesVal);
             GLES20.glUniform1f(uPostLutSize, postLutSizeVal);
             GLES20.glUniform1f(uPostLutSizeTiles, postLutSizeTilesVal);
 
@@ -770,8 +770,8 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutProgram, "PostLut"), 1);
 
                 double lutSizeDouble = (double) lutSize;
-                float postLutSizeVal = (float) Math.cbrt(lutSizeDouble * lutSizeDouble);
-                float postLutSizeTilesVal = (float) (lutSizeDouble / postLutSizeVal);
+                float postLutSizeTilesVal = (float) Math.round(Math.pow(lutSizeDouble, 1.0 / 3.0));
+                float postLutSizeVal = (float) (lutSizeDouble / postLutSizeTilesVal);
                 GLES20.glUniform1f(uPostLutSize, postLutSizeVal);
                 GLES20.glUniform1f(uPostLutSizeTiles, postLutSizeTilesVal);
 
