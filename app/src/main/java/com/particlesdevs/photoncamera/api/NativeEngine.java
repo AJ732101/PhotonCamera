@@ -117,4 +117,10 @@ public class NativeEngine {
      * @return bitwise OR of all 16-bit words in the buffer
      */
     public static native int nativeAnalyzeP010(java.nio.ByteBuffer buffer, int width, int height, int rowStride);
+
+    /**
+     * Get statistics of a P010 buffer
+     * @return a long array containing [max, min, average_scaled_to_10bit]
+     */
+    public static native long[] nativeGetP010Stats(java.nio.ByteBuffer buffer, int width, int height, int rowStride);
 }
