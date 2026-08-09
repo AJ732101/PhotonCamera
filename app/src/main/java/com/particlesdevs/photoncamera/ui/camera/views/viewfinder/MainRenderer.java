@@ -359,26 +359,11 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     }
 
     private static int loadShader(String vss, String fss) {
-        return loadShader(vss, fss, "");
-    }
-
-    private static int loadShader(String vss, String fss, String prefix) {
         if (!vss.startsWith("#version")) {
-            vss = "#version 300 es\n" + prefix + vss;
-        } else {
-            // If version is already there, insert prefix after it
-            int firstNewline = vss.indexOf('\n');
-            if (firstNewline != -1) {
-                vss = vss.substring(0, firstNewline + 1) + prefix + vss.substring(firstNewline + 1);
-            }
+            vss = "#version 300 es\n" + vss;
         }
         if (!fss.startsWith("#version")) {
-            fss = "#version 300 es\n" + prefix + fss;
-        } else {
-            int firstNewline = fss.indexOf('\n');
-            if (firstNewline != -1) {
-                fss = fss.substring(0, firstNewline + 1) + prefix + fss.substring(firstNewline + 1);
-            }
+            fss = "#version 300 es\n" + fss;
         }
 
         int vshader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);

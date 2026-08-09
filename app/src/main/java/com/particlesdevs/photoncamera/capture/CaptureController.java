@@ -3940,9 +3940,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             if (mMainRenderer != null) {
                 Log.d(TAG, "Requesting LUT processing from MainRenderer.");
                 if (image.getFormat() == ImageFormat.YCBCR_P010) {
-                    /*if (image.getFormat() == ImageFormat.YCBCR_P010) {
-                        Utilities.testP010Validity(image);
-                    }*/
+                    //Utilities.testP010Validity(image);
+                    //Utilities.testHDRContent(image);
                     mMainRenderer.processYCbCrImage(image, rotation, (processedData) -> {
                         try {
                             if (processedData != null) {

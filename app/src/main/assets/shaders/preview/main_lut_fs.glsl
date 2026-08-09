@@ -40,7 +40,7 @@ vec3 applyLut(in vec3 textureColor) {
 }
 
 void main() {
-    vec3 hdrColor = texture(sTexture, texCoord).rgb;
-    vec3 finalColor = applyLut(hdrColor);
+    vec3 color = texture(sTexture, texCoord).rgb;
+    vec3 finalColor = applyLut(color);
     Output = vec4(finalColor, 1.0);
 }

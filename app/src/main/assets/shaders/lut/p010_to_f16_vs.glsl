@@ -1,12 +1,10 @@
-#version 300 es
-precision highp float;
-
-layout(location = 0) in vec4 aPosition;
-layout(location = 1) in vec2 aTexCoord;
+in vec2 vPosition;
+in vec2 vTexCoord;
 out vec2 v_texCoord;
 uniform mat4 uTexRotateMatrix;
 
 void main() {
-    gl_Position = aPosition;
-    v_texCoord = (uTexRotateMatrix * vec4(aTexCoord, 0.0, 1.0)).xy;
+    v_texCoord.yx = vTexCoord.xy;
+    v_texCoord.x = 1.0 - v_texCoord.x;
+    gl_Position = uTexRotateMatrix * vec4 ( vPosition.x, vPosition.y, 0.0, 1.0 );
 }
