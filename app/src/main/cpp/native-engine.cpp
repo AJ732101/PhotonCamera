@@ -545,3 +545,165 @@ Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeGetP010Stats(
     env->SetLongArrayRegion(result, 0, 3, stats);
     return result;
 }
+
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <cmath>
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeGetCubeLutSize(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jstring filePath) {
+
+    const char* path = env->GetStringUTFChars(filePath, nullptr);
+    std::ifstream file(path);
+    env->ReleaseStringUTFChars(filePath, path);
+
+    if (!file.is_open()) return 0;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        // Skip leading whitespace manually
+        size_t first = line.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) continue;
+        std::string trimmed = line.substr(first);
+
+        if (trimmed.compare(0, 11, "LUT_3D_SIZE") == 0) {
+            int size = 0;
+            if (sscanf(trimmed.c_str() + 11, "%d", &size) == 1) {
+                return size;
+            }
+        }
+    }
+    return 0;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeParseCubeToBuffer8Bit(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jstring filePath,
+        jobject buffer,
+        jint size) {
+
+    const char* path = env->GetStringUTFChars(filePath, nullptr);
+    std::ifstream file(path);
+    env->ReleaseStringUTFChars(filePath, path);
+
+    uint8_t* output = (uint8_t*)env->GetDirectBufferAddress(buffer);
+    if (!file.is_open() || !output) return JNI_FALSE;
+
+    int columns = (int)std::ceil(std::sqrt(size));
+    int texWidth = size * columns;
+
+    std::string line;
+    int r_idx = 0, g_idx = 0, b_idx = 0;
+
+    while (std::getline(file, line)) {
+        size_t first = line.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) continue;
+
+        char c = line[first];
+        // Data lines start with a digit, minus or dot
+        if (!((c >= '0' && c <= '9') || c == '-' || c == '.')) continue;
+
+        float r, g, b;
+        if (sscanf(line.c_str() + first, "%f %f %f", &r, &g, &b) == 3) {
+            int cellX = (b_idx % columns) * size;
+            int cellY = (b_idx / columns) * size;
+            int x = cellX + r_idx;
+            int y = cellY + g_idx;
+            int dstIdx = (y * texWidth + x) * 4;
+
+            output[dstIdx] = (uint8_t)std::min(255.0f, std::max(0.0f, r * 255.0f));
+            output[dstIdx + 1] = (uint8_t)std::min(255.0f, std::max(0.0f, g * 255.0f));
+            output[dstIdx + 2] = (uint8_t)std::min(255.0f, std::max(0.0f, b * 255.0f));
+            output[dstIdx + 3] = 255;
+
+            r_idx++;
+            if (r_idx >= size) {
+                r_idx = 0;
+                g_idx++;
+                if (g_idx >= size) {
+                    g_idx = 0;
+                    b_idx++;
+                    if (b_idx >= size) break; // We got all the data
+                }
+            }
+        }
+    }
+    return JNI_TRUE;
+}
+
+// Helper for IEEE 754 half-float conversion
+uint16_t floatToHalf(float f) {
+    uint32_t x = *((uint32_t*)&f);
+    uint16_t sign = (x >> 16) & 0x8000;
+    uint16_t exp = ((x >> 23) & 0xff) - 127;
+    uint16_t mant = (x >> 13) & 0x03ff;
+
+    if (exp == (uint16_t)-127) return sign; // Zero
+    if (exp > 15) return sign | 0x7c00; // Infinity
+    if (exp < (uint16_t)-14) return sign; // Subnormal -> 0
+
+    return sign | ((exp + 15) << 10) | mant;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeParseCubeToBuffer16Bit(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jstring filePath,
+        jobject buffer,
+        jint size) {
+
+    const char* path = env->GetStringUTFChars(filePath, nullptr);
+    std::ifstream file(path);
+    env->ReleaseStringUTFChars(filePath, path);
+
+    uint16_t* output = (uint16_t*)env->GetDirectBufferAddress(buffer);
+    if (!file.is_open() || !output) return JNI_FALSE;
+
+    int columns = (int)std::ceil(std::sqrt(size));
+    int texWidth = size * columns;
+
+    std::string line;
+    int r_idx = 0, g_idx = 0, b_idx = 0;
+    uint16_t halfOne = floatToHalf(1.0f);
+
+    while (std::getline(file, line)) {
+        size_t first = line.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) continue;
+
+        char c = line[first];
+        if (!((c >= '0' && c <= '9') || c == '-' || c == '.')) continue;
+
+        float r, g, b;
+        if (sscanf(line.c_str() + first, "%f %f %f", &r, &g, &b) == 3) {
+            int cellX = (b_idx % columns) * size;
+            int cellY = (b_idx / columns) * size;
+            int x = cellX + r_idx;
+            int y = cellY + g_idx;
+            int dstIdx = (y * texWidth + x) * 4;
+
+            output[dstIdx] = floatToHalf(r);
+            output[dstIdx + 1] = floatToHalf(g);
+            output[dstIdx + 2] = floatToHalf(b);
+            output[dstIdx + 3] = halfOne;
+
+            r_idx++;
+            if (r_idx >= size) {
+                r_idx = 0;
+                g_idx++;
+                if (g_idx >= size) {
+                    g_idx = 0;
+                    b_idx++;
+                    if (b_idx >= size) break;
+                }
+            }
+        }
+    }
+    return JNI_TRUE;
+}

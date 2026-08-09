@@ -226,7 +226,12 @@ import static com.particlesdevs.photoncamera.util.Math2.mix;
         if (postlut.exists()){
             if (postlut.getName().toLowerCase().endsWith(".cube")) {
                 try (java.io.FileInputStream fis = new java.io.FileInputStream(postlut)) {
-                    Bitmap bmp = Utilities.parseCubeLut8Bit(fis);
+                    // Try JNI acceleration first
+                    Bitmap bmp = Utilities.parseCubeLut8Bit(postlut);
+                    if (bmp == null) {
+                        // Fallback to original Java parsing if JNI fails
+                        bmp = Utilities.parseCubeLut8Bit(fis);
+                    }
                     if (bmp != null) {
                         lutbm = new GLImage(bmp);
                     }

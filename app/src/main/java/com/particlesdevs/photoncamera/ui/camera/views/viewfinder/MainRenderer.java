@@ -301,11 +301,16 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             if (currentLutFile != null && currentLutFile.exists()) {
                 GLImage lutbm = null;
                 if (currentLutFile.getName().toLowerCase().endsWith(".cube")) {
-                    try (FileInputStream fis = new FileInputStream(currentLutFile)) {
-                        Bitmap bmp = Utilities.parseCubeLut8Bit(fis);
-                        if (bmp != null) {
-                            lutbm = new GLImage(bmp);
+                    // Try fast JNI acceleration first
+                    Bitmap bmp = Utilities.parseCubeLut8Bit(currentLutFile);
+                    if (bmp == null) {
+                        // Fallback to original Java parsing if JNI fails
+                        try (FileInputStream fis = new FileInputStream(currentLutFile)) {
+                            bmp = Utilities.parseCubeLut8Bit(fis);
                         }
+                    }
+                    if (bmp != null) {
+                        lutbm = new GLImage(bmp);
                     }
                 } else {
                     lutbm = new GLImage(currentLutFile);

@@ -24,10 +24,59 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import static java.lang.Math.min;
-//import static java.lang.Math.max;
 
 public class Utilities {
     private static final PorterDuffXfermode porterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.ADD);
+
+    public static Bitmap parseCubeLut8Bit(File file) {
+        String path = file.getAbsolutePath();
+        int size = com.particlesdevs.photoncamera.api.NativeEngine.nativeGetCubeLutSize(path);
+        if (size <= 0) return null;
+
+        int columns = (int) Math.ceil(Math.sqrt(size));
+        int width = size * columns;
+        int height = size * columns;
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocateDirect(width * height * 4);
+        
+        if (com.particlesdevs.photoncamera.api.NativeEngine.nativeParseCubeToBuffer8Bit(path, buffer, size)) {
+            buffer.rewind();
+            bmp.copyPixelsFromBuffer(buffer);
+            return bmp;
+        }
+        
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+            return parseCubeLut8Bit(fis);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static Bitmap parseCubeLut16Bit(File file) {
+        String path = file.getAbsolutePath();
+        int size = com.particlesdevs.photoncamera.api.NativeEngine.nativeGetCubeLutSize(path);
+        if (size <= 0) return null;
+
+        int columns = (int) Math.ceil(Math.sqrt(size));
+        int width = size * columns;
+        int height = size * columns;
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGBA_F16);
+        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocateDirect(width * height * 8);
+        
+        if (com.particlesdevs.photoncamera.api.NativeEngine.nativeParseCubeToBuffer16Bit(path, buffer, size)) {
+            buffer.rewind();
+            bmp.copyPixelsFromBuffer(buffer);
+            return bmp;
+        }
+        
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+            return parseCubeLut16Bit(fis);
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
     public static Bitmap parseCubeLut8Bit(InputStream is) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -75,7 +124,6 @@ public class Utilities {
                     }
                 }
             } else if (lineCount > 2000) {
-                // If size not found in first 2000 lines, abort
                 return null;
             }
         }
@@ -84,7 +132,7 @@ public class Utilities {
 
         int columns = (int) Math.ceil(Math.sqrt(size));
         int width = size * columns;
-        int height = size * columns; // Make it square for the shader logic
+        int height = size * columns;
 
         Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         byte[] pixelData = new byte[width * height * 4];
@@ -110,6 +158,106 @@ public class Utilities {
         bmp.copyPixelsFromBuffer(java.nio.ByteBuffer.wrap(pixelData));
         return bmp;
     }
+
+    public static Bitmap parseCubeLut16Bit(InputStream is) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line;
+        int size = 0;
+        float[] data = null;
+        int dataIndex = 0;
+        int lineCount = 0;
+
+        while ((line = reader.readLine()) != null) {
+            lineCount++;
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("#") || line.startsWith("TITLE")) {
+                if (lineCount > 1000000) break;
+                continue;
+            }
+
+            if (line.startsWith("LUT_3D_SIZE")) {
+                if (data == null) {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length > 1) {
+                        try {
+                            size = Integer.parseInt(parts[1]);
+                            if (size < 2 || size > 128) return null;
+                            data = new float[size * size * size * 3];
+                        } catch (NumberFormatException e) {
+                            return null;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (data != null) {
+                char firstChar = line.charAt(0);
+                if (Character.isDigit(firstChar) || firstChar == '-' || firstChar == '.') {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length >= 3) {
+                        try {
+                            data[dataIndex++] = Float.parseFloat(parts[0]);
+                            data[dataIndex++] = Float.parseFloat(parts[1]);
+                            data[dataIndex++] = Float.parseFloat(parts[2]);
+                            if (dataIndex >= data.length) break;
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+            } else if (lineCount > 2000) {
+                return null;
+            }
+        }
+
+        if (size == 0 || data == null || dataIndex < data.length) return null;
+
+        int columns = (int) Math.ceil(Math.sqrt(size));
+        int width = size * columns;
+        int height = size * columns;
+
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGBA_F16);
+        ByteBuffer pixelData = ByteBuffer.allocateDirect(width * height * 8);
+        pixelData.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+        for (int b = 0; b < size; b++) {
+            int cellX = (b % columns) * size;
+            int cellY = (b / columns) * size;
+            for (int g = 0; g < size; g++) {
+                for (int r = 0; r < size; r++) {
+                    int srcIdx = (r + g * size + b * size * size) * 3;
+                    int x = cellX + r;
+                    int y = cellY + g;
+                    pixelData.position((y * width + x) * 8);
+                    pixelData.putShort(floatToHalf(data[srcIdx]));
+                    pixelData.putShort(floatToHalf(data[srcIdx + 1]));
+                    pixelData.putShort(floatToHalf(data[srcIdx + 2]));
+                    pixelData.putShort(floatToHalf(1.0f));
+                }
+            }
+        }
+        pixelData.rewind();
+        bmp.copyPixelsFromBuffer(pixelData);
+        return bmp;
+    }
+
+    private static short floatToHalf(float f) {
+        int i = Float.floatToIntBits(f);
+        int s = (i >> 16) & 0x8000;
+        int e = ((i >> 23) & 0xff) - (127 - 15);
+        int m = i & 0x7fffff;
+        if (e <= 0) {
+            if (e < -10) return (short) s;
+            m = (m | 0x800000) >> (1 - e);
+            return (short) (s | (m >> 13));
+        } else if (e == 0xff - (127 - 15)) {
+            if (m == 0) return (short) (s | 0x7c00);
+            return (short) (s | 0x7c00 | (m >> 13) | 1);
+        } else {
+            if (e > 30) return (short) (s | 0x7c00);
+            return (short) (s | (e << 10) | (m >> 13));
+        }
+    }
+
     public static Bitmap drawKernels(float[][][] inputKernels, Point kernelSize, Point kernelCount){
         int width = kernelSize.x*kernelCount.x;
         int height = kernelSize.y*kernelCount.y;
@@ -137,6 +285,7 @@ public class Utilities {
 
         return output;
     }
+
     public static void drawPoints(Point[] inputPoints, float pointSize,Bitmap io){
         Canvas canvas = new Canvas(io);
         Paint wallPaint = new Paint();
@@ -146,6 +295,7 @@ public class Utilities {
         for(Point p : inputPoints)
             canvas.drawCircle(p.x,p.y,pointSize,wallPaint);
     }
+
     public static void saveBitmap(Bitmap in, String name){
         File debug = new File(ImagePath.newImageFilePath().toString().replace(".jpg","") + name + ".png");
         FileOutputStream fOut = null;
@@ -157,6 +307,7 @@ public class Utilities {
         }
         in.compress(Bitmap.CompressFormat.PNG, 100, fOut);
     }
+
     public static void drawBL(float[] rgb, Bitmap io){
         float max = 0.f;
         int width = io.getWidth();
@@ -168,6 +319,7 @@ public class Utilities {
         wallPaint.setARGB(255, (int)(rgb[0]*255.f), (int)(rgb[1]*255.f), (int)(rgb[2]*255.f));
         canvas.drawRect(width*0.50f, height, width*0.50f+32.f, height-32, wallPaint);
     }
+
     public static void drawWB(float[] rgb, Bitmap io){
         float max = 1f;//max(max(rgb[0],rgb[1]),rgb[2]);
         //max = 1.f;
@@ -300,6 +452,7 @@ public class Utilities {
             output[i] = splineInterpolator.interpolate(i/(float)(output.length-1));
         return output;
     }
+
     public static float[] interpolateTonemap(float[] in, int requiredSize){
         float[] output = new float[requiredSize];
         ArrayList<Float> mY,mx;
@@ -315,9 +468,11 @@ public class Utilities {
             output[i] = splineInterpolator.interpolate(i/(float)(output.length-1));
         return output;
     }
+
     public static float luminocity(float[] in){
         return (in[0]*0.299f+in[1]*0.587f+in[2]*0.114f);
     }
+
     public static float[] saturate(float[] in, float saturation){
         float br = luminocity(in);
         float[] vec = new float[]{in[0],in[1],in[2]};
@@ -427,7 +582,7 @@ public class Utilities {
             // 64 = Schwarz
             // 940 = Weiß (SDR Ref)
             // Alles > 940 ist "echtes" HDR Glanzlicht.
-            // (Bei Full Range wäre alles über ~700-800 ein Indiz für hohen Dynamikumfang)
+            // (Bei Full Range wäre alles over ~700-800 ein Indiz für hohen Dynamikumfang)
 
             Log.d(TAG, "HDR Stats: Max=" + maxVal + ", Min=" + minVal + ", Avg=" + avgVal);
 

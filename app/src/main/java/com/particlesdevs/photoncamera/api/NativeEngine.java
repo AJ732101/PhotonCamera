@@ -123,4 +123,19 @@ public class NativeEngine {
      * @return a long array containing [max, min, average_scaled_to_10bit]
      */
     public static native long[] nativeGetP010Stats(java.nio.ByteBuffer buffer, int width, int height, int rowStride);
+
+    /**
+     * Parses a .CUBE file and returns the LUT size (e.g. 33 for a 33x33x33 LUT)
+     */
+    public static native int nativeGetCubeLutSize(String filePath);
+
+    /**
+     * Parses a .CUBE file directly into a ByteBuffer (8-bit RGBA)
+     */
+    public static native boolean nativeParseCubeToBuffer8Bit(String filePath, java.nio.ByteBuffer outputBuffer, int size);
+
+    /**
+     * Parses a .CUBE file directly into a ByteBuffer (16-bit RGBA_F16)
+     */
+    public static native boolean nativeParseCubeToBuffer16Bit(String filePath, java.nio.ByteBuffer outputBuffer, int size);
 }
