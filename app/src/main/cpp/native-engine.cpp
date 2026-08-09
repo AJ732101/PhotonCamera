@@ -508,3 +508,40 @@ Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeAnalyzeP010(
 
     return (jint)combined_or;
 }
+
+extern "C" JNIEXPORT jlongArray JNICALL
+Java_com_particlesdevs_photoncamera_api_NativeEngine_nativeGetP010Stats(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jobject buffer,
+        jint width,
+        jint height,
+        jint rowStride) {
+
+    uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(buffer);
+    if (!data) return nullptr;
+
+    uint16_t max_val = 0;
+    uint16_t min_val = 65535;
+    uint64_t sum = 0;
+
+    for (int y = 0; y < height; y++) {
+        uint16_t* row = (uint16_t*)(data + y * rowStride);
+        for (int x = 0; x < width; x++) {
+            uint16_t val = row[x];
+            if (val > max_val) max_val = val;
+            if (val < min_val) min_val = val;
+            sum += val;
+        }
+    }
+
+    jlong stats[3];
+    // Scale back to 10-bit range (0-1023) for easier Java-side comparison
+    stats[0] = (jlong)(max_val >> 6);
+    stats[1] = (jlong)(min_val >> 6);
+    stats[2] = (jlong)((sum / (width * height)) >> 6);
+
+    jlongArray result = env->NewLongArray(3);
+    env->SetLongArrayRegion(result, 0, 3, stats);
+    return result;
+}
