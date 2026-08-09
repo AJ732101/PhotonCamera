@@ -406,4 +406,45 @@ public class Utilities {
             Log.e(TAG, "P010 Analysis failed", e);
         }
     }
+
+    public static void testHDRContent(Image image) {
+        final String TAG = "Utilities";
+        if (image.getFormat() != ImageFormat.YCBCR_P010) return;
+        try {
+            Image.Plane yPlane = image.getPlanes()[0];
+            ByteBuffer buffer = yPlane.getBuffer();
+            if (!buffer.isDirect()) return;
+
+            long[] stats = com.particlesdevs.photoncamera.api.NativeEngine.nativeGetP010Stats(buffer, image.getWidth(), image.getHeight(), yPlane.getRowStride());
+            if (stats == null || stats.length < 3) return;
+
+            long maxVal = stats[0]; // 0-1023
+            long minVal = stats[1]; // 0-1023
+            long avgVal = stats[2]; // 0-1023
+
+            // HDR Thresholds:
+            // Bei 10-bit Limited Range (Standard für P010) ist:
+            // 64 = Schwarz
+            // 940 = Weiß (SDR Ref)
+            // Alles > 940 ist "echtes" HDR Glanzlicht.
+            // (Bei Full Range wäre alles über ~700-800 ein Indiz für hohen Dynamikumfang)
+
+            Log.d(TAG, "HDR Stats: Max=" + maxVal + ", Min=" + minVal + ", Avg=" + avgVal);
+
+            if (maxVal > 940) {
+                Log.i(TAG, "HDR Analysis: Image contains SUPER-WHITE highlights (> 940). Real HDR!");
+            } else if (maxVal > 800) {
+                Log.i(TAG, "HDR Analysis: Image contains bright highlights (> 800). Likely HDR.");
+            } else {
+                Log.d(TAG, "HDR Analysis: Image dynamic range stays within SDR limits.");
+            }
+
+            // Test auf Kontrastumfang
+            if ((maxVal - minVal) > 800) {
+                 Log.i(TAG, "HDR Analysis: Very high contrast detected (" + (maxVal - minVal) + " levels).");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "HDR Analysis failed", e);
+        }
+    }
 }
