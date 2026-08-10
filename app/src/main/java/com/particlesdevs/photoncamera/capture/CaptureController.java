@@ -77,6 +77,7 @@ import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.processing.ImageFrame;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 import com.particlesdevs.photoncamera.processing.ImageSaverSelector;
+import com.particlesdevs.photoncamera.processing.ImageUtils;
 import com.particlesdevs.photoncamera.processing.SaverImplementation;
 import com.particlesdevs.photoncamera.ui.camera.data.CameraLensData;
 import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
@@ -150,6 +151,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -3942,17 +3944,26 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                 if (image.getFormat() == ImageFormat.YCBCR_P010) {
                     //Utilities.testP010Validity(image);
                     //Utilities.testHDRContent(image);
-                    mMainRenderer.processYCbCrImage(image, rotation, (processedData) -> {
+                    mMainRenderer.processYCbCrImageFP16(image, rotation, (processedData) -> {
                         try {
                             if (processedData != null) {
                                 Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                                mImageSaver.directSaveImageLut(processedData, outWidth, outHeight, videoRotation,
-                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
+                                Boolean imageSaved = false;
+                                //Path imagePath = ImagePath.newAVIFFilePath();
+                                //imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, null, mMetaData, videoRotation);
+                                Path imagePath = ImagePath.newJPGFilePath();
+                                imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, mMetaData, videoRotation);
+                                try {
+                                    cameraEventsListener.notifyImageSavedStatus(imageSaved, imagePath);
+                                }
+                                catch (Exception e){
+                                    Log.d(TAG,"Error in processingEventsListener.notifyImageSavedStatus:" + Log.getStackTraceString(e));
+                                }
                             } else {
                                 Log.e(TAG, "LUT processing failed, renderer returned null data.");
                                 cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
                             }
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         } finally {
                             mIsProcessingImage.set(false);

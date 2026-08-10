@@ -175,7 +175,7 @@ public class HdrxProcessor extends ProcessorBase {
         }
         ISO /= mImageFramesToProcess.size();
 
-        processingParameters.FillDynamicParameters(captureResult, captureRequest,ISO);
+        processingParameters.FillDynamicParameters(captureResult, captureRequest, ISO);
         processingParameters.cameraRotation = cameraRotation;
 
         exifData.EQUIVALENT_35MM = String.valueOf(PhotonCamera.getParameters().current35mmFocalLength);
@@ -340,7 +340,7 @@ public class HdrxProcessor extends ProcessorBase {
         //Saves the final bitmap
         if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
             imageFile = Paths.get(imageFile.toAbsolutePath() + "avif");
-            imageSaved = ImageSaver.Util.saveBitmapAsAvif(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData);
+            imageSaved = ImageSaver.Util.saveBitmapAsAvif(imageFile, img, PhotonCamera.getSettings().singleFrameQuality, exifData, null, 0);
         } else {
             imageFile = Paths.get(imageFile.toAbsolutePath() + "jpg");
             if (PhotonCamera.getSettings().useJpegUltraHdr) {

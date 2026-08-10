@@ -6,14 +6,19 @@ import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ColorSpace;
 import android.graphics.Gainmap;
+import android.graphics.HardwareBufferRenderer;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
+import android.hardware.HardwareBuffer;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -493,12 +498,30 @@ public class ImageSaver {
     }
 
     public static class Util {
-        public static boolean saveBitmapAsAvif(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {
+        public static boolean saveBitmapAsAvif(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData, Bundle metaData, int orientation) {
             File heicFile = new File(fileToSave.toString());
             Boolean ret = false;
             AvifEncoder avifEncoder = new AvifEncoder();
             try {
-                ret = avifEncoder.encodeBmpToAvif(img, heicFile, 0, PhotonCamera.getSettings().singleFrameQuality, null, exifData);
+                int rotation = orientation;
+                if (exifData == null) {
+                    switch (orientation) {
+                        case 0:
+                            rotation = 180;
+                            break;
+                        case 90:
+                            rotation = 270;
+                            break;
+                        case 180:
+                            rotation = 0;
+                            break;
+                        case 270:
+                        case -90:
+                            rotation = 90;
+                            break;
+                    }
+                }
+                ret = avifEncoder.encodeBmpToAvif(img, heicFile, rotation, PhotonCamera.getSettings().singleFrameQuality, metaData, null);
             }
             catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
@@ -777,9 +800,32 @@ public class ImageSaver {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    public Boolean createUltraHdrFromFp16(Bitmap hdrBitmapFp16, Path fileToSave, ParseExif.ExifData exifData) throws IOException {
+    public static Boolean createUltraHdrFromFp16(Bitmap hdrBitmapFp16, Path fileToSave, ParseExif.ExifData exifData, Bundle metaData, int orientation) throws IOException {
         int width = hdrBitmapFp16.getWidth();
         int height = hdrBitmapFp16.getHeight();
+        int targetW = width / 2;
+        int targetH = height / 2;
+
+        int rotation = 0;
+        switch (orientation) {
+            case 0:
+                rotation = 180;
+                break;
+            case 90:
+                rotation = 270;
+                break;
+            case 180:
+                rotation = 0;
+                break;
+            case 270:
+            case -90:
+                rotation = 90;
+                break;
+        }
+
+        if (exifData == null) {
+            exifData = exifDataFromMetadata(metaData, rotation);
+        }
 
         float maxHdrBoost = PhotonCamera.getSpecific().specificSetting.ultraHdrMaxBoost;
         float hdrGamma = PhotonCamera.getSpecific().specificSetting.ultraHdrGamma;
@@ -787,8 +833,6 @@ public class ImageSaver {
         Bitmap sdrBase = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas sdrCanvas = new Canvas(sdrBase);
         sdrCanvas.drawBitmap(hdrBitmapFp16, 0, 0, null);
-
-        Bitmap gainmapContents = Bitmap.createBitmap(width / 2, height / 2, Bitmap.Config.ALPHA_8);
 
         String agslCode =
                 "uniform shader hdrTex;\n" +
@@ -803,7 +847,7 @@ public class ImageSaver {
                         "    float ratio = max(hdrLum / sdrLum, 1.0);\n" +
                         "    float logValue = log2(ratio) / log2(maxBoost);\n" +
                         "    float gainmapVal = clamp(pow(logValue, 1.0 / gamma), 0.0, 1.0);\n" +
-                        "    return half4(gainmapVal);\n" +
+                        "    return half4(gainmapVal, gainmapVal, gainmapVal, 1.0);\n" +
                         "}";
 
         RuntimeShader shader = new RuntimeShader(agslCode);
@@ -815,8 +859,27 @@ public class ImageSaver {
         Paint paint = new Paint();
         paint.setShader(shader);
 
-        Canvas gainmapCanvas = new Canvas(gainmapContents);
-        gainmapCanvas.drawRect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight(), paint);
+        HardwareBuffer hardwareBuffer = HardwareBuffer.create(
+                targetW, targetH,
+                HardwareBuffer.RGBA_8888, 1,
+                HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
+        );
+
+        RenderNode renderNode = new RenderNode("GainmapRender");
+        renderNode.setPosition(0, 0, targetW, targetH);
+        RecordingCanvas canvas = renderNode.beginRecording(targetW, targetH);
+        canvas.drawRect(0, 0, targetW, targetH, paint);
+        renderNode.endRecording();
+
+        HardwareBufferRenderer renderer = new HardwareBufferRenderer(hardwareBuffer);
+        renderer.setContentRoot(renderNode);
+
+        HardwareBufferRenderer.RenderRequest request = renderer.obtainRenderRequest();
+        request.draw(Runnable::run, result -> {});
+
+        Bitmap gainmapContents = Bitmap.wrapHardwareBuffer(hardwareBuffer, ColorSpace.get(ColorSpace.Named.SRGB));
+
+        renderer.close();
 
         Gainmap gainmap = new Gainmap(gainmapContents);
         gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
@@ -827,14 +890,17 @@ public class ImageSaver {
         try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
             sdrBase.compress(Bitmap.CompressFormat.JPEG, ImageSaver.JPG_QUALITY, outputStream);
             outputStream.flush();
-            ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
-            inter.saveAttributes();
+            if (exifData != null) {
+                ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
+                inter.saveAttributes();
+            }
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
             return false;
         } finally {
             sdrBase.recycle();
-            gainmapContents.recycle();
+            if (gainmapContents != null) gainmapContents.recycle();
+            hardwareBuffer.close();
         }
         return true;
     }

@@ -4,6 +4,7 @@ import static com.particlesdevs.photoncamera.util.FileManager.sPHOTON_TUNING_DIR
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
@@ -104,6 +105,19 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     private int mP010_aTexCoord;
     private int mP010_Ytex, mP010_Utex, mP010_Vtex;
     private int uOffscreenTexRotateMatrixHandle_P010;
+
+    private int mP010ToF16NoClampProgram;
+    private int mP010NoClamp_vPosition;
+    private int mP010NoClamp_aTexCoord;
+    private int mP010NoClamp_Ytex, mP010NoClamp_Utex, mP010NoClamp_Vtex;
+    private int uOffscreenTexRotateMatrixHandle_P010NoClamp;
+
+    private int mLutNoClampProgram;
+    private int vPosition_LutNoClamp;
+    private int vTexCoord_LutNoClamp;
+    private int uPostLutSizeNoClamp;
+    private int uPostLutSizeTilesNoClamp;
+    private int uOffscreenTexRotateMatrixHandle_LUTNoClamp;
 
     MainRenderer(GLPreview view) {
         mView = view;
@@ -218,6 +232,16 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
         mP010_Vtex = mP010_Utex;
 
+        String p010_fs_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_noclamp_fs.glsl");
+        String simple_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/simple_vs.glsl");
+        mP010ToF16NoClampProgram = loadShader(simple_vs, p010_fs_noclamp);
+        mP010NoClamp_vPosition = GLES20.glGetAttribLocation(mP010ToF16NoClampProgram, "aPosition");
+        mP010NoClamp_aTexCoord = GLES20.glGetAttribLocation(mP010ToF16NoClampProgram, "aTexCoord");
+        mP010NoClamp_Ytex = GLES20.glGetUniformLocation(mP010ToF16NoClampProgram, "y_texture");
+        mP010NoClamp_Utex = GLES20.glGetUniformLocation(mP010ToF16NoClampProgram, "u_texture");
+        uOffscreenTexRotateMatrixHandle_P010NoClamp = GLES20.glGetUniformLocation(mP010ToF16NoClampProgram, "uTexRotateMatrix");
+        mP010NoClamp_Vtex = mP010NoClamp_Utex;
+
         mSTexture = new SurfaceTexture(hTex[0]);
         mSTexture.setOnFrameAvailableListener(this);
 
@@ -303,6 +327,14 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         uPostLutSize = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZE");
         uPostLutSizeTiles = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZETILES");
         uOffscreenTexRotateMatrixHandle_LUT = GLES20.glGetUniformLocation(mLutProgram, "uTexRotateMatrix");
+
+        String fss_lut_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/main_lut_noclamp_2d_fs.glsl");
+        mLutNoClampProgram = loadShader(simple_vs, fss_lut_noclamp);
+        vPosition_LutNoClamp = GLES20.glGetAttribLocation(mLutNoClampProgram, "aPosition");
+        vTexCoord_LutNoClamp = GLES20.glGetAttribLocation(mLutNoClampProgram, "aTexCoord");
+        uPostLutSizeNoClamp = GLES20.glGetUniformLocation(mLutNoClampProgram, "POSTLUTSIZE");
+        uPostLutSizeTilesNoClamp = GLES20.glGetUniformLocation(mLutNoClampProgram, "POSTLUTSIZETILES");
+        uOffscreenTexRotateMatrixHandle_LUTNoClamp = GLES20.glGetUniformLocation(mLutNoClampProgram, "uTexRotateMatrix");
 
         setupOffscreenRendering();
 
@@ -692,10 +724,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         return directBuffer;
     }
 
-    /**
-     * Processes a 10-bit YCBCR_P010 image using high-precision FP16 internal processing.
-     * Applies LUT and orientation, returning an 8-bit RGBA buffer.
-     */
     public void processYCbCrImage(final Image image, final int orientation, final Consumer<ByteBuffer> onComplete) {
         if (image == null || image.getFormat() != ImageFormat.YCBCR_P010) {
             Log.e(TAG, "processYCbCrImage: Invalid image or format (expected P010)");
@@ -708,7 +736,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         final int sensorHeight = image.getHeight();
         final Image.Plane[] planes = image.getPlanes();
 
-        // 1. Copy P010 planes (Y and interleaved UV) - P010 uses 10 bits in 16-bit shorts
         final ByteBuffer yBufferCopy = ByteBuffer.allocateDirect(planes[0].getBuffer().remaining());
         yBufferCopy.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer ySrc = planes[0].getBuffer().duplicate();
@@ -742,7 +769,6 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             int[] yuvTextures = new int[2];
 
             try {
-                // Pass 1: P010 -> RGB (Target: Intermediate FP16 FBO, ROTATED dimensions)
                 setupGenericFramebuffer(fbo1, rbo1, tex1, mImageWidth, mImageHeight, true);
 
                 GLES20.glGenTextures(2, yuvTextures, 0);
@@ -787,8 +813,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 GLES20.glDisableVertexAttribArray(mP010_vPosition);
                 GLES20.glDisableVertexAttribArray(mP010_aTexCoord);
 
-                // Pass 2: Apply LUT (Orientation already done in Pass 1)
-                setupGenericFramebuffer(fbo2, rbo2, tex2, mImageWidth, mImageHeight, false);
+                setupGenericFramebuffer(fbo2, rbo2, tex2, mImageWidth, mImageHeight, true);
                 GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo2[0]);
                 GLES20.glViewport(0, 0, mImageWidth, mImageHeight);
                 GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -822,13 +847,202 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                 GLES20.glDisableVertexAttribArray(vPosition_Lut);
                 GLES20.glDisableVertexAttribArray(vTexCoord_Lut);
 
-                // Read back final 8-bit processed data
                 ByteBuffer processedData = ByteBuffer.allocateDirect(mImageWidth * mImageHeight * 4);
                 processedData.order(ByteOrder.nativeOrder());
                 GLES20.glReadPixels(0, 0, mImageWidth, mImageHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, processedData);
                 processedData.rewind();
 
                 onComplete.accept(processedData);
+
+            } finally {
+                GLES20.glDeleteTextures(2, yuvTextures, 0);
+                GLES20.glDeleteTextures(1, tex1, 0);
+                GLES20.glDeleteTextures(1, tex2, 0);
+                GLES20.glDeleteFramebuffers(1, fbo1, 0);
+                GLES20.glDeleteFramebuffers(1, fbo2, 0);
+                GLES20.glDeleteRenderbuffers(1, rbo1, 0);
+                GLES20.glDeleteRenderbuffers(1, rbo2, 0);
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+            }
+        });
+    }
+
+    public void processYCbCrImageFP16(final Image image, final int orientation, final Consumer<Bitmap> onComplete) {
+        if (image == null || image.getFormat() != ImageFormat.YCBCR_P010) {
+            if (image != null) image.close();
+            onComplete.accept(null);
+            return;
+        }
+
+        final int sensorWidth = image.getWidth();
+        final int sensorHeight = image.getHeight();
+        final Image.Plane[] planes = image.getPlanes();
+
+        final ByteBuffer yBufferCopy = ByteBuffer.allocateDirect(planes[0].getBuffer().remaining());
+        yBufferCopy.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer ySrc = planes[0].getBuffer().duplicate();
+        ySrc.position(0);
+        yBufferCopy.put(ySrc);
+        yBufferCopy.rewind();
+        final int yRowStride = planes[0].getRowStride();
+
+        final ByteBuffer uvBufferCopy = ByteBuffer.allocateDirect(planes[1].getBuffer().remaining());
+        uvBufferCopy.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer uvSrc = planes[1].getBuffer().duplicate();
+        uvSrc.position(0);
+        uvBufferCopy.put(uvSrc);
+        uvBufferCopy.rewind();
+        final int uvRowStride = planes[1].getRowStride();
+
+        image.close();
+
+        mView.queueEvent(() -> {
+            if (!PhotonCamera.getSettings().lutName.equals("lut.png") && (hTexLut == null)) {
+                onComplete.accept(null);
+                return;
+            }
+
+            final boolean isSideways = (orientation == 90 || orientation == 270 || orientation == -90);
+            mImageWidth = isSideways ? sensorHeight : sensorWidth;
+            mImageHeight = isSideways ? sensorWidth : sensorHeight;
+
+            int[] fbo1 = new int[1], rbo1 = new int[1], tex1 = new int[1];
+            int[] fbo2 = new int[1], rbo2 = new int[1], tex2 = new int[1];
+            int[] yuvTextures = new int[2];
+
+            try {
+                setupGenericFramebuffer(fbo1, rbo1, tex1, mImageWidth, mImageHeight, true);
+
+                GLES20.glGenTextures(2, yuvTextures, 0);
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 2);
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, yRowStride / 2);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[0]);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_R16UI, sensorWidth, sensorHeight, 0, GLES30.GL_RED_INTEGER, GLES30.GL_UNSIGNED_SHORT, yBufferCopy);
+                setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
+
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, uvRowStride / 4);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, yuvTextures[1]);
+                GLES30.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES30.GL_RG16UI, sensorWidth / 2, sensorHeight / 2, 0, GLES30.GL_RG_INTEGER, GLES30.GL_UNSIGNED_SHORT, uvBufferCopy);
+                setupTextureParameters(GLES20.GL_TEXTURE_2D, GLES20.GL_NEAREST);
+                GLES30.glPixelStorei(GLES30.GL_UNPACK_ROW_LENGTH, 0);
+
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo1[0]);
+                GLES20.glViewport(0, 0, mImageWidth, mImageHeight);
+                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+                GLES20.glUseProgram(mP010ToF16NoClampProgram);
+
+                Matrix.setIdentityM(mOffscreenRotationMatrix, 0);
+                Matrix.translateM(mOffscreenRotationMatrix, 0, 0.5f, 0.5f, 0.0f);
+                Matrix.rotateM(mOffscreenRotationMatrix, 0, -orientation, 0.0f, 0.0f, 1.0f);
+                Matrix.translateM(mOffscreenRotationMatrix, 0, -0.5f, -0.5f, 0.0f);
+                GLES20.glUniformMatrix4fv(uOffscreenTexRotateMatrixHandle_P010NoClamp, 1, false, mOffscreenRotationMatrix, 0);
+
+                GLES20.glUniform1i(mP010NoClamp_Ytex, 0);
+                GLES20.glUniform1i(mP010NoClamp_Utex, 1);
+                GLES20.glUniform1i(mP010NoClamp_Vtex, 1);
+
+                mOffscreenVertexBuffer.position(0);
+                GLES20.glVertexAttribPointer(mP010NoClamp_vPosition, 2, GLES20.GL_FLOAT, false, 0, mOffscreenVertexBuffer);
+                GLES20.glEnableVertexAttribArray(mP010NoClamp_vPosition);
+
+                mOffscreenTexCoordBuffer.position(0);
+                GLES20.glVertexAttribPointer(mP010NoClamp_aTexCoord, 2, GLES20.GL_FLOAT, false, 0, mOffscreenTexCoordBuffer);
+                GLES20.glEnableVertexAttribArray(mP010NoClamp_aTexCoord);
+
+                GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+                GLES20.glDisableVertexAttribArray(mP010NoClamp_vPosition);
+                GLES20.glDisableVertexAttribArray(mP010NoClamp_aTexCoord);
+
+                int finalFbo = fbo1[0];
+
+                if (hTexLut != null && lutSize > 0) {
+                    setupGenericFramebuffer(fbo2, rbo2, tex2, mImageWidth, mImageHeight, true);
+                    GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo2[0]);
+                    GLES20.glViewport(0, 0, mImageWidth, mImageHeight);
+                    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+                    GLES20.glUseProgram(mLutNoClampProgram);
+
+                    Matrix.setIdentityM(mOffscreenRotationMatrix, 0);
+                    GLES20.glUniformMatrix4fv(uOffscreenTexRotateMatrixHandle_LUTNoClamp, 1, false, mOffscreenRotationMatrix, 0);
+
+                    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex1[0]);
+                    GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutNoClampProgram, "sTexture"), 0);
+
+                    GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, hTexLut.mTextureID);
+                    GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutNoClampProgram, "PostLut"), 1);
+
+                    double lutSizeDouble = (double) lutSize;
+                    float postLutSizeTilesVal = (float) Math.round(Math.pow(lutSizeDouble, 1.0 / 3.0));
+                    float postLutSizeVal = (float) (lutSizeDouble / postLutSizeTilesVal);
+                    GLES20.glUniform1f(uPostLutSizeNoClamp, postLutSizeVal);
+                    GLES20.glUniform1f(uPostLutSizeTilesNoClamp, postLutSizeTilesVal);
+
+                    mOffscreenVertexBuffer.position(0);
+                    GLES20.glVertexAttribPointer(vPosition_LutNoClamp, 2, GLES20.GL_FLOAT, false, 0, mOffscreenVertexBuffer);
+                    GLES20.glEnableVertexAttribArray(vPosition_LutNoClamp);
+                    mOffscreenTexCoordBuffer.position(0);
+                    GLES20.glVertexAttribPointer(vTexCoord_LutNoClamp, 2, GLES20.GL_FLOAT, false, 0, mOffscreenTexCoordBuffer);
+                    GLES20.glEnableVertexAttribArray(vTexCoord_LutNoClamp);
+                    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+                    GLES20.glDisableVertexAttribArray(vPosition_LutNoClamp);
+                    GLES20.glDisableVertexAttribArray(vTexCoord_LutNoClamp);
+                    finalFbo = fbo2[0];
+                }
+
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, finalFbo);
+                ByteBuffer processedBuffer = ByteBuffer.allocateDirect(mImageWidth * mImageHeight * 8);
+                processedBuffer.order(ByteOrder.nativeOrder());
+                GLES20.glReadPixels(0, 0, mImageWidth, mImageHeight, GLES20.GL_RGBA, GLES30.GL_HALF_FLOAT, processedBuffer);
+
+                Bitmap resultBitmap = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ColorSpace targetSpace = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
+                    switch (PhotonCamera.getSettings().swColorSpace) {
+                        case "scRGB LINEAR":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+                            break;
+                        case "sRGB":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+                            break;
+                        case "scRGB":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
+                            break;
+                        case "DISPLAY P3":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
+                            break;
+                        case "BT.2020 HLG":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.BT2020_HLG);
+                            break;
+                        case "BT.2020 PQ":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.BT2020_PQ);
+                            break;
+                        case "ADOBE RGB":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.ADOBE_RGB);
+                            break;
+                        case "BT.2020":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.BT2020);
+                            break;
+                        case "BT.709":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.BT709);
+                            break;
+                        case "DCI P3":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.DCI_P3);
+                            break;
+                        case "sRGB LINEAR":
+                            targetSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB);
+                            break;
+                    }
+                    resultBitmap = Bitmap.createBitmap(mImageWidth, mImageHeight, Bitmap.Config.RGBA_F16, true, targetSpace);
+                } else {
+                    resultBitmap = Bitmap.createBitmap(mImageWidth, mImageHeight, Bitmap.Config.RGBA_F16, true, ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
+                }
+                resultBitmap.copyPixelsFromBuffer(processedBuffer);
+
+                onComplete.accept(resultBitmap);
 
             } finally {
                 GLES20.glDeleteTextures(2, yuvTextures, 0);
