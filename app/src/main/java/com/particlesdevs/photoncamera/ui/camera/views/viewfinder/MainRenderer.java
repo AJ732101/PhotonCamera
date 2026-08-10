@@ -227,65 +227,97 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             try {
                 vss_default = new String(Files.readAllBytes(prevVs.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
+                Log.e(TAG, "vss_default " + e.getMessage());
             }
         }
         else {
             vss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_vs.glsl");
         }
+
         String fss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_fs.glsl");
-        String fss_magnify = PhotonCamera.getAssetLoader().getString("shaders/preview/main_magnification_fs.glsl");
+        File defaultFs = new File(sPHOTON_TUNING_DIR, "main_fs.glsl");
+        if (defaultFs.exists()) {
+            try {
+                fss_default = new String(Files.readAllBytes(defaultFs.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "fss_default " + e.getMessage());
+            }
+        }
+        else {
+            fss_default = PhotonCamera.getAssetLoader().getString("shaders/preview/main_fs.glsl");
+        }
+
+        String fss_magnify = "";
+        File magFs = new File(sPHOTON_TUNING_DIR, "main_magnification_fs.glsl");
+        if (magFs.exists()) {
+            try {
+                fss_magnify = new String(Files.readAllBytes(magFs.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "fss_magnify " + e.getMessage());
+            }
+        }
+        else {
+            fss_magnify = PhotonCamera.getAssetLoader().getString("shaders/preview/main_magnification_fs.glsl");
+        }
+
         String fss_lut = "";
         File lutFs = new File(sPHOTON_TUNING_DIR, "main_lut_fs.glsl");
         if (lutFs.exists()) {
             try {
                 fss_lut = new String(Files.readAllBytes(lutFs.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
+                Log.e(TAG, "fss_lut " + e.getMessage());
             }
         }
         else {
             fss_lut = PhotonCamera.getAssetLoader().getString("shaders/preview/main_lut_fs.glsl");
         }
+
         mNormalProgram = loadShader(vss_default, fss_default);
         mMagnifyProgram = loadShader(vss_default, fss_magnify);
         mLutProgram = loadShader(vss_default, fss_lut);
         Log.d(TAG, "mNormalProgram ID: " + mNormalProgram);
         Log.d(TAG, "mMagnifyProgram ID: " + mMagnifyProgram);
         Log.d(TAG, "mLutProgram ID: " + mLutProgram);
+
         uTexRotateMatrix_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uTexRotateMatrix");
         uSTMatrix_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uSTMatrix");
         vPosition_Normal = GLES20.glGetAttribLocation(mNormalProgram, "vPosition");
         vTexCoord_Normal = GLES20.glGetAttribLocation(mNormalProgram, "vTexCoord");
         enablePeak_Normal = GLES20.glGetUniformLocation(mNormalProgram, "enablePeak");
         resolutionLocation_Normal = GLES20.glGetUniformLocation(mNormalProgram, "resolution");
+        uBinning_Normal = GLES20.glGetUniformLocation(mNormalProgram, "binning");
+        uCameraResolution_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uCameraResolution");
+
         uTexRotateMatrix_Magnify = GLES20.glGetUniformLocation(mMagnifyProgram, "uTexRotateMatrix");
         uSTMatrix_Magnify = GLES20.glGetUniformLocation(mMagnifyProgram, "uSTMatrix");
         vPosition_Magnify = GLES20.glGetAttribLocation(mMagnifyProgram, "vPosition");
         vTexCoord_Magnify = GLES20.glGetAttribLocation(mMagnifyProgram, "vTexCoord");
         enablePeak_Magnify = GLES20.glGetUniformLocation(mMagnifyProgram, "enablePeak");
         resolutionLocation_Magnify = GLES20.glGetUniformLocation(mMagnifyProgram, "resolution");
+
         uTexRotateMatrix_Lut = GLES20.glGetUniformLocation(mLutProgram, "uTexRotateMatrix");
         uSTMatrix_Lut = GLES20.glGetUniformLocation(mLutProgram, "uSTMatrix");
         vPosition_Lut = GLES20.glGetAttribLocation(mLutProgram, "vPosition");
         vTexCoord_Lut = GLES20.glGetAttribLocation(mLutProgram, "vTexCoord");
         uPostLutSize = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZE");
         uPostLutSizeTiles = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZETILES");
-
         uOffscreenTexRotateMatrixHandle_LUT = GLES20.glGetUniformLocation(mLutProgram, "uTexRotateMatrix");
 
-        uBinning_Normal = GLES20.glGetUniformLocation(mNormalProgram, "binning");
-        uCameraResolution_Normal = GLES20.glGetUniformLocation(mNormalProgram, "uCameraResolution");
         setupOffscreenRendering();
+
         GLES20.glUseProgram(mNormalProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mNormalProgram, "sTexture"), 0);
+
         int isQuad = ((PhotonCamera.getSettings().sensorModeCfaPattern == -2) && PhotonCamera.isSensorModeOn) ? 1 : 0;
         GLES20.glUniform1i(uBinning_Normal, isQuad);
         GLES20.glUseProgram(mMagnifyProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mMagnifyProgram, "sTexture"), 0);
+
         GLES20.glUseProgram(mLutProgram);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutProgram, "sTexture"), 0);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(mLutProgram, "PostLut"), 1);
+
         GLES20.glUseProgram(0);
         mGLInit = true;
         mView.fireOnSurfaceTextureAvailable(mSTexture, 0, 0);
