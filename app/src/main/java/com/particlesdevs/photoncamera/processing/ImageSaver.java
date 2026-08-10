@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.processing;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -11,6 +12,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RuntimeShader;
+import android.graphics.Shader;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -762,6 +765,69 @@ public class ImageSaver {
                     inter.setAltitude(PhotonCamera.gpsLocation.getAltitude());
                 }
             }
+            inter.saveAttributes();
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            return false;
+        } finally {
+            sdrBase.recycle();
+            gainmapContents.recycle();
+        }
+        return true;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public Boolean createUltraHdrFromFp16(Bitmap hdrBitmapFp16, Path fileToSave, ParseExif.ExifData exifData) throws IOException {
+        int width = hdrBitmapFp16.getWidth();
+        int height = hdrBitmapFp16.getHeight();
+
+        float maxHdrBoost = PhotonCamera.getSpecific().specificSetting.ultraHdrMaxBoost;
+        float hdrGamma = PhotonCamera.getSpecific().specificSetting.ultraHdrGamma;
+
+        Bitmap sdrBase = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas sdrCanvas = new Canvas(sdrBase);
+        sdrCanvas.drawBitmap(hdrBitmapFp16, 0, 0, null);
+
+        Bitmap gainmapContents = Bitmap.createBitmap(width / 2, height / 2, Bitmap.Config.ALPHA_8);
+
+        String agslCode =
+                "uniform shader hdrTex;\n" +
+                        "uniform shader sdrTex;\n" +
+                        "uniform float maxBoost;\n" +
+                        "uniform float gamma;\n" +
+                        "half4 main(float2 coord) {\n" +
+                        "    half4 hdr = hdrTex.eval(coord);\n" +
+                        "    half4 sdr = sdrTex.eval(coord);\n" +
+                        "    float hdrLum = max(dot(hdr.rgb, half3(0.2126, 0.7152, 0.0722)), 0.0001);\n" +
+                        "    float sdrLum = max(dot(sdr.rgb, half3(0.2126, 0.7152, 0.0722)), 0.0001);\n" +
+                        "    float ratio = max(hdrLum / sdrLum, 1.0);\n" +
+                        "    float logValue = log2(ratio) / log2(maxBoost);\n" +
+                        "    float gainmapVal = clamp(pow(logValue, 1.0 / gamma), 0.0, 1.0);\n" +
+                        "    return half4(gainmapVal);\n" +
+                        "}";
+
+        RuntimeShader shader = new RuntimeShader(agslCode);
+        shader.setInputShader("hdrTex", new BitmapShader(hdrBitmapFp16, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        shader.setInputShader("sdrTex", new BitmapShader(sdrBase, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        shader.setFloatUniform("maxBoost", maxHdrBoost);
+        shader.setFloatUniform("gamma", hdrGamma);
+
+        Paint paint = new Paint();
+        paint.setShader(shader);
+
+        Canvas gainmapCanvas = new Canvas(gainmapContents);
+        gainmapCanvas.drawRect(0, 0, gainmapContents.getWidth(), gainmapContents.getHeight(), paint);
+
+        Gainmap gainmap = new Gainmap(gainmapContents);
+        gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
+        gainmap.setRatioMax(maxHdrBoost, maxHdrBoost, maxHdrBoost);
+        gainmap.setGamma(hdrGamma, hdrGamma, hdrGamma);
+        sdrBase.setGainmap(gainmap);
+
+        try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {
+            sdrBase.compress(Bitmap.CompressFormat.JPEG, ImageSaver.JPG_QUALITY, outputStream);
+            outputStream.flush();
+            ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);
             inter.saveAttributes();
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
