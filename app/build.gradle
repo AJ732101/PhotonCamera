@@ -67,7 +67,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             //noinspection ChromeOsAbiSupport
-            abiFilters "arm64-v8a", "armeabi-v7a"
+            abiFilters "arm64-v8a"
         }
         buildConfigField "String", "VERSION_BUILD", "\"${versionBuild}\""
         buildConfigField "String", "VERSION_NAME", "\"${versionProps['VERSION_NAME']}\""
