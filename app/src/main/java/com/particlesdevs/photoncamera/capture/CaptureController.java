@@ -73,6 +73,7 @@ import android.os.SystemClock;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.particlesdevs.photoncamera.api.ParseExif;
 import com.particlesdevs.photoncamera.app.ContextProvider;
 import com.particlesdevs.photoncamera.processing.ImageFrame;
 import com.particlesdevs.photoncamera.processing.ImagePath;
@@ -3952,7 +3953,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                                 Path imagePath = null;
                                 if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
                                     imagePath = ImagePath.newAVIFFilePath();
-                                    imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, null, mMetaData, videoRotation);
+                                    imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, ParseExif.parse(mCaptureResult, mCaptureRequest), null, videoRotation);
                                 } else {
                                     imagePath = ImagePath.newJPGFilePath();
                                     imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, mMetaData, videoRotation);

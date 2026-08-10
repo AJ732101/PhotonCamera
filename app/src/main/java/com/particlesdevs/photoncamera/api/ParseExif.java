@@ -1,5 +1,6 @@
 package com.particlesdevs.photoncamera.api;
 
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.os.Build;
@@ -60,17 +61,20 @@ public class ParseExif {
         Log.d(TAG, "Gravity rotation:" + PhotonCamera.getGravity().getRotation());
         Log.d(TAG, "Sensor rotation:" + PhotonCamera.getCaptureController().mSensorOrientation);
         int orientation = ORIENTATION_NORMAL;
-        switch (rotation) {
-            case 90:
-                orientation = ExifInterface.ORIENTATION_ROTATE_90;
-                break;
-            case 180:
-                orientation = ExifInterface.ORIENTATION_ROTATE_180;
-                break;
-            case 270:
-                orientation = ExifInterface.ORIENTATION_ROTATE_270;
-                break;
-        }
+        //if ((PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) && (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010)) {
+            switch (rotation) {
+                case 90:
+                    orientation = ExifInterface.ORIENTATION_ROTATE_90;
+                    break;
+                case 180:
+                    orientation = ExifInterface.ORIENTATION_ROTATE_180;
+                    break;
+                case 270:
+                case -90:
+                    orientation = ExifInterface.ORIENTATION_ROTATE_270;
+                    break;
+            }
+        //}
         Log.d(TAG, "rotation:" + rotation);
         Log.d(TAG, "orientation:" + orientation);
 
@@ -89,12 +93,12 @@ public class ParseExif {
         data.EQUIVALENT_35MM = "23mm";
         String focal = resultget(result, LENS_FOCAL_LENGTH);
         if (!focal.isEmpty()) {
-            focal = requestget(request, CaptureRequest.LENS_FOCAL_LENGTH);
+            focal = resultget(result, CaptureResult.LENS_FOCAL_LENGTH);
             data.FOCAL_LENGTH = ((int) (100 * Double.parseDouble(focal))) + "/100";
         }
         String exposure = resultget(result, SENSOR_EXPOSURE_TIME);
         if (!exposure.isEmpty()) {
-            exposure = requestget(request, CaptureRequest.SENSOR_EXPOSURE_TIME);
+            exposure = resultget(result, CaptureResult.SENSOR_EXPOSURE_TIME);
             data.EXPOSURE_TIME = getTime(Long.parseLong(exposure));
         }
         data.DATETIME = getCurrentDateTime();
@@ -155,6 +159,7 @@ public class ParseExif {
                 orientation = ExifInterface.ORIENTATION_ROTATE_180;
                 break;
             case 270:
+            case -90:
                 orientation = ExifInterface.ORIENTATION_ROTATE_270;
                 break;
         }

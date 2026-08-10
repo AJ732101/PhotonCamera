@@ -503,25 +503,23 @@ public class ImageSaver {
             Boolean ret = false;
             AvifEncoder avifEncoder = new AvifEncoder();
             try {
-                int rotation = orientation;
-                if (exifData == null) {
-                    switch (orientation) {
-                        case 0:
-                            rotation = 180;
-                            break;
-                        case 90:
-                            rotation = 270;
-                            break;
-                        case 180:
-                            rotation = 0;
-                            break;
-                        case 270:
-                        case -90:
-                            rotation = 90;
-                            break;
-                    }
+                switch (orientation) {
+                    case 90:
+                        exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_270);
+                        break;
+                    case 180:
+                        exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_180);
+                        break;
+                    case 270:
+                    case -90:
+                        exifData.ORIENTATION = String.valueOf(ExifInterface.ORIENTATION_ROTATE_90);
+                        break;
                 }
-                ret = avifEncoder.encodeBmpToAvif(img, heicFile, rotation, PhotonCamera.getSettings().singleFrameQuality, metaData, null);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ret = avifEncoder.encodeBmpToAvif(img, heicFile, 0, PhotonCamera.getSettings().singleFrameQuality, metaData, exifData);
+                } else {
+                    return false;
+                }
             }
             catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));

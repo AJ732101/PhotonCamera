@@ -17,13 +17,10 @@ import android.os.Build;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.particlesdevs.photoncamera.app.PhotonCamera;
-import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.processing.opengl.GLImage;
 import com.particlesdevs.photoncamera.processing.opengl.GLTexture;
-import com.particlesdevs.photoncamera.util.FileManager;
 import com.particlesdevs.photoncamera.util.Log;
 import com.particlesdevs.photoncamera.util.Utilities;
 
@@ -37,8 +34,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.FileInputStream;
 import java.util.function.Consumer;
 
@@ -220,9 +215,34 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         initTex();
 
-        String p010_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_vs.glsl");
-        String p010_fs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_fs.glsl");
+        String p010_vs = "";
+        File p010_vsFile = new File(sPHOTON_TUNING_DIR, "p010_to_f16_vs.glsl");
+        if (p010_vsFile.exists()) {
+            try {
+                p010_vs = new String(Files.readAllBytes(p010_vsFile.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "p010_to_f16_vs " + e.getMessage());
+            }
+        }
+        else {
+            p010_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_vs.glsl");
+        }
+
+        String p010_fs = "";
+        File prevFs = new File(sPHOTON_TUNING_DIR, "p010_to_f16_fs.glsl");
+        if (prevFs.exists()) {
+            try {
+                p010_fs = new String(Files.readAllBytes(prevFs.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "p010_to_f16_fs " + e.getMessage());
+            }
+        }
+        else {
+            p010_fs = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_fs.glsl");
+        }
+
         mP010ToF16Program = loadShader(p010_vs, p010_fs);
+        Log.d(TAG, "mP010ToF16Program ID: " + mP010ToF16Program);
 
         mP010_vPosition = GLES20.glGetAttribLocation(mP010ToF16Program, "aPosition");
         mP010_aTexCoord = GLES20.glGetAttribLocation(mP010ToF16Program, "aTexCoord");
@@ -232,9 +252,36 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
 
         mP010_Vtex = mP010_Utex;
 
-        String p010_fs_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_noclamp_fs.glsl");
-        String simple_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/simple_vs.glsl");
+        String p010_fs_noclamp = "";
+        File p010_fs_noclampFile = new File(sPHOTON_TUNING_DIR, "p010_to_f16_noclamp_fs.glsl");
+        if (p010_fs_noclampFile.exists()) {
+            try {
+                p010_fs_noclamp = new String(Files.readAllBytes(p010_fs_noclampFile.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "p010_to_f16_noclamp_fs " + e.getMessage());
+            }
+        }
+        else {
+            p010_fs_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/p010_to_f16_noclamp_fs.glsl");
+        }
+
+        String simple_vs = "";
+        File simple_vsFile = new File(sPHOTON_TUNING_DIR, "simple_vs.glsl");
+        if (simple_vsFile.exists()) {
+            try {
+                simple_vs = new String(Files.readAllBytes(simple_vsFile.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "simple_vs " + e.getMessage());
+            }
+        }
+        else {
+            simple_vs = PhotonCamera.getAssetLoader().getString("shaders/lut/simple_vs.glsl");
+        }
+
+
         mP010ToF16NoClampProgram = loadShader(simple_vs, p010_fs_noclamp);
+        Log.d(TAG, "mP010ToF16Program ID: " + mP010ToF16Program);
+
         mP010NoClamp_vPosition = GLES20.glGetAttribLocation(mP010ToF16NoClampProgram, "aPosition");
         mP010NoClamp_aTexCoord = GLES20.glGetAttribLocation(mP010ToF16NoClampProgram, "aTexCoord");
         mP010NoClamp_Ytex = GLES20.glGetUniformLocation(mP010ToF16NoClampProgram, "y_texture");
@@ -251,7 +298,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
             try {
                 vss_default = new String(Files.readAllBytes(prevVs.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                Log.e(TAG, "vss_default " + e.getMessage());
+                Log.e(TAG, "main_vs " + e.getMessage());
             }
         }
         else {
