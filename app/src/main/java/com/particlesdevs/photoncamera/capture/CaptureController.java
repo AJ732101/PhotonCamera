@@ -882,8 +882,8 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public boolean isSingleShotSwEncoder() {
         if ((PhotonCamera.getSettings().frameCount == 1) &&
                 ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
-                 /*(PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||
-                 (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) ||*/
+                 /*(PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatHeifSw) ||*/
+                 ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) && (PhotonCamera.getSettings().realPreviewFormat == ImageFormat.YCBCR_P010)) ||
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatPngSw) ||
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLossySw) ||
                  (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatWebpLosslessSw)) &&
@@ -3949,10 +3949,14 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
                             if (processedData != null) {
                                 Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
                                 Boolean imageSaved = false;
-                                //Path imagePath = ImagePath.newAVIFFilePath();
-                                //imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, null, mMetaData, videoRotation);
-                                Path imagePath = ImagePath.newJPGFilePath();
-                                imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, mMetaData, videoRotation);
+                                Path imagePath = null;
+                                if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
+                                    imagePath = ImagePath.newAVIFFilePath();
+                                    imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, null, mMetaData, videoRotation);
+                                } else {
+                                    imagePath = ImagePath.newJPGFilePath();
+                                    imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, mMetaData, videoRotation);
+                                }
                                 try {
                                     cameraEventsListener.notifyImageSavedStatus(imageSaved, imagePath);
                                 }

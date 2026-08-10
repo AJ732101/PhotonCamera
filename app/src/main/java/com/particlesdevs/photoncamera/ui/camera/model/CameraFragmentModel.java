@@ -2,6 +2,7 @@ package com.particlesdevs.photoncamera.ui.camera.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.media.MediaFormat;
 import android.util.Size;
 import android.view.View;
@@ -430,7 +431,11 @@ public class CameraFragmentModel extends BaseObservable {
                 entries.add("HEIC_ULTRA");
                 entryValues.add("4102");
             }
-            entries.add("AVIF (SW)");
+            if (PhotonCamera.getSettings().realPreviewFormat == ImageFormat.YCBCR_P010) {
+                entries.add("AVIF (SW, LUT)");
+            } else {
+                entries.add("AVIF (SW)");
+            }
             entryValues.add("999999999");
             entries.add("HEIC/HEIF (SW)");
             entryValues.add("999999991");

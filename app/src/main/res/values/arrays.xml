@@ -59,6 +59,7 @@
         <item>JPEG_R</item>
         <item>HEIC_ULTRA</item>
         <item>AVIF (SW)</item>
+        <item>AVIF (SW, LUT)</item>
         <item>HEIC/HEIF (SW)</item>
         <item>JPEG (SW, LUT)</item>
         <item>YUV RAW</item>
@@ -75,6 +76,7 @@
         <item>1212500294</item>
         <item>4101</item>
         <item>4102</item>
+        <item>999999999</item>
         <item>999999999</item>
         <item>999999991</item>
         <item>999999992</item>

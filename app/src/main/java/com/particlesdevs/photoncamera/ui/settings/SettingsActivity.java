@@ -173,7 +173,11 @@ public class SettingsActivity extends BaseActivity implements
                 entries.add("HEIC_ULTRA");
                 entryValues.add("4102");
             }
-            entries.add("AVIF (SW)");
+            if (PhotonCamera.getSettings().realPreviewFormat == ImageFormat.YCBCR_P010) {
+                entries.add("AVIF (SW, LUT)");
+            } else {
+                entries.add("AVIF (SW)");
+            }
             entryValues.add("999999999");
             entries.add("HEIC/HEIF (SW)");
             entryValues.add("999999991");
