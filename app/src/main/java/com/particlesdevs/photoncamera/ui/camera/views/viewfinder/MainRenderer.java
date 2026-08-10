@@ -306,7 +306,7 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
                     if (bmp == null) {
                         // Fallback to original Java parsing if JNI fails
                         try (FileInputStream fis = new FileInputStream(currentLutFile)) {
-                            bmp = Utilities.parseCubeLut8Bit(fis);
+                            bmp = Utilities.parseCubeLut16Bit(fis);
                         }
                     }
                     if (bmp != null) {
