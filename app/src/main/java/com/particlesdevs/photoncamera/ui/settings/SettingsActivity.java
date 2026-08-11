@@ -77,6 +77,9 @@ public class SettingsActivity extends BaseActivity implements
         PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
         PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
     public static boolean toRestartApp;
+    public static final String EXTRA_SHOW_FRAGMENT = "show_fragment";
+    public static final String FRAGMENT_SINGLE_SHOT = "single_shot";
+    public static final String FRAGMENT_STACKING = "stacking";
 
     public static class GeneralSettingsFragment extends PreferenceFragmentCompat {
         @Override
@@ -1455,9 +1458,17 @@ public class SettingsActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         if (savedInstanceState == null) {
+            Fragment fragment = new SettingsFragment();
+            String showFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
+            if (FRAGMENT_SINGLE_SHOT.equals(showFragment)) {
+                fragment = new SingleShotSettingsFragment();
+            } else if (FRAGMENT_STACKING.equals(showFragment)) {
+                fragment = new StackingSettingsFragment();
+            }
+
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings_container, new SettingsFragment())
+                    .replace(R.id.settings_container, fragment)
                     .commit();
         }
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentLifeCycleMonitor(), true);

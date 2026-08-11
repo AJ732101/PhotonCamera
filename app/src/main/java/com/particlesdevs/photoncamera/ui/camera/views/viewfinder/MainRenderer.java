@@ -375,8 +375,22 @@ public class MainRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFr
         uPostLutSizeTiles = GLES20.glGetUniformLocation(mLutProgram, "POSTLUTSIZETILES");
         uOffscreenTexRotateMatrixHandle_LUT = GLES20.glGetUniformLocation(mLutProgram, "uTexRotateMatrix");
 
-        String fss_lut_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/main_lut_noclamp_2d_fs.glsl");
+        String fss_lut_noclamp ="";
+        File fss_lut_noclampFile = new File(sPHOTON_TUNING_DIR, "main_lut_noclamp_2d_fs.glsl");
+        if (fss_lut_noclampFile.exists()) {
+            try {
+                fss_lut_noclamp = new String(Files.readAllBytes(fss_lut_noclampFile.toPath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                Log.e(TAG, "fss_lut " + e.getMessage());
+            }
+        }
+        else {
+            fss_lut_noclamp = PhotonCamera.getAssetLoader().getString("shaders/lut/main_lut_noclamp_2d_fs.glsl");
+        }
+
         mLutNoClampProgram = loadShader(simple_vs, fss_lut_noclamp);
+        Log.d(TAG, "mLutNoClampProgram ID: " + mLutNoClampProgram);
+
         vPosition_LutNoClamp = GLES20.glGetAttribLocation(mLutNoClampProgram, "aPosition");
         vTexCoord_LutNoClamp = GLES20.glGetAttribLocation(mLutNoClampProgram, "aTexCoord");
         uPostLutSizeNoClamp = GLES20.glGetUniformLocation(mLutNoClampProgram, "POSTLUTSIZE");

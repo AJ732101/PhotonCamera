@@ -1,6 +1,7 @@
 package com.particlesdevs.photoncamera.ui.camera.model;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.media.MediaFormat;
@@ -22,6 +23,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.ui.camera.CameraUIController;
+import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
 import com.particlesdevs.photoncamera.util.FileManager;
 
 import java.io.File;
@@ -132,6 +134,16 @@ public class CameraFragmentModel extends BaseObservable {
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
+        } else if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.PHOTO) ||
+                   PhotonCamera.getSettings().selectedMode.equals(CameraMode.MOTION) ||
+                   PhotonCamera.getSettings().selectedMode.equals(CameraMode.NIGHT)) {
+            Intent intent = new Intent(context, SettingsActivity.class);
+            if (PhotonCamera.getSettings().frameCount == 1) {
+                intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.FRAGMENT_SINGLE_SHOT);
+            } else {
+                intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.FRAGMENT_STACKING);
+            }
+            context.startActivity(intent);
         }
     }
 
