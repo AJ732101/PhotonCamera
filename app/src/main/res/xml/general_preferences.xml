@@ -28,6 +28,15 @@
             app:minValue="5"
             android:icon="@drawable/humidity_percentage_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
+            android:key="@string/pref_exposure_compensation_key"
+            android:layout="@layout/preference_seekbar"
+            android:title="@string/contrast_curve_exposure_compensation"
+            android:defaultValue="@string/pref_exposure_compensation_default"
+            app:maxValue="24"
+            app:minValue="-24"
+            android:icon="@drawable/exposure_24px"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_preview_format_key"
@@ -98,11 +107,27 @@
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_center_weight_ae_key"
+            android:defaultValue="@bool/pref_center_weight_ae_default"
+            android:title="@string/center_weight_ae"
+            android:summary=""
+            android:icon="@drawable/exposure_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_dng_compression_key"
             android:defaultValue="@bool/pref_dng_compression_default"
             android:title="@string/turn_on_dng_compression"
             android:summary=""
             android:icon="@drawable/compress_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:key="@string/pref_ultra_hdr_key"
+            android:defaultValue="@bool/pref_ultra_hdr_default"
+            android:layout="@layout/preference_with_margin"
+            android:title="@string/ultra_hdr_jpeg"
+            android:summary=""
+            android:icon="@drawable/hdr_on_24px"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:key="@string/pref_wide169_key"

@@ -1255,14 +1255,23 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         }
     }
 
+    public CameraCharacteristics getmCameraCharacteristics() {
+        return mCameraCharacteristics;
+    }
+
     public void rebuildPreviewBuilder() {
-        if(burst) return;
+        if (burst) {
+            return;
+        }
         try {
             if (mCaptureSession == null || mPreviewRequestBuilder == null) {
                 return;
             }
             mPreviewInputRequest = mPreviewRequestBuilder.build();
             if (mPreviewInputRequest != null) {
+                if (PhotonCamera.getSettings().useCenterWeightAe) {
+                    CameraMeteringHelper.applyCenterWeightedAE(mPreviewRequestBuilder, mCameraCharacteristics, 0.25f);
+                }
                 mCaptureSession.setRepeatingRequest(mPreviewInputRequest, mCaptureCallback, mBackgroundHandler);
             } else {
                 Log.e(TAG, "mPreviewInputRequest == null");
@@ -1882,7 +1891,12 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
             }
         });
     }
+
     public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) throws CameraAccessException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        if (PhotonCamera.getSettings().exposureCompensation2 != 0) {
+            captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSettings().exposureCompensation2);
+        }
+
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode
         if (!PhotonCamera.getSettings().useNewSettingsGloabal) {
             if (!PhotonCamera.getSettings().selectedMode.equals(CameraMode.VIDEO) && (PhotonCamera.getSettings().frameCount != 1)) {
@@ -1894,8 +1908,6 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         //captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, mPreviewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION));
         // QualityDoesMatter
         captureBuilder.set(CaptureRequest.STATISTICS_HOT_PIXEL_MAP_MODE, PhotonCamera.getSpecific().specificSetting.statisticsHotPixelMapMode);
-        if ((PhotonCamera.getSettings().exposureCompensation2 != 0) && !PhotonCamera.getSettings().contrastCurve.equals("off"))
-            captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSettings().exposureCompensation2);
         if (PhotonCamera.getSettings().hotPixelMode != 99)
             captureBuilder.set(CaptureRequest.HOT_PIXEL_MODE, PhotonCamera.getSettings().hotPixelMode);
         if (PhotonCamera.getSettings().colorCorrectionAberrationMode != 99)
@@ -3079,7 +3091,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         mPreviewRequestBuilder.set(CaptureRequest.EDGE_MODE, PhotonCamera.getSettings().edgeProcessing);
         setSceneAndEffectMode(mPreviewRequestBuilder);
 
-        mPreviewMeteringAE = mPreviewRequestBuilder.get(CONTROL_AE_REGIONS);
+        if (PhotonCamera.getSettings().useCenterWeightAe) {
+            CameraMeteringHelper.applyCenterWeightedAE(mPreviewRequestBuilder, mCameraCharacteristics, 0.25f);
+        } else {
+            mPreviewMeteringAE = mPreviewRequestBuilder.get(CONTROL_AE_REGIONS);
+        }
         mPreviewAEMode = mPreviewRequestBuilder.get(CONTROL_AE_MODE);
     }
 
@@ -3602,7 +3618,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         Rect rect = new Rect(left, top, left + rectWidth, top + rectHeight);
         MeteringRectangle meteringRect = new MeteringRectangle(rect, MeteringRectangle.METERING_WEIGHT_MAX);
 
-        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{meteringRect});
+        if (PhotonCamera.getSettings().useCenterWeightAe) {
+            CameraMeteringHelper.applyCenterWeightedAE(mPreviewRequestBuilder, mCameraCharacteristics, 0.25f);
+        } else {
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{meteringRect});
+        }
 
         try {
             if (mCaptureSession != null) {
@@ -4954,7 +4974,11 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     private void setAFMode(CaptureRequest.Builder builder, int afMode) {
         if (builder != null) {
             builder.set(CaptureRequest.CONTROL_AF_REGIONS, builder.get(CONTROL_AF_REGIONS));
-            builder.set(CaptureRequest.CONTROL_AE_REGIONS, builder.get(CONTROL_AE_REGIONS));
+            if (PhotonCamera.getSettings().useCenterWeightAe) {
+                CameraMeteringHelper.applyCenterWeightedAE(mPreviewRequestBuilder, mCameraCharacteristics, 0.25f);
+            } else {
+                builder.set(CaptureRequest.CONTROL_AE_REGIONS, builder.get(CONTROL_AE_REGIONS));
+            }
             builder.set(CaptureRequest.CONTROL_AF_MODE, afMode);
         }
     }

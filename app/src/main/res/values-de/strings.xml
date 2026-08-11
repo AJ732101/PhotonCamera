@@ -5,7 +5,7 @@
     <string name="luma_nr_count">Helligkeit Rauschreduktion Stärke</string>
     <string name="frame_count">Bilder für Synthese/Stacking </string>
     <string name="frame_count_summary">Anzahl der Bilder für die Synthese (Stacking)</string>
-    <string name="contrast_curve_exposure_compensation">Belichtungskorrektur für Kontrastkurven</string>
+    <string name="contrast_curve_exposure_compensation">Globale Belichtungskorrektur</string>
     <string name="color_tint">Farbton</string>
     <string name="single_frame_quality">Foto Qualität</string>
     <string name="bitrate">Bitrate [MBit/s]</string>

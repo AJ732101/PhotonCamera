@@ -121,15 +121,6 @@
             android:defaultValue="@string/pref_contrast_curve_default_value" />
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
-            android:key="@string/pref_exposure_compensation_key"
-            android:layout="@layout/preference_seekbar"
-            android:title="@string/contrast_curve_exposure_compensation"
-            android:defaultValue="@string/pref_exposure_compensation_default"
-            app:maxValue="24"
-            app:minValue="-24"
-            android:icon="@drawable/exposure_24px"/>
-
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.UniversalSeekBarPreference
             android:key="@string/pref_color_temperature_key"
             android:layout="@layout/preference_seekbar"
             android:title="@string/color_temperature"

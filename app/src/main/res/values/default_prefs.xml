@@ -103,6 +103,7 @@
     <!-- General settings strings -->
     <string name="pref_aperture_default_value" translatable="false">99</string>
     <bool name="pref_dng_compression_default">false</bool>
+    <bool name="pref_center_weight_ae_default">false</bool>
     <bool name="pref_use_external_gallery_default">true</bool>
     <bool name="pref_show_basic_osd_default">true</bool>
     <bool name="pref_ois_default">true</bool>

@@ -64,6 +64,7 @@ public class Settings {
     public boolean useBasicOsd = true;
     public boolean useOis = true;
     public boolean useDngCompression = false;
+    public boolean useCenterWeightAe = false;
     public boolean useP3 = false;
     public int videoBitrate;
     public float apertureToUse;
@@ -221,6 +222,7 @@ public class Settings {
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();
         useDngCompression = PreferenceKeys.useDngCompression();
+        useCenterWeightAe = PreferenceKeys.useCenterWeightAe();
         singleFrameQuality = PreferenceKeys.getSingleFrameQualityValue();
         apertureToUse = PreferenceKeys.getAperture();
         useExtendIso = PreferenceKeys.useExtendIsoOn();

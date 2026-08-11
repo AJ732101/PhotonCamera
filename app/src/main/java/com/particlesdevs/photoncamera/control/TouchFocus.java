@@ -8,6 +8,7 @@ import android.hardware.camera2.params.MeteringRectangle;
 
 import com.particlesdevs.photoncamera.api.CameraMode;
 import com.particlesdevs.photoncamera.app.PhotonCamera;
+import com.particlesdevs.photoncamera.capture.CameraMeteringHelper;
 import com.particlesdevs.photoncamera.util.Log;
 import android.util.Size;
 import android.view.View;
@@ -163,7 +164,11 @@ public class TouchFocus {
         }
         captureController.rebuildPreviewBuilderOneShot();
         builder.set(CaptureRequest.CONTROL_AF_REGIONS, rectaf);
-        builder.set(CaptureRequest.CONTROL_AE_REGIONS, rectaf);
+        if (PhotonCamera.getSettings().useCenterWeightAe) {
+            CameraMeteringHelper.applyCenterWeightedAE(builder, captureController.getmCameraCharacteristics(), 0.25f);
+        } else {
+            builder.set(CaptureRequest.CONTROL_AE_REGIONS, rectaf);
+        }
         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
         builder.set(CaptureRequest.CONTROL_AF_MODE, PreferenceKeys.getAfMode());
         builder.set(CaptureRequest.CONTROL_AE_MODE, Math.max(PreferenceKeys.getAeMode(), 1));
@@ -197,7 +202,11 @@ public class TouchFocus {
         Log.d(TAG, "resetAutoFocus");
         builder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
         builder.set(CaptureRequest.CONTROL_AF_REGIONS, captureController.mPreviewMeteringAF);
-        builder.set(CaptureRequest.CONTROL_AE_REGIONS, captureController.mPreviewMeteringAE);
+        if (PhotonCamera.getSettings().useCenterWeightAe) {
+            CameraMeteringHelper.applyCenterWeightedAE(builder, captureController.getmCameraCharacteristics(), 0.25f);
+        } else {
+            builder.set(CaptureRequest.CONTROL_AE_REGIONS, captureController.mPreviewMeteringAE);
+        }
         builder.set(CaptureRequest.CONTROL_AF_MODE, captureController.mPreviewAFMode);
         builder.set(CaptureRequest.CONTROL_AE_MODE, captureController.mPreviewAEMode);
         captureController.rebuildPreviewBuilderOneShot();

@@ -74,6 +74,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_COUNTDOWN_TIMER.mValue);
         COMMON_KEYS.add(Key.KEY_OIS_ON.mValue);
         COMMON_KEYS.add(Key.KEY_DNG_COMPRESSION_ON.mValue);
+        COMMON_KEYS.add(Key.KEY_CENTER_WEIGHT_AE_ON.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_BASIC_OSD.mValue);
         COMMON_KEYS.add(Key.KEY_SINGLE_FRAME_QUALITY.mValue);
         COMMON_KEYS.add(Key.KEY_USE_EXTERNAL_GALLERY.mValue);
@@ -246,6 +247,7 @@ public class PreferenceKeys {
         // QualityDoesMatter - General
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_OIS_ON, resources.getBoolean(R.bool.pref_ois_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON, resources.getBoolean(R.bool.pref_dng_compression_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_CENTER_WEIGHT_AE_ON, resources.getBoolean(R.bool.pref_center_weight_ae_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_BASIC_OSD, resources.getBoolean(R.bool.pref_show_basic_osd_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_ISO, resources.getBoolean(R.bool.pref_extend_iso_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EXTEND_EXPOSURE, resources.getBoolean(R.bool.pref_extend_exposure_default));
@@ -840,6 +842,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DNG_COMPRESSION_ON);
     }
 
+    public static boolean useCenterWeightAe() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_CENTER_WEIGHT_AE_ON);
+    }
+
     public static int getVideoBitrate() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_VIDEO_BITRATE_SEEKBAR);
     }
@@ -1331,6 +1337,7 @@ public class PreferenceKeys {
         KEY_EXTEND_EXPOSURE(R.string.pref_extend_exposure_key),
         KEY_OIS_ON(R.string.pref_ois_key),
         KEY_DNG_COMPRESSION_ON(R.string.pref_dng_compression_key),
+        KEY_CENTER_WEIGHT_AE_ON(R.string.pref_center_weight_ae_key),
 
         /**
          * QualityDoesMatter - Single Shot & Video Related
