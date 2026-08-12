@@ -31,7 +31,7 @@
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1.0"
-                app:layout_constraintEnd_toStartOf="@id/shutter_button_container"
+                app:layout_constraintEnd_toStartOf="@id/toggle_framecount_slider_container"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -54,13 +54,38 @@
         </FrameLayout>
 
         <FrameLayout
+                android:id="@+id/toggle_framecount_slider_container"
+                android:layout_width="35dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1.0"
+                app:layout_constraintEnd_toStartOf="@+id/shutter_button_container"
+                app:layout_constraintStart_toEndOf="@+id/camera_switch_container"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                    android:id="@+id/toggleFrameCountSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/aux_container_background"
+                    android:clickable="true"
+                    android:contentDescription="Toggle Frame Count Slider"
+                    android:onClick="@{bottom_bar_click_listener}"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_burst_mode_black_24dp"
+                    app:bindRotate="@{uimodel}" />
+
+        </FrameLayout>
+
+        <FrameLayout
                 android:layout_width="@dimen/shutter_button_size"
                 android:layout_height="0dp"
                 app:layout_constraintDimensionRatio="1.0"
                 android:id="@+id/shutter_button_container"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/camera_switch_container"
-                app:layout_constraintEnd_toStartOf="@id/galery_button_container"
+                app:layout_constraintStart_toEndOf="@+id/toggle_framecount_slider_container"
+                app:layout_constraintEnd_toStartOf="@id/toggle_zoom_slider_container"
                 app:layout_constraintBottom_toBottomOf="parent" >
 
             <ImageButton
@@ -111,6 +136,31 @@
         </FrameLayout>
 
         <FrameLayout
+                android:id="@+id/toggle_zoom_slider_container"
+                android:layout_width="35dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1.0"
+                app:layout_constraintEnd_toStartOf="@+id/galery_button_container"
+                app:layout_constraintStart_toEndOf="@+id/shutter_button_container"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                    android:id="@+id/toggleZoomSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/aux_container_background"
+                    android:clickable="true"
+                    android:contentDescription="Toggle Zoom Slider"
+                    android:onClick="@{bottom_bar_click_listener}"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/zoom_in_24px"
+                    app:bindRotate="@{uimodel}" />
+
+        </FrameLayout>
+
+        <FrameLayout
                 android:layout_width="@dimen/gallery_button_size"
                 android:layout_height="0dp"
                 app:layout_constraintDimensionRatio="1.0"
@@ -118,7 +168,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/shutter_button_container" >
+                app:layout_constraintStart_toEndOf="@id/toggle_zoom_slider_container" >
 
             <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/gallery_image_button"

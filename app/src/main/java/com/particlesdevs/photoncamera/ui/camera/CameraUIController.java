@@ -261,6 +261,26 @@ final public class CameraUIController implements CameraUIEventsListener,
                 setID(cameraFragment.cycler(PreferenceKeys.getCameraID()));
                 this.restartCamera();
                 break;
+
+            case R.id.toggleFrameCountSlider:
+                boolean currentSlider = PreferenceKeys.showFramecountSlider();
+                PreferenceKeys.setShowFramecountSlider(!currentSlider);
+                if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
+                    cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(!currentSlider);
+                    if (!currentSlider) {
+                        cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
+                    }
+                }
+                break;
+
+            case R.id.toggleZoomSlider:
+                boolean currentZoomSlider = PreferenceKeys.showZoomSlider();
+                PreferenceKeys.setShowZoomSlider(!currentZoomSlider);
+                if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
+                    cameraFragment.cameraFragmentBinding.setZoomSliderVisible(!currentZoomSlider);
+                }
+                break;
+
             case R.id.grid_toggle_button:
                 PreferenceKeys.setGridValue((PreferenceKeys.getGridValue() + 1) % view.getResources().getStringArray(R.array.vf_grid_entryvalues).length);
                 view.setSelected(PreferenceKeys.getGridValue() != 0);

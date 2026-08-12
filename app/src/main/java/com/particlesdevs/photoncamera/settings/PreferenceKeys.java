@@ -1050,8 +1050,16 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER);
     }
 
+    public static void setShowZoomSlider(boolean value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER, value);
+    }
+
     public static boolean showFramecountSlider() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_FRAMECOUNT_SLIDER);
+    }
+
+    public static void setShowFramecountSlider(boolean value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_SHOW_FRAMECOUNT_SLIDER, value);
     }
 
     public static int getHotPixelMode() {
