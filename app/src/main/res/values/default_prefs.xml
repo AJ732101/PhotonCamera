@@ -134,6 +134,7 @@
     <bool name="pref_new_rec_video_def_value">false</bool>
     <bool name="pref_use_stream_usecase_def_value">false</bool>
     <bool name="pref_show_zoom_slider_def_value">false</bool>
+    <bool name="pref_show_framecount_slider_def_value">false</bool>
     <string name="pref_keyframe_interval_default_value" translatable="false">10</string>
     <string name="pref_hdr_mode_default_value" translatable="false">4096</string>
     <string name="pref_photo_video_codec_default_value" translatable="false">HEVC</string>

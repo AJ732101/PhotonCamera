@@ -242,6 +242,7 @@
     <string name="zsl">Zero Shutter Lag</string>
     <string name="use_stream_usecase">Use Stream Usecase</string>
     <string name="show_zoom_slider">Show Zoom Slider</string>
+    <string name="show_framecount_slider">Show Framecount Slider</string>
     <string name="photo_transfer_function">Transfer Function</string>
     <string name="photo_video_codec">Used Codec</string>
     <string name="photo_colorspace">Color Space</string>

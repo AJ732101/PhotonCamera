@@ -62,14 +62,6 @@
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
-            android:key="@string/pref_2x_zoom_key"
-            android:title="@string/zoom"
-            android:summary=""
-            android:icon="@drawable/zoom_in_24px"
-            android:defaultValue="@bool/pref_2x_zoom_def_value"/>
-
-        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
-            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_scene_and_effect_mode_key"
             android:title="@string/scene_and_effect_mode"
             android:summary=""
@@ -91,6 +83,14 @@
             android:summary=""
             android:icon="@drawable/high_quality_24px"
             android:defaultValue="@bool/pref_use_stream_usecase_def_value"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_2x_zoom_key"
+            android:title="@string/zoom"
+            android:summary=""
+            android:icon="@drawable/zoom_in_24px"
+            android:defaultValue="@bool/pref_2x_zoom_def_value"/>
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"

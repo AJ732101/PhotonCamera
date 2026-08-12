@@ -77,6 +77,14 @@
             android:summary=""
             android:icon="@drawable/join_right_24px"/>
 
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_framecount_slider_key"
+            android:title="@string/show_framecount_slider"
+            android:summary=""
+            android:icon="@drawable/ic_burst_mode_black_24dp"
+            android:defaultValue="@bool/pref_show_framecount_slider_def_value"/>
+
         <ListPreference
             android:layout="@layout/preference_with_margin"
             android:key="@string/pref_demosaic_key"

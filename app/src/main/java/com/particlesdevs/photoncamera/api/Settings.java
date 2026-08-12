@@ -149,6 +149,7 @@ public class Settings {
     public boolean isTonnemappingModeQuality = false;
     public int socQualcommMfnrFrames = 5;
     public boolean showZoomSlider = false;
+    public boolean showFramecountSlider = false;
     public boolean alternateImageReaderFlags = false;
     public boolean useHqSubsampling = false;
     public boolean useParallelAvif = false;
@@ -296,6 +297,7 @@ public class Settings {
         photoRange = PreferenceKeys.getPhotoRange();
         photoVideoCodec = PreferenceKeys.getPhotoVideoCodec();
         showZoomSlider = PreferenceKeys.showZoomSlider();
+        showFramecountSlider = PreferenceKeys.showFramecountSlider();
         swColorSpace = PreferenceKeys.getSwColorSpace();
         alternateImageReaderFlags = PreferenceKeys.isAlternateImageReaderFlagsOn();
         useHqSubsampling = PreferenceKeys.isHqSubsamplingOn();

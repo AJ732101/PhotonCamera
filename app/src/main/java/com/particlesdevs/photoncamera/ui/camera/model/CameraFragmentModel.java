@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Class that holds the ui state, for now the orientation
@@ -46,6 +47,7 @@ public class CameraFragmentModel extends BaseObservable {
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
     public final MutableLiveData<Float> zoomLevel = new MutableLiveData<>(1.0f);
+    public final MutableLiveData<Integer> frameCount = new MutableLiveData<>(PhotonCamera.getSettings().frameCount);
 
     public void onMagnifyViewfinderClicked() {
         if (PhotonCamera.getCaptureController() != null) {
@@ -791,6 +793,7 @@ public class CameraFragmentModel extends BaseObservable {
                 PhotonCamera.getCaptureController().zoomSliderChanged(newZoom);
                 zoomLevel.setValue(newZoom);
                 notifyPropertyChanged(BR.zoomLevel);
+                notifyPropertyChanged(BR.zoomProgress);
             }
         }
 
@@ -805,9 +808,40 @@ public class CameraFragmentModel extends BaseObservable {
         }
     };
 
+    public final SeekBar.OnSeekBarChangeListener frameCountChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                frameCount.setValue(progress);
+                notifyPropertyChanged(BR.frameCount);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            PreferenceKeys.setFrameCountValue(frameCount.getValue());
+            PhotonCamera.getCaptureController().restartCamera();
+        }
+    };
+
     @Bindable
     public Float getZoomLevel() {
         return zoomLevel.getValue() != null ? zoomLevel.getValue() : 1.0f;
+    }
+
+    @Bindable
+    public int getZoomProgress() {
+        Float currentZoom = zoomLevel.getValue();
+        if (currentZoom == null) return 38;
+        float curved_fraction = (currentZoom - 0.5f) / 9.5f;
+        if (curved_fraction < 0) curved_fraction = 0;
+        float linear_fraction = (float) Math.pow(curved_fraction, 1.0 / 2.5);
+        return Math.round((linear_fraction * 95.0f) + 5);
     }
 
     public void onZoomChanged(int progress) {
@@ -820,12 +854,9 @@ public class CameraFragmentModel extends BaseObservable {
 
     }
 
-    public void onZoomProgressChanged(int progress, boolean fromUser) {
-        if (fromUser) {
-            if (PhotonCamera.getCaptureController() != null) {
-                PhotonCamera.getCaptureController().zoomSliderChanged((float)(progress / 10.0f));
-            }
-        }
+    @Bindable
+    public Integer getFrameCount() {
+        return frameCount.getValue() != null ? frameCount.getValue() : 1;
     }
 
     @Bindable

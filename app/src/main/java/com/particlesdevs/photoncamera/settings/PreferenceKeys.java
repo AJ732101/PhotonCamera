@@ -138,6 +138,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_LOSSLESS_SW_ENCODING.mValue);
         COMMON_KEYS.add(Key.KEY_USE_STREAM_USECASE.mValue);
         COMMON_KEYS.add(Key.KEY_SHOW_ZOOM_SLIDER.mValue);
+        COMMON_KEYS.add(Key.KEY_SHOW_FRAMECOUNT_SLIDER.mValue);
         COMMON_KEYS.add(Key.KEY_NOISE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_EDGE_PROCESSING.mValue);
         COMMON_KEYS.add(Key.KEY_2X_ZOOM.mValue);
@@ -317,6 +318,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_LOSSLESS_SW_ENCODING, resources.getBoolean(R.bool.pref_lossless_sw_encoding_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_STREAM_USECASE, resources.getBoolean(R.bool.pref_use_stream_usecase_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER, resources.getBoolean(R.bool.pref_show_zoom_slider_def_value));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_SHOW_FRAMECOUNT_SLIDER, resources.getBoolean(R.bool.pref_show_framecount_slider_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_2X_ZOOM, resources.getBoolean(R.bool.pref_2x_zoom_def_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_NOISE_PROCESSING, resources.getString(R.string.pref_noise_processing_default_value));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_EDGE_PROCESSING, resources.getString(R.string.pref_edge_processing_default_value));
@@ -609,6 +611,10 @@ public class PreferenceKeys {
 
     public static int getFrameCountValue() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_FRAME_COUNT);
+    }
+
+    public static void setFrameCountValue(int framecount) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_FRAME_COUNT, framecount);
     }
 
     public static int getSessionType() {
@@ -1044,6 +1050,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_ZOOM_SLIDER);
     }
 
+    public static boolean showFramecountSlider() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SHOW_FRAMECOUNT_SLIDER);
+    }
+
     public static int getHotPixelMode() {
         return preferenceKeys.settingsManager.getInteger(SCOPE_GLOBAL, Key.KEY_HOT_PIXEL_MODE);
     }
@@ -1348,6 +1358,7 @@ public class PreferenceKeys {
         KEY_LOSSLESS_SW_ENCODING(R.string.pref_lossless_sw_encoding_key),
         KEY_USE_STREAM_USECASE(R.string.pref_use_stream_usecase_key),
         KEY_SHOW_ZOOM_SLIDER(R.string.pref_show_zoom_slider_key),
+        KEY_SHOW_FRAMECOUNT_SLIDER(R.string.pref_framecount_slider_key),
         KEY_DIGITAL_ZOOM_FACTOR(R.string.pref_digital_zoom_factor_key),
         KEY_CONTRAST_CURVE(R.string.pref_contrast_curve_key),
         KEY_EXPOSURE_COMPENSATION(R.string.pref_exposure_compensation_key),
