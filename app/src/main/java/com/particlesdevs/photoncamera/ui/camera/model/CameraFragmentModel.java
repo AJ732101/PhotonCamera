@@ -859,6 +859,11 @@ public class CameraFragmentModel extends BaseObservable {
         return frameCount.getValue() != null ? frameCount.getValue() : 1;
     }
 
+    public void refreshFrameCount() {
+        frameCount.setValue(PhotonCamera.getSettings().frameCount);
+        notifyPropertyChanged(BR.frameCount);
+    }
+
     @Bindable
     public boolean isViewfinderMagnified() {
         return viewfinderMaginified;

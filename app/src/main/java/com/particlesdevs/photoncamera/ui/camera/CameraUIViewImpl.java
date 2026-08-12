@@ -317,6 +317,9 @@ public class CameraUIViewImpl implements CameraUIView {
                 topbar.setEdgeVisible(false);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
+                if (PhotonCamera.getSettings().showFramecountSlider) {
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
+                }
             }
             topbar.setEisVisible(false);
             topbar.setFpsVisible(true);
@@ -356,6 +359,9 @@ public class CameraUIViewImpl implements CameraUIView {
                 topbar.setEdgeVisible(false);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
+                if (PhotonCamera.getSettings().showFramecountSlider) {
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
+                }
             }
             topbar.setEisVisible(false);
             topbar.setFpsVisible(true);
