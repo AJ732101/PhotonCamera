@@ -44,6 +44,9 @@ public class CameraFragmentModel extends BaseObservable {
     private boolean viewfinderMaginified = false;
     private boolean functionOneOn = false;
     private boolean functionTwoOn = false;
+    private boolean zoomSliderVisible = PreferenceKeys.showZoomSlider();
+    private boolean hdrOn = PreferenceKeys.isUltraHdrOn();
+    private boolean frameCountSliderVisible = PreferenceKeys.showFramecountSlider();
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
     public final MutableLiveData<Float> zoomLevel = new MutableLiveData<>(1.0f);
@@ -927,6 +930,36 @@ public class CameraFragmentModel extends BaseObservable {
     public void setSettingsBarVisibility(boolean settingsBarVisibility) {
         this.settingsBarVisibility = settingsBarVisibility;
         notifyChange();
+    }
+
+    @Bindable
+    public boolean isHdrOn() {
+        return hdrOn;
+    }
+
+    public void setHdrOn(boolean hdrOn) {
+        this.hdrOn= hdrOn;
+        notifyPropertyChanged(BR.hdrOn);
+    }
+
+    @Bindable
+    public boolean isZoomSliderVisible() {
+        return zoomSliderVisible;
+    }
+
+    public void setZoomSliderVisible(boolean zoomSliderVisible) {
+        this.zoomSliderVisible = zoomSliderVisible;
+        notifyPropertyChanged(BR.zoomSliderVisible);
+    }
+
+    @Bindable
+    public boolean isFrameCountSliderVisible() {
+        return frameCountSliderVisible;
+    }
+
+    public void setFrameCountSliderVisible(boolean frameCountSliderVisible) {
+        this.frameCountSliderVisible = frameCountSliderVisible;
+        notifyPropertyChanged(BR.frameCountSliderVisible);
     }
     
     @Bindable

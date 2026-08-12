@@ -251,12 +251,17 @@ public class CameraUIViewImpl implements CameraUIView {
             topbar.setHdrxVisible(false);
             if (PhotonCamera.getSettings().frameCount == 1) {
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
             } else {
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(false);
             }
             cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(false);
+            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(false);
             cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.GONE);
             cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.VISIBLE);
+            cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleHdrContainer.setVisibility(View.GONE);
+            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -282,9 +287,13 @@ public class CameraUIViewImpl implements CameraUIView {
             topbar.setTimerVisible(false);
             topbar.setHdrxVisible(false);
             cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
+            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(false);
             cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(false);
+            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(false);
             cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.GONE);
             cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.GONE);
+            cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleHdrContainer.setVisibility(View.GONE);
+            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.fps_entry_layout, View.VISIBLE);
             cameraFragment.cameraFragmentBinding.settingsBar.setChildVisibility(R.id.timer_entry_layout, View.GONE);
             mShutterButton.setBackgroundResource(R.drawable.unlimitedbutton);
@@ -310,21 +319,31 @@ public class CameraUIViewImpl implements CameraUIView {
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);;
             } else if (PhotonCamera.isSingleShotJpegOrHeic()) {
+                int hdrVisibility = ((PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatJpegLutSw) ||
+                                     (PhotonCamera.getSettings().frameCount > 1))
+                        ? View.VISIBLE : View.GONE;
                 topbar.setZoomVisible(true);
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(false);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(false);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.GONE);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.VISIBLE);
+                cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleHdrContainer.setVisibility(hdrVisibility);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
             } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(false);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.GONE);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
                 if (PhotonCamera.getSettings().showFramecountSlider) {
                     cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
                 }
@@ -360,15 +379,23 @@ public class CameraUIViewImpl implements CameraUIView {
                 topbar.setNoiseVisible(true);
                 topbar.setEdgeVisible(true);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(PhotonCamera.getSettings().showZoomSlider);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(false);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(false);
+                cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.GONE);
+                cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.VISIBLE);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
             } else {
                 topbar.setZoomVisible(false);
                 topbar.setNoiseVisible(false);
                 topbar.setEdgeVisible(false);
                 cameraFragment.cameraFragmentBinding.setZoomSliderVisible(false);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(false);
                 cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(PhotonCamera.getSettings().showFramecountSlider);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleFrameCountSlider.setVisibility(View.VISIBLE);
                 cameraFragment.cameraFragmentBinding.layoutBottombar.bottomButtons.toggleZoomSlider.setVisibility(View.GONE);
+                cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(PreferenceKeys.isUltraHdrOn());
                 if (PhotonCamera.getSettings().showFramecountSlider) {
                     cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
                 }

@@ -500,6 +500,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR);
     }
 
+    public static void setUltraHdr(boolean value) {
+        preferenceKeys.settingsManager.set(SCOPE_GLOBAL, Key.KEY_ULTRA_HDR, value);
+    }
+
     public static boolean isPerLensSettingsOn() {
         if (preferenceKeys == null || preferenceKeys.settingsManager == null) return false;
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_SAVE_PER_LENS_SETTINGS);

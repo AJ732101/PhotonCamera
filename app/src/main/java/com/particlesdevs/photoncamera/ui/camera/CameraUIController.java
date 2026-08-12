@@ -267,6 +267,7 @@ final public class CameraUIController implements CameraUIEventsListener,
                 PreferenceKeys.setShowFramecountSlider(!currentSlider);
                 if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
                     cameraFragment.cameraFragmentBinding.setFramecountSliderVisible(!currentSlider);
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFrameCountSliderVisible(!currentSlider);
                     if (!currentSlider) {
                         cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().refreshFrameCount();
                     }
@@ -278,6 +279,15 @@ final public class CameraUIController implements CameraUIEventsListener,
                 PreferenceKeys.setShowZoomSlider(!currentZoomSlider);
                 if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
                     cameraFragment.cameraFragmentBinding.setZoomSliderVisible(!currentZoomSlider);
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setZoomSliderVisible(!currentZoomSlider);
+                }
+                break;
+
+            case R.id.toggleHdr:
+                boolean currentHdr = PreferenceKeys.isUltraHdrOn();
+                PreferenceKeys.setUltraHdr(!currentHdr);
+                if (cameraFragment != null && cameraFragment.cameraFragmentBinding != null) {
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setHdrOn(!currentHdr);
                 }
                 break;
 
