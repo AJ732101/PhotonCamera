@@ -143,8 +143,9 @@
 
             <TextView
                 android:id="@+id/current_shutter_text"
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/aux_container_background"
                 android:drawablePadding="8dp"
@@ -166,8 +167,9 @@
 
             <TextView
                 android:id="@+id/current_iso_text"
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:layout_marginStart="16dp"
                 android:background="@drawable/aux_container_background"
                 android:drawablePadding="8dp"
