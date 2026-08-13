@@ -123,6 +123,7 @@
     <string name="pref_show_basic_osd_key" translatable="false">pref_show_basic_osd_key</string>
     <string name="pref_ois_key" translatable="false">pref_ois_key</string>
     <string name="pref_use_external_gallery_key" translatable="false">pref_use_external_gallery_key</string>
+    <string name="pref_use_face_detection_key" translatable="false">pref_use_face_detection_key</string>
     <string name="pref_dng_compression_key" translatable="false">pref_dng_compression_key</string>
     <string name="pref_center_weight_ae_key" translatable="false">pref_center_weight_ae_key</string>
     <string name="pref_extend_iso_key" translatable="false">pref_extend_iso_key</string>

@@ -161,6 +161,7 @@ public class Settings {
     public String customResolution = "OFF";
     public String customResolutionQb = "OFF";
     public int sensorModeDcgCropMode = 0;
+    public boolean useFaceDetection = false;
 
     public void loadCache() {
         noiseReduction = PreferenceKeys.isSystemNrOn();
@@ -219,6 +220,7 @@ public class Settings {
         use16Bit = PreferenceKeys.is16BitOn();
         useJpegUltraHdr = PreferenceKeys.isUltraHdrOn();
         writeCaptureResult = PreferenceKeys.writeCaptureResultOn();
+        useFaceDetection = PreferenceKeys.isFaceDetectionOn();
         // QualityDoesMatter - General
         useBasicOsd = PreferenceKeys.useBasicOsdOn();
         useOis = PreferenceKeys.useOisOn();

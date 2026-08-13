@@ -83,6 +83,7 @@ public class PreferenceKeys {
         COMMON_KEYS.add(Key.KEY_VIRTUAL_HORIZON_TEXT.mValue);
         COMMON_KEYS.add(Key.KEY_ALLOW_NETWORK_SYNC.mValue);
         COMMON_KEYS.add(Key.KEY_GPS_LOCATION.mValue);
+        COMMON_KEYS.add(Key.KEY_USE_FACE_DETECTION.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_VENDOR_KEYS.mValue);
         COMMON_KEYS.add(Key.KEY_DISABLE_NOGUI_YET.mValue);
         COMMON_KEYS.add(Key.KEY_WRITE_CAPTURE_RESULT.mValue);
@@ -260,6 +261,7 @@ public class PreferenceKeys {
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_VIRTUAL_HORIZON_TEXT, resources.getBoolean(R.bool.pref_virtual_horizon_text_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_ALLOW_NETWORK_SYNC, resources.getBoolean(R.bool.pref_allow_network_sync_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION, resources.getBoolean(R.bool.pref_gps_default));
+        settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_USE_FACE_DETECTION, resources.getBoolean(R.bool.pref_use_face_detection_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS, resources.getBoolean(R.bool.pref_disable_all_vendor_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_DISABLE_NOGUI_YET, resources.getBoolean(R.bool.pref_disable_nogui_yet_default));
         settingsManager.setInitial(SCOPE_GLOBAL, Key.KEY_WRITE_CAPTURE_RESULT, resources.getBoolean(R.bool.pref_write_capture_result_default));
@@ -1118,6 +1120,10 @@ public class PreferenceKeys {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_GPS_LOCATION);
     }
 
+    public static boolean isFaceDetectionOn() {
+        return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_USE_FACE_DETECTION);
+    }
+
     public static boolean disableVendorKeys() {
         return preferenceKeys.settingsManager.getBoolean(SCOPE_GLOBAL, Key.KEY_DISABLE_VENDOR_KEYS);
     }
@@ -1294,6 +1300,7 @@ public class PreferenceKeys {
         KEY_VIRTUAL_HORIZON_TEXT(R.string.pref_virtual_horizon_text_key),
         KEY_ALLOW_NETWORK_SYNC(R.string.pref_allow_network_sync_key),
         KEY_GPS_LOCATION(R.string.pref_gps_key),
+        KEY_USE_FACE_DETECTION(R.string.pref_use_face_detection_key),
         KEY_DISABLE_VENDOR_KEYS(R.string.pref_disable_all_vendor_key),
         KEY_DISABLE_NOGUI_YET(R.string.pref_disable_nogui_yet_key),
         KEY_WRITE_CAPTURE_RESULT(R.string.pref_write_capture_result_key),

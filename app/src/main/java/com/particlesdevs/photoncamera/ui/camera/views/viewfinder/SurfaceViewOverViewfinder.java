@@ -23,6 +23,7 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
     public boolean isCanvasDrawn = false;
     private RectF afRectToDraw = new RectF();
     private RectF aeRectToDraw = new RectF();
+    private RectF[] facesToDraw = null;
     private String debugText = null;
 
     public SurfaceViewOverViewfinder(Context context, AttributeSet attrs) {
@@ -157,6 +158,7 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);//Clears the canvas
                 drawAFRect(canvas);
                 drawAERect(canvas);
+                drawFaces(canvas);
                 drawAFDebugText(canvas);
                 surfaceHolder.unlockCanvasAndPost(canvas);
                 isCanvasDrawn = true;
@@ -180,8 +182,13 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
         }
         afRectToDraw = null;
         aeRectToDraw = null;
+        facesToDraw = null;
         debugText = null;
         isCanvasDrawn = false;
+    }
+
+    public void setFaces(RectF[] faces) {
+        this.facesToDraw = faces;
     }
 
     private void drawAFDebugText(Canvas canvas) {
@@ -218,6 +225,16 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
             if (aeRectToDraw != null && !aeRectToDraw.isEmpty()) {
                 rectPaint.setColor(Color.YELLOW);
                 canvas.drawRect(aeRectToDraw, rectPaint);
+            }
+        }
+    }
+
+    private void drawFaces(Canvas canvas) {
+        if (facesToDraw != null && facesToDraw.length > 0) {
+            rectPaint.setColor(Color.WHITE);
+            rectPaint.setStrokeWidth(2);
+            for (RectF face : facesToDraw) {
+                canvas.drawRect(face, rectPaint);
             }
         }
     }

@@ -185,6 +185,7 @@
     <string name="turn_on_basic_osd">Show Basic OSD</string>
     <string name="turn_on_ois">OIS</string>
     <string name="turn_use_external_gallery">Use External Gallery</string>
+    <string name="face_detection">Face Detection</string>
     <string name="turn_on_dng_compression">DNG Compression</string>
     <string name="center_weight_ae">Center Weight Auto Exposure</string>
     <string name="turn_on_extend_iso">Extend ISO</string>

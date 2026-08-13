@@ -44,6 +44,7 @@ import android.hardware.camera2.params.BlackLevelPattern;
 import android.hardware.camera2.params.ColorSpaceProfiles;
 import android.hardware.camera2.params.ColorSpaceTransform;
 import android.hardware.camera2.params.DynamicRangeProfiles;
+import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.RggbChannelVector;
@@ -303,6 +304,7 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public String mSocVendor = "";
     private int mVidWidth = 1280;
     private int mVidHeight = 720;
+    public Face[] mFaces = null;
 
     public final boolean mFlashEnabled = false;
     public CameraEventsListener cameraEventsListener;
@@ -652,7 +654,16 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
+
+            mFaces = result.get(CaptureResult.STATISTICS_FACES);
+            if (mFaces != null && mFaces.length > 0) {
+                for (Face face : mFaces) {
+                    Log.d(TAG, "Face detected: " + face.toString());
+                }
+            }
+
             processHistogram(result);
+
             if (mIsRecordingVideo) {
                 Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
                 if (timestamp != null && mMainRenderer != null) {
@@ -900,7 +911,9 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
     public void setPreviewFormat() {
         mPreviewTargetFormat = PhotonCamera.getSettings().realPreviewFormat;
 
-        if (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) {
+        if (PhotonCamera.getSettings().selectedMode.equals(CameraMode.RAWVIDEO)) {
+            mPreviewTargetFormat = ImageFormat.YUV_420_888;
+        } else if (PhotonCamera.getSettings().previewFormat == ImageFormat.YCBCR_P010) {
             mPreviewTargetFormat = ImageFormat.YCBCR_P010;
         }
     }
@@ -1892,9 +1905,38 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         });
     }
 
+    public int checkFaceDetectionCaps() {
+        int[] faceModes = mCameraCharacteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
+        Integer maxFaceCount = mCameraCharacteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
+
+        if (faceModes != null) {
+            for (int mode : faceModes) {
+                if (mode == CameraMetadata.STATISTICS_FACE_DETECT_MODE_FULL) {
+                    return mode;
+                }
+                if (mode == CameraMetadata.STATISTICS_FACE_DETECT_MODE_SIMPLE) {
+                    return mode;
+                }
+            }
+        }
+
+        return CameraMetadata.STATISTICS_FACE_DETECT_MODE_OFF;
+    }
+
     public void setAdvancedParameters(CaptureRequest.Builder captureBuilder, boolean isPreview) throws CameraAccessException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         if (PhotonCamera.getSettings().exposureCompensation2 != 0) {
             captureBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, PhotonCamera.getSettings().exposureCompensation2);
+        }
+
+        if (isPreview) {
+            int faceDetectionCaps = checkFaceDetectionCaps();
+            if (faceDetectionCaps != CameraMetadata.STATISTICS_FACE_DETECT_MODE_OFF) {
+                if (PhotonCamera.getSettings().useFaceDetection) {
+                    captureBuilder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, faceDetectionCaps);
+                } else {
+                    captureBuilder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF);
+                }
+            }
         }
 
         // we do this only in video mode or if framecount is 1 or if forced with forceNewSettingsInRegularPhotoMode

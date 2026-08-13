@@ -163,6 +163,14 @@
 
         <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
             android:layout="@layout/preference_with_margin"
+            android:key="@string/pref_use_face_detection_key"
+            android:defaultValue="@bool/pref_use_face_detection_default"
+            android:title="@string/face_detection"
+            android:summary=""
+            android:icon="@drawable/familiar_face_and_zone_24px"/>
+
+        <com.particlesdevs.photoncamera.ui.settings.custompreferences.ManagedSwitchPreference
+            android:layout="@layout/preference_with_margin"
             android:key="@string/pref_alternate_loupe_key"
             android:defaultValue="@bool/pref_use_alternate_loupe_default"
             android:title="@string/turn_on_alternate_loupe"
