@@ -299,9 +299,13 @@ final public class CameraUIController implements CameraUIEventsListener,
                 break;
 
             case R.id.flash_button:
-                PreferenceKeys.setAeMode((PreferenceKeys.getAeMode() + 1) % 4); //cycles in 0,1,2,3
-                ((FlashButton) view).setFlashValueState(PreferenceKeys.getAeMode());
-                cameraFragment.captureController.setPreviewAEModeRebuild(PreferenceKeys.getAeMode());
+                int newMode = (PreferenceKeys.getAeMode() + 1) % 4;
+                PreferenceKeys.setAeMode(newMode); //cycles in 0,1,2,3
+                ((FlashButton) view).setFlashValueState(newMode);
+                if (cameraFragment.getCameraFragmentViewModel() != null) {
+                    cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFlashSelected(newMode != 1);
+                }
+                cameraFragment.captureController.setPreviewAEModeRebuild(newMode);
                 cameraFragment.updateSettingsBar();
                 break;
 
@@ -405,9 +409,13 @@ final public class CameraUIController implements CameraUIEventsListener,
                 Object value = topBarSettingsData.getValue();
                 switch (type) {
                     case FLASH:
-                        PreferenceKeys.setAeMode((Integer) value); //cycles in 0,1,2,3
-                        cameraFragment.captureController.setPreviewAEModeRebuild(PreferenceKeys.getAeMode());
-                        cameraFragment.cameraFragmentBinding.layoutTopbar.flashButton.setFlashValueState((Integer) value);
+                        int flashMode = (Integer) value;
+                        PreferenceKeys.setAeMode(flashMode); //cycles in 0,1,2,3
+                        cameraFragment.captureController.setPreviewAEModeRebuild(flashMode);
+                        if (cameraFragment.getCameraFragmentViewModel() != null) {
+                            cameraFragment.getCameraFragmentViewModel().getCameraFragmentModel().setFlashSelected(flashMode != 1);
+                        }
+                        cameraFragment.cameraFragmentBinding.layoutTopbar.flashButton.setFlashValueState(flashMode);
                         break;
                     case HDRX:
                         PreferenceKeys.setHdrX(value.equals(1));

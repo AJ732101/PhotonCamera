@@ -23,6 +23,7 @@ import com.particlesdevs.photoncamera.app.PhotonCamera;
 import com.particlesdevs.photoncamera.capture.CaptureController;
 import com.particlesdevs.photoncamera.settings.PreferenceKeys;
 import com.particlesdevs.photoncamera.ui.camera.CameraUIController;
+import com.particlesdevs.photoncamera.ui.camera.views.FlashButton;
 import com.particlesdevs.photoncamera.ui.settings.SettingsActivity;
 import com.particlesdevs.photoncamera.util.FileManager;
 
@@ -46,6 +47,7 @@ public class CameraFragmentModel extends BaseObservable {
     private boolean functionTwoOn = false;
     private boolean zoomSliderVisible = PreferenceKeys.showZoomSlider();
     private boolean hdrOn = PreferenceKeys.isUltraHdrOn();
+    private boolean flashSelected = PreferenceKeys.getAeMode() != 1;
     private boolean frameCountSliderVisible = PreferenceKeys.showFramecountSlider();
     private float screenAspectRatio = 9f / 16;
     private String dummyAspectRatio = "16:9";
@@ -314,6 +316,27 @@ public class CameraFragmentModel extends BaseObservable {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    public void onGridLongClicked(View view, Object uiController) {
+        PreferenceKeys.setGridValue(0);
+        view.setSelected(false);
+    }
+
+    public void onFlashLongClicked(View view, Object uiController) {
+        int offMode = 1;
+        PreferenceKeys.setAeMode(offMode);
+        if (view instanceof FlashButton) {
+            ((FlashButton) view).setFlashValueState(offMode);
+        }
+        view.setSelected(false);
+        setFlashSelected(false);
+        if (PhotonCamera.getCaptureController() != null) {
+            PhotonCamera.getCaptureController().setPreviewAEModeRebuild(offMode);
+        }
+        if (uiController instanceof CameraUIController) {
+            ((CameraUIController) uiController).refreshCameraUI(false);
+        }
     }
 
     public void onGalleryLongClicked(View view, Object uiController) {
@@ -872,10 +895,12 @@ public class CameraFragmentModel extends BaseObservable {
         return viewfinderMaginified;
     }
 
+    @Bindable
     public boolean isFunctionOneOn() {
         return functionOneOn;
     }
 
+    @Bindable
     public boolean isFunctionTwoOn() {
         return functionTwoOn;
     }
@@ -950,6 +975,16 @@ public class CameraFragmentModel extends BaseObservable {
     public void setZoomSliderVisible(boolean zoomSliderVisible) {
         this.zoomSliderVisible = zoomSliderVisible;
         notifyPropertyChanged(BR.zoomSliderVisible);
+    }
+
+    @Bindable
+    public boolean isFlashSelected() {
+        return flashSelected;
+    }
+
+    public void setFlashSelected(boolean flashSelected) {
+        this.flashSelected = flashSelected;
+        notifyPropertyChanged(BR.flashSelected);
     }
 
     @Bindable

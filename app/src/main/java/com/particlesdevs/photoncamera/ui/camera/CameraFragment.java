@@ -38,6 +38,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.camera2.CameraCharacteristics;
@@ -662,6 +663,16 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
         }
 
         surfaceView.post(() -> {
+            if (captureController.mFaces != null && captureController.mFaces.length > 0) {
+                RectF[] faceRects = new RectF[captureController.mFaces.length];
+                for (int i = 0; i < captureController.mFaces.length; i++) {
+                    faceRects[i] = getScreenRect(captureController.mFaces[i].getBounds());
+                }
+                surfaceView.setFaces(faceRects);
+            } else {
+                surfaceView.setFaces(null);
+            }
+
             if ((PhotonCamera.getSettings().functionOne.equals("Histogram") || PhotonCamera.getSettings().functionTwo.equals("Histogram")) && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) {
                 paintHistogram(getCameraFragmentViewModel().getCameraFragmentModel().getOrientation());
             } else {
@@ -684,6 +695,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                 }
                 //captureController.cameraEventsListener.mCurrentShutterSpeed = String.valueOf(result.get(CaptureResult.SENSOR_EXPOSURE_TIME) / 1000000000);
             }
+
             if (PreferenceKeys.isAfDataOn() ||
                 (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) ||
                 (PhotonCamera.getSettings().functionTwo.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionTwoOn())) {
@@ -713,31 +725,31 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     stringMap.put("Mode", "SINGLE SHOT");
                     switch (PhotonCamera.getSettings().effectMode ) {
                         case CaptureRequest.CONTROL_EFFECT_MODE_MONO:
-                            stringMap.put("Effectmode:", "Mono");
+                            stringMap.put("Effectmode", "Mono");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_NEGATIVE:
-                            stringMap.put("Effectmode:", "Negative");
+                            stringMap.put("Effectmode", "Negative");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_SOLARIZE:
-                            stringMap.put("Effectmode:", "Solarize");
+                            stringMap.put("Effectmode", "Solarize");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_SEPIA:
-                            stringMap.put("Effectmode:", "Sepia");
+                            stringMap.put("Effectmode", "Sepia");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_POSTERIZE:
                             stringMap.put("Effectmode:", "Posterize");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_WHITEBOARD:
-                            stringMap.put("Effectmode:", "Whiteboard");
+                            stringMap.put("Effectmode", "Whiteboard");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_BLACKBOARD:
-                            stringMap.put("Effectmode:", "Blackboard");
+                            stringMap.put("Effectmode", "Blackboard");
                             break;
                         case CaptureRequest.CONTROL_EFFECT_MODE_AQUA:
-                            stringMap.put("Effectmode:", "Aqua");
+                            stringMap.put("Effectmode", "Aqua");
                             break;
                         default:
-                            stringMap.put("Effectmode:", "None");
+                            stringMap.put("Effectmode", "None");
                             break;
                     }
                 }
@@ -901,7 +913,7 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     MeteringRectangle[] afRect = result.get(CaptureResult.CONTROL_AF_REGIONS);
                     stringMap.put("AF_RECT", Arrays.deepToString(afRect));
                     if (afRect != null && afRect.length > 0) {
-                        RectF rect = getScreenRectFromMeteringRect(afRect[0]);
+                        RectF rect = getScreenRect(afRect[0].getRect());
                         stringMap.put("AF_RECT(px)", rect.toString());
                         surfaceView.setAFRect(rect);
                     } else {
@@ -910,33 +922,43 @@ public class CameraFragment extends Fragment implements BaseActivity.BackPressed
                     MeteringRectangle[] aeRect = result.get(CaptureResult.CONTROL_AE_REGIONS);
                     stringMap.put("AE_RECT", Arrays.deepToString(aeRect));
                     if (aeRect != null && aeRect.length > 0) {
-                        RectF rect = getScreenRectFromMeteringRect(aeRect[0]);
+                        RectF rect = getScreenRect(aeRect[0].getRect());
                         stringMap.put("AE_RECT(px)", rect.toString());
                         surfaceView.setAERect(rect);
                     } else {
                         surfaceView.setAERect(null);
                     }
                 }
-                surfaceView.setDebugText(Logger.createTextFrom(stringMap));
-                surfaceView.refresh();
+                if (PreferenceKeys.isAfDataOn() || PreferenceKeys.isFaceDetectionOn() ||
+                    (PhotonCamera.getSettings().functionOne.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionOneOn()) ||
+                    (PhotonCamera.getSettings().functionTwo.equals("Debug Info") && getCameraFragmentViewModel().getCameraFragmentModel().isFunctionTwoOn())) {
+                    surfaceView.setDebugText(Logger.createTextFrom(stringMap));
+                    surfaceView.refresh();
+                } else {
+                    if (surfaceView.isCanvasDrawn) {
+                        surfaceView.clear();
+                    }
+                }
             } else {
-                if (surfaceView.isCanvasDrawn) {
+                if (PreferenceKeys.isFaceDetectionOn()) {
+                    surfaceView.refresh();
+                } else if (surfaceView.isCanvasDrawn) {
                     surfaceView.clear();
                 }
             }
         });
     }
 
-    private RectF getScreenRectFromMeteringRect(MeteringRectangle meteringRectangle) {
+    private RectF getScreenRect(Rect rect) {
         if (captureController.mImageReaderPreview == null) return new RectF();
         Size size = CaptureController.mCameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
         if (size == null) {
             size = new Size(captureController.mImageReaderPreview.getWidth(), captureController.mImageReaderPreview.getHeight());
         }
-        float left = (((float) meteringRectangle.getY() / size.getHeight()) * (textureView.getWidth()));
-        float top = (((float) meteringRectangle.getX() / size.getWidth()) * (textureView.getHeight()));
-        float width = (((float) meteringRectangle.getHeight() / size.getHeight()) * (textureView.getWidth()));
-        float height = (((float) meteringRectangle.getWidth() / size.getWidth()) * (textureView.getHeight()));
+        float left = (((float) rect.top / size.getHeight()) * (textureView.getWidth()));
+        float top = (((float) rect.left / size.getWidth()) * (textureView.getHeight()));
+        float width = (((float) rect.height() / size.getHeight()) * (textureView.getWidth()));
+        float height = (((float) rect.width() / size.getWidth()) * (textureView.getHeight()));
         //left = textureView.getWidth() - left;
         return new RectF(
                 //meteringRectangle.getY()-left, //Left
