@@ -4004,54 +4004,65 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
 
             if (mMainRenderer != null) {
                 Log.d(TAG, "Requesting LUT processing from MainRenderer.");
+
+                final TotalCaptureResult result = mCaptureResult;
+                final CaptureRequest request = mCaptureRequest;
+                final Bundle metaData = mMetaData == null ? null : new Bundle(mMetaData);
+                final int vidRot = videoRotation;
+
                 if (image.getFormat() == ImageFormat.YCBCR_P010) {
-                    //Utilities.testP010Validity(image);
-                    //Utilities.testHDRContent(image);
                     mMainRenderer.processYCbCrImageFP16(image, rotation, (processedData) -> {
-                        try {
-                            if (processedData != null) {
-                                Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                                Boolean imageSaved = false;
-                                Path imagePath = null;
-                                if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
-                                    imagePath = ImagePath.newAVIFFilePath();
-                                    imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, ParseExif.parse(mCaptureResult, mCaptureRequest), null, videoRotation);
+                        processExecutor.execute(() -> {
+                            try {
+                                if (processedData != null) {
+                                    Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
+                                    Boolean imageSaved = false;
+                                    Path imagePath = null;
+                                    String resultMsg = "";
+                                    if (PhotonCamera.getSettings().previewFormat == PhotonCamera.userFormatAvifSw) {
+                                        imagePath = ImagePath.newAVIFFilePath();
+                                        imageSaved = ImageSaver.Util.saveBitmapAsAvif(imagePath, processedData, PhotonCamera.getSettings().singleFrameQuality, ParseExif.parse(result, request), null, vidRot);
+                                        resultMsg = "AVIF saved: " + imagePath.toAbsolutePath().toString();
+                                    } else {
+                                        imagePath = ImagePath.newJPGFilePath();
+                                        imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, metaData, vidRot);
+                                        resultMsg = "LUT processed JPEG: " + imagePath.toAbsolutePath().toString();
+                                    }
+                                    try {
+                                        cameraEventsListener.notifyImageSavedStatus(imageSaved, imagePath);
+                                        cameraEventsListener.onProcessingFinished(resultMsg);
+                                    } catch (Exception e) {
+                                        Log.d(TAG, "Error in processingEventsListener callbacks:" + Log.getStackTraceString(e));
+                                    }
                                 } else {
-                                    imagePath = ImagePath.newJPGFilePath();
-                                    imageSaved = ImageSaver.createUltraHdrFromFp16(processedData, imagePath, null, mMetaData, videoRotation);
+                                    Log.e(TAG, "LUT processing failed, renderer returned null data.");
+                                    cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
                                 }
-                                try {
-                                    cameraEventsListener.notifyImageSavedStatus(imageSaved, imagePath);
-                                }
-                                catch (Exception e){
-                                    Log.d(TAG,"Error in processingEventsListener.notifyImageSavedStatus:" + Log.getStackTraceString(e));
-                                }
-                            } else {
-                                Log.e(TAG, "LUT processing failed, renderer returned null data.");
-                                cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
+                            } catch (Exception e) {
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            } finally {
+                                mIsProcessingImage.set(false);
                             }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            mIsProcessingImage.set(false);
-                        }
+                        });
                     });
                 } else {
                     mMainRenderer.processYuvImage(image, rotation, (processedData) -> {
-                        try {
-                            if (processedData != null) {
-                                Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
-                                mImageSaver.directSaveImageLut(processedData, outWidth, outHeight, videoRotation,
-                                        PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, mMetaData, cameraEventsListener);
-                            } else {
-                                Log.e(TAG, "LUT processing failed, renderer returned null data.");
-                                cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
+                        processExecutor.execute(() -> {
+                            try {
+                                if (processedData != null) {
+                                    Log.d(TAG, "LUT processing complete, handing data to ImageSaver.");
+                                    mImageSaver.directSaveImageLut(processedData, outWidth, outHeight, vidRot,
+                                            PhotonCamera.getSettings().previewFormat, PhotonCamera.getSettings().singleFrameQuality, metaData, cameraEventsListener);
+                                } else {
+                                    Log.e(TAG, "LUT processing failed, renderer returned null data.");
+                                    cameraEventsListener.onProcessingFinished("LUT processing failed, renderer returned null data.");
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            } finally {
+                                mIsProcessingImage.set(false);
                             }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            mIsProcessingImage.set(false);
-                        }
+                        });
                     });
                 }
             } else {
