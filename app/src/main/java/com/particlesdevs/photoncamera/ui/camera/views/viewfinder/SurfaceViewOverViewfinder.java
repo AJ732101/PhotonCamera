@@ -37,7 +37,8 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
 
     private void initPaints() {
         whitePaint.setColor(Color.WHITE);
-        whitePaint.setStrokeWidth(1.5f);
+        whitePaint.setStrokeWidth(1.0f);
+        whitePaint.setAlpha(90);
 
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(35);
