@@ -835,11 +835,13 @@ public class ImageSaver {
         String agslCode =
                 "uniform shader hdrTex;\n" +
                         "uniform shader sdrTex;\n" +
+                        "uniform float2 scale;\n" +
                         "uniform float maxBoost;\n" +
                         "uniform float gamma;\n" +
                         "half4 main(float2 coord) {\n" +
-                        "    half4 hdr = hdrTex.eval(coord);\n" +
-                        "    half4 sdr = sdrTex.eval(coord);\n" +
+                        "    float2 uv = coord * scale;\n" +
+                        "    half4 hdr = hdrTex.eval(uv);\n" +
+                        "    half4 sdr = sdrTex.eval(uv);\n" +
                         "    float hdrLum = max(dot(hdr.rgb, half3(0.2126, 0.7152, 0.0722)), 0.0001);\n" +
                         "    float sdrLum = max(dot(sdr.rgb, half3(0.2126, 0.7152, 0.0722)), 0.0001);\n" +
                         "    float ratio = max(hdrLum / sdrLum, 1.0);\n" +
@@ -849,8 +851,14 @@ public class ImageSaver {
                         "}";
 
         RuntimeShader shader = new RuntimeShader(agslCode);
-        shader.setInputShader("hdrTex", new BitmapShader(hdrBitmapFp16, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-        shader.setInputShader("sdrTex", new BitmapShader(sdrBase, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        BitmapShader hdrShader = new BitmapShader(hdrBitmapFp16, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        hdrShader.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+        BitmapShader sdrShader = new BitmapShader(sdrBase, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        sdrShader.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+
+        shader.setInputShader("hdrTex", hdrShader);
+        shader.setInputShader("sdrTex", sdrShader);
+        shader.setFloatUniform("scale", (float) width / targetW, (float) height / targetH);
         shader.setFloatUniform("maxBoost", maxHdrBoost);
         shader.setFloatUniform("gamma", hdrGamma);
 
@@ -865,19 +873,34 @@ public class ImageSaver {
 
         RenderNode renderNode = new RenderNode("GainmapRender");
         renderNode.setPosition(0, 0, targetW, targetH);
-        RecordingCanvas canvas = renderNode.beginRecording(targetW, targetH);
-        canvas.drawRect(0, 0, targetW, targetH, paint);
+        RecordingCanvas recordingCanvas = renderNode.beginRecording(targetW, targetH);
+        recordingCanvas.drawRect(0, 0, targetW, targetH, paint);
         renderNode.endRecording();
 
         HardwareBufferRenderer renderer = new HardwareBufferRenderer(hardwareBuffer);
         renderer.setContentRoot(renderNode);
 
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
         HardwareBufferRenderer.RenderRequest request = renderer.obtainRenderRequest();
-        request.draw(Runnable::run, result -> {});
+        request.draw(Runnable::run, result -> {
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "HardwareBufferRenderer interrupted", e);
+        }
 
         Bitmap gainmapContents = Bitmap.wrapHardwareBuffer(hardwareBuffer, ColorSpace.get(ColorSpace.Named.SRGB));
 
         renderer.close();
+
+        if (gainmapContents == null) {
+            Log.e(TAG, "Failed to create gainmap bitmap from HardwareBuffer");
+            hardwareBuffer.close();
+            return false;
+        }
 
         Gainmap gainmap = new Gainmap(gainmapContents);
         gainmap.setRatioMin(1.0f, 1.0f, 1.0f);

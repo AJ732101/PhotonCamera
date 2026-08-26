@@ -43,7 +43,7 @@ import com.particlesdevs.photoncamera.gallery.viewmodel.GalleryViewModel;
 import com.particlesdevs.photoncamera.gallery.views.CustomSSIV;
 import com.particlesdevs.photoncamera.processing.ImagePath;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -253,11 +253,11 @@ public class ImageViewerFragment extends Fragment {
         if (galleryItems != null && getContext() != null) {
             GalleryItem galleryItem = galleryItems.get(position);
             String fileName = galleryItem.getFile().getDisplayName();
-            String mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FileUtils.getExtension(fileName));
+            String mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(fileName));
             Uri uri = galleryItem.getFile().getFileUri();
             Intent editIntent = new Intent(Intent.ACTION_EDIT);
             editIntent.setDataAndType(uri, mediaType);
-            String outPutFileUri = galleryItem.getFile().getFileUri().toString().replace(galleryItem.getFile().getDisplayName(), ImagePath.generateNewFileName() + '.' + FileUtils.getExtension(fileName));
+            String outPutFileUri = galleryItem.getFile().getFileUri().toString().replace(galleryItem.getFile().getDisplayName(), ImagePath.generateNewFileName() + '.' + FilenameUtils.getExtension(fileName));
             editIntent.putExtra(MediaStore.EXTRA_OUTPUT, outPutFileUri);
             editIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             Intent chooser = Intent.createChooser(editIntent, null);
@@ -308,7 +308,7 @@ public class ImageViewerFragment extends Fragment {
         int position = viewPager.getCurrentItem();
         GalleryItem galleryItem = galleryItems.get(position);
         String fileName = galleryItem.getFile().getDisplayName();
-        String mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FileUtils.getExtension(fileName));
+        String mediaType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(fileName));
         Uri uri = galleryItem.getFile().getFileUri();
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_STREAM, uri);

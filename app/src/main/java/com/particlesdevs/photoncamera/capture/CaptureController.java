@@ -5373,6 +5373,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         } else if (PhotonCamera.getSettings().videoHeight == 3672) {
             vidWidth = 8160;
             vidHeight = 3672;
+        } else if (PhotonCamera.getSettings().videoHeight == 1440) {
+            vidWidth = 1920;
+            vidHeight = 1440;
+        } else if (PhotonCamera.getSettings().videoHeight == 1200) {
+            vidWidth = 1600;
+            vidHeight = 1200;
+        } else if (PhotonCamera.getSettings().videoHeight == 1944) {
+            vidWidth = 2592;
+            vidHeight = 1944;
         } else {
             vidWidth = 1280;
         }
@@ -5935,6 +5944,15 @@ public class CaptureController implements MediaRecorder.OnInfoListener {
         } else if (PhotonCamera.getSettings().videoHeight == 3672) {
             mVidWidth = 8160;
             mVidHeight = 3672;
+        } else if (PhotonCamera.getSettings().videoHeight == 1440) {
+            mVidWidth = 1920;
+            mVidHeight = 1440;
+        } else if (PhotonCamera.getSettings().videoHeight == 1200) {
+            mVidWidth = 1600;
+            mVidHeight = 1200;
+        } else if (PhotonCamera.getSettings().videoHeight == 1944) {
+            mVidWidth = 2592;
+            mVidHeight = 1944;
         }
 
         mMediaRecorder.setVideoFrameRate(PhotonCamera.getSettings().videoFramrate);

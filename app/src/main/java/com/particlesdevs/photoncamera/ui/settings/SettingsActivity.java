@@ -12,6 +12,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.MultiResolutionStreamConfigurationMap;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaFormat;
 import android.net.Uri;
@@ -1356,7 +1357,9 @@ public class SettingsActivity extends BaseActivity implements
                     case "LensShadingMap":
                         return android.hardware.camera2.params.LensShadingMap.class;
                     case "MultiResolutionStreamConfigurationMap":
-                        return android.hardware.camera2.params.MultiResolutionStreamConfigurationMap.class;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            return MultiResolutionStreamConfigurationMap.class;
+                        }
                     case "BlackLevelPattern":
                         return android.hardware.camera2.params.BlackLevelPattern.class;
                     case "ColorSpaceTransform":

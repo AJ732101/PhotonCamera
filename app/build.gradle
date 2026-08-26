@@ -149,10 +149,10 @@ dependencies {
     implementation 'androidx.exifinterface:exifinterface:1.4.2'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.github.mohammadatif:Animatoo:master'
-    implementation 'com.github.ChickenHook:RestrictionBypass:2.2'
+    implementation project(':restrictionbypass')
     implementation 'com.github.bumptech.glide:glide:5.0.9'
     annotationProcessor 'com.github.bumptech.glide:compiler:5.0.9'
-    implementation group: 'commons-io', name: 'commons-io', version: '20030203.000550'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.18.0'
     implementation 'com.google.code.gson:gson:2.14.0'
     // Navigation Component
     implementation 'androidx.navigation:navigation-fragment-ktx:2.9.8'

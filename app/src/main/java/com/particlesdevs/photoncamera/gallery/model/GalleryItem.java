@@ -5,7 +5,7 @@ import android.widget.Checkable;
 import com.particlesdevs.photoncamera.gallery.files.ImageFile;
 import com.particlesdevs.photoncamera.gallery.files.MediaFile;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -34,7 +34,7 @@ public class GalleryItem implements Checkable {
     }
 
     private String getTagName(String fileName) {
-        String ext = FileUtils.getExtension(fileName);
+        String ext = FilenameUtils.getExtension(fileName);
         if (ext.equalsIgnoreCase("dng")) {
             return "RAW";
         } else if (ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg")) {

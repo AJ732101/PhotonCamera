@@ -231,10 +231,12 @@ public class SurfaceViewOverViewfinder extends SurfaceView {
 
     private void drawFaces(Canvas canvas) {
         if (facesToDraw != null && facesToDraw.length > 0) {
-            rectPaint.setColor(Color.WHITE);
-            rectPaint.setStrokeWidth(2);
-            for (RectF face : facesToDraw) {
-                canvas.drawRect(face, rectPaint);
+            if (PreferenceKeys.isFaceDetectionOn() || PreferenceKeys.isAfDataOn()) {
+                rectPaint.setColor(Color.WHITE);
+                rectPaint.setStrokeWidth(2);
+                for (RectF face : facesToDraw) {
+                    canvas.drawRect(face, rectPaint);
+                }
             }
         }
     }

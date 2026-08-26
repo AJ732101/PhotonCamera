@@ -798,7 +798,6 @@ public class YUVSaver extends DefaultSaver{
         }
     }
 
-
     public void saveP010Raw(Image image, File file) {
         int size = image.getWidth() * image.getHeight() * 3;
         ByteBuffer cleanBuffer = ByteBuffer.allocateDirect(size);
@@ -863,7 +862,7 @@ public class YUVSaver extends DefaultSaver{
             sb.append("Resolution: ").append(widthHeight).append("\n");
             sb.append("Orientation: ").append(orientation).append(" degrees\n");
             sb.append("Format: ").append(isP010 ? "10-bit P010" : "8-bit YUV420").append("\n");
-            sb.append("Camera ID: ").append(PhotonCamera.getSettings().mCameraID);
+            sb.append("Camera ID: ").append(PhotonCamera.getSettings().mCameraID).append("\n");
 
             if (metadata != null) {
                 if (metadata.containsKey("aperture")) {

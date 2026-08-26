@@ -22,7 +22,8 @@ import com.particlesdevs.photoncamera.gallery.compare.SSIVListener;
 import com.particlesdevs.photoncamera.gallery.model.GalleryItem;
 import com.particlesdevs.photoncamera.gallery.views.CustomSSIV;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class ImageAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         GalleryItem galleryItem = galleryItemList.get(position);
-        String fileExt = FileUtils.getExtension(galleryItem.getFile().getDisplayName());
+        String fileExt = FilenameUtils.getExtension(galleryItem.getFile().getDisplayName());
 
         CustomSSIV scaleImageView = new CustomSSIV(container.getContext());
         scaleImageView.setId(getSsivId(position));

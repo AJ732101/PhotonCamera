@@ -9,7 +9,7 @@ import com.particlesdevs.photoncamera.util.Log;
 
 import com.particlesdevs.photoncamera.processing.render.Parameters;
 
-import org.chickenhook.restrictionbypass.BuildConfig;
+//import org.chickenhook.restrictionbypass.BuildConfig;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;

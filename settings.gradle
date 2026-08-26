@@ -5,3 +5,5 @@ rootProject.name='PhotonCamera'
 include ':app'
 include ':circularbarlib'
 include ':avif-coder-2.2.1:avif-coder'
+include ':restrictionbypass'
+project(':restrictionbypass').projectDir = new File('RestrictionBypass-2.4.2/restrictionbypass')

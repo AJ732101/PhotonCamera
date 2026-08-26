@@ -200,7 +200,8 @@
 
     <string-array name="video_resolution_entries">
         <item>HD (1280x720)</item>
-        <item>FHD (1920x1080)</item>
+        <item>FHD 16:9 (1920x1080)</item>
+        <item>FHD 4:3 (1920x1440)</item>
         <item>4K (3840x2160)</item>
         <item>8K (7680x4320)</item>
         <item>4K+ 4:3</item>
@@ -216,11 +217,14 @@
         <item>Custom 5 (2816x1584)</item>
         <item>Custom 6 (8192x3748)</item>
         <item>Custom 7 (8160x3672)</item>
+        <item>Custom 8 (1600x1200)</item>
+        <item>Custom 9 (2592x1944)</item>
     </string-array>
 
     <string-array name="video_resolution_entryValues">
         <item>720</item>
         <item>1080</item>
+        <item>1440</item>
         <item>2160</item>
         <item>4320</item>
         <item>9999</item>
@@ -236,6 +240,8 @@
         <item>1584</item>
         <item>3748</item>
         <item>3672</item>
+        <item>1200</item>
+        <item>1944</item>
     </string-array>
 
     <string-array name="video_framerate_entries">
